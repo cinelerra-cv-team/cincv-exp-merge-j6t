@@ -1,0 +1,11 @@
+include ../../global_config
+
+OBJS = \
+	../motion/$(OBJDIR)/affine.o \
+	$(OBJDIR)/rotate.o
+
+OUTPUT = ../$(OBJDIR)/rotate.plugin
+
+include ../../plugin_config
+
+$(OBJDIR)/rotate.o: rotate.C

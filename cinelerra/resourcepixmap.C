@@ -1,0 +1,863 @@
+#include "aedit.h"
+#include "asset.h"
+#include "asset.inc"
+#include "cache.h"
+#include "clip.h"
+#include "colormodels.h"
+#include "datatype.h"
+#include "edit.h"
+#include "edits.h"
+#include "edl.h"
+#include "edlsession.h"
+#include "file.h"
+#include "filesystem.h"
+#include "framecache.h"
+#include "indexfile.h"
+#include "language.h"
+#include "localsession.h"
+#include "mwindow.h"
+#include "resourcepixmap.h"
+#include "theme.h"
+#include "track.h"
+#include "trackcanvas.h"
+#include "vedit.h"
+#include "vframe.h"
+
+
+ResourcePixmap::ResourcePixmap(MWindow *mwindow, 
+	TrackCanvas *canvas, 
+	Edit *edit, 
+	int w, 
+	int h)
+ : BC_Pixmap(canvas, w, h)
+{
+	reset();
+
+	this->mwindow = mwindow;
+	this->canvas = canvas;
+	startsource = edit->startsource;
+	data_type = edit->track->data_type;
+	source_framerate = edit->asset->frame_rate;
+	project_framerate = edit->edl->session->frame_rate;
+	source_samplerate = edit->asset->sample_rate;
+	project_samplerate = edit->edl->session->sample_rate;
+	edit_id = edit->id;
+}
+
+ResourcePixmap::~ResourcePixmap()
+{
+}
+
+
+void ResourcePixmap::reset()
+{
+	edit_x = 0;
+	pixmap_x = 0;
+	pixmap_w = 0;
+	pixmap_h = 0;
+	zoom_sample = 0;
+	zoom_track = 0;
+	zoom_y = 0;
+	visible = 1;
+}
+	
+void ResourcePixmap::resize(int w, int h)
+{
+	int new_w = (w > get_w()) ? w : get_w();
+	int new_h = (h > get_h()) ? h : get_h();
+
+	BC_Pixmap::resize(new_w, new_h);
+}
+
+
+void ResourcePixmap::draw_data(Edit *edit,
+	int64_t edit_x,
+	int64_t edit_w, 
+	int64_t pixmap_x, 
+	int64_t pixmap_w,
+	int64_t pixmap_h,
+	int force,
+	int indexes_only)
+{
+// Get new areas to fill in relative to pixmap
+// Area to redraw relative to pixmap
+	int refresh_x = 0;
+	int refresh_w = 0;
+
+
+
+	int y = 0;
+	if(mwindow->edl->session->show_titles) y += mwindow->theme->title_bg_data->get_h();
+	Track *track = edit->edits->track;
+
+
+// If index can't be drawn, don't do anything.
+	int need_redraw = 0;
+	int64_t index_zoom = 0;
+	if(indexes_only)
+	{
+		IndexFile indexfile(mwindow);
+		if(!indexfile.open_index(edit->asset))
+		{
+			index_zoom = edit->asset->index_zoom;
+			indexfile.close_index();
+		}
+
+		if(index_zoom)
+		{
+			if(data_type == TRACK_AUDIO)
+			{
+				double asset_over_session = (double)edit->asset->sample_rate / 
+					mwindow->edl->session->sample_rate;
+					asset_over_session;
+				if(index_zoom <= mwindow->edl->local_session->zoom_sample *
+					asset_over_session)
+					need_redraw = 1;
+			}
+		}
+
+		if(!need_redraw)
+			return;
+	}
+
+
+// Redraw everything
+	if(edit->startsource != this->startsource ||
+		(data_type == TRACK_AUDIO && 
+			edit->asset->sample_rate != source_samplerate) ||
+		(data_type == TRACK_VIDEO && 
+			!EQUIV(edit->asset->frame_rate, source_framerate)) ||
+		mwindow->edl->session->sample_rate != project_samplerate ||
+		mwindow->edl->session->frame_rate != project_framerate ||
+		mwindow->edl->local_session->zoom_sample != zoom_sample || 
+		mwindow->edl->local_session->zoom_track != zoom_track ||
+		this->pixmap_h != pixmap_h ||
+		(data_type == TRACK_AUDIO && 
+			mwindow->edl->local_session->zoom_y != zoom_y) ||
+		force ||
+		need_redraw)
+	{
+// Shouldn't draw at all if zoomed in below index zoom.
+		refresh_x = 0;
+		refresh_w = pixmap_w;
+	}
+	else
+	{
+// Start translated right
+		if(pixmap_w == this->pixmap_w && edit_x < this->edit_x && edit_w != pixmap_w)
+		{
+			refresh_w = this->edit_x - edit_x;
+			refresh_x = this->pixmap_w - refresh_w;
+
+// Moved completely off the pixmap
+			if(refresh_w > this->pixmap_w)
+			{
+				refresh_w = this->pixmap_w;
+				refresh_x = 0;
+			}
+			else
+			{
+				copy_area(refresh_w, 
+					y, 
+					refresh_x, 
+					mwindow->edl->local_session->zoom_track, 
+					0, 
+					y);
+			}
+		}
+ 		else
+// Start translated left
+ 		if(pixmap_w == this->pixmap_w && edit_x > this->edit_x && edit_w != pixmap_w)
+ 		{
+			refresh_x = 0;
+			refresh_w = edit_x - this->edit_x;
+
+// Moved completely off the pixmap
+			if(refresh_w > this->pixmap_w)
+			{
+				refresh_w = this->pixmap_w;
+			}
+			else
+			{
+				copy_area(0, 
+					y, 
+					this->pixmap_w - refresh_w, 
+					mwindow->edl->local_session->zoom_track, 
+					refresh_w, 
+					y);
+			}
+ 		}
+		else
+// Start translated right and pixmap came off of right side
+		if(pixmap_w < this->pixmap_w && edit_x < this->edit_x && 
+			this->edit_x + edit_w > this->pixmap_x + this->pixmap_w)
+		{
+			refresh_w = (this->edit_x + edit_w) - (this->pixmap_x + this->pixmap_w);
+			refresh_x = pixmap_w - refresh_w;
+			
+			if(refresh_w >= pixmap_w)
+			{
+				refresh_x = 0;
+				refresh_w = pixmap_w;
+			}
+			else
+			{
+				copy_area(this->edit_x - edit_x, 
+					y, 
+					pixmap_w - refresh_w, 
+					mwindow->edl->local_session->zoom_track, 
+					0, 
+					y);
+			}
+		}
+		else
+// Start translated right and reduced in size on the right.
+		if(pixmap_w < this->pixmap_w && edit_x < this->edit_x)
+		{
+			refresh_x = 0;
+			refresh_w = 0;
+
+			copy_area(this->pixmap_w - pixmap_w, 
+				y, 
+				pixmap_w, 
+				mwindow->edl->local_session->zoom_track, 
+				0, 
+				y);
+		}
+		else
+// Start translated left and pixmap came off left side
+		if(edit_x >= 0 && this->edit_x < 0)
+		{
+			refresh_x = 0;
+			refresh_w = -this->edit_x;
+
+			if(refresh_w > pixmap_w)
+			{
+				refresh_w = pixmap_w;
+			}
+			else
+			{
+				copy_area(0, 
+						y, 
+						this->pixmap_w, 
+						mwindow->edl->local_session->zoom_track, 
+						refresh_w, 
+						y);
+			}
+		}
+		else
+// Start translated left and reduced in size on the right
+		if(pixmap_w < this->pixmap_w && edit_x > this->edit_x)
+		{
+			refresh_x = 0;
+			refresh_w = 0;
+		}
+		else
+// Start translated right and left went into left side.
+		if(pixmap_w > this->pixmap_w && edit_x < 0 && this->edit_x > 0)
+		{
+			refresh_w = pixmap_w - (edit_x + this->pixmap_w);
+			refresh_x = pixmap_w - refresh_w;
+
+// Moved completely off new pixmap
+			if(refresh_w > pixmap_w)
+			{
+				refresh_w = pixmap_w;
+				refresh_x = 0;
+			}
+			else
+			{
+				copy_area(-edit_x, 
+					y,
+					refresh_x,
+					mwindow->edl->local_session->zoom_track,
+					0,
+					y);
+			}
+		}
+		else
+// Start translated right and increased in size on the right
+		if(pixmap_w > this->pixmap_w && edit_x <= this->edit_x)
+		{
+			refresh_w = pixmap_w - this->pixmap_w;
+			refresh_x = pixmap_w - refresh_w;
+		}
+		else
+// Start translated left and increased in size on the right
+		if(pixmap_w > this->pixmap_w && edit_x > this->edit_x)
+		{
+			refresh_x = 0;
+			refresh_w = edit_x - this->edit_x;
+
+// Moved completely off new pixmap
+			if(refresh_w > this->pixmap_w)
+			{
+				refresh_w = pixmap_w;
+				refresh_x = 0;
+			}
+// Shift and insert
+			else
+			{
+				copy_area(0, 
+					y,
+					this->pixmap_w,
+					mwindow->edl->local_session->zoom_track,
+					refresh_w,
+					y);
+			}
+		}
+	}
+
+// Update pixmap settings
+	this->edit_id = edit->id;
+	this->startsource = edit->startsource;
+	this->source_framerate = edit->asset->frame_rate;
+	this->source_samplerate = edit->asset->sample_rate;
+	this->project_framerate = edit->edl->session->frame_rate;
+	this->project_samplerate = edit->edl->session->sample_rate;
+	this->edit_x = edit_x;
+	this->pixmap_x = pixmap_x;
+	this->pixmap_w = pixmap_w;
+	this->pixmap_h = pixmap_h;
+	this->zoom_sample = mwindow->edl->local_session->zoom_sample;
+	this->zoom_track = mwindow->edl->local_session->zoom_track;
+	this->zoom_y = mwindow->edl->local_session->zoom_y;
+
+
+
+// Draw in new background
+	if(refresh_w > 0)
+		mwindow->theme->draw_resource_bg(canvas,
+			this, 
+			edit_x,
+			edit_w,
+			pixmap_x,
+			refresh_x, 
+			y,
+			refresh_x + refresh_w,
+			mwindow->edl->local_session->zoom_track + y);
+//printf("ResourcePixmap::draw_data 70\n");
+
+
+// Draw media
+	if(track->draw)
+	{
+		switch(track->data_type)
+		{
+			case TRACK_AUDIO:
+				draw_audio_resource(edit, refresh_x, refresh_w);
+				break;
+
+			case TRACK_VIDEO:
+				draw_video_resource(edit, 
+					edit_x, 
+					edit_w, 
+					pixmap_x,
+					pixmap_w,
+					refresh_x, 
+					refresh_w);
+				break;
+		}
+	}
+
+// Draw title
+	if(mwindow->edl->session->show_titles)
+		draw_title(edit, edit_x, edit_w, pixmap_x, pixmap_w);
+}
+
+void ResourcePixmap::draw_title(Edit *edit,
+	int64_t edit_x, 
+	int64_t edit_w, 
+	int64_t pixmap_x, 
+	int64_t pixmap_w)
+{
+// coords relative to pixmap
+	int64_t total_x = edit_x - pixmap_x, total_w = edit_w;
+	int64_t x = total_x, w = total_w;
+	int left_margin = 10;
+
+	if(x < 0) 
+	{
+		w -= -x;
+		x = 0;
+	}
+	if(w > pixmap_w) w -= w - pixmap_w;
+
+	canvas->draw_3segmenth(x, 
+		0, 
+		w, 
+		total_x,
+		total_w,
+		mwindow->theme->title_bg_data,
+		this);
+
+	if(total_x > -BC_INFINITY)
+	{
+		char title[BCTEXTLEN], channel[BCTEXTLEN];
+		FileSystem fs;
+
+		if(edit->user_title[0])
+			strcpy(title, edit->user_title);
+		else
+		{
+			fs.extract_name(title, edit->asset->path);
+
+			sprintf(channel, " #%d", edit->channel + 1);
+			strcat(title, channel);
+		}
+
+		canvas->set_color(mwindow->theme->title_color);
+		canvas->set_font(mwindow->theme->title_font);
+//printf("ResourcePixmap::draw_title 1 %d\n", total_x + 10);
+		
+// Justify the text on the left boundary of the edit if it is visible.
+// Otherwise justify it on the left side of the screen.
+		int text_x = total_x + left_margin;
+		text_x = MAX(left_margin, text_x);
+		canvas->draw_text(text_x, 
+			canvas->get_text_ascent(MEDIUMFONT_3D) + 2, 
+			title,
+			strlen(title),
+			this);
+	}
+}
+
+
+// Need to draw one more x
+void ResourcePixmap::draw_audio_resource(Edit *edit, int x, int w)
+{
+	if(w <= 0) return;
+	double asset_over_session = (double)edit->asset->sample_rate / 
+		mwindow->edl->session->sample_rate;
+
+// Develop strategy for drawing
+	switch(edit->asset->index_status)
+	{
+		case INDEX_NOTTESTED:
+			return;
+			break;
+// Disabled.  Always draw from index.
+		case INDEX_TOOSMALL:
+			draw_audio_source(edit, x, w);
+			break;
+		case INDEX_BUILDING:
+		case INDEX_READY:
+		{
+			IndexFile indexfile(mwindow);
+			if(!indexfile.open_index(edit->asset))
+			{
+				if(edit->asset->index_zoom > 
+						mwindow->edl->local_session->zoom_sample * 
+						asset_over_session)
+				{
+					draw_audio_source(edit, x, w);
+				}
+				else
+					indexfile.draw_index(this, edit, x, w);
+				indexfile.close_index();
+			}
+			break;
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void ResourcePixmap::draw_audio_source(Edit *edit, int x, int w)
+{
+	File *source = mwindow->audio_cache->check_out(edit->asset);
+
+	if(!source)
+	{
+		printf(_("ResourcePixmap::draw_audio_source: failed to check out %s for drawing.\n"), edit->asset->path);
+		return;
+	}
+
+	w++;
+	int source_start = (pixmap_x - edit_x + x) * mwindow->edl->local_session->zoom_sample + edit->startsource;
+	int source_len = w * mwindow->edl->local_session->zoom_sample;
+	int center_pixel = mwindow->edl->local_session->zoom_track / 2;
+	if(mwindow->edl->session->show_titles) center_pixel += mwindow->theme->title_bg_data->get_h();
+	double asset_over_session = (double)edit->asset->sample_rate / 
+		mwindow->edl->session->sample_rate;
+
+// Single sample zoom
+	if(mwindow->edl->local_session->zoom_sample == 1)
+	{
+		double oldsample, newsample;
+		int total_source_samples = (int)((double)(source_len + 1) * 
+			asset_over_session);
+		double *buffer = new double[total_source_samples];
+
+		source->set_audio_position((int)((double)source_start *
+				asset_over_session), 
+			edit->asset->sample_rate);
+		source->set_channel(edit->channel);
+		canvas->set_color(mwindow->theme->audio_color);
+
+		if(!source->read_samples(buffer, 
+			total_source_samples, 
+			edit->asset->sample_rate))
+		{
+			oldsample = newsample = *buffer;
+			for(int x1 = x, x2 = x + w, i = 0; 
+				x1 < x2; 
+				x1++, i++)
+			{
+				oldsample = newsample;
+				newsample = buffer[(int)(i * asset_over_session)];
+				canvas->draw_line(x1 - 1, 
+					(int)(center_pixel - oldsample * mwindow->edl->local_session->zoom_y / 2),
+					x1,
+					(int)(center_pixel - newsample * mwindow->edl->local_session->zoom_y / 2),
+					this);
+			}
+		}
+
+		delete [] buffer;
+		canvas->test_timer();
+	}
+	else
+// Multiple sample zoom
+	{
+		int fragmentsize;
+		int buffersize = fragmentsize = 65536;
+		double *buffer = new double[buffersize + 1];
+		double highsample, lowsample;
+		float sample_of_pixel = 0;
+		int total_source_samples = (int)(source_len * 
+			asset_over_session);
+		double asset_samples_per_pixel = 
+			mwindow->edl->local_session->zoom_sample *
+			asset_over_session;
+		int first_pixel = 1;
+		int prev_y1 = -1;
+		int prev_y2 = -1;
+		int y1;
+		int y2;
+		double x_double = x;
+
+		source->set_audio_position((int)(source_start * asset_over_session), 
+			edit->asset->sample_rate);
+		source->set_channel(edit->channel);
+		canvas->set_color(mwindow->theme->audio_color);
+
+		for(int source_sample = 0; 
+			source_sample < total_source_samples; 
+			source_sample += buffersize)
+		{
+			fragmentsize = buffersize;
+			if(total_source_samples - source_sample < buffersize)
+				fragmentsize = total_source_samples - source_sample;
+
+			if(source_sample == 0)
+			{
+				highsample = buffer[0];
+				lowsample = buffer[0];
+			}
+
+			if(!source->read_samples(buffer, 
+				fragmentsize, 
+				edit->asset->sample_rate))
+			{
+
+
+// Draw samples for this buffer
+				for(int bufferposition = 0; 
+					bufferposition < fragmentsize; 
+					bufferposition++)
+				{
+// Replicate
+					if(asset_samples_per_pixel < 1)
+					{
+						int x1 = (int)x_double;
+						x_double += (double)1 / asset_samples_per_pixel;
+						int x2 = (int)x_double;
+
+						y1 = (int)(center_pixel - 
+								buffer[bufferposition] * 
+								mwindow->edl->local_session->zoom_y / 
+								2);
+						if(first_pixel)
+						{
+							canvas->draw_line(x1, 
+								y1,
+								x2,
+								y1,
+								this);
+							first_pixel = 0;
+						}
+						else
+							canvas->draw_line(x1, 
+								prev_y1,
+								x2,
+								y1,
+								this);
+						prev_y1 = y1;
+					}
+					else
+					if(asset_samples_per_pixel >= 1 &&
+						sample_of_pixel >= asset_samples_per_pixel)
+					{
+// Draw column and reset
+						y1 = (int)(center_pixel - 
+							highsample * 
+							mwindow->edl->local_session->zoom_y / 
+							2);
+						y2 = (int)(center_pixel - 
+							lowsample * 
+							mwindow->edl->local_session->zoom_y / 
+							2);
+
+						int current_y1;
+						int current_y2;
+						if(first_pixel)
+						{
+							canvas->draw_line(x, 
+								y1,
+								x,
+								y2,
+								this);
+							first_pixel = 0;
+						}
+						else
+							canvas->draw_line(x, 
+								MIN(y1, prev_y2),
+								x,
+								MAX(y2, prev_y1),
+								this);
+						sample_of_pixel -= asset_samples_per_pixel;
+						x++;
+						lowsample = highsample = buffer[bufferposition];
+						prev_y1 = y1;
+						prev_y2 = y2;
+					}
+
+					if(sample_of_pixel >= 1)
+					{
+// update lowsample and highsample
+						if(buffer[bufferposition] < lowsample) 
+							lowsample = buffer[bufferposition];
+						else 
+						if(buffer[bufferposition] > highsample) 
+							highsample = buffer[bufferposition];
+					}
+
+
+					sample_of_pixel++;
+				}
+
+
+
+
+
+			}
+
+
+			canvas->test_timer();
+		}
+		delete [] buffer;
+	}
+
+	mwindow->audio_cache->check_in(edit->asset);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void ResourcePixmap::draw_video_resource(Edit *edit, 
+	int64_t edit_x, 
+	int64_t edit_w, 
+	int64_t pixmap_x,
+	int64_t pixmap_w,
+	int refresh_x, 
+	int refresh_w)
+{
+//printf("ResourcePixmap::draw_video_resource 1\n");
+// pixels spanned by a picon
+	int64_t picon_w = Units::round(edit->picon_w());
+	int64_t picon_h = edit->picon_h();
+
+//printf("ResourcePixmap::draw_video_resource 1\n");
+// Don't draw video if picon is bigger than edit
+	if(picon_w > edit_w) return;
+
+//printf("ResourcePixmap::draw_video_resource 1\n");
+// pixels spanned by a frame
+	double frame_w = edit->frame_w();
+
+//printf("ResourcePixmap::draw_video_resource 1\n");
+// Frames spanned by a picon
+	double frames_per_picon = edit->frames_per_picon();
+
+//printf("ResourcePixmap::draw_video_resource 1\n");
+// Current pixel relative to pixmap
+	int x = 0;
+	int y = 0;
+	if(mwindow->edl->session->show_titles) 
+		y += mwindow->theme->title_bg_data->get_h();
+// Frame in project touched by current pixel
+	int64_t project_frame;
+
+// Get first frame touched by x and fix x to start of frame
+	if(frames_per_picon > 1)
+	{
+		int picon = Units::to_int64((double)(refresh_x + pixmap_x - edit_x) / picon_w);
+		x = picon_w * picon + edit_x - pixmap_x;
+		project_frame = Units::to_int64((double)picon * frames_per_picon);
+	}
+	else
+	{
+		project_frame = Units::to_int64((double)(refresh_x + pixmap_x - edit_x) / 
+			frame_w);
+		x = Units::round((double)project_frame * frame_w + edit_x - pixmap_x);
+	}
+
+//printf("ResourcePixmap::draw_video_resource 1 %s\n", edit->asset->path);
+	File *source = mwindow->video_cache->check_out(edit->asset);
+	if(!source) return;
+
+
+//printf("ResourcePixmap::draw_video_resource 2 project_frame=%d frame_w=%f refresh_x=%d refresh_w=%d x=%d\n",
+//project_frame, frame_w, refresh_x, refresh_w, x);
+	while(x < refresh_x + refresh_w)
+	{
+		int64_t source_frame = project_frame + edit->startsource;
+		source->set_layer(edit->channel);
+		source->set_video_position(source_frame, 
+			mwindow->edl->session->frame_rate);
+
+// Try displaying from source cache
+		FrameCache *frame_cache = source->get_frame_cache();
+		VFrame *picon_frame = 0;
+		int use_cache = 0;
+
+//frame_cache->dump();
+		if((picon_frame = frame_cache->get_frame_ptr(source_frame,
+			mwindow->edl->session->frame_rate,
+			BC_RGB888,
+			picon_w,
+			picon_h)) != 0)
+		{
+			use_cache = 1;
+		}
+		else
+// Display from file and put in cache
+		{
+			if(canvas->temp_picon &&
+				(canvas->temp_picon->get_w() != edit->asset->width ||
+				canvas->temp_picon->get_h() != edit->asset->height))
+			{
+				delete canvas->temp_picon;
+				canvas->temp_picon = 0;
+			}
+
+			if(!canvas->temp_picon)
+			{
+				canvas->temp_picon = new VFrame(0, 
+					edit->asset->width, 
+					edit->asset->height, 
+					BC_RGB888);
+			}
+
+			source->read_frame(canvas->temp_picon);
+			picon_frame = new VFrame(0, picon_w, picon_h, BC_RGB888);
+			frame_cache->put_frame(picon_frame, 
+				source_frame,
+				mwindow->edl->session->frame_rate,
+				0);
+			cmodel_transfer(picon_frame->get_rows(),
+				canvas->temp_picon->get_rows(),
+				0,
+				0,
+				0,
+				0,
+				0,
+				0,
+				0,
+				0, 
+				canvas->temp_picon->get_w(),
+				canvas->temp_picon->get_h(),
+				0,
+				0,
+				picon_frame->get_w(), 
+				picon_frame->get_h(),
+				BC_RGB888,
+				BC_RGB888,
+				0,
+				canvas->temp_picon->get_bytes_per_line(),
+				picon_frame->get_bytes_per_line());
+		}
+
+		draw_vframe(picon_frame, 
+			x, 
+			y, 
+			picon_w, 
+			picon_h, 
+			0, 
+			0);
+
+		if(use_cache)
+			frame_cache->unlock();
+		
+		if(frames_per_picon > 1)
+		{
+			x += Units::round(picon_w);
+			project_frame = Units::to_int64(frames_per_picon * (int64_t)((double)(x + pixmap_x - edit_x) / picon_w));
+		}
+		else
+		{
+			x += Units::round(frame_w);
+			project_frame = (int64_t)((double)(x + pixmap_x - edit_x) / frame_w);
+		}
+
+
+		canvas->test_timer();
+	}
+
+	if(source)
+	{
+		mwindow->video_cache->check_in(edit->asset);
+	}
+}
+
+
+void ResourcePixmap::dump()
+{
+	printf("ResourcePixmap %p\n", this);
+	printf(" edit %x edit_x %d pixmap_x %d pixmap_w %d visible %d\n", edit_id, edit_x, pixmap_x, pixmap_w, visible);
+}
+
+
+
