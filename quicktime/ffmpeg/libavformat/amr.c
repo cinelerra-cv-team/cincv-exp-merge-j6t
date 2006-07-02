@@ -1,4 +1,4 @@
-/* 
+/*
  * amr file format
  * Copyright (c) 2001 ffmpeg project
  *
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -28,6 +28,7 @@ Only mono files are supported.
 static const unsigned char AMR_header [] = "#!AMR\n";
 static const unsigned char AMRWB_header [] = "#!AMR-WB\n";
 
+#ifdef CONFIG_MUXERS
 static int amr_write_header(AVFormatContext *s)
 {
     ByteIOContext *pb = &s->pb;
@@ -62,11 +63,12 @@ static int amr_write_trailer(AVFormatContext *s)
 {
     return 0;
 }
+#endif /* CONFIG_MUXERS */
 
 static int amr_probe(AVProbeData *p)
 {
-    //Only check for "#!AMR" which could be amr-wb, amr-nb. 
-    //This will also trigger multichannel files: "#!AMR_MC1.0\n" and 
+    //Only check for "#!AMR" which could be amr-wb, amr-nb.
+    //This will also trigger multichannel files: "#!AMR_MC1.0\n" and
     //"#!AMR-WB_MC1.0\n" (not supported)
 
     if (p->buf_size < 5)
@@ -99,7 +101,7 @@ static int amr_read_header(AVFormatContext *s,
         {
             return AVERROR_NOMEM;
         }
-    
+
         st->codec->codec_type = CODEC_TYPE_AUDIO;
         st->codec->codec_tag = MKTAG('s', 'a', 'w', 'b');
         st->codec->codec_id = CODEC_ID_AMR_WB;
@@ -113,7 +115,7 @@ static int amr_read_header(AVFormatContext *s,
         {
             return AVERROR_NOMEM;
         }
-    
+
         st->codec->codec_type = CODEC_TYPE_AUDIO;
         st->codec->codec_tag = MKTAG('s', 'a', 'm', 'r');
         st->codec->codec_id = CODEC_ID_AMR_NB;
@@ -137,18 +139,18 @@ static int amr_read_packet(AVFormatContext *s,
         uint8_t toc, q, ft;
         int read;
         int size;
-    
+
         if (url_feof(&s->pb))
         {
             return AVERROR_IO;
         }
-    
+
         toc=get_byte(&s->pb);
         q  = (toc >> 2) & 0x01;
         ft = (toc >> 3) & 0x0F;
-    
+
         size=packed_size[ft];
-    
+
         if (av_new_packet(pkt, size+1))
         {
             return AVERROR_IO;
@@ -156,15 +158,15 @@ static int amr_read_packet(AVFormatContext *s,
         pkt->stream_index = 0;
         pkt->pos= url_ftell(&s->pb);
         pkt->data[0]=toc;
-    
+
         read = get_buffer(&s->pb, pkt->data+1, size);
-    
+
         if (read != size)
         {
             av_free_packet(pkt);
             return AVERROR_IO;
         }
-    
+
         return 0;
     }
     else if(enc->codec_id == CODEC_ID_AMR_WB)
@@ -173,33 +175,33 @@ static int amr_read_packet(AVFormatContext *s,
         uint8_t toc, mode;
         int read;
         int size;
-    
+
         if (url_feof(&s->pb))
         {
             return AVERROR_IO;
         }
-    
+
         toc=get_byte(&s->pb);
         mode = (uint8_t)((toc >> 3) & 0x0F);
         size = packed_size[mode];
-    
+
         if ( (size==0) || av_new_packet(pkt, size))
         {
             return AVERROR_IO;
         }
-    
+
         pkt->stream_index = 0;
         pkt->pos= url_ftell(&s->pb);
         pkt->data[0]=toc;
-    
+
         read = get_buffer(&s->pb, pkt->data+1, size-1);
-    
+
         if (read != (size-1))
         {
             av_free_packet(pkt);
             return AVERROR_IO;
         }
-    
+
         return 0;
     }
     else
@@ -223,6 +225,7 @@ static AVInputFormat amr_iformat = {
     amr_read_close,
 };
 
+#ifdef CONFIG_MUXERS
 static AVOutputFormat amr_oformat = {
     "amr",
     "3gpp amr file format",
@@ -235,10 +238,13 @@ static AVOutputFormat amr_oformat = {
     amr_write_packet,
     amr_write_trailer,
 };
+#endif
 
 int amr_init(void)
 {
     av_register_input_format(&amr_iformat);
+#ifdef CONFIG_MUXERS
     av_register_output_format(&amr_oformat);
+#endif
     return 0;
 }

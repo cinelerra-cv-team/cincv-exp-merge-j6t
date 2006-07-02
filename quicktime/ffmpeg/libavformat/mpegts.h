@@ -14,10 +14,11 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #define TS_FEC_PACKET_SIZE 204
+#define TS_DVHS_PACKET_SIZE 192
 #define TS_PACKET_SIZE 188
 #define NB_PID_MAX 8192
 #define MAX_SECTION_SIZE 4096
@@ -28,7 +29,7 @@
 
 /* table ids */
 #define PAT_TID   0x00
-#define PMT_TID   0x02 
+#define PMT_TID   0x02
 #define SDT_TID   0x42
 
 /* descriptor ids */

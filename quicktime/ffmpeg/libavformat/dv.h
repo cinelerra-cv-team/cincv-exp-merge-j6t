@@ -1,6 +1,6 @@
-/* 
- * General DV muxer/demuxer 
- * Copyright (c) 2003 Roman Shaposhnick
+/*
+ * General DV muxer/demuxer
+ * Copyright (c) 2003 Roman Shaposhnik
  *
  * Many thanks to Dan Dennedy <dan@dennedy.org> for providing wealth
  * of DV technical info.
@@ -20,7 +20,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 typedef struct DVDemuxContext DVDemuxContext;

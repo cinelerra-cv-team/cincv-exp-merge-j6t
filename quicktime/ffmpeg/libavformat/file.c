@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
 #include <fcntl.h>
@@ -70,7 +70,7 @@ static int file_write(URLContext *h, unsigned char *buf, int size)
 static offset_t file_seek(URLContext *h, offset_t pos, int whence)
 {
     int fd = (size_t)h->priv_data;
-#if defined(CONFIG_WIN32) && !defined(__CYGWIN__) 
+#if defined(CONFIG_WIN32) && !defined(__CYGWIN__)
     return _lseeki64(fd, pos, whence);
 #else
     return lseek(fd, pos, whence);

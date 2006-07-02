@@ -14,9 +14,9 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
- 
+
 /**
  * @file faacaudio.c
  * Interface to libfaac for aac encoding.
@@ -46,7 +46,7 @@ static int Faac_encode_init(AVCodecContext *avctx)
     /* check faac version */
     faac_cfg = faacEncGetCurrentConfiguration(s->faac_handle);
     if (faac_cfg->version != FAAC_CFG_VERSION) {
-	av_log(avctx, AV_LOG_ERROR, "wrong libfaac version (compiled for: %d, using %d)\n", FAAC_CFG_VERSION, faac_cfg->version);
+        av_log(avctx, AV_LOG_ERROR, "wrong libfaac version (compiled for: %d, using %d)\n", FAAC_CFG_VERSION, faac_cfg->version);
         faacEncClose(s->faac_handle);
         return -1;
     }
@@ -56,14 +56,14 @@ static int Faac_encode_init(AVCodecContext *avctx)
     faac_cfg->mpegVersion = MPEG4;
     faac_cfg->useTns = 0;
     faac_cfg->allowMidside = 1;
-    faac_cfg->bitRate = avctx->bit_rate;
-    faac_cfg->outputFormat = 0;
-    faac_cfg->inputFormat = FAAC_INPUT_16BIT;
-
-    if (!faacEncSetConfiguration(s->faac_handle, faac_cfg)) {
-        av_log(avctx, AV_LOG_ERROR, "libfaac doesn't support this output format!\n");
-        return -1;
+    faac_cfg->bitRate = avctx->bit_rate / avctx->channels;
+    faac_cfg->bandWidth = avctx->cutoff;
+    if(avctx->flags & CODEC_FLAG_QSCALE) {
+        faac_cfg->bitRate = 0;
+        faac_cfg->quantqual = avctx->global_quality / FF_QP2LAMBDA;
     }
+    faac_cfg->outputFormat = 1;
+    faac_cfg->inputFormat = FAAC_INPUT_16BIT;
 
     avctx->frame_size = samples_input / avctx->channels;
 
@@ -81,8 +81,13 @@ static int Faac_encode_init(AVCodecContext *avctx)
                                            &decoder_specific_info_size)) {
             avctx->extradata = buffer;
             avctx->extradata_size = decoder_specific_info_size;
-av_log(avctx, AV_LOG_ERROR, "Faac_encode_init %lld\n", avctx->extradata_size);
+            faac_cfg->outputFormat = 0;
         }
+    }
+
+    if (!faacEncSetConfiguration(s->faac_handle, faac_cfg)) {
+        av_log(avctx, AV_LOG_ERROR, "libfaac doesn't support this output format!\n");
+        return -1;
     }
 
     return 0;

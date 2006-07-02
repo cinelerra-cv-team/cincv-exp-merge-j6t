@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
 #if defined(__FreeBSD__)
@@ -30,7 +30,7 @@
 #  include <machine/ioctl_meteor.h>
 #  include <machine/ioctl_bt848.h>
 # endif
-#elseif defined(__DragonFly__)
+#elif defined(__DragonFly__)
 # include <dev/video/meteor/ioctl_meteor.h>
 # include <dev/video/bktr/ioctl_bt848.h>
 #else
@@ -174,7 +174,7 @@ static int bktr_init(const char *video_device, int width, int height,
 
     video_buf_size = width * height * 12 / 8;
 
-    video_buf = (uint8_t *)mmap((caddr_t)0, video_buf_size, 
+    video_buf = (uint8_t *)mmap((caddr_t)0, video_buf_size,
         PROT_READ, MAP_SHARED, *video_fd, (off_t)0);
     if (video_buf == MAP_FAILED) {
         perror("mmap");
@@ -182,7 +182,7 @@ static int bktr_init(const char *video_device, int width, int height,
     }
 
     if (frequency != 0.0) {
-        ioctl_frequency  = (unsigned long)(frequency*16); 
+        ioctl_frequency  = (unsigned long)(frequency*16);
         if (ioctl(*tuner_fd, TVTUNER_SETFREQ, &ioctl_frequency) < 0)
             perror("TVTUNER_SETFREQ");
     }
@@ -229,7 +229,7 @@ static int grab_read_packet(AVFormatContext *s1, AVPacket *pkt)
 
     bktr_getframe(s->per_frame);
 
-    pkt->pts = av_gettime() & ((1LL << 48) - 1);
+    pkt->pts = av_gettime();
     memcpy(pkt->data, video_buf, video_buf_size);
 
     return video_buf_size;
@@ -245,7 +245,7 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     int format = -1;
     const char *video_device;
 
-    if (!ap || ap->width <= 0 || ap->height <= 0 || ap->time_base.den <= 0)
+    if (ap->width <= 0 || ap->height <= 0 || ap->time_base.den <= 0)
         return -1;
 
     width = ap->width;
@@ -260,7 +260,7 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     st = av_new_stream(s1, 0);
     if (!st)
         return -ENOMEM;
-    av_set_pts_info(st, 48, 1, 1000000); /* 48 bits pts in use */
+    av_set_pts_info(st, 64, 1, 1000000); /* 64 bits pts in use */
 
     s->width = width;
     s->height = height;
@@ -268,13 +268,13 @@ static int grab_read_header(AVFormatContext *s1, AVFormatParameters *ap)
     s->frame_rate_base = frame_rate_base;
     s->per_frame = ((u_int64_t)1000000 * s->frame_rate_base) / s->frame_rate;
 
-    st->codec.codec_type = CODEC_TYPE_VIDEO;
-    st->codec.pix_fmt = PIX_FMT_YUV420P;
-    st->codec.codec_id = CODEC_ID_RAWVIDEO;
-    st->codec.width = width;
-    st->codec.height = height;
-    st->codec.time_base.den = frame_rate;
-    st->codec.time_base.num = frame_rate_base;
+    st->codec->codec_type = CODEC_TYPE_VIDEO;
+    st->codec->pix_fmt = PIX_FMT_YUV420P;
+    st->codec->codec_id = CODEC_ID_RAWVIDEO;
+    st->codec->width = width;
+    st->codec->height = height;
+    st->codec->time_base.den = frame_rate;
+    st->codec->time_base.num = frame_rate_base;
 
     if (ap->standard) {
         if (!strcasecmp(ap->standard, "pal"))

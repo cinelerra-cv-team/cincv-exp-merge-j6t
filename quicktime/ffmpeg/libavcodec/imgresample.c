@@ -1,5 +1,5 @@
 /*
- * High quality image resampling with polyphase filters 
+ * High quality image resampling with polyphase filters
  * Copyright (c) 2001 Fabrice Bellard.
  *
  * This library is free software; you can redistribute it and/or
@@ -14,15 +14,16 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
- 
+
 /**
  * @file imgresample.c
  * High quality image resampling with polyphase filters .
  */
- 
+
 #include "avcodec.h"
+#include "swscale.h"
 #include "dsputil.h"
 
 #ifdef USE_FASTMEMCPY
@@ -50,8 +51,8 @@ struct ImgReSampleContext {
     int padtop, padbottom, padleft, padright;
     int pad_owidth, pad_oheight;
     int h_incr, v_incr;
-    int16_t h_filters[NB_PHASES][NB_TAPS] __align8; /* horizontal filters */
-    int16_t v_filters[NB_PHASES][NB_TAPS] __align8; /* vertical filters */
+    DECLARE_ALIGNED_8(int16_t, h_filters[NB_PHASES][NB_TAPS]); /* horizontal filters */
+    DECLARE_ALIGNED_8(int16_t, v_filters[NB_PHASES][NB_TAPS]); /* vertical filters */
     uint8_t *line_buf;
 };
 
@@ -64,8 +65,8 @@ static inline int get_phase(int pos)
 
 /* This function must be optimized */
 static void h_resample_fast(uint8_t *dst, int dst_width, const uint8_t *src,
-			    int src_width, int src_start, int src_incr,
-			    int16_t *filters)
+                            int src_width, int src_start, int src_incr,
+                            int16_t *filters)
 {
     int src_pos, phase, sum, i;
     const uint8_t *s;
@@ -108,7 +109,7 @@ static void h_resample_fast(uint8_t *dst, int dst_width, const uint8_t *src,
 
 /* This function must be optimized */
 static void v_resample(uint8_t *dst, int dst_width, const uint8_t *src,
-		       int wrap, int16_t *filter)
+                       int wrap, int16_t *filter)
 {
     int sum, i;
     const uint8_t *s;
@@ -167,14 +168,14 @@ static void v_resample(uint8_t *dst, int dst_width, const uint8_t *src,
 
 /* XXX: do four pixels at a time */
 static void h_resample_fast4_mmx(uint8_t *dst, int dst_width,
-				 const uint8_t *src, int src_width,
+                                 const uint8_t *src, int src_width,
                                  int src_start, int src_incr, int16_t *filters)
 {
     int src_pos, phase;
     const uint8_t *s;
     int16_t *filter;
     mmx_t tmp;
-    
+
     src_pos = src_start;
     pxor_r2r(mm7, mm7);
 
@@ -212,13 +213,13 @@ static void h_resample_fast4_mmx(uint8_t *dst, int dst_width,
 }
 
 static void v_resample4_mmx(uint8_t *dst, int dst_width, const uint8_t *src,
-			    int wrap, int16_t *filter)
+                            int wrap, int16_t *filter)
 {
     int sum, i, v;
     const uint8_t *s;
     mmx_t tmp;
     mmx_t coefs[4];
-    
+
     for(i=0;i<4;i++) {
         v = filter[i];
         coefs[i].uw[0] = v;
@@ -226,7 +227,7 @@ static void v_resample4_mmx(uint8_t *dst, int dst_width, const uint8_t *src,
         coefs[i].uw[2] = v;
         coefs[i].uw[3] = v;
     }
-    
+
     pxor_r2r(mm7, mm7);
     s = src;
     while (dst_width >= 4) {
@@ -248,7 +249,7 @@ static void v_resample4_mmx(uint8_t *dst, int dst_width, const uint8_t *src,
         paddw_r2r(mm3, mm2);
         paddw_r2r(mm2, mm0);
         psraw_i2r(FILTER_BITS, mm0);
-        
+
         packuswb_r2r(mm7, mm0);
         movq_r2m(mm0, tmp);
 
@@ -277,24 +278,24 @@ static void v_resample4_mmx(uint8_t *dst, int dst_width, const uint8_t *src,
 #endif
 
 #ifdef HAVE_ALTIVEC
-typedef	union {
+typedef         union {
     vector unsigned char v;
     unsigned char c[16];
 } vec_uc_t;
 
-typedef	union {
+typedef         union {
     vector signed short v;
     signed short s[8];
 } vec_ss_t;
 
 void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
-			  int wrap, int16_t *filter)
+                          int wrap, int16_t *filter)
 {
     int sum, i;
     const uint8_t *s;
     vector unsigned char *tv, tmp, dstv, zero;
     vec_ss_t srchv[4], srclv[4], fv[4];
-    vector signed short zeros, sumhv, sumlv;    
+    vector signed short zeros, sumhv, sumlv;
     s = src;
 
     for(i=0;i<4;i++)
@@ -308,7 +309,7 @@ void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
         fv[i].s[0] = filter[i] << (15-FILTER_BITS);
         fv[i].v = vec_splat(fv[i].v, 0);
     }
-    
+
     zero = vec_splat_u8(0);
     zeros = vec_splat_s16(0);
 
@@ -334,7 +335,7 @@ void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
         dst_width--;
         i--;
     }
-    
+
     /* Do our altivec resampling on 16 pixels at once. */
     while(dst_width>=16) {
         /*
@@ -371,14 +372,14 @@ void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
         srclv[3].v = (vector signed short) vec_mergel(zero, tmp);
         sumhv = vec_madds(srchv[3].v, fv[3].v, sumhv);
         sumlv = vec_madds(srclv[3].v, fv[3].v, sumlv);
-    
+
         /*
            Pack the results into our destination vector,
            and do an aligned write of that back to memory.
         */
         dstv = vec_packsu(sumhv, sumlv) ;
         vec_st(dstv, 0, (vector unsigned char *) dst);
-        
+
         dst+=16;
         s+=16;
         dst_width-=16;
@@ -405,7 +406,7 @@ void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
 
 /* slow version to handle limit cases. Does not need optimisation */
 static void h_resample_slow(uint8_t *dst, int dst_width,
-			    const uint8_t *src, int src_width,
+                            const uint8_t *src, int src_width,
                             int src_start, int src_incr, int16_t *filters)
 {
     int src_pos, phase, sum, j, v, i;
@@ -441,8 +442,8 @@ static void h_resample_slow(uint8_t *dst, int dst_width,
 }
 
 static void h_resample(uint8_t *dst, int dst_width, const uint8_t *src,
-		       int src_width, int src_start, int src_incr,
-		       int16_t *filters)
+                       int src_width, int src_start, int src_incr,
+                       int16_t *filters)
 {
     int n, src_end;
 
@@ -455,29 +456,29 @@ static void h_resample(uint8_t *dst, int dst_width, const uint8_t *src,
     }
     src_end = src_start + dst_width * src_incr;
     if (src_end > ((src_width - NB_TAPS) << POS_FRAC_BITS)) {
-        n = (((src_width - NB_TAPS + 1) << POS_FRAC_BITS) - 1 - src_start) / 
+        n = (((src_width - NB_TAPS + 1) << POS_FRAC_BITS) - 1 - src_start) /
             src_incr;
     } else {
         n = dst_width;
     }
 #ifdef HAVE_MMX
     if ((mm_flags & MM_MMX) && NB_TAPS == 4)
-        h_resample_fast4_mmx(dst, n, 
+        h_resample_fast4_mmx(dst, n,
                              src, src_width, src_start, src_incr, filters);
     else
 #endif
-        h_resample_fast(dst, n, 
+        h_resample_fast(dst, n,
                         src, src_width, src_start, src_incr, filters);
     if (n < dst_width) {
         dst += n;
         dst_width -= n;
         src_start += n * src_incr;
-        h_resample_slow(dst, dst_width, 
+        h_resample_slow(dst, dst_width,
                         src, src_width, src_start, src_incr, filters);
     }
 }
 
-static void component_resample(ImgReSampleContext *s, 
+static void component_resample(ImgReSampleContext *s,
                                uint8_t *output, int owrap, int owidth, int oheight,
                                uint8_t *input, int iwrap, int iwidth, int iheight)
 {
@@ -486,7 +487,7 @@ static void component_resample(ImgReSampleContext *s,
 
     last_src_y = - FCENTER - 1;
     /* position of the bottom of the filter in the source image */
-    src_y = (last_src_y + NB_TAPS) * POS_FRAC; 
+    src_y = (last_src_y + NB_TAPS) * POS_FRAC;
     ring_y = NB_TAPS; /* position in ring buffer */
     for(y=0;y<oheight;y++) {
         /* apply horizontal filter on new lines from input if needed */
@@ -506,8 +507,8 @@ static void component_resample(ImgReSampleContext *s,
             src_line = input + y1 * iwrap;
             new_line = s->line_buf + ring_y * owidth;
             /* apply filter and handle limit cases correctly */
-            h_resample(new_line, owidth, 
-                       src_line, iwidth, - FCENTER * POS_FRAC, s->h_incr, 
+            h_resample(new_line, owidth,
+                       src_line, iwidth, - FCENTER * POS_FRAC, s->h_incr,
                        &s->h_filters[0][0]);
             /* handle ring buffer wraping */
             if (ring_y >= LINE_BUF_HEIGHT) {
@@ -520,8 +521,8 @@ static void component_resample(ImgReSampleContext *s,
 #ifdef HAVE_MMX
         /* desactivated MMX because loss of precision */
         if ((mm_flags & MM_MMX) && NB_TAPS == 4 && 0)
-            v_resample4_mmx(output, owidth, 
-                            s->line_buf + (ring_y - NB_TAPS + 1) * owidth, owidth, 
+            v_resample4_mmx(output, owidth,
+                            s->line_buf + (ring_y - NB_TAPS + 1) * owidth, owidth,
                             &s->v_filters[phase_y][0]);
         else
 #endif
@@ -532,12 +533,12 @@ static void component_resample(ImgReSampleContext *s,
                                 &s->v_filters[phase_y][0]);
         else
 #endif
-            v_resample(output, owidth, 
-                       s->line_buf + (ring_y - NB_TAPS + 1) * owidth, owidth, 
+            v_resample(output, owidth,
+                       s->line_buf + (ring_y - NB_TAPS + 1) * owidth, owidth,
                        &s->v_filters[phase_y][0]);
-            
+
         src_y += s->v_incr;
-        
+
         output += owrap;
     }
 }
@@ -545,7 +546,7 @@ static void component_resample(ImgReSampleContext *s,
 ImgReSampleContext *img_resample_init(int owidth, int oheight,
                                       int iwidth, int iheight)
 {
-    return img_resample_full_init(owidth, oheight, iwidth, iheight, 
+    return img_resample_full_init(owidth, oheight, iwidth, iheight,
             0, 0, 0, 0, 0, 0, 0, 0);
 }
 
@@ -558,25 +559,28 @@ ImgReSampleContext *img_resample_full_init(int owidth, int oheight,
 {
     ImgReSampleContext *s;
 
+    if (!owidth || !oheight || !iwidth || !iheight)
+        return NULL;
+
     s = av_mallocz(sizeof(ImgReSampleContext));
     if (!s)
         return NULL;
     if((unsigned)owidth >= UINT_MAX / (LINE_BUF_HEIGHT + NB_TAPS))
         return NULL;
     s->line_buf = av_mallocz(owidth * (LINE_BUF_HEIGHT + NB_TAPS));
-    if (!s->line_buf) 
+    if (!s->line_buf)
         goto fail;
-    
+
     s->owidth = owidth;
     s->oheight = oheight;
     s->iwidth = iwidth;
     s->iheight = iheight;
-  
+
     s->topBand = topBand;
     s->bottomBand = bottomBand;
     s->leftBand = leftBand;
     s->rightBand = rightBand;
-    
+
     s->padtop = padtop;
     s->padbottom = padbottom;
     s->padleft = padleft;
@@ -586,11 +590,11 @@ ImgReSampleContext *img_resample_full_init(int owidth, int oheight,
     s->pad_oheight = oheight - (padtop + padbottom);
 
     s->h_incr = ((iwidth - leftBand - rightBand) * POS_FRAC) / s->pad_owidth;
-    s->v_incr = ((iheight - topBand - bottomBand) * POS_FRAC) / s->pad_oheight; 
+    s->v_incr = ((iheight - topBand - bottomBand) * POS_FRAC) / s->pad_oheight;
 
-    av_build_filter(&s->h_filters[0][0], (float) s->pad_owidth  / 
+    av_build_filter(&s->h_filters[0][0], (float) s->pad_owidth  /
             (float) (iwidth - leftBand - rightBand), NB_TAPS, NB_PHASES, 1<<FILTER_BITS, 0);
-    av_build_filter(&s->v_filters[0][0], (float) s->pad_oheight / 
+    av_build_filter(&s->v_filters[0][0], (float) s->pad_oheight /
             (float) (iheight - topBand - bottomBand), NB_TAPS, NB_PHASES, 1<<FILTER_BITS, 0);
 
     return s;
@@ -599,7 +603,7 @@ fail:
     return NULL;
 }
 
-void img_resample(ImgReSampleContext *s, 
+void img_resample(ImgReSampleContext *s,
                   AVPicture *output, const AVPicture *input)
 {
     int i, shift;
@@ -608,14 +612,14 @@ void img_resample(ImgReSampleContext *s,
     for (i=0;i<3;i++) {
         shift = (i == 0) ? 0 : 1;
 
-        optr = output->data[i] + (((output->linesize[i] * 
+        optr = output->data[i] + (((output->linesize[i] *
                         s->padtop) + s->padleft) >> shift);
 
-        component_resample(s, optr, output->linesize[i], 
+        component_resample(s, optr, output->linesize[i],
                 s->pad_owidth >> shift, s->pad_oheight >> shift,
-                input->data[i] + (input->linesize[i] * 
+                input->data[i] + (input->linesize[i] *
                     (s->topBand >> shift)) + (s->leftBand >> shift),
-                input->linesize[i], ((s->iwidth - s->leftBand - 
+                input->linesize[i], ((s->iwidth - s->leftBand -
                         s->rightBand) >> shift),
                            (s->iheight - s->topBand - s->bottomBand) >> shift);
     }
@@ -626,6 +630,140 @@ void img_resample_close(ImgReSampleContext *s)
     av_free(s->line_buf);
     av_free(s);
 }
+
+struct SwsContext *sws_getContext(int srcW, int srcH, int srcFormat,
+                                  int dstW, int dstH, int dstFormat,
+                                  int flags, SwsFilter *srcFilter,
+                                  SwsFilter *dstFilter, double *param)
+{
+    struct SwsContext *ctx;
+
+    ctx = av_malloc(sizeof(struct SwsContext));
+    if (ctx == NULL) {
+        av_log(NULL, AV_LOG_ERROR, "Cannot allocate a resampling context!\n");
+
+        return NULL;
+    }
+
+    if ((srcH != dstH) || (srcW != dstW)) {
+        if ((srcFormat != PIX_FMT_YUV420P) || (dstFormat != PIX_FMT_YUV420P)) {
+            av_log(NULL, AV_LOG_INFO, "PIX_FMT_YUV420P will be used as an intermediate format for rescaling\n");
+        }
+        ctx->resampling_ctx = img_resample_init(dstW, dstH, srcW, srcH);
+    } else {
+        ctx->resampling_ctx = av_malloc(sizeof(ImgReSampleContext));
+        ctx->resampling_ctx->iheight = srcH;
+        ctx->resampling_ctx->iwidth = srcW;
+        ctx->resampling_ctx->oheight = dstH;
+        ctx->resampling_ctx->owidth = dstW;
+    }
+    ctx->src_pix_fmt = srcFormat;
+    ctx->dst_pix_fmt = dstFormat;
+
+    return ctx;
+}
+
+void sws_freeContext(struct SwsContext *ctx)
+{
+    if ((ctx->resampling_ctx->iwidth != ctx->resampling_ctx->owidth) ||
+        (ctx->resampling_ctx->iheight != ctx->resampling_ctx->oheight)) {
+        img_resample_close(ctx->resampling_ctx);
+    } else {
+        av_free(ctx->resampling_ctx);
+    }
+    av_free(ctx);
+}
+
+int sws_scale(struct SwsContext *ctx, uint8_t* src[], int srcStride[],
+              int srcSliceY, int srcSliceH, uint8_t* dst[], int dstStride[])
+{
+    AVPicture src_pict, dst_pict;
+    int i, res = 0;
+    AVPicture picture_format_temp;
+    AVPicture picture_resample_temp, *formatted_picture, *resampled_picture;
+    uint8_t *buf1 = NULL, *buf2 = NULL;
+    enum PixelFormat current_pix_fmt;
+
+    for (i = 0; i < 3; i++) {
+        src_pict.data[i] = src[i];
+        src_pict.linesize[i] = srcStride[i];
+        dst_pict.data[i] = dst[i];
+        dst_pict.linesize[i] = dstStride[i];
+    }
+    if ((ctx->resampling_ctx->iwidth != ctx->resampling_ctx->owidth) ||
+        (ctx->resampling_ctx->iheight != ctx->resampling_ctx->oheight)) {
+        /* We have to rescale the picture, but only YUV420P rescaling is supported... */
+
+        if (ctx->src_pix_fmt != PIX_FMT_YUV420P) {
+            int size;
+
+            /* create temporary picture for rescaling input*/
+            size = avpicture_get_size(PIX_FMT_YUV420P, ctx->resampling_ctx->iwidth, ctx->resampling_ctx->iheight);
+            buf1 = av_malloc(size);
+            if (!buf1) {
+                res = -1;
+                goto the_end;
+            }
+            formatted_picture = &picture_format_temp;
+            avpicture_fill((AVPicture*)formatted_picture, buf1,
+                           PIX_FMT_YUV420P, ctx->resampling_ctx->iwidth, ctx->resampling_ctx->iheight);
+
+            if (img_convert((AVPicture*)formatted_picture, PIX_FMT_YUV420P,
+                            &src_pict, ctx->src_pix_fmt,
+                            ctx->resampling_ctx->iwidth, ctx->resampling_ctx->iheight) < 0) {
+
+                av_log(NULL, AV_LOG_ERROR, "pixel format conversion not handled\n");
+                res = -1;
+                goto the_end;
+            }
+        } else {
+            formatted_picture = &src_pict;
+        }
+
+        if (ctx->dst_pix_fmt != PIX_FMT_YUV420P) {
+            int size;
+
+            /* create temporary picture for rescaling output*/
+            size = avpicture_get_size(PIX_FMT_YUV420P, ctx->resampling_ctx->owidth, ctx->resampling_ctx->oheight);
+            buf2 = av_malloc(size);
+            if (!buf2) {
+                res = -1;
+                goto the_end;
+            }
+            resampled_picture = &picture_resample_temp;
+            avpicture_fill((AVPicture*)resampled_picture, buf2,
+                           PIX_FMT_YUV420P, ctx->resampling_ctx->owidth, ctx->resampling_ctx->oheight);
+
+        } else {
+            resampled_picture = &dst_pict;
+        }
+
+        /* ...and finally rescale!!! */
+        img_resample(ctx->resampling_ctx, resampled_picture, formatted_picture);
+        current_pix_fmt = PIX_FMT_YUV420P;
+    } else {
+        resampled_picture = &src_pict;
+        current_pix_fmt = ctx->src_pix_fmt;
+    }
+
+    if (current_pix_fmt != ctx->dst_pix_fmt) {
+        if (img_convert(&dst_pict, ctx->dst_pix_fmt,
+                        resampled_picture, current_pix_fmt,
+                        ctx->resampling_ctx->owidth, ctx->resampling_ctx->oheight) < 0) {
+
+            av_log(NULL, AV_LOG_ERROR, "pixel format conversion not handled\n");
+
+            res = -1;
+            goto the_end;
+        }
+    }
+
+the_end:
+    av_free(buf1);
+    av_free(buf2);
+    return res;
+}
+
 
 #ifdef TEST
 #include <stdio.h>
@@ -643,11 +781,13 @@ uint8_t img2[XSIZE1 * YSIZE1];
 
 void save_pgm(const char *filename, uint8_t *img, int xsize, int ysize)
 {
+#undef fprintf
     FILE *f;
     f=fopen(filename,"w");
     fprintf(f,"P5\n%d %d\n%d\n", xsize, ysize, 255);
     fwrite(img,1, xsize * ysize,f);
     fclose(f);
+#define fprintf please_use_av_log
 }
 
 static void dump_filter(int16_t *filter)
@@ -685,20 +825,20 @@ int main(int argc, char **argv)
                     else
                         v = 0x00;
                 } else if (x < XSIZE/4) {
-                    if (x & 1) 
+                    if (x & 1)
                         v = 0xff;
-                    else 
+                    else
                         v = 0;
                 } else if (y < XSIZE/4) {
-                    if (y & 1) 
+                    if (y & 1)
                         v = 0xff;
-                    else 
+                    else
                         v = 0;
                 } else {
                     if (y < YSIZE*3/8) {
-                        if ((y+x) & 1) 
+                        if ((y+x) & 1)
                             v = 0xff;
-                        else 
+                        else
                             v = 0;
                     } else {
                         if (((x+3) % 4) <= 1 &&

@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "../dsputil.h"
@@ -29,6 +29,17 @@
 extern void fdct_altivec(int16_t *block);
 extern void idct_put_altivec(uint8_t *dest, int line_size, int16_t *block);
 extern void idct_add_altivec(uint8_t *dest, int line_size, int16_t *block);
+
+extern void ff_snow_horizontal_compose97i_altivec(DWTELEM *b, int width);
+extern void ff_snow_vertical_compose97i_altivec(DWTELEM *b0, DWTELEM *b1,
+                                                DWTELEM *b2, DWTELEM *b3,
+                                                DWTELEM *b4, DWTELEM *b5,
+                                                int width);
+extern void ff_snow_inner_add_yblock_altivec(uint8_t *obmc, const int obmc_stride,
+                                          uint8_t * * block, int b_w, int b_h,
+                                          int src_x, int src_y, int src_stride,
+                                          slice_buffer * sb, int add,
+                                          uint8_t * dst8);
 
 int mm_flags = 0;
 
@@ -87,16 +98,16 @@ void powerpc_display_perf_report(void)
   {
     for (j = 0; j < POWERPC_NUM_PMC_ENABLED ; j++)
       {
-	if (perfdata[j][i][powerpc_data_num] != (unsigned long long)0)
-	  av_log(NULL, AV_LOG_INFO,
-		  " Function \"%s\" (pmc%d):\n\tmin: %llu\n\tmax: %llu\n\tavg: %1.2lf (%llu)\n",
-		  perfname[i],
-		  j+1,
-		  perfdata[j][i][powerpc_data_min],
-		  perfdata[j][i][powerpc_data_max],
-		  (double)perfdata[j][i][powerpc_data_sum] /
-		  (double)perfdata[j][i][powerpc_data_num],
-		  perfdata[j][i][powerpc_data_num]);
+        if (perfdata[j][i][powerpc_data_num] != (unsigned long long)0)
+          av_log(NULL, AV_LOG_INFO,
+                  " Function \"%s\" (pmc%d):\n\tmin: %llu\n\tmax: %llu\n\tavg: %1.2lf (%llu)\n",
+                  perfname[i],
+                  j+1,
+                  perfdata[j][i][powerpc_data_min],
+                  perfdata[j][i][powerpc_data_max],
+                  (double)perfdata[j][i][powerpc_data_sum] /
+                  (double)perfdata[j][i][powerpc_data_num],
+                  perfdata[j][i][powerpc_data_num]);
       }
   }
 }
@@ -179,7 +190,7 @@ POWERPC_PERF_START_COUNT(powerpc_clear_blocks_dcbz128, 1);
     }
     else
       for ( ; i < sizeof(DCTELEM)*6*64 ; i += 128) {
-	asm volatile("dcbzl %0,%1" : : "b" (blocks), "r" (i) : "memory");
+        asm volatile("dcbzl %0,%1" : : "b" (blocks), "r" (i) : "memory");
       }
 #else
     memset(blocks, 0, sizeof(DCTELEM)*6*64);
@@ -227,7 +238,7 @@ long check_dcbzl_effect(void)
   }
 
   av_free(fakedata);
-  
+
   return count;
 }
 #else
@@ -257,10 +268,10 @@ void dsputil_init_ppc(DSPContext* c, AVCodecContext *avctx)
 
 #ifdef HAVE_ALTIVEC
   dsputil_h264_init_ppc(c, avctx);
-  
+
     if (has_altivec()) {
         mm_flags |= MM_ALTIVEC;
-        
+
         // Altivec specific optimisations
         c->pix_abs[0][1] = sad16_x2_altivec;
         c->pix_abs[0][2] = sad16_y2_altivec;
@@ -284,25 +295,28 @@ void dsputil_init_ppc(DSPContext* c, AVCodecContext *avctx)
         c->put_no_rnd_pixels_tab[0][0] = put_pixels16_altivec;
         c->avg_pixels_tab[0][0] = avg_pixels16_altivec;
         c->avg_pixels_tab[1][0] = avg_pixels8_altivec;
-	c->avg_pixels_tab[1][3] = avg_pixels8_xy2_altivec;
+        c->avg_pixels_tab[1][3] = avg_pixels8_xy2_altivec;
         c->put_pixels_tab[1][3] = put_pixels8_xy2_altivec;
         c->put_no_rnd_pixels_tab[1][3] = put_no_rnd_pixels8_xy2_altivec;
         c->put_pixels_tab[0][3] = put_pixels16_xy2_altivec;
         c->put_no_rnd_pixels_tab[0][3] = put_no_rnd_pixels16_xy2_altivec;
-        
-	c->gmc1 = gmc1_altivec;
 
-#ifdef CONFIG_DARWIN // ATM gcc-3.3 and gcc-3.4 fail to compile these in linux...
-	c->hadamard8_diff[0] = hadamard8_diff16_altivec;
-	c->hadamard8_diff[1] = hadamard8_diff8x8_altivec;
-#endif
+        c->gmc1 = gmc1_altivec;
+
+        c->hadamard8_diff[0] = hadamard8_diff16_altivec;
+        c->hadamard8_diff[1] = hadamard8_diff8x8_altivec;
+
+
+        c->horizontal_compose97i = ff_snow_horizontal_compose97i_altivec;
+        c->vertical_compose97i = ff_snow_vertical_compose97i_altivec;
+        c->inner_add_yblock = ff_snow_inner_add_yblock_altivec;
 
 #ifdef CONFIG_ENCODERS
-	if (avctx->dct_algo == FF_DCT_AUTO ||
-	    avctx->dct_algo == FF_DCT_ALTIVEC)
-	{
-	    c->fdct = fdct_altivec;
-	}
+        if (avctx->dct_algo == FF_DCT_AUTO ||
+            avctx->dct_algo == FF_DCT_ALTIVEC)
+        {
+            c->fdct = fdct_altivec;
+        }
 #endif //CONFIG_ENCODERS
 
       if (avctx->lowres==0)
@@ -319,20 +333,20 @@ void dsputil_init_ppc(DSPContext* c, AVCodecContext *avctx)
 #endif /* ALTIVEC_USE_REFERENCE_C_CODE */
         }
       }
-        
+
 #ifdef POWERPC_PERFORMANCE_REPORT
         {
           int i, j;
           for (i = 0 ; i < powerpc_perf_total ; i++)
           {
-	    for (j = 0; j < POWERPC_NUM_PMC_ENABLED ; j++)
-	      {
-		perfdata[j][i][powerpc_data_min] = 0xFFFFFFFFFFFFFFFFULL;
-		perfdata[j][i][powerpc_data_max] = 0x0000000000000000ULL;
-		perfdata[j][i][powerpc_data_sum] = 0x0000000000000000ULL;
-		perfdata[j][i][powerpc_data_num] = 0x0000000000000000ULL;
-	      }
-	  }
+            for (j = 0; j < POWERPC_NUM_PMC_ENABLED ; j++)
+              {
+                perfdata[j][i][powerpc_data_min] = 0xFFFFFFFFFFFFFFFFULL;
+                perfdata[j][i][powerpc_data_max] = 0x0000000000000000ULL;
+                perfdata[j][i][powerpc_data_sum] = 0x0000000000000000ULL;
+                perfdata[j][i][powerpc_data_num] = 0x0000000000000000ULL;
+              }
+          }
         }
 #endif /* POWERPC_PERFORMANCE_REPORT */
     } else

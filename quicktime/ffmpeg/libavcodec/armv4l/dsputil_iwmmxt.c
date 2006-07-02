@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include "../dsputil.h"
@@ -138,10 +138,10 @@ void dsputil_init_iwmmxt(DSPContext* c, AVCodecContext *avctx)
     mm_flags = mm_support();
 
     if (avctx->dsp_mask) {
-	if (avctx->dsp_mask & FF_MM_FORCE)
-	    mm_flags |= (avctx->dsp_mask & 0xffff);
-	else
-	    mm_flags &= ~(avctx->dsp_mask & 0xffff);
+        if (avctx->dsp_mask & FF_MM_FORCE)
+            mm_flags |= (avctx->dsp_mask & 0xffff);
+        else
+            mm_flags &= ~(avctx->dsp_mask & 0xffff);
     }
 
     if (!(mm_flags & MM_IWMMXT)) return;

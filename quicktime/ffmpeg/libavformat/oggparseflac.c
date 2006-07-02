@@ -1,6 +1,6 @@
 /*
  *    Copyright (C) 2005  Matthieu CASTET
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdlib.h>
@@ -45,7 +45,7 @@ flac_header (AVFormatContext * s, int idx)
             return -1;
         skip_bits(&gb, 8 + 16);      /* minor version + header count */
         skip_bits(&gb, 4*8); /* "fLaC" */
-    
+
         /* METADATA_BLOCK_HEADER */
         if (get_bits(&gb, 32) != FLAC_STREAMINFO_SIZE)
             return -1;
@@ -54,7 +54,7 @@ flac_header (AVFormatContext * s, int idx)
 
         st->codec->sample_rate = get_bits_long(&gb, 20);
         st->codec->channels = get_bits(&gb, 3) + 1;
-    
+
         st->codec->codec_type = CODEC_TYPE_AUDIO;
         st->codec->codec_id = CODEC_ID_FLAC;
 
@@ -63,6 +63,9 @@ flac_header (AVFormatContext * s, int idx)
         memcpy (st->codec->extradata, os->buf + os->pstart + 5 + 4 + 4 + 4,
                 FLAC_STREAMINFO_SIZE);
         st->codec->extradata_size = FLAC_STREAMINFO_SIZE;
+
+        st->time_base.num = 1;
+        st->time_base.den = st->codec->sample_rate;
     } else if (mdt == 4) {
         vorbis_comment (s, os->buf + os->pstart + 4, os->psize - 4);
     }

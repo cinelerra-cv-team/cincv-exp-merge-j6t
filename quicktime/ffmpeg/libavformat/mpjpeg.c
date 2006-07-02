@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
 
@@ -22,7 +22,7 @@
 
 #define BOUNDARY_TAG "ffserver"
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
 static int mpjpeg_write_header(AVFormatContext *s)
 {
     uint8_t buf1[256];
@@ -70,4 +70,4 @@ int jpeg_init(void)
     av_register_output_format(&mpjpeg_format);
     return 0;
 }
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS

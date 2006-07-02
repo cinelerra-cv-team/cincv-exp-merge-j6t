@@ -1,4 +1,4 @@
-/* 
+/*
  * AU encoder and decoder
  * Copyright (c) 2001 Fabrice Bellard.
  *
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -39,7 +39,7 @@ static const CodecTag codec_au_tags[] = {
     { 0, 0 },
 };
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
 /* AUDIO_FILE header */
 static int put_au_header(ByteIOContext *pb, AVCodecContext *enc)
 {
@@ -97,7 +97,7 @@ static int au_write_trailer(AVFormatContext *s)
 
     return 0;
 }
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
 static int au_probe(AVProbeData *p)
 {
@@ -127,11 +127,11 @@ static int au_read_header(AVFormatContext *s,
         return -1;
     size = get_be32(pb); /* header size */
     get_be32(pb); /* data size */
-    
+
     id = get_be32(pb);
     rate = get_be32(pb);
     channels = get_be32(pb);
-    
+
     codec = codec_get_id(codec_au_tags, id);
 
     if (size >= 24) {
@@ -188,7 +188,7 @@ static AVInputFormat au_iformat = {
     pcm_read_seek,
 };
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
 static AVOutputFormat au_oformat = {
     "au",
     "SUN AU Format",
@@ -201,13 +201,13 @@ static AVOutputFormat au_oformat = {
     au_write_packet,
     au_write_trailer,
 };
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
 int au_init(void)
 {
     av_register_input_format(&au_iformat);
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     av_register_output_format(&au_oformat);
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     return 0;
 }

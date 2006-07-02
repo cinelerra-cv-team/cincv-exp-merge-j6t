@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /**
@@ -177,13 +177,12 @@ static int str_read_header(AVFormatContext *s,
                 st = av_new_stream(s, 0);
                 if (!st)
                     return AVERROR_NOMEM;
-                /* set the pts reference (1 pts = 1/90000) */
-                av_set_pts_info(st, 33, 1, 90000);
+                av_set_pts_info(st, 64, 1, 15);
 
                 str->channels[channel].video_stream_index = st->index;
 
                 st->codec->codec_type = CODEC_TYPE_VIDEO;
-                st->codec->codec_id = CODEC_ID_MDEC; 
+                st->codec->codec_id = CODEC_ID_MDEC;
                 st->codec->codec_tag = 0;  /* no fourcc */
                 st->codec->width = str->channels[channel].width;
                 st->codec->height = str->channels[channel].height;
@@ -196,24 +195,24 @@ static int str_read_header(AVFormatContext *s,
                 int fmt;
                 str->audio_channel = channel;
                 str->channels[channel].type = STR_AUDIO;
-                str->channels[channel].channels = 
+                str->channels[channel].channels =
                     (sector[0x13] & 0x01) ? 2 : 1;
-                str->channels[channel].sample_rate = 
+                str->channels[channel].sample_rate =
                     (sector[0x13] & 0x04) ? 18900 : 37800;
-                str->channels[channel].bits = 
+                str->channels[channel].bits =
                     (sector[0x13] & 0x10) ? 8 : 4;
 
                 /* allocate a new AVStream */
                 st = av_new_stream(s, 0);
                 if (!st)
                     return AVERROR_NOMEM;
-                av_set_pts_info(st, 33, 1, 90000);
+                av_set_pts_info(st, 64, 128, str->channels[channel].sample_rate);
 
                 str->channels[channel].audio_stream_index = st->index;
 
                 fmt = sector[0x13];
                 st->codec->codec_type = CODEC_TYPE_AUDIO;
-                st->codec->codec_id = CODEC_ID_ADPCM_XA; 
+                st->codec->codec_id = CODEC_ID_ADPCM_XA;
                 st->codec->codec_tag = 0;  /* no fourcc */
                 st->codec->channels = (fmt&1)?2:1;
                 st->codec->sample_rate = (fmt&4)?18900:37800;
@@ -233,7 +232,7 @@ if (str->video_channel != -1)
     str->channels[str->video_channel].width,
     str->channels[str->video_channel].height,str->channels[str->video_channel].video_stream_index);
 if (str->audio_channel != -1)
-   av_log (s, AV_LOG_DEBUG, " audio channel = %d, %d Hz, %d channels, %d bits/sample %d\n", 
+   av_log (s, AV_LOG_DEBUG, " audio channel = %d, %d Hz, %d channels, %d bits/sample %d\n",
     str->audio_channel,
     str->channels[str->audio_channel].sample_rate,
     str->channels[str->audio_channel].channels,
@@ -284,7 +283,7 @@ static int str_read_packet(AVFormatContext *s,
                         return AVERROR_IO;
 
                     pkt->pos= url_ftell(pb) - RAW_CD_SECTOR_SIZE;
-                    pkt->stream_index = 
+                    pkt->stream_index =
                         str->channels[channel].video_stream_index;
                //     pkt->pts = str->pts;
 
@@ -321,7 +320,7 @@ printf (" dropping audio sector\n");
                     return AVERROR_IO;
                 memcpy(pkt->data,sector+24,2304);
 
-                pkt->stream_index = 
+                pkt->stream_index =
                     str->channels[channel].audio_stream_index;
                 //pkt->pts = str->pts;
                 return 0;

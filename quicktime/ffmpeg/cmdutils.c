@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #define HAVE_AV_CONFIG_H
 #include "avformat.h"
@@ -45,6 +45,15 @@ void show_help_options(const OptionDef *options, const char *msg, int mask, int 
     }
 }
 
+static const OptionDef* find_option(const OptionDef *po, const char *name){
+    while (po->name != NULL) {
+        if (!strcmp(name, po->name))
+            break;
+        po++;
+    }
+    return po;
+}
+
 void parse_options(int argc, char **argv, const OptionDef *options)
 {
     const char *opt, *arg;
@@ -55,15 +64,13 @@ void parse_options(int argc, char **argv, const OptionDef *options)
     optindex = 1;
     while (optindex < argc) {
         opt = argv[optindex++];
-        
+
         if (opt[0] == '-' && opt[1] != '\0') {
-            po = options;
-            while (po->name != NULL) {
-                if (!strcmp(opt + 1, po->name))
-                    break;
-                po++;
-            }
+            po= find_option(options, opt + 1);
+            if (!po->name)
+                po= find_option(options, "default");
             if (!po->name) {
+unknown_opt:
                 fprintf(stderr, "%s: unrecognized option '%s'\n", argv[0], opt);
                 exit(1);
             }
@@ -85,8 +92,11 @@ void parse_options(int argc, char **argv, const OptionDef *options)
                 *po->u.int_arg = atoi(arg);
             } else if (po->flags & OPT_FLOAT) {
                 *po->u.float_arg = atof(arg);
+            } else if (po->flags & OPT_FUNC2) {
+                if(po->u.func2_arg(opt+1, arg)<0)
+                    goto unknown_opt;
             } else {
-		po->u.func_arg(arg);
+                po->u.func_arg(arg);
             }
         } else {
             parse_arg_file(opt);
@@ -101,7 +111,7 @@ void print_error(const char *filename, int err)
         fprintf(stderr, "%s: Incorrect image filename syntax.\n"
                 "Use '%%d' to specify the image number:\n"
                 "  for img1.jpg, img2.jpg, ..., use 'img%%d.jpg';\n"
-                "  for img001.jpg, img002.jpg, ..., use 'img%%03d.jpg'.\n", 
+                "  for img001.jpg, img002.jpg, ..., use 'img%%03d.jpg'.\n",
                 filename);
         break;
     case AVERROR_INVALIDDATA:
@@ -112,8 +122,8 @@ void print_error(const char *filename, int err)
         break;
     case AVERROR_IO:
         fprintf(stderr, "%s: I/O error occured\n"
-	        "Usually that means that input file is truncated and/or corrupted.\n",
-		filename);
+                "Usually that means that input file is truncated and/or corrupted.\n",
+                filename);
         break;
     case AVERROR_NOMEM:
         fprintf(stderr, "%s: memory allocation error occured\n", filename);

@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <unistd.h>
@@ -46,9 +46,9 @@ struct dv1394_data {
     DVDemuxContext* dv_demux; /* Generic DV muxing/demuxing context */
 };
 
-/* 
+/*
  * The trick here is to kludge around well known problem with kernel Ooopsing
- * when you try to capture PAL on a device node configure for NTSC. That's 
+ * when you try to capture PAL on a device node configure for NTSC. That's
  * why we have to configure the device node for PAL, and then read only NTSC
  * amount of data.
  */
@@ -88,9 +88,9 @@ static int dv1394_read_header(AVFormatContext * context, AVFormatParameters * ap
         goto failed;
 
     if (ap->standard && !strcasecmp(ap->standard, "pal"))
-	dv->format = DV1394_PAL;
+        dv->format = DV1394_PAL;
     else
-	dv->format = DV1394_NTSC;
+        dv->format = DV1394_NTSC;
 
     if (ap->channel)
         dv->channel = ap->channel;
@@ -148,9 +148,9 @@ static int dv1394_read_packet(AVFormatContext *context, AVPacket *pkt)
                 /* This usually means that ring buffer overflowed.
                  * We have to reset :(.
                  */
-  
+
                 av_log(context, AV_LOG_ERROR, "DV1394: Ring buffer overflow. Reseting ..\n");
- 
+
                 dv1394_reset(dv);
                 dv1394_start(dv);
             }
@@ -173,7 +173,7 @@ restart_poll:
             return AVERROR_IO;
         }
 #ifdef DV1394_DEBUG
-        fprintf(stderr, "DV1394: status\n"
+        av_log(context, AV_LOG_DEBUG, "DV1394: status\n"
                 "\tactive_frame\t%d\n"
                 "\tfirst_clear_frame\t%d\n"
                 "\tn_clear_frames\t%d\n"
@@ -196,16 +196,16 @@ restart_poll:
     }
 
 #ifdef DV1394_DEBUG
-    fprintf(stderr, "index %d, avail %d, done %d\n", dv->index, dv->avail,
+    av_log(context, AV_LOG_DEBUG, "index %d, avail %d, done %d\n", dv->index, dv->avail,
             dv->done);
 #endif
 
-    size = dv_produce_packet(dv->dv_demux, pkt, 
-                             dv->ring + (dv->index * DV1394_PAL_FRAME_SIZE), 
-			     DV1394_PAL_FRAME_SIZE);
+    size = dv_produce_packet(dv->dv_demux, pkt,
+                             dv->ring + (dv->index * DV1394_PAL_FRAME_SIZE),
+                             DV1394_PAL_FRAME_SIZE);
     dv->index = (dv->index + 1) % DV1394_RING_FRAMES;
     dv->done++; dv->avail--;
-    
+
     return size;
 }
 

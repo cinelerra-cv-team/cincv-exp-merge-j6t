@@ -14,7 +14,7 @@
 @
 @ You should have received a copy of the GNU Lesser General Public
 @ License along with this library; if not, write to the Free Software
-@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 @
 
 .macro  ADJ_ALIGN_QUADWORD_D shift, Rd0, Rd1, Rd2, Rd3, Rn0, Rn1, Rn2, Rn3, Rn4
@@ -637,15 +637,15 @@ put_pixels8_xy2_arm:
         .align 8
 2:
         RND_XY2_EXPAND 1, 1
-        
+
         .align 8
 3:
         RND_XY2_EXPAND 2, 1
-        
+
         .align 8
 4:
         RND_XY2_EXPAND 3, 1
-        
+
 5:
         .word 0x03030303
         .word 2b
@@ -674,15 +674,15 @@ put_no_rnd_pixels8_xy2_arm:
         .align 8
 2:
         RND_XY2_EXPAND 1, 0
-        
+
         .align 8
 3:
         RND_XY2_EXPAND 2, 0
-        
+
         .align 8
 4:
         RND_XY2_EXPAND 3, 0
-        
+
 5:
         .word 0x03030303
         .word 2b

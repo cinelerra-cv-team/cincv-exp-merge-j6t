@@ -5,8 +5,8 @@ includedir=${pcfiledir}/libavcodec/libpostproc
 
 Name: libpostproc
 Description: FFmpeg post processing library
-Version: CVS
-Requires: 
+Version: 51.9.0
+Requires:
 Conflicts:
 Libs: ${libdir}/libpostproc.a
 Cflags: -I${includedir}

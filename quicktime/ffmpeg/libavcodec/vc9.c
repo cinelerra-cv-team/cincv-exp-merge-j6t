@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  *
  */
 
@@ -235,7 +235,7 @@ typedef struct VC9Context{
      */
     //@{
     int profile;          ///< 2bits, Profile
-    int frmrtq_postproc;  ///< 3bits, 
+    int frmrtq_postproc;  ///< 3bits,
     int bitrtq_postproc;  ///< 5bits, quantized framerate-based postprocessing strength
     int fastuvmc;         ///< Rounding of qpel vector to hpel ? (not in Simple)
     int extended_mv;      ///< Ext MV in P/B (not in Simple)
@@ -696,7 +696,7 @@ static int decode_advanced_sequence_header(AVCodecContext *avctx, GetBitContext 
 }
 #endif
 
-/** 
+/**
  * Decode Simple/Main Profiles sequence header
  * @see Figure 7-8, p16-17
  * @param avctx Codec context
@@ -929,12 +929,12 @@ static int advanced_entry_point_process(AVCodecContext *avctx, GetBitContext *gb
  * @todo TODO: Take into account stride
  * @todo TODO: Allow use of external buffers ?
  */
-int alloc_bitplane(BitPlane *bp, int width, int height)
+static int alloc_bitplane(BitPlane *bp, int width, int height)
 {
     if (!bp || bp->width<0 || bp->height<0) return -1;
     bp->data = (uint8_t*)av_malloc(width*height);
     if (!bp->data) return -1;
-    bp->width = bp->stride = width; 
+    bp->width = bp->stride = width;
     bp->height = height;
     return 0;
 }
@@ -942,7 +942,7 @@ int alloc_bitplane(BitPlane *bp, int width, int height)
 /** Free the bitplane's buffer
  * @param bp Bitplane which buffer is to free
  */
-void free_bitplane(BitPlane *bp)
+static void free_bitplane(BitPlane *bp)
 {
     bp->width = bp->stride = bp->height = 0;
     if (bp->data) av_freep(&bp->data);
@@ -961,7 +961,7 @@ static void decode_rowskip(uint8_t* plane, int width, int height, int stride, Ge
         if (!get_bits(gb, 1)) //rowskip
             memset(plane, 0, width);
         else
-            for (x=0; x<width; x++) 
+            for (x=0; x<width; x++)
                 plane[x] = get_bits(gb, 1);
         plane += stride;
     }
@@ -1162,7 +1162,7 @@ static int vop_dquant_decoding(VC9Context *v)
 }
 
 /***********************************************************************/
-/** 
+/**
  * @defgroup all_frame_hdr All VC9 profiles frame header
  * @brief Part of the frame header decoding from all profiles
  * @warning Only pro/epilog differs between Simple/Main and Advanced => check caller
@@ -1488,7 +1488,7 @@ static int decode_p_picture_secondary_header(VC9Context *v)
 
 
 /***********************************************************************/
-/** 
+/**
  * @defgroup std_frame_hdr VC9 Simple/Main Profiles header decoding
  * @brief Part of the frame header decoding belonging to Simple/Main Profiles
  * @warning Only pro/epilog differs between Simple/Main and Advanced =>
@@ -1573,14 +1573,14 @@ static int standard_decode_picture_secondary_header(VC9Context *v)
 
 #if HAS_ADVANCED_PROFILE
 /***********************************************************************/
-/** 
+/**
  * @defgroup adv_frame_hdr VC9 Advanced Profile header decoding
  * @brief Part of the frame header decoding belonging to Advanced Profiles
  * @warning Only pro/epilog differs between Simple/Main and Advanced =>
  *          check caller
  * @{
  */
-/** Frame header decoding, primary part 
+/** Frame header decoding, primary part
  * @param v VC9 context
  * @return Status
  */
@@ -1654,7 +1654,7 @@ static int advanced_decode_picture_secondary_header(VC9Context *v)
     case P_TYPE: status = decode_p_picture_secondary_header(v); break;
     case B_TYPE: status = decode_b_picture_secondary_header(v); break;
     case BI_TYPE:
-    case I_TYPE: status = decode_i_picture_secondary_header(v); break; 
+    case I_TYPE: status = decode_i_picture_secondary_header(v); break;
     }
     if (status<0) return FRAME_SKIPPED;
 
@@ -1673,7 +1673,7 @@ static int advanced_decode_picture_secondary_header(VC9Context *v)
 /** @} */ //End for adv_frame_hdr
 
 /***********************************************************************/
-/** 
+/**
  * @defgroup block VC9 Block-level functions
  * @see 7.1.4, p91 and 8.1.1.7, p(1)04
  * @todo TODO: Integrate to MpegEncContext facilities
@@ -1762,9 +1762,9 @@ static inline int vc9_pred_dc(MpegEncContext *s, int n,
     int a, b, c, wrap, pred, scale;
     int16_t *dc_val;
     static const uint16_t dcpred[31] = {
-        1024,  512,  341,  256,  205,  171,  146,  128, 
-         114,  102,   93,   85,   79,   73,   68,   64, 
-          60,   57,   54,   51,   49,   47,   45,   43, 
+        1024,  512,  341,  256,  205,  171,  146,  128,
+         114,  102,   93,   85,   79,   73,   68,   64,
+          60,   57,   54,   51,   49,   47,   45,   43,
           41,   39,   38,   37,   35,   34,   33
     };
 
@@ -1776,14 +1776,14 @@ static inline int vc9_pred_dc(MpegEncContext *s, int n,
     dc_val= s->dc_val[0] + s->block_index[n];
 
     /* B C
-     * A X 
+     * A X
      */
     a = dc_val[ - 1];
     b = dc_val[ - 1 - wrap];
     c = dc_val[ - wrap];
 
     /* XXX: Rule B is used only for I and BI frames in S/M/C profile
-     *      with overlap filtering off 
+     *      with overlap filtering off
      */
     if ((s->pict_type == I_TYPE || s->pict_type == BI_TYPE) &&
         1 /* XXX: overlap filtering off */)
@@ -1832,7 +1832,7 @@ static inline int vc9_pred_dc(MpegEncContext *s, int n,
  * @todo TODO: Process the blocks
  * @todo TODO: Use M$ MPEG-4 cbp prediction
  */
-int vc9_decode_block(VC9Context *v, DCTELEM block[64], int n, int coded, int mquant)
+static int vc9_decode_block(VC9Context *v, DCTELEM block[64], int n, int coded, int mquant)
 {
     GetBitContext *gb = &v->s.gb;
     MpegEncContext *s = &v->s;
@@ -1943,7 +1943,7 @@ int vc9_decode_block(VC9Context *v, DCTELEM block[64], int n, int coded, int mqu
 /** @} */ //End for group block
 
 /***********************************************************************/
-/** 
+/**
  * @defgroup std_mb VC9 Macroblock-level functions in Simple/Main Profiles
  * @see 7.1.4, p91 and 8.1.1.7, p(1)04
  * @todo TODO: Integrate to MpegEncContext facilities
@@ -1958,7 +1958,7 @@ static inline int vc9_coded_block_pred(MpegEncContext * s, int n, uint8_t **code
     wrap = s->b8_stride;
 
     /* B C
-     * A X 
+     * A X
      */
     a = s->coded_block[xy - 1       ];
     b = s->coded_block[xy - 1 - wrap];
@@ -1979,11 +1979,11 @@ static inline int vc9_coded_block_pred(MpegEncContext * s, int n, uint8_t **code
 /** Decode one I-frame MB (in Simple/Main profile)
  * @todo TODO: Extend to AP
  */
-int vc9_decode_i_mb(VC9Context *v, DCTELEM block[6][64])
+static int vc9_decode_i_mb(VC9Context *v, DCTELEM block[6][64])
 {
     int i, cbp, val;
     uint8_t *coded_val;
-    uint32_t * const mb_type_ptr= &v->s.current_picture.mb_type[ v->s.mb_x + v->s.mb_y*v->s.mb_stride ];
+//    uint32_t * const mb_type_ptr= &v->s.current_picture.mb_type[ v->s.mb_x + v->s.mb_y*v->s.mb_stride ];
 
     v->s.mb_intra = 1;
     cbp = get_vlc2(&v->s.gb, ff_msmp4_mb_i_vlc.table, MB_INTRA_VLC_BITS, 2);
@@ -2013,14 +2013,14 @@ int vc9_decode_i_mb(VC9Context *v, DCTELEM block[6][64])
  * @todo TODO: Extend to AP
  * @fixme FIXME: DC value for inter blocks not set
  */
-int vc9_decode_p_mb(VC9Context *v, DCTELEM block[6][64])
+static int vc9_decode_p_mb(VC9Context *v, DCTELEM block[6][64])
 {
     MpegEncContext *s = &v->s;
     GetBitContext *gb = &s->gb;
     int i, mb_offset = s->mb_x + s->mb_y*s->mb_width; /* XXX: mb_stride */
     int cbp; /* cbp decoding stuff */
     int hybrid_pred; /* Prediction types */
-    int mv_mode_bit = 0; 
+    int mv_mode_bit = 0;
     int mqdiff, mquant; /* MB quantization */
     int ttmb; /* MB Transform type */
     int status;
@@ -2160,7 +2160,7 @@ int vc9_decode_p_mb(VC9Context *v, DCTELEM block[6][64])
  * @warning XXX: Used for decoding BI MBs
  * @fixme FIXME: DC value for inter blocks not set
  */
-int vc9_decode_b_mb(VC9Context *v, DCTELEM block[6][64])
+static int vc9_decode_b_mb(VC9Context *v, DCTELEM block[6][64])
 {
     MpegEncContext *s = &v->s;
     GetBitContext *gb = &v->s.gb;
@@ -2304,7 +2304,7 @@ static int standard_decode_mbs(VC9Context *v)
 
 #if HAS_ADVANCED_PROFILE
 /***********************************************************************/
-/** 
+/**
  * @defgroup adv_mb VC9 Macroblock-level functions in Advanced Profile
  * @todo TODO: Integrate to MpegEncContext facilities
  * @todo TODO: Code P, B and BI
@@ -2456,7 +2456,7 @@ static int vc9_decode_frame(AVCodecContext *avctx,
             if (scp != 0x000001)
                 break; // eof ?
 
-            scs = buf[i++];	
+            scs = buf[i++];
 
             init_get_bits(gb, buf+i, (buf_size-i)*8);
 
@@ -2606,22 +2606,21 @@ static int vc9_decode_frame(AVCodecContext *avctx,
 
     assert(s->current_picture.pict_type == s->current_picture_ptr->pict_type);
     assert(s->current_picture.pict_type == s->pict_type);
-    if(s->pict_type==B_TYPE || s->low_delay){
-        *pict= *(AVFrame*)&s->current_picture;
+
+    if (s->pict_type == B_TYPE || s->low_delay) {
+        *pict= *(AVFrame*)s->current_picture_ptr;
+    } else if (s->last_picture_ptr != NULL) {
+        *pict= *(AVFrame*)s->last_picture_ptr;
+    }
+
+    if(s->last_picture_ptr || s->low_delay){
+        *data_size = sizeof(AVFrame);
         ff_print_debug_info(s, pict);
-    } else {
-        *pict= *(AVFrame*)&s->last_picture;
-        if(pict)
-            ff_print_debug_info(s, pict);
     }
 
     /* Return the Picture timestamp as the frame number */
     /* we substract 1 because it is added on utils.c    */
     avctx->frame_number = s->picture_number - 1;
-
-    /* dont output the last pic after seeking */
-    if(s->last_picture_ptr || s->low_delay)
-        *data_size = sizeof(AVFrame);
 
     av_log(avctx, AV_LOG_DEBUG, "Consumed %i/%i bits\n",
            get_bits_count(&s->gb), buf_size*8);

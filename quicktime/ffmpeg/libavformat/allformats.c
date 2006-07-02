@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
 
@@ -27,7 +27,7 @@
 void av_register_all(void)
 {
     static int inited = 0;
-    
+
     if (inited != 0)
         return;
     inited = 1;
@@ -37,36 +37,38 @@ void av_register_all(void)
 
     mpegps_init();
     mpegts_init();
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     crc_init();
     img_init();
     img2_init();
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     raw_init();
     mp3_init();
     rm_init();
     asf_init();
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     avienc_init();
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     avidec_init();
     ff_wav_init();
     ff_mmf_init();
     swf_init();
     au_init();
-#ifdef CONFIG_ENCODERS
+    ff_aiff_init();
+#ifdef CONFIG_MUXERS
+    ff_adts_init();
     gif_init();
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     mov_init();
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     movenc_init();
     jpeg_init();
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     ff_dv_init();
     fourxm_init();
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     flvenc_init();
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     flvdec_init();
     str_init();
     roq_init();
@@ -77,6 +79,8 @@ void av_register_all(void)
     idcin_init();
     flic_init();
     vmd_init();
+    mm_init();
+    smacker_init();
 
 #if defined(AMR_NB) || defined(AMR_NB_FIXED) || defined(AMR_WB)
     amr_init();
@@ -89,6 +93,9 @@ void av_register_all(void)
 #endif
 
     ffm_init();
+#if defined(CONFIG_VIDEO4LINUX2)
+    v4l2_init();
+#endif
 #if defined(CONFIG_VIDEO4LINUX) || defined(CONFIG_BKTR)
     video_grab_init();
 #endif
@@ -109,8 +116,13 @@ void av_register_all(void)
     sol_init();
     ea_init();
     nsvdec_init();
+    daud_init();
+    voc_init();
+    tta_init();
+    avs_init();
+    nuv_init();
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     /* image formats */
 #if 0
     av_register_image_format(&pnm_image_format);
@@ -125,10 +137,11 @@ void av_register_all(void)
 #endif
     av_register_image_format(&jpeg_image_format);
 #endif
-    av_register_image_format(&gif_image_format);  
+    av_register_image_format(&gif_image_format);
 //    av_register_image_format(&sgi_image_format); heap corruption, dont enable
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
+#ifdef CONFIG_PROTOCOLS
     /* file protocols */
     register_protocol(&file_protocol);
     register_protocol(&pipe_protocol);
@@ -139,5 +152,6 @@ void av_register_all(void)
     register_protocol(&rtp_protocol);
     register_protocol(&tcp_protocol);
     register_protocol(&http_protocol);
+#endif
 #endif
 }

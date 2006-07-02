@@ -21,7 +21,7 @@ test-server: vsynth1/0.pgm asynth1.sw
 	@$(SRC_PATH)/tests/server-regression.sh $(SERVER_REFFILE) $(SRC_PATH)/tests/test.conf
 
 # fast regression tests for all codecs
-codectest mpeg4 mpeg ac3 snow: vsynth1/0.pgm vsynth2/0.pgm asynth1.sw tiny_psnr
+codectest mpeg4 mpeg ac3 snow snowll: vsynth1/0.pgm vsynth2/0.pgm asynth1.sw tiny_psnr
 	@$(SRC_PATH)/tests/regression.sh $@ $(REFFILE1) vsynth1
 	@$(SRC_PATH)/tests/regression.sh $@ $(REFFILE2) vsynth2
 
@@ -55,7 +55,7 @@ audiogen: audiogen.c
 
 tiny_psnr: tiny_psnr.c
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $<
-        
+
 DSPDEPS = $(SRC_PATH)/libavcodec/i386/dsputil_mmx.c \
  $(SRC_PATH)/libavcodec/i386/dsputil_mmx_avg.h \
  $(SRC_PATH)/libavcodec/i386/dsputil_mmx_rnd.h \
@@ -72,6 +72,6 @@ dsptestpic: dsptest.c $(DSPDEPS)
 dsptest: dsptest.c $(DSPDEPS)
 	$(CC) -O4 -fomit-frame-pointer -DHAVE_AV_CONFIG_H -I.. -I$(SRC_PATH)/libavcodec/i386 -I$(SRC_PATH)/libavcodec/ -o $@ $< -lm
 
-clean:
+distclean clean:
 	rm -rf vsynth1 vsynth2 data
-	rm -f asynth1.sw *~ audiogen videogen rotozoom tiny_psnr 
+	rm -f asynth1.sw *~ audiogen videogen rotozoom tiny_psnr

@@ -1,4 +1,4 @@
-/* 
+/*
  * MP3 encoder and decoder
  * Copyright (c) 2003 Fabrice Bellard.
  *
@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
 
@@ -166,7 +166,7 @@ static int id3_match(const uint8_t *buf)
             (buf[9] & 0x80) == 0);
 }
 
-static void id3_get_string(char *str, int str_size, 
+static void id3_get_string(char *str, int str_size,
                            const uint8_t *buf, int buf_size)
 {
     int i, c;
@@ -189,7 +189,7 @@ static int id3_parse_tag(AVFormatContext *s, const uint8_t *buf)
 {
     char str[5];
     int genre;
-    
+
     if (!(buf[0] == 'T' &&
           buf[1] == 'A' &&
           buf[2] == 'G'))
@@ -254,7 +254,7 @@ static int mp3_read_header(AVFormatContext *s,
     st->codec->codec_type = CODEC_TYPE_AUDIO;
     st->codec->codec_id = CODEC_ID_MP3;
     st->need_parsing = 1;
-    
+
     /* try to get the TAG */
     if (!url_is_streamed(&s->pb)) {
         /* XXX: change that */
@@ -294,7 +294,7 @@ static int mp3_read_packet(AVFormatContext *s, AVPacket *pkt)
 {
     int ret, size;
     //    AVStream *st = s->streams[0];
-    
+
     size= MP3_PACKET_SIZE;
 
     ret= av_get_packet(&s->pb, pkt, size);
@@ -314,7 +314,7 @@ static int mp3_read_close(AVFormatContext *s)
     return 0;
 }
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
 /* simple formats */
 static int mp3_write_header(struct AVFormatContext *s)
 {
@@ -340,7 +340,7 @@ static int mp3_write_trailer(struct AVFormatContext *s)
     }
     return 0;
 }
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
 AVInputFormat mp3_iformat = {
     "mp3",
@@ -353,7 +353,7 @@ AVInputFormat mp3_iformat = {
     .extensions = "mp2,mp3,m2a", /* XXX: use probe */
 };
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
 AVOutputFormat mp2_oformat = {
     "mp2",
     "MPEG audio layer 2",
@@ -385,16 +385,16 @@ AVOutputFormat mp3_oformat = {
     mp3_write_trailer,
 };
 #endif
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
 int mp3_init(void)
 {
     av_register_input_format(&mp3_iformat);
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     av_register_output_format(&mp2_oformat);
 #ifdef CONFIG_MP3LAME
     av_register_output_format(&mp3_oformat);
-#endif    
-#endif //CONFIG_ENCODERS
+#endif
+#endif //CONFIG_MUXERS
     return 0;
 }

@@ -1,4 +1,4 @@
-/* 
+/*
  * Yamaha SMAF format
  * Copyright (c) 2005 Vidar Madsen
  *
@@ -14,12 +14,11 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
 #include "avi.h"
 
-#ifdef CONFIG_ENCODERS
 typedef struct {
     offset_t atrpos, atsqpos, awapos;
     offset_t data_size;
@@ -43,6 +42,7 @@ static int mmf_rate(int code)
     return mmf_rates[code];
 }
 
+#ifdef CONFIG_MUXERS
 /* Copy of end_tag() from avienc.c, but for big-endian chunk size */
 static void end_tag_be(ByteIOContext *pb, offset_t start)
 {
@@ -66,7 +66,7 @@ static int mmf_write_header(AVFormatContext *s)
         av_log(s, AV_LOG_ERROR, "Unsupported sample rate %d\n", s->streams[0]->codec->sample_rate);
         return -1;
     }
-    
+
     put_tag(pb, "MMMD");
     put_be32(pb, 0);
     pos = start_tag(pb, "CNTI");
@@ -160,7 +160,7 @@ static int mmf_write_trailer(AVFormatContext *s)
     }
     return 0;
 }
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
 static int mmf_probe(AVProbeData *p)
 {
@@ -202,6 +202,10 @@ static int mmf_read_header(AVFormatContext *s,
     }
 
     /* Tag = "ATRx", where "x" = track number */
+    if ((tag & 0xffffff) == MKTAG('M', 'T', 'R', 0)) {
+        av_log(s, AV_LOG_ERROR, "MIDI like format found, unsupported\n");
+        return -1;
+    }
     if ((tag & 0xffffff) != MKTAG('A', 'T', 'R', 0)) {
         av_log(s, AV_LOG_ERROR, "Unsupported SMAF chunk %08x\n", tag);
         return -1;
@@ -270,7 +274,7 @@ static int mmf_read_packet(AVFormatContext *s,
 
     if(!size)
         return AVERROR_IO;
-    
+
     if (av_new_packet(pkt, size))
         return AVERROR_IO;
     pkt->stream_index = 0;
@@ -290,7 +294,7 @@ static int mmf_read_close(AVFormatContext *s)
     return 0;
 }
 
-static int mmf_read_seek(AVFormatContext *s, 
+static int mmf_read_seek(AVFormatContext *s,
                          int stream_index, int64_t timestamp, int flags)
 {
     return pcm_read_seek(s, stream_index, timestamp, flags);
@@ -308,7 +312,7 @@ static AVInputFormat mmf_iformat = {
     mmf_read_seek,
 };
 
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
 static AVOutputFormat mmf_oformat = {
     "mmf",
     "mmf format",
@@ -321,14 +325,14 @@ static AVOutputFormat mmf_oformat = {
     mmf_write_packet,
     mmf_write_trailer,
 };
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
 
 int ff_mmf_init(void)
 {
     av_register_input_format(&mmf_iformat);
-#ifdef CONFIG_ENCODERS
+#ifdef CONFIG_MUXERS
     av_register_output_format(&mmf_oformat);
-#endif //CONFIG_ENCODERS
+#endif //CONFIG_MUXERS
     return 0;
 }
 
