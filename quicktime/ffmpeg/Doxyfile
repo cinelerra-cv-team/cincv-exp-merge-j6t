@@ -654,7 +654,7 @@ LATEX_BATCHMODE        = NO
 #---------------------------------------------------------------------------
 
 # If the GENERATE_RTF tag is set to YES Doxygen will generate RTF output
-# The RTF output is optimised for Word 97 and may not look very pretty with
+# The RTF output is optimized for Word 97 and may not look very pretty with
 # other RTF readers or editors.
 
 GENERATE_RTF           = NO
@@ -836,7 +836,7 @@ INCLUDE_FILE_PATTERNS  =
 # omitted =1 is assumed.
 
 PREDEFINED             = __attribute__(x)="" "RENAME(x)=x ## _TMPL" "DEF(x)=x ## _TMPL" \
-                         HAVE_BUILTIN_VECTOR HAVE_AV_CONFIG_H HAVE_MMX HAVE_MMX2 HAVE_3DNOW \
+                         HAVE_AV_CONFIG_H HAVE_MMX HAVE_MMX2 HAVE_3DNOW \
                          ATTR_ALIGN(x)=""
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then

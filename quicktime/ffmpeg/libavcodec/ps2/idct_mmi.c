@@ -1,18 +1,32 @@
 /*
-  Originally provided by Intel at AP-922
-  http://developer.intel.com/vtune/cbts/strmsimd/922down.htm
-  (See more app notes at http://developer.intel.com/vtune/cbts/strmsimd/appnotes.htm)
-  but in a limited edition.
+ * Originally provided by Intel at Application Note AP-922.
+ *
+ * Column code adapted from Peter Gubanov.
+ * Copyright (c) 2000-2001 Peter Gubanov <peter@elecard.net.ru>
+ * http://www.elecard.com/peter/idct.shtml
+ * rounding trick copyright (c) 2000 Michel Lespinasse <walken@zoy.org>
+ *
+ * MMI port and (c) 2002 by Leon van Stuivenberg
+ *
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * FFmpeg is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
-  column code adapted from peter gubanov
-  Copyright (c) 2000-2001 Peter Gubanov <peter@elecard.net.ru>
-  http://www.elecard.com/peter/idct.shtml
-  Rounding trick Copyright (c) 2000 Michel Lespinasse <walken@zoy.org>
-
-  MMI port by Leon van Stuivenberg
-*/
-#include "../common.h"
-#include "../dsputil.h"
+#include "libavutil/common.h"
+#include "libavcodec/dsputil.h"
 #include "mmi.h"
 
 #define BITS_INV_ACC    5       // 4 or 5 for IEEE
@@ -243,7 +257,7 @@ static short consttable[] align16 = {
         pmaxh($2, $0, $2);      \
         ppacb($0, $2, $2);      \
         sd3(2, 0, 4);           \
-        __asm__ __volatile__ ("add $4, $5, $4");
+        asm volatile ("add $4, $5, $4");
 
 #define DCT_8_INV_COL8_PUT() \
         PUT($16);        \
@@ -263,7 +277,7 @@ static short consttable[] align16 = {
         pmaxh($2, $0, $2);   \
         ppacb($0, $2, $2);   \
         sd3(2, 0, 4); \
-        __asm__ __volatile__ ("add $4, $5, $4");
+        asm volatile ("add $4, $5, $4");
 
 /*fixme: schedule*/
 #define DCT_8_INV_COL8_ADD() \
@@ -280,7 +294,7 @@ static short consttable[] align16 = {
 void ff_mmi_idct(int16_t * block)
 {
         /* $4 = block */
-        __asm__ __volatile__("la $24, %0"::"m"(consttable[0]));
+        asm volatile("la $24, %0"::"m"(consttable[0]));
         lq($24, ROUNDER_0, $8);
         lq($24, ROUNDER_1, $7);
         DCT_8_INV_ROW1($4, 0, TAB_i_04, $8, $8);
@@ -295,14 +309,14 @@ void ff_mmi_idct(int16_t * block)
         DCT_8_INV_COL8_STORE($4);
 
         //let savedtemp regs be saved
-        __asm__ __volatile__(" ":::"$16", "$17", "$18", "$19", "$20", "$21", "$22", "$23");
+        asm volatile(" ":::"$16", "$17", "$18", "$19", "$20", "$21", "$22", "$23");
 }
 
 
 void ff_mmi_idct_put(uint8_t *dest, int line_size, DCTELEM *block)
 {
         /* $4 = dest, $5 = line_size, $6 = block */
-        __asm__ __volatile__("la $24, %0"::"m"(consttable[0]));
+        asm volatile("la $24, %0"::"m"(consttable[0]));
         lq($24, ROUNDER_0, $8);
         lq($24, ROUNDER_1, $7);
         DCT_8_INV_ROW1($6, 0, TAB_i_04, $8, $8);
@@ -319,14 +333,14 @@ void ff_mmi_idct_put(uint8_t *dest, int line_size, DCTELEM *block)
         DCT_8_INV_COL8_PUT();
 
         //let savedtemp regs be saved
-        __asm__ __volatile__(" ":::"$16", "$17", "$18", "$19", "$20", "$21", "$22", "$23");
+        asm volatile(" ":::"$16", "$17", "$18", "$19", "$20", "$21", "$22", "$23");
 }
 
 
 void ff_mmi_idct_add(uint8_t *dest, int line_size, DCTELEM *block)
 {
         /* $4 = dest, $5 = line_size, $6 = block */
-        __asm__ __volatile__("la $24, %0"::"m"(consttable[0]));
+        asm volatile("la $24, %0"::"m"(consttable[0]));
         lq($24, ROUNDER_0, $8);
         lq($24, ROUNDER_1, $7);
         DCT_8_INV_ROW1($6, 0, TAB_i_04, $8, $8);
@@ -343,6 +357,6 @@ void ff_mmi_idct_add(uint8_t *dest, int line_size, DCTELEM *block)
         DCT_8_INV_COL8_ADD();
 
         //let savedtemp regs be saved
-        __asm__ __volatile__(" ":::"$16", "$17", "$18", "$19", "$20", "$21", "$22", "$23");
+        asm volatile(" ":::"$16", "$17", "$18", "$19", "$20", "$21", "$22", "$23");
 }
 

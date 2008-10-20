@@ -2,19 +2,21 @@
  * American Laser Games MM Video Decoder
  * Copyright (c) 2006 Peter Ross
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /**
@@ -45,7 +47,7 @@ typedef struct MmContext {
     AVFrame frame;
 } MmContext;
 
-static int mm_decode_init(AVCodecContext *avctx)
+static av_cold int mm_decode_init(AVCodecContext *avctx)
 {
     MmContext *s = avctx->priv_data;
 
@@ -57,7 +59,6 @@ static int mm_decode_init(AVCodecContext *avctx)
     }
 
     avctx->pix_fmt = PIX_FMT_PAL8;
-    avctx->has_b_frames = 0;
 
     if (avcodec_check_dimensions(avctx, avctx->width, avctx->height))
         return -1;
@@ -108,7 +109,7 @@ static void mm_decode_intra(MmContext * s, int half_horiz, int half_vert, const 
 
 static void mm_decode_inter(MmContext * s, int half_horiz, int half_vert, const uint8_t *buf, int buf_size)
 {
-    const int data_ptr = 2 + LE_16(&buf[0]);
+    const int data_ptr = 2 + AV_RL16(&buf[0]);
     int d, r, y;
     d = data_ptr; r = 2; y = 0;
 
@@ -149,7 +150,7 @@ static void mm_decode_inter(MmContext * s, int half_horiz, int half_vert, const 
 
 static int mm_decode_frame(AVCodecContext *avctx,
                             void *data, int *data_size,
-                            uint8_t *buf, int buf_size)
+                            const uint8_t *buf, int buf_size)
 {
     MmContext *s = avctx->priv_data;
     AVPaletteControl *palette_control = avctx->palctrl;
@@ -160,7 +161,7 @@ static int mm_decode_frame(AVCodecContext *avctx,
         palette_control->palette_changed = 0;
     }
 
-    type = LE_16(&buf[0]);
+    type = AV_RL16(&buf[0]);
     buf += MM_PREAMBLE_SIZE;
     buf_size -= MM_PREAMBLE_SIZE;
 
@@ -181,7 +182,7 @@ static int mm_decode_frame(AVCodecContext *avctx,
     return buf_size;
 }
 
-static int mm_decode_end(AVCodecContext *avctx)
+static av_cold int mm_decode_end(AVCodecContext *avctx)
 {
     MmContext *s = avctx->priv_data;
 
@@ -201,4 +202,5 @@ AVCodec mmvideo_decoder = {
     mm_decode_end,
     mm_decode_frame,
     CODEC_CAP_DR1,
+    .long_name = "American Laser Games MM Video",
 };

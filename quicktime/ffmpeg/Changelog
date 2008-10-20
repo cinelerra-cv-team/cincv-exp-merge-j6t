@@ -1,4 +1,5 @@
 version <next>
+- The "device" muxers and demuxers are now in a new libavdevice library
 - DV50 AKA DVCPRO50 encoder, decoder, muxer and demuxer
 - TechSmith Camtasia (TSCC) video decoder
 - IBM Ultimotion (ULTI) video decoder
@@ -19,7 +20,7 @@ version <next>
 - Fraps FPS1 video decoder
 - Snow video encoder/decoder
 - Sonic audio encoder/decoder
-- Vorbis audio decoder
+- Vorbis audio encoder/decoder
 - Macromedia ADPCM decoder
 - Duck TrueMotion 2 video decoder
 - support for decoding FLX and DTA extensions in FLIC files
@@ -38,7 +39,7 @@ version <next>
 - ADTS AAC file reading and writing
 - Creative VOC file reading and writing
 - American Laser Games multimedia (*.mm) playback system
-- Zip Blocks Motion Video decoder
+- Zip Blocks Motion Video decoder and encoder
 - Improved Theora/VP3 decoder
 - True Audio (TTA) decoder
 - AVS demuxer and video decoder
@@ -47,6 +48,79 @@ version <next>
 - KMVC decoder
 - MPEG-2 intra vlc support
 - MPEG-2 4:2:2 encoder
+- Flash Screen Video decoder
+- GXF demuxer
+- Chinese AVS decoder
+- GXF muxer
+- MXF demuxer
+- VC-1/WMV3/WMV9 video decoder
+- MacIntel support
+- AVISynth support
+- VMware video decoder
+- VP5 video decoder
+- VP6 video decoder
+- WavPack lossless audio decoder
+- Targa (.TGA) picture decoder
+- Delphine Software .cin demuxer/audio and video decoder
+- Tiertex .seq demuxer/video decoder
+- MTV demuxer
+- TIFF picture encoder and decoder
+- GIF picture decoder
+- Intel Music decoder
+- Musepack decoder
+- Flash Screen Video encoder
+- Theora encoding via libtheora
+- BMP encoder
+- WMA encoder
+- GSM-MS encoder and decoder
+- DCA decoder
+- DXA demuxer and decoder
+- DNxHD decoder
+- Gamecube movie (.THP) playback system
+- Blackfin optimizations
+- Interplay C93 demuxer and video decoder
+- Bethsoft VID demuxer and video decoder
+- CRYO APC demuxer
+- Atrac3 decoder
+- V.Flash PTX decoder
+- RoQ muxer, audio encoder
+- Renderware TXD demuxer and decoder
+- extern C declarations for C++ removed from headers
+- sws_flags command line option
+- codebook generator
+- RoQ video encoder
+- QTRLE encoder
+- OS/2 support removed and restored again
+- AC-3 decoder
+- NUT muxer (since r10052)
+- Matroska muxer
+- Slice-based parallel H.264 decoding
+- Monkey's Audio demuxer and decoder
+- additional SPARC (VIS) optimizations
+- AMV audio and video decoder
+- DNxHD encoder
+- H.264 PAFF decoding
+- Nellymoser ASAO decoder
+- Beam Software SIFF demuxer and decoder
+- libvorbis Vorbis decoding removed in favor of native decoder
+- IntraX8 (J-Frame) subdecoder for WMV2 and VC-1
+- Ogg muxer
+- PC Paintbrush PCX decoder
+- Sun Rasterfile decoder
+- TechnoTrend PVA demuxer
+- Linux Media Labs MPEG-4 (LMLM4) demuxer
+- AVM2 (Flash 9) SWF muxer
+- QT variant of IMA ADPCM encoder
+- VFW grabber
+- Ipod/Iphone compatible mp4 muxer
+- Mimic decoder
+- MSN TCP Webcam stream demuxer
+- RL2 demuxer / decoder
+- IFF demuxer
+- 8SVX audio decoder
+- BFI demuxer
+- MAXIS EA XA (.xa) demuxer / decoder
+- BFI video decoder
 
 version 0.4.9-pre1:
 
@@ -115,7 +189,7 @@ version 0.4.9-pre1:
 - SGI image format, encoding and decoding
 - H.264 loop filter support
 - H.264 CABAC support
-- nicer looking arrows for the motion vector vissualization
+- nicer looking arrows for the motion vector visualization
 - improved VCD support
 - audio timestamp drift compensation
 - MPEG-2 YUV 422/444 support
@@ -218,8 +292,8 @@ version 0.4.6:
 
 version 0.4.5:
 
-- some header fixes (Zdenek Kabelac <kabi@informatics.muni.cz>)
-- many MMX optimizations (Nick Kurshev <nickols_k@mail.ru>)
+- some header fixes (Zdenek Kabelac <kabi at informatics.muni.cz>)
+- many MMX optimizations (Nick Kurshev <nickols_k at mail.ru>)
 - added configure system (actually a small shell script)
 - added MPEG audio layer 1/2/3 decoding using LGPL'ed mpglib by
   Michael Hipp (temporary solution - waiting for integer only
@@ -236,12 +310,12 @@ version 0.4.5:
 - added MJPEG decoder
 - added mmx/mmxext IDCT from libmpeg2
 - added pgmyuvpipe, ppm, and ppm_pipe formats (original patch by Celer
-  <celer@shell.scrypt.net>)
+  <celer at shell.scrypt.net>)
 - added pixel format conversion layer (e.g. for MJPEG or PPM)
 - added deinterlacing option
 - MPEG-1/2 fixes
-- MPEG-4 vol header fixes (Jonathan Marsden <snmjbm@pacbell.net>)
-- ARM optimizations (Lionel Ulmer <lionel.ulmer@free.fr>).
+- MPEG-4 vol header fixes (Jonathan Marsden <snmjbm at pacbell.net>)
+- ARM optimizations (Lionel Ulmer <lionel.ulmer at free.fr>).
 - Windows porting of file converter
 - added MJPEG raw format (input/ouput)
 - added JPEG image format support (input/output)
@@ -249,7 +323,7 @@ version 0.4.5:
 version 0.4.4:
 
 - fixed some std header definitions (Bjorn Lindgren
-  <bjorn.e.lindgren@telia.com>).
+  <bjorn.e.lindgren at telia.com>).
 - added MPEG demuxer (MPEG-1 and 2 compatible).
 - added ASF demuxer
 - added prototype RM demuxer
@@ -272,7 +346,7 @@ version 0.4.4:
 
 version 0.4.3:
 
-- BGR24 patch (initial patch by Jeroen Vreeken <pe1rxq@amsat.org>)
+- BGR24 patch (initial patch by Jeroen Vreeken <pe1rxq at amsat.org>)
 - fixed raw yuv output
 - added motion rounding support in MPEG-4
 - fixed motion bug rounding in MSMPEG4
@@ -287,7 +361,7 @@ version 0.4.3:
 - suppressed 'img:' protocol. Simply use: /tmp/test%d.[pgm|Y] as input or
   output.
 - added pgmpipe I/O format (original patch from Martin Aumueller
-  <lists@reserv.at>, but changed completely since we use a format
+  <lists at reserv.at>, but changed completely since we use a format
   instead of a protocol)
 
 version 0.4.2:
@@ -325,7 +399,7 @@ version 0.4.0:
 - added timeshifting support for live feeds (option ?date=xxx in the
   URL)
 - added high quality image resize code with polyphase filter (need
-  mmx/see optimisation). Enable multiple image size support in ffserver.
+  mmx/see optimization). Enable multiple image size support in ffserver.
 - added multi live feed support in ffserver
 - suppressed master feature from ffserver (it should be done with an
   external program which opens the .ffm url and writes it to another
@@ -339,7 +413,7 @@ version 0.4.0:
 - added WAV format support
 - added "tty user interface" to ffmpeg to stop grabbing gracefully
 - added MMX/SSE optimizations to SAD (Sums of Absolutes Differences)
-  (Juan J. Sierralta P. a.k.a. "Juanjo" <juanjo@atmlab.utfsm.cl>)
+  (Juan J. Sierralta P. a.k.a. "Juanjo" <juanjo at atmlab.utfsm.cl>)
 - added MMX DCT from mpeg2_movie 1.5 (Juanjo)
 - added new motion estimation algorithms, log and phods (Juanjo)
 - changed directories: libav for format handling, libavcodec for

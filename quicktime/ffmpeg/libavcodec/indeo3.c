@@ -2,18 +2,20 @@
  * Intel Indeo 3 (IV31, IV32, etc.) video decoder for ffmpeg
  * written, produced, and directed by Alan Smithee
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -22,10 +24,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "common.h"
 #include "avcodec.h"
 #include "dsputil.h"
-#include "mpegvideo.h"
+#include "bytestream.h"
 
 #include "indeo3data.h"
 
@@ -53,15 +54,15 @@ typedef struct Indeo3DecodeContext {
     unsigned short *corrector_type;
 } Indeo3DecodeContext;
 
-static int corrector_type_0[24] = {
+static const int corrector_type_0[24] = {
   195, 159, 133, 115, 101,  93,  87,  77,
   195, 159, 133, 115, 101,  93,  87,  77,
   128,  79,  79,  79,  79,  79,  79,  79
 };
 
-static int corrector_type_2[8] = { 9, 7, 6, 8, 5, 4, 3, 2 };
+static const int corrector_type_2[8] = { 9, 7, 6, 8, 5, 4, 3, 2 };
 
-static void build_modpred(Indeo3DecodeContext *s)
+static av_cold void build_modpred(Indeo3DecodeContext *s)
 {
   int i, j;
 
@@ -91,16 +92,12 @@ static void build_modpred(Indeo3DecodeContext *s)
 }
 
 static void iv_Decode_Chunk(Indeo3DecodeContext *s, unsigned char *cur,
-  unsigned char *ref, int width, int height, unsigned char *buf1,
-  long fflags2, unsigned char *hdr,
-  unsigned char *buf2, int min_width_160);
-
-#ifndef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#endif
+  unsigned char *ref, int width, int height, const unsigned char *buf1,
+  long fflags2, const unsigned char *hdr,
+  const unsigned char *buf2, int min_width_160);
 
 /* ---------------------------------------------------------------------- */
-static void iv_alloc_frames(Indeo3DecodeContext *s)
+static av_cold void iv_alloc_frames(Indeo3DecodeContext *s)
 {
   int luma_width, luma_height, luma_pixels, chroma_width, chroma_height,
       chroma_pixels, i;
@@ -158,7 +155,7 @@ static void iv_alloc_frames(Indeo3DecodeContext *s)
 }
 
 /* ---------------------------------------------------------------------- */
-static void iv_free_func(Indeo3DecodeContext *s)
+static av_cold void iv_free_func(Indeo3DecodeContext *s)
 {
   int i;
 
@@ -179,38 +176,32 @@ static void iv_free_func(Indeo3DecodeContext *s)
 
 /* ---------------------------------------------------------------------- */
 static unsigned long iv_decode_frame(Indeo3DecodeContext *s,
-                                     unsigned char *buf, int buf_size)
+                                     const unsigned char *buf, int buf_size)
 {
   unsigned int hdr_width, hdr_height,
     chroma_width, chroma_height;
   unsigned long fflags1, fflags2, fflags3, offs1, offs2, offs3, offs;
-  unsigned char *hdr_pos, *buf_pos;
+  const unsigned char *hdr_pos, *buf_pos;
 
   buf_pos = buf;
   buf_pos += 18;
 
-  fflags1 = le2me_16(*(uint16_t *)buf_pos);
-  buf_pos += 2;
-  fflags3 = le2me_32(*(uint32_t *)buf_pos);
-  buf_pos += 4;
+  fflags1 = bytestream_get_le16(&buf_pos);
+  fflags3 = bytestream_get_le32(&buf_pos);
   fflags2 = *buf_pos++;
   buf_pos += 3;
-  hdr_height = le2me_16(*(uint16_t *)buf_pos);
-  buf_pos += 2;
-  hdr_width = le2me_16(*(uint16_t *)buf_pos);
+  hdr_height = bytestream_get_le16(&buf_pos);
+  hdr_width  = bytestream_get_le16(&buf_pos);
 
   if(avcodec_check_dimensions(NULL, hdr_width, hdr_height))
       return -1;
 
-  buf_pos += 2;
   chroma_height = ((hdr_height >> 2) + 3) & 0x7ffc;
   chroma_width = ((hdr_width >> 2) + 3) & 0x7ffc;
-  offs1 = le2me_32(*(uint32_t *)buf_pos);
+  offs1 = bytestream_get_le32(&buf_pos);
+  offs2 = bytestream_get_le32(&buf_pos);
+  offs3 = bytestream_get_le32(&buf_pos);
   buf_pos += 4;
-  offs2 = le2me_32(*(uint32_t *)buf_pos);
-  buf_pos += 4;
-  offs3 = le2me_32(*(uint32_t *)buf_pos);
-  buf_pos += 8;
   hdr_pos = buf_pos;
   if(fflags3 == 0x80) return 4;
 
@@ -223,31 +214,28 @@ static unsigned long iv_decode_frame(Indeo3DecodeContext *s,
   }
 
   buf_pos = buf + 16 + offs1;
-  offs = le2me_32(*(uint32_t *)buf_pos);
-  buf_pos += 4;
+  offs = bytestream_get_le32(&buf_pos);
 
   iv_Decode_Chunk(s, s->cur_frame->Ybuf, s->ref_frame->Ybuf, hdr_width,
     hdr_height, buf_pos + offs * 2, fflags2, hdr_pos, buf_pos,
-    min(hdr_width, 160));
+    FFMIN(hdr_width, 160));
 
   if (!(s->avctx->flags & CODEC_FLAG_GRAY))
   {
 
   buf_pos = buf + 16 + offs2;
-  offs = le2me_32(*(uint32_t *)buf_pos);
-  buf_pos += 4;
+  offs = bytestream_get_le32(&buf_pos);
 
   iv_Decode_Chunk(s, s->cur_frame->Vbuf, s->ref_frame->Vbuf, chroma_width,
     chroma_height, buf_pos + offs * 2, fflags2, hdr_pos, buf_pos,
-    min(chroma_width, 40));
+    FFMIN(chroma_width, 40));
 
   buf_pos = buf + 16 + offs3;
-  offs = le2me_32(*(uint32_t *)buf_pos);
-  buf_pos += 4;
+  offs = bytestream_get_le32(&buf_pos);
 
   iv_Decode_Chunk(s, s->cur_frame->Ubuf, s->ref_frame->Ubuf, chroma_width,
     chroma_height, buf_pos + offs * 2, fflags2, hdr_pos, buf_pos,
-    min(chroma_width, 40));
+    FFMIN(chroma_width, 40));
 
   }
 
@@ -310,13 +298,13 @@ typedef struct {
 
 static void iv_Decode_Chunk(Indeo3DecodeContext *s,
   unsigned char *cur, unsigned char *ref, int width, int height,
-  unsigned char *buf1, long fflags2, unsigned char *hdr,
-  unsigned char *buf2, int min_width_160)
+  const unsigned char *buf1, long fflags2, const unsigned char *hdr,
+  const unsigned char *buf2, int min_width_160)
 {
   unsigned char bit_buf;
   unsigned long bit_pos, lv, lv1, lv2;
   long *width_tbl, width_tbl_arr[10];
-  signed char *ref_vectors;
+  const signed char *ref_vectors;
   unsigned char *cur_frm_pos, *ref_frm_pos, *cp, *cp2;
   uint32_t *cur_lp, *ref_lp;
   const uint32_t *correction_lp[2], *correctionloworder_lp[2], *correctionhighorder_lp[2];
@@ -381,7 +369,7 @@ static void iv_Decode_Chunk(Indeo3DecodeContext *s,
     } else if(cmd == 3) {
       if(strip->usl7 == 0) {
         strip->usl7 = 1;
-        ref_vectors = buf2 + (*buf1 * 2);
+        ref_vectors = (const signed char*)buf2 + (*buf1 * 2);
         buf1++;
         continue;
       }
@@ -1060,7 +1048,7 @@ static void iv_Decode_Chunk(Indeo3DecodeContext *s,
   }
 }
 
-static int indeo3_decode_init(AVCodecContext *avctx)
+static av_cold int indeo3_decode_init(AVCodecContext *avctx)
 {
     Indeo3DecodeContext *s = avctx->priv_data;
 
@@ -1068,7 +1056,6 @@ static int indeo3_decode_init(AVCodecContext *avctx)
     s->width = avctx->width;
     s->height = avctx->height;
     avctx->pix_fmt = PIX_FMT_YUV410P;
-    avctx->has_b_frames = 0;
 
     build_modpred(s);
     iv_alloc_frames(s);
@@ -1078,7 +1065,7 @@ static int indeo3_decode_init(AVCodecContext *avctx)
 
 static int indeo3_decode_frame(AVCodecContext *avctx,
                                void *data, int *data_size,
-                               unsigned char *buf, int buf_size)
+                               const unsigned char *buf, int buf_size)
 {
     Indeo3DecodeContext *s=avctx->priv_data;
     unsigned char *src, *dest;
@@ -1128,7 +1115,7 @@ static int indeo3_decode_frame(AVCodecContext *avctx,
     return buf_size;
 }
 
-static int indeo3_decode_end(AVCodecContext *avctx)
+static av_cold int indeo3_decode_end(AVCodecContext *avctx)
 {
     Indeo3DecodeContext *s = avctx->priv_data;
 
@@ -1147,5 +1134,6 @@ AVCodec indeo3_decoder = {
     indeo3_decode_end,
     indeo3_decode_frame,
     0,
-    NULL
+    NULL,
+    .long_name = "Intel Indeo 3",
 };

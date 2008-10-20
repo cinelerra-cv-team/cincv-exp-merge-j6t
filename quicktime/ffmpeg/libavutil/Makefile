@@ -1,24 +1,48 @@
-#
-# libavutil Makefile
-#
-include ../config.mak
+include $(SUBDIR)../config.mak
 
-# NOTE: -I.. is needed to include config.h
-CFLAGS=$(OPTFLAGS) -DHAVE_AV_CONFIG_H -DBUILD_AVUTIL -I.. -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_GNU_SOURCE
+NAME = avutil
 
-OBJS= mathematics.o \
-      rational.o \
-      intfloat_readwrite.o \
-      crc.o \
+OBJS = adler32.o \
+       aes.o \
+       base64.o \
+       crc.o \
+       des.o \
+       fifo.o \
+       intfloat_readwrite.o \
+       lls.o \
+       log.o \
+       lzo.o \
+       mathematics.o \
+       md5.o \
+       mem.o \
+       random.o \
+       rational.o \
+       rc4.o \
+       sha1.o \
+       string.o \
+       tree.o \
 
-HEADERS = avutil.h common.h mathematics.h integer.h rational.h \
-          intfloat_readwrite.h
+HEADERS = adler32.h \
+          avstring.h \
+          avutil.h \
+          base64.h \
+          common.h \
+          crc.h \
+          fifo.h \
+          intfloat_readwrite.h \
+          log.h \
+          lzo.h \
+          mathematics.h \
+          md5.h \
+          mem.h \
+          random.h \
+          rational.h \
+          sha1.h
 
-NAME=avutil
-SUBDIR = libavutil
-ifeq ($(BUILD_SHARED),yes)
-LIBVERSION=$(LAVUVERSION)
-LIBMAJOR=$(LAVUMAJOR)
-endif
+TESTS = $(addsuffix -test$(EXESUF), adler32 aes crc des lls md5 sha1 softfloat tree)
 
-include $(SRC_PATH)/common.mak
+include $(SUBDIR)../subdir.mak
+
+$(SUBDIR)lzo-test$(EXESUF): EXTRALIBS += -llzo2
+
+CLEANFILES = lzo-test$(EXESUF)

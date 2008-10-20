@@ -2,21 +2,20 @@
  * vis.h
  * Copyright (C) 2003 David S. Miller <davem@redhat.com>
  *
- * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
- * See http://libmpeg2.sourceforge.net/ for updates.
+ * This file is part of FFmpeg.
  *
- * mpeg2dec is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * FFmpeg is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * mpeg2dec is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -41,6 +40,9 @@
  * the assembler to keep the binary from becoming tainted.
  */
 
+#ifndef FFMPEG_VIS_H
+#define FFMPEG_VIS_H
+
 #define vis_opc_base    ((0x1 << 31) | (0x36 << 19))
 #define vis_opf(X)      ((X) << 5)
 #define vis_sreg(X)     (X)
@@ -53,97 +55,97 @@
 #define vis_rd_d(X)     (vis_dreg(X) << 25)
 
 #define vis_ss2s(opf,rs1,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs1_s(rs1) | \
                                        vis_rs2_s(rs2) | \
                                        vis_rd_s(rd)))
 
 #define vis_dd2d(opf,rs1,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs1_d(rs1) | \
                                        vis_rs2_d(rs2) | \
                                        vis_rd_d(rd)))
 
 #define vis_ss2d(opf,rs1,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs1_s(rs1) | \
                                        vis_rs2_s(rs2) | \
                                        vis_rd_d(rd)))
 
 #define vis_sd2d(opf,rs1,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs1_s(rs1) | \
                                        vis_rs2_d(rs2) | \
                                        vis_rd_d(rd)))
 
 #define vis_d2s(opf,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs2_d(rs2) | \
                                        vis_rd_s(rd)))
 
 #define vis_s2d(opf,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs2_s(rs2) | \
                                        vis_rd_d(rd)))
 
 #define vis_d12d(opf,rs1,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs1_d(rs1) | \
                                        vis_rd_d(rd)))
 
 #define vis_d22d(opf,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs2_d(rs2) | \
                                        vis_rd_d(rd)))
 
 #define vis_s12s(opf,rs1,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs1_s(rs1) | \
                                        vis_rd_s(rd)))
 
 #define vis_s22s(opf,rs2,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rs2_s(rs2) | \
                                        vis_rd_s(rd)))
 
 #define vis_s(opf,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rd_s(rd)))
 
 #define vis_d(opf,rd) \
-        __asm__ __volatile__ (".word %0" \
+        asm volatile (".word %0" \
                               : : "i" (vis_opc_base | vis_opf(opf) | \
                                        vis_rd_d(rd)))
 
 #define vis_r2m(op,rd,mem) \
-        __asm__ __volatile__ (#op "\t%%f" #rd ", [%0]" : : "r" (&(mem)) )
+        asm volatile (#op "\t%%f" #rd ", [%0]" : : "r" (&(mem)) )
 
 #define vis_r2m_2(op,rd,mem1,mem2) \
-        __asm__ __volatile__ (#op "\t%%f" #rd ", [%0 + %1]" : : "r" (mem1), "r" (mem2) )
+        asm volatile (#op "\t%%f" #rd ", [%0 + %1]" : : "r" (mem1), "r" (mem2) )
 
 #define vis_m2r(op,mem,rd) \
-        __asm__ __volatile__ (#op "\t[%0], %%f" #rd : : "r" (&(mem)) )
+        asm volatile (#op "\t[%0], %%f" #rd : : "r" (&(mem)) )
 
 #define vis_m2r_2(op,mem1,mem2,rd) \
-        __asm__ __volatile__ (#op "\t[%0 + %1], %%f" #rd : : "r" (mem1), "r" (mem2) )
+        asm volatile (#op "\t[%0 + %1], %%f" #rd : : "r" (mem1), "r" (mem2) )
 
 static inline void vis_set_gsr(unsigned int _val)
 {
         register unsigned int val asm("g1");
 
         val = _val;
-        __asm__ __volatile__(".word 0xa7804000"
+        asm volatile(".word 0xa7804000"
                              : : "r" (val));
 }
 
@@ -164,7 +166,7 @@ static inline void vis_set_gsr(unsigned int _val)
 #define vis_ldblk(mem, rd) \
 do {        register void *__mem asm("g1"); \
         __mem = &(mem); \
-        __asm__ __volatile__(".word 0xc1985e00 | %1" \
+        asm volatile(".word 0xc1985e00 | %1" \
                              : \
                              : "r" (__mem), \
                                "i" (vis_rd_d(rd)) \
@@ -174,7 +176,7 @@ do {        register void *__mem asm("g1"); \
 #define vis_stblk(rd, mem) \
 do {        register void *__mem asm("g1"); \
         __mem = &(mem); \
-        __asm__ __volatile__(".word 0xc1b85e00 | %1" \
+        asm volatile(".word 0xc1b85e00 | %1" \
                              : \
                              : "r" (__mem), \
                                "i" (vis_rd_d(rd)) \
@@ -182,10 +184,10 @@ do {        register void *__mem asm("g1"); \
 } while (0)
 
 #define vis_membar_storestore()        \
-        __asm__ __volatile__(".word 0x8143e008" : : : "memory")
+        asm volatile(".word 0x8143e008" : : : "memory")
 
 #define vis_membar_sync()        \
-        __asm__ __volatile__(".word 0x8143e040" : : : "memory")
+        asm volatile(".word 0x8143e040" : : : "memory")
 
 /* 16 and 32 bit partitioned addition and subtraction.  The normal
  * versions perform 4 16-bit or 2 32-bit additions or subtractions.
@@ -228,7 +230,7 @@ static inline void *vis_alignaddr(void *_ptr)
 
         ptr = _ptr;
 
-        __asm__ __volatile__(".word %2"
+        asm volatile(".word %2"
                              : "=&r" (ptr)
                              : "0" (ptr),
                                "i" (vis_opc_base | vis_opf(0x18) |
@@ -245,7 +247,7 @@ static inline void vis_alignaddr_g0(void *_ptr)
 
         ptr = _ptr;
 
-        __asm__ __volatile__(".word %2"
+        asm volatile(".word %2"
                              : "=&r" (ptr)
                              : "0" (ptr),
                                "i" (vis_opc_base | vis_opf(0x18) |
@@ -260,7 +262,7 @@ static inline void *vis_alignaddrl(void *_ptr)
 
         ptr = _ptr;
 
-        __asm__ __volatile__(".word %2"
+        asm volatile(".word %2"
                              : "=&r" (ptr)
                              : "0" (ptr),
                                "i" (vis_opc_base | vis_opf(0x19) |
@@ -277,7 +279,7 @@ static inline void vis_alignaddrl_g0(void *_ptr)
 
         ptr = _ptr;
 
-        __asm__ __volatile__(".word %2"
+        asm volatile(".word %2"
                              : "=&r" (ptr)
                              : "0" (ptr),
                                "i" (vis_opc_base | vis_opf(0x19) |
@@ -326,3 +328,5 @@ static inline void vis_alignaddrl_g0(void *_ptr)
 /* Pixel component distance.  */
 
 #define vis_pdist(rs1,rs2,rd)           vis_dd2d(0x3e, rs1, rs2, rd)
+
+#endif /* FFMPEG_VIS_H */

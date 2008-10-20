@@ -26,24 +26,26 @@
  ******************************************************************************
  * Author: Gustavo Sverzut Barbieri <gsbarbieri@yahoo.com.br>
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #define MAXSIZE_TEXT 1024
 
-#include "framehook.h"
+#include "libavformat/framehook.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,11 +61,15 @@
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#define RGB_TO_YUV(rgb_color, yuv_color) { \
-    yuv_color[0] = ( 0.257 * rgb_color[0]) + (0.504 * rgb_color[1]) + (0.098 * rgb_color[2]) +  16; \
-    yuv_color[2] = ( 0.439 * rgb_color[0]) - (0.368 * rgb_color[1]) - (0.071 * rgb_color[2]) + 128; \
-    yuv_color[1] = (-0.148 * rgb_color[0]) - (0.291 * rgb_color[1]) + (0.439 * rgb_color[2]) + 128; \
-}
+#define SCALEBITS 10
+#define ONE_HALF  (1 << (SCALEBITS - 1))
+#define FIX(x)    ((int) ((x) * (1<<SCALEBITS) + 0.5))
+
+#define RGB_TO_YUV(rgb_color, yuv_color) do { \
+  yuv_color[0] = (FIX(0.29900)    * rgb_color[0] + FIX(0.58700) * rgb_color[1] + FIX(0.11400) * rgb_color[2] + ONE_HALF) >> SCALEBITS; \
+  yuv_color[2] = ((FIX(0.50000)   * rgb_color[0] - FIX(0.41869) * rgb_color[1] - FIX(0.08131) * rgb_color[2] + ONE_HALF - 1) >> SCALEBITS) + 128; \
+  yuv_color[1] = ((- FIX(0.16874) * rgb_color[0] - FIX(0.33126) * rgb_color[1] + FIX(0.50000) * rgb_color[2] + ONE_HALF - 1) >> SCALEBITS) + 128; \
+} while (0)
 
 #define COPY_3(dst,src) { \
     dst[0]=src[0]; \
@@ -88,7 +94,7 @@
 
 typedef struct {
   unsigned char *text;
-  unsigned char *file;
+  char *file;
   unsigned int x;
   unsigned int y;
   int bg;
@@ -166,7 +172,7 @@ int Configure(void **ctxp, int argc, char *argv[])
     ci->outline = 0;
     ci->text_height = 0;
 
-    optind = 0;
+    optind = 1;
     while ((c = getopt(argc, argv, "f:t:T:x:y:s:c:C:bo")) > 0) {
       switch (c) {
       case 'f':
@@ -190,14 +196,14 @@ int Configure(void **ctxp, int argc, char *argv[])
       case 'c':
         if (ParseColor(optarg, ci->fgcolor) == -1)
           {
-            fprintf(stderr, "ERROR: Invalid foreground color: '%s'. You must specify the color in the internet way(packaged hex): #RRGGBB, ie: -c #ffffff (for white foreground)\n",optarg);
+            av_log(NULL, AV_LOG_ERROR, "Invalid foreground color: '%s'. You must specify the color in the internet way(packaged hex): #RRGGBB, ie: -c #ffffff (for white foreground)\n", optarg);
             return -1;
           }
         break;
       case 'C':
         if (ParseColor(optarg, ci->bgcolor) == -1)
           {
-            fprintf(stderr, "ERROR: Invalid foreground color: '%s'. You must specify the color in the internet way(packaged hex): #RRGGBB, ie: -c #ffffff (for white foreground)\n",optarg);
+            av_log(NULL, AV_LOG_ERROR, "Invalid background color: '%s'. You must specify the color in the internet way(packaged hex): #RRGGBB, ie: -C #ffffff (for white background)\n", optarg);
             return -1;
           }
         break;
@@ -208,14 +214,14 @@ int Configure(void **ctxp, int argc, char *argv[])
         ci->outline=1;
         break;
       case '?':
-        fprintf(stderr, "ERROR: Unrecognized argument '%s'\n", argv[optind]);
+        av_log(NULL, AV_LOG_ERROR, "Unrecognized argument '%s'\n", argv[optind]);
         return -1;
       }
     }
 
     if (!ci->text)
       {
-        fprintf(stderr,"ERROR: No text provided (-t text)\n");
+        av_log(NULL, AV_LOG_ERROR, "No text provided (-t text)\n");
         return -1;
       }
 
@@ -224,7 +230,7 @@ int Configure(void **ctxp, int argc, char *argv[])
         FILE *fp;
         if ((fp=fopen(ci->file, "r")) == NULL)
           {
-            perror("WARNING: the file could not be opened. Using text provided with -t switch. ");
+            av_log(NULL, AV_LOG_INFO, "WARNING: The file could not be opened. Using text provided with -t switch: %s", strerror(errno));
           }
         else
           {
@@ -234,25 +240,25 @@ int Configure(void **ctxp, int argc, char *argv[])
 
     if (!font)
       {
-        fprintf(stderr,"ERROR: No font file provided! (-f filename)\n");
+        av_log(NULL, AV_LOG_ERROR, "No font file provided! (-f filename)\n");
         return -1;
       }
 
     if ((error = FT_Init_FreeType(&(ci->library))) != 0)
       {
-        fprintf(stderr,"ERROR: Could not load FreeType (error# %d)\n",error);
+        av_log(NULL, AV_LOG_ERROR, "Could not load FreeType (error# %d).\n", error);
         return -1;
       }
 
     if ((error = FT_New_Face( ci->library, font, 0, &(ci->face) )) != 0)
       {
-        fprintf(stderr,"ERROR: Could not load face: %s  (error# %d)\n",font, error);
+        av_log(NULL, AV_LOG_ERROR, "Could not load face: %s  (error# %d).\n", font, error);
         return -1;
       }
 
     if ((error = FT_Set_Pixel_Sizes( ci->face, 0, size)) != 0)
       {
-        fprintf(stderr,"ERROR: Could not set font size to %d pixels (error# %d)\n",size, error);
+        av_log(NULL, AV_LOG_ERROR, "Could not set font size to %d pixels (error# %d).\n", size, error);
         return -1;
       }
 
@@ -400,7 +406,7 @@ void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width,
       if (fd < 0)
         {
           text = ci->text;
-          perror("WARNING: the file could not be opened. Using text provided with -t switch. ");
+          av_log(NULL, AV_LOG_INFO, "WARNING: The file could not be opened. Using text provided with -t switch: %s", strerror(errno));
         }
       else
         {
@@ -414,7 +420,7 @@ void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width,
           else
             {
               text = ci->text;
-              perror("WARNING: the file could not be opened. Using text provided with -t switch. ");
+              av_log(NULL, AV_LOG_INFO, "WARNING: The file could not be read. Using text provided with -t switch: %s", strerror(errno));
             }
           close(fd);
         }
@@ -500,7 +506,7 @@ void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width,
       if (
           ( (c == '_') && (text == ci->text) ) || /* skip '_' (consider as space)
                                                      IF text was specified in cmd line
-                                                     (which doesn't like neasted quotes)  */
+                                                     (which doesn't like nested quotes)  */
           ( c == '\n' ) /* Skip new line char, just go to new line */
           )
         continue;

@@ -4,100 +4,32 @@
 #
 #
 #set -x
-# Even in the 21st century some diffs are not supporting -u.
-diff -u "$0" "$0" > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  diff_cmd="diff -u"
-else
-  diff_cmd="diff"
-fi
-
-diff -w "$0" "$0" > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  diff_cmd="$diff_cmd -w"
-fi
 
 set -e
 
-datadir="./data"
+datadir="./tests/data"
 
-logfile="$datadir/ffmpeg.regression"
-outfile="$datadir/a-"
+test="${1#regtest-}"
+this="$test.$2"
+logfile="$datadir/$this.regression"
+outfile="$datadir/$4-"
 
-# tests to do
-if [ "$1" = "mpeg4" ] ; then
-    do_mpeg4=y
-elif [ "$1" = "mpeg" ] ; then
-    do_mpeg=y
-    do_mpeg2=y
-elif [ "$1" = "ac3" ] ; then
-    do_ac3=y
-elif [ "$1" = "huffyuv" ] ; then
-    do_huffyuv=y
-elif [ "$1" = "mpeg2thread" ] ; then
-    do_mpeg2thread=y
-elif [ "$1" = "snow" ] ; then
-    do_snow=y
-elif [ "$1" = "snowll" ] ; then
-    do_snowll=y
-elif [ "$1" = "libavtest" ] ; then
-    do_libav=y
-    logfile="$datadir/libav.regression"
-    outfile="$datadir/b-"
-else
-    do_mpeg=y
-    do_mpeg2=y
-    do_mpeg2thread=y
-    do_msmpeg4v2=y
-    do_msmpeg4=y
-    do_wmv1=y
-    do_wmv2=y
-    do_h261=y
-    do_h263=y
-    do_h263p=y
-    do_mpeg4=y
-    do_mp4psp=y
-    do_huffyuv=y
-    do_mjpeg=y
-    do_ljpeg=y
-    do_jpegls=y
-    do_rv10=y
-    do_rv20=y
-    do_mp2=y
-    do_ac3=y
-    do_g726=y
-    do_adpcm_ima_wav=y
-    do_adpcm_ms=y
-    do_rc=y
-    do_mpeg4adv=y
-    do_mpeg4thread=y
-    do_mpeg4nr=y
-    do_mpeg1b=y
-    do_asv1=y
-    do_asv2=y
-    do_flv=y
-    do_ffv1=y
-    do_error=y
-    do_svq1=y
-    do_snow=y
-    do_snowll=y
-    do_adpcm_yam=y
-    do_dv=y
-    do_dv50=y
-fi
-
+eval do_$test=y
 
 # various files
-ffmpeg="../ffmpeg_g"
-tiny_psnr="./tiny_psnr"
-reffile="$2"
-benchfile="$datadir/ffmpeg.bench"
+ffmpeg="./ffmpeg_g"
+tiny_psnr="tests/tiny_psnr"
+benchfile="$datadir/$this.bench"
+bench="$datadir/$this.bench.tmp"
+bench2="$datadir/$this.bench2.tmp"
 raw_src="$3/%02d.pgm"
-raw_dst="$datadir/out.yuv"
-raw_ref="$datadir/ref.yuv"
-pcm_src="asynth1.sw"
-pcm_dst="$datadir/out.wav"
-pcm_ref="$datadir/ref.wav"
+raw_dst="$datadir/$this.out.yuv"
+raw_ref="$datadir/$2.ref.yuv"
+pcm_src="tests/asynth1.sw"
+pcm_dst="$datadir/$this.out.wav"
+pcm_ref="$datadir/$2.ref.wav"
+crcfile="$datadir/$this.crc"
+
 if [ X"`echo | md5sum 2> /dev/null`" != X ]; then
     do_md5sum() { md5sum -b $1; }
 elif [ -x /sbin/md5 ]; then
@@ -106,15 +38,17 @@ else
     do_md5sum() { echo No md5sum program found; }
 fi
 
-# create the data directory if it does not exists
+# create the data directory if it does not exist
 mkdir -p $datadir
+
+FFMPEG_OPTS="-y -flags +bitexact -dct fastint -idct simple"
 
 do_ffmpeg()
 {
     f="$1"
     shift
-    echo $ffmpeg -y -flags +bitexact -dct fastint -idct simple $*
-    $ffmpeg -y -flags +bitexact -dct fastint -idct simple -benchmark $* > $datadir/bench.tmp 2> /tmp/ffmpeg$$
+    echo $ffmpeg $FFMPEG_OPTS $*
+    $ffmpeg $FFMPEG_OPTS -benchmark $* > $bench 2> /tmp/ffmpeg$$
     egrep -v "^(Stream|Press|Input|Output|frame|  Stream|  Duration|video:)" /tmp/ffmpeg$$ || true
     rm -f /tmp/ffmpeg$$
     do_md5sum $f >> $logfile
@@ -125,647 +59,542 @@ do_ffmpeg()
     else
         wc -c $f >> $logfile
     fi
-    expr "`cat $datadir/bench.tmp`" : '.*utime=\(.*s\)' > $datadir/bench2.tmp
-    echo `cat $datadir/bench2.tmp` $f >> $benchfile
+    expr "`cat $bench`" : '.*utime=\(.*s\)' > $bench2
+    echo `cat $bench2` $f >> $benchfile
+}
+
+do_ffmpeg_nomd5()
+{
+    f="$1"
+    shift
+    echo $ffmpeg $FFMPEG_OPTS $*
+    $ffmpeg $FFMPEG_OPTS -benchmark $* > $bench 2> /tmp/ffmpeg$$
+    egrep -v "^(Stream|Press|Input|Output|frame|  Stream|  Duration|video:)" /tmp/ffmpeg$$ || true
+    rm -f /tmp/ffmpeg$$
+    if [ $f = $raw_dst ] ; then
+        $tiny_psnr $f $raw_ref >> $logfile
+    elif [ $f = $pcm_dst ] ; then
+        $tiny_psnr $f $pcm_ref 2 >> $logfile
+    else
+        wc -c $f >> $logfile
+    fi
+    expr "`cat $bench`" : '.*utime=\(.*s\)' > $bench2
+    echo `cat $bench2` $f >> $benchfile
 }
 
 do_ffmpeg_crc()
 {
     f="$1"
     shift
-    echo $ffmpeg -y -flags +bitexact -dct fastint -idct simple $* -f crc $datadir/ffmpeg.crc
-    $ffmpeg -y -flags +bitexact -dct fastint -idct simple $* -f crc $datadir/ffmpeg.crc > /tmp/ffmpeg$$ 2>&1
+    echo $ffmpeg $FFMPEG_OPTS $* -f crc "$crcfile"
+    $ffmpeg $FFMPEG_OPTS $* -f crc "$crcfile" > /tmp/ffmpeg$$ 2>&1
     egrep -v "^(Stream|Press|Input|Output|frame|  Stream|  Duration|video:|ffmpeg version|  configuration|  built)" /tmp/ffmpeg$$ || true
     rm -f /tmp/ffmpeg$$
-    echo "$f `cat $datadir/ffmpeg.crc`" >> $logfile
+    echo "$f `cat $crcfile`" >> $logfile
+    rm -f "$crcfile"
 }
 
 do_ffmpeg_nocheck()
 {
     f="$1"
     shift
-    echo $ffmpeg -y -flags +bitexact -dct fastint -idct simple $*
-    $ffmpeg -y -flags +bitexact -dct fastint -idct simple -benchmark $* > $datadir/bench.tmp 2> /tmp/ffmpeg$$
+    echo $ffmpeg $FFMPEG_OPTS $*
+    $ffmpeg $FFMPEG_OPTS -benchmark $* > $bench 2> /tmp/ffmpeg$$
     egrep -v "^(Stream|Press|Input|Output|frame|  Stream|  Duration|video:)" /tmp/ffmpeg$$ || true
     rm -f /tmp/ffmpeg$$
-    expr "`cat $datadir/bench.tmp`" : '.*utime=\(.*s\)' > $datadir/bench2.tmp
-    echo `cat $datadir/bench2.tmp` $f >> $benchfile
+    expr "`cat $bench`" : '.*utime=\(.*s\)' > $bench2
+    echo `cat $bench2` $f >> $benchfile
 }
 
-echo "ffmpeg regression test" > $logfile
-echo "ffmpeg benchmarks" > $benchfile
+do_video_decoding()
+{
+    do_ffmpeg $raw_dst $1 -i $file -f rawvideo $2 $raw_dst
+    rm -f $raw_dst
+}
 
-###################################
+do_video_encoding()
+{
+    file=${outfile}$1
+    do_ffmpeg $file $2 -f image2 -vcodec pgmyuv -i $raw_src $3 $file
+}
+
+do_audio_encoding()
+{
+    file=${outfile}$1
+    do_ffmpeg $file -ab 128k -ac 2 -f s16le -i $pcm_src $3 $file
+}
+
+do_audio_decoding()
+{
+    do_ffmpeg $pcm_dst -i $file -f wav $pcm_dst
+}
+
+do_libav()
+{
+    file=${outfile}libav.$1
+    do_ffmpeg $file -t 1 -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src -f s16le -i $pcm_src $2 $file
+    do_ffmpeg_crc $file -i $file $3
+}
+
+do_streamed_images()
+{
+    file=${outfile}${1}pipe.$1
+    do_ffmpeg $file -t 1 -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src -f image2pipe $file
+    do_ffmpeg_crc $file -f image2pipe -i $file
+}
+
+do_image_formats()
+{
+    file=${outfile}libav%02d.$1
+    $ffmpeg -t 0.5 -y -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src $2 $3 -flags +bitexact $file
+    do_md5sum ${outfile}libav02.$1 >> $logfile
+    do_ffmpeg_crc $file $3 -i $file
+    wc -c ${outfile}libav02.$1 >> $logfile
+}
+
+do_audio_only()
+{
+    file=${outfile}libav.$1
+    do_ffmpeg $file -t 1 -qscale 10 -f s16le -i $pcm_src $file
+    do_ffmpeg_crc $file -i $file
+}
+
+rm -f "$logfile"
+rm -f "$benchfile"
+
 # generate reference for quality check
-do_ffmpeg_nocheck $raw_ref -y -f pgmyuv -i $raw_src -an -f rawvideo $raw_ref
-do_ffmpeg_nocheck $pcm_ref -y -ab 128 -ac 2 -ar 44100 -f s16le -i $pcm_src -f wav $pcm_ref
-
-###################################
-if [ -n "$do_mpeg" ] ; then
-# mpeg1 encoding
-file=${outfile}mpeg1.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -f mpeg1video $file
-
-# mpeg1 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+if [ -n "$do_ref" ]; then
+do_ffmpeg_nocheck $raw_ref -f image2 -vcodec pgmyuv -i $raw_src -an -f rawvideo $raw_ref
+do_ffmpeg_nocheck $pcm_ref -ab 128k -ac 2 -ar 44100 -f s16le -i $pcm_src -f wav $pcm_ref
 fi
 
-###################################
+if [ -n "$do_mpeg" ] ; then
+# mpeg1
+do_video_encoding mpeg1.mpg "-qscale 10" "-f mpeg1video"
+do_video_decoding
+fi
+
 if [ -n "$do_mpeg2" ] ; then
-# mpeg2 encoding
-file=${outfile}mpeg2.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec mpeg2video -f mpeg1video $file
+# mpeg2
+do_video_encoding mpeg2.mpg "-qscale 10" "-vcodec mpeg2video -f mpeg1video"
+do_video_decoding
 
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+# mpeg2 encoding intra vlc qprd
+do_video_encoding mpeg2ivlc-qprd.mpg "-vb 500k -bf 2 -flags +trell+qprd+mv0 -flags2 +ivlc -cmp 2 -subcmp 2 -mbd rd" "-vcodec mpeg2video -f mpeg2video"
+do_video_decoding
 
-# mpeg2 encoding using intra vlc
-file=${outfile}mpeg2ivlc.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec mpeg2video -f mpeg1video -flags2 +ivlc $file
-
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
-
-# mpeg2 encoding
-file=${outfile}mpeg2.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec mpeg2video -idct int -dct int -f mpeg1video $file
-
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -idct int -i $file -f rawvideo $raw_dst
+# mpeg2
+do_video_encoding mpeg2.mpg "-qscale 10" "-vcodec mpeg2video -idct int -dct int -f mpeg1video"
+do_video_decoding "-idct int"
 
 # mpeg2 encoding interlaced
-file=${outfile}mpeg2i.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec mpeg2video -f mpeg1video -flags +ildct+ilme $file
-
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg2i.mpg "-qscale 10" "-vcodec mpeg2video -f mpeg1video -flags +ildct+ilme"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mpeg2thread" ] ; then
 # mpeg2 encoding interlaced
-file=${outfile}mpeg2thread.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec mpeg2video -f mpeg1video -bf 2 -flags +ildct+ilme -threads 2 $file
-
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg2thread.mpg "-qscale 10" "-vcodec mpeg2video -f mpeg1video -bf 2 -flags +ildct+ilme -threads 2"
+do_video_decoding
 
 # mpeg2 encoding interlaced using intra vlc
-file=${outfile}mpeg2threadivlc.mpg
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec mpeg2video -f mpeg1video -bf 2 -flags +ildct+ilme -flags2 +ivlc -threads 2 $file
-
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg2threadivlc.mpg "-qscale 10" "-vcodec mpeg2video -f mpeg1video -bf 2 -flags +ildct+ilme -flags2 +ivlc -threads 2"
+do_video_decoding
 
 # mpeg2 encoding interlaced
 file=${outfile}mpeg2reuse.mpg
-do_ffmpeg $file -y -sameq -me_threshold 256 -mb_threshold 1024 -i ${outfile}mpeg2thread.mpg -vcodec mpeg2video -f mpeg1video -bf 2 -flags +ildct+ilme -threads 4 $file
-
-# mpeg2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_ffmpeg $file -sameq -me_threshold 256 -mb_threshold 1024 -i ${outfile}mpeg2thread.mpg -vcodec mpeg2video -f mpeg1video -bf 2 -flags +ildct+ilme -threads 4 $file
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_msmpeg4v2" ] ; then
-# msmpeg4 encoding
-file=${outfile}msmpeg4v2.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec msmpeg4v2 $file
-
-# msmpeg4v2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding msmpeg4v2.avi "-qscale 10" "-an -vcodec msmpeg4v2"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_msmpeg4" ] ; then
-# msmpeg4 encoding
-file=${outfile}msmpeg4.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec msmpeg4 $file
-
-# msmpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding msmpeg4.avi "-qscale 10" "-an -vcodec msmpeg4"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_wmv1" ] ; then
-# wmv1 encoding
-file=${outfile}wmv1.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec wmv1 $file
-
-# wmv1 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding wmv1.avi "-qscale 10" "-an -vcodec wmv1"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_wmv2" ] ; then
-# wmv2 encoding
-file=${outfile}wmv2.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec wmv2 $file
-
-# wmv2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding wmv2.avi "-qscale 10" "-an -vcodec wmv2"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_h261" ] ; then
-# h261 encoding
-file=${outfile}h261.avi
-do_ffmpeg $file -y -qscale 11 -f pgmyuv -i $raw_src -s 352x288 -an -vcodec h261 $file
-
-# h261 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding h261.avi "-qscale 11" "-s 352x288 -an -vcodec h261"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_h263" ] ; then
-# h263 encoding
-file=${outfile}h263.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -s 352x288 -an -vcodec h263 $file
-
-# h263 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding h263.avi "-qscale 10" "-s 352x288 -an -vcodec h263"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_h263p" ] ; then
-# h263p encoding
-file=${outfile}h263p.avi
-do_ffmpeg $file -y -qscale 2 -flags +umv+aiv+aic -f pgmyuv -i $raw_src -s 352x288 -an -vcodec h263p -ps 300 $file
-
-# h263p decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding h263p.avi "-qscale 2 -flags +umv+aiv+aic" "-s 352x288 -an -vcodec h263p -ps 300"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mpeg4" ] ; then
-# mpeg4
-file=${outfile}odivx.mp4
-do_ffmpeg $file -y -flags +mv4 -mbd bits -qscale 10 -f pgmyuv -i $raw_src -an -vcodec mpeg4 $file
-
-# mpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding odivx.mp4 "-flags +mv4 -mbd bits -qscale 10" "-an -vcodec mpeg4"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_huffyuv" ] ; then
-# huffyuv
-file=${outfile}huffyuv.avi
-do_ffmpeg $file -y -f pgmyuv -i $raw_src -an -vcodec huffyuv -pix_fmt yuv422p $file
-
-# huffyuv decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -strict -2 -pix_fmt yuv420p $raw_dst
+do_video_encoding huffyuv.avi "" "-an -vcodec huffyuv -pix_fmt yuv422p"
+do_video_decoding "" "-strict -2 -pix_fmt yuv420p"
 fi
 
-###################################
 if [ -n "$do_rc" ] ; then
-# mpeg4 rate control
-file=${outfile}mpeg4-rc.avi
-do_ffmpeg $file -y -b 400 -bf 2 -f pgmyuv -i $raw_src -an -vcodec mpeg4 $file
-
-# mpeg4 rate control decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg4-rc.avi "-b 400k -bf 2" "-an -vcodec mpeg4"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mpeg4adv" ] ; then
-# mpeg4
-file=${outfile}mpeg4-adv.avi
-do_ffmpeg $file -y -qscale 9 -flags +mv4+part+aic+trell -mbd bits -ps 200 -f pgmyuv -i $raw_src -an -vcodec mpeg4 $file
+do_video_encoding mpeg4-adv.avi "-qscale 9 -flags +mv4+part+aic+trell -mbd bits -ps 200" "-an -vcodec mpeg4"
+do_video_decoding
 
-# mpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg4-qprd.avi "-b 450k -bf 2 -flags +mv4+trell+qprd+mv0 -cmp 2 -subcmp 2 -mbd rd" "-an -vcodec mpeg4"
+do_video_decoding
+
+do_video_encoding mpeg4-adap.avi "-b 550k -bf 2 -flags +mv4+trell+mv0 -cmp 1 -subcmp 2 -mbd rd -scplx_mask 0.3" "-an -vcodec mpeg4"
+do_video_decoding
+
+do_video_encoding mpeg4-Q.avi "-qscale 7 -flags +mv4+qpel -mbd 2 -bf 2 -cmp 1 -subcmp 2" "-an -vcodec mpeg4"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mpeg4thread" ] ; then
-# mpeg4
-file=${outfile}mpeg4-thread.avi
-do_ffmpeg $file -y -b 500 -flags +mv4+part+aic+trell -mbd bits  -ps 200 -bf 2 -f pgmyuv -i $raw_src -an -vcodec mpeg4 -threads 2 $file
-
-# mpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg4-thread.avi "-b 500k -flags +mv4+part+aic+trell -mbd bits -ps 200 -bf 2" "-an -vcodec mpeg4 -threads 2"
+do_video_decoding
 fi
 
-###################################
-if [ -n "$do_mpeg4adv" ] ; then
-# mpeg4
-file=${outfile}mpeg4-Q.avi
-do_ffmpeg $file -y -qscale 7 -flags +mv4+qpel -mbd 2 -bf 2 -cmp 1 -subcmp 2 -f pgmyuv -i $raw_src -an -vcodec mpeg4 $file
-
-# mpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
-fi
-
-###################################
-if [ -n "$do_mp4psp" ] ; then
-# mp4 PSP style
-file=${outfile}mpeg4-PSP.mp4
-do_ffmpeg $file -y -b 768 -s 320x240 -f psp -ar 24000 -ab 32 -i $raw_src $file
-fi
-
-###################################
 if [ -n "$do_error" ] ; then
-# damaged mpeg4
-file=${outfile}error-mpeg4-adv.avi
-do_ffmpeg $file -y -qscale 7 -flags +mv4+part+aic -mbd rd -ps 250 -error 10 -f pgmyuv -i $raw_src -an -vcodec mpeg4 $file
-
-# damaged mpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding error-mpeg4-adv.avi "-qscale 7 -flags +mv4+part+aic -mbd rd -ps 250 -error 10" "-an -vcodec mpeg4"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mpeg4nr" ] ; then
-# noise reduction
-file=${outfile}mpeg4-nr.avi
-do_ffmpeg $file -y -qscale 8 -flags +mv4 -mbd rd -nr 200 -f pgmyuv -i $raw_src -an -vcodec mpeg4 $file
-
-# mpeg4 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg4-nr.avi "-qscale 8 -flags +mv4 -mbd rd -nr 200" "-an -vcodec mpeg4"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mpeg1b" ] ; then
-# mpeg1
-file=${outfile}mpeg1b.mpg
-do_ffmpeg $file -y -qscale 8 -bf 3 -ps 200 -f pgmyuv -i $raw_src -an -vcodec mpeg1video -f mpeg1video $file
-
-# mpeg1 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding mpeg1b.mpg "-qscale 8 -bf 3 -ps 200" "-an -vcodec mpeg1video -f mpeg1video"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_mjpeg" ] ; then
-# mjpeg
-file=${outfile}mjpeg.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec mjpeg -pix_fmt yuvj420p $file
-
-# mjpeg decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -pix_fmt yuv420p $raw_dst
+do_video_encoding mjpeg.avi "-qscale 10" "-an -vcodec mjpeg -pix_fmt yuvj420p"
+do_video_decoding "" "-pix_fmt yuv420p"
 fi
 
-###################################
 if [ -n "$do_ljpeg" ] ; then
-# ljpeg
-file=${outfile}ljpeg.avi
-do_ffmpeg $file -y -f pgmyuv -i $raw_src -an -vcodec ljpeg -strict -1 $file
-
-# ljpeg decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding ljpeg.avi "" "-an -vcodec ljpeg -strict -1"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_jpegls" ] ; then
-# jpeg ls
-file=${outfile}jpegls.avi
-do_ffmpeg $file -y -f pgmyuv -i $raw_src -an -vcodec jpegls -vtag MJPG $file
-
-# jpeg ls decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -pix_fmt yuv420p $raw_dst
+do_video_encoding jpegls.avi "" "-an -vcodec jpegls -vtag MJPG"
+do_video_decoding "" "-pix_fmt yuv420p"
 fi
 
-###################################
 if [ -n "$do_rv10" ] ; then
-# rv10 encoding
-file=${outfile}rv10.rm
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an $file
-
-# rv10 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding rv10.rm "-qscale 10" "-an"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_rv20" ] ; then
-# rv20 encoding
-file=${outfile}rv20.rm
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -vcodec rv20 -an $file
-
-# rv20 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding rv20.rm "-qscale 10" "-vcodec rv20 -an"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_asv1" ] ; then
-# asv1 encoding
-file=${outfile}asv1.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec asv1 $file
-
-# asv1 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding asv1.avi "-qscale 10" "-an -vcodec asv1"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_asv2" ] ; then
-# asv2 encoding
-file=${outfile}asv2.avi
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec asv2 $file
-
-# asv2 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding asv2.avi "-qscale 10" "-an -vcodec asv2"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_flv" ] ; then
-# flv encoding
-file=${outfile}flv.flv
-do_ffmpeg $file -y -qscale 10 -f pgmyuv -i $raw_src -an -vcodec flv $file
-
-# flv decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding flv.flv "-qscale 10" "-an -vcodec flv"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_ffv1" ] ; then
-# ffv1 encoding
-file=${outfile}ffv1.avi
-do_ffmpeg $file -y -strict -2 -f pgmyuv -i $raw_src -an -vcodec ffv1 $file
-
-# ffv1 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding ffv1.avi "-strict -2" "-an -vcodec ffv1"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_snow" ] ; then
-# snow encoding
-file=${outfile}snow.avi
-do_ffmpeg $file -y -strict -2 -f pgmyuv -i $raw_src -an -vcodec snow -qscale 2 -flags +qpel -me iter -dia_size 2 -cmp 12 -subcmp 12 -s 128x64 $file
-
-# snow decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -s 352x288 $raw_dst
+do_video_encoding snow.avi "-strict -2" "-an -vcodec snow -qscale 2 -flags +qpel -me iter -dia_size 2 -cmp 12 -subcmp 12 -s 128x64"
+do_video_decoding "" "-s 352x288"
 fi
 
-###################################
 if [ -n "$do_snowll" ] ; then
-# snow encoding
-file=${outfile}snow53.avi
-do_ffmpeg $file -y -strict -2 -f pgmyuv -i $raw_src -an -vcodec snow -qscale .001 -pred 1 -flags +mv4+qpel $file
-
-# snow decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo $raw_dst
+do_video_encoding snow53.avi "-strict -2" "-an -vcodec snow -qscale .001 -pred 1 -flags +mv4+qpel"
+do_video_decoding
 fi
 
-###################################
 if [ -n "$do_dv" ] ; then
-# dv encoding
-file=${outfile}dv.dv
-do_ffmpeg $file -dct int -y -f pgmyuv -i $raw_src -s pal -an $file
-
-# dv decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -s cif $raw_dst
+do_video_encoding dv.dv "-dct int" "-s pal -an"
+do_video_decoding "" "-s cif"
 fi
 
-###################################
 if [ -n "$do_dv50" ] ; then
-# dv50 encoding
-file=${outfile}dv.dv
-do_ffmpeg $file -dct int -y -f pgmyuv -i $raw_src -s pal -pix_fmt yuv422p -an $file
-
-# dv50 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -s cif -pix_fmt yuv420p $raw_dst
+do_video_encoding dv50.dv "-dct int" "-s pal -pix_fmt yuv422p -an"
+do_video_decoding "" "-s cif -pix_fmt yuv420p"
 fi
 
-
-###################################
 if [ -n "$do_svq1" ] ; then
-# svq1 encoding
-file=${outfile}svq1.mov
-do_ffmpeg $file -y -f pgmyuv -i $raw_src -an -vcodec svq1 -qscale 3 -pix_fmt yuv410p $file
-
-# svq1 decoding
-do_ffmpeg $raw_dst -y -i $file -f rawvideo -pix_fmt yuv420p $raw_dst
+do_video_encoding svq1.mov "" "-an -vcodec svq1 -qscale 3 -pix_fmt yuv410p"
+do_video_decoding "" "-pix_fmt yuv420p"
 fi
 
-###################################
-if [ -n "$do_mp2" ] ; then
-# mp2 encoding
-file=${outfile}mp2.mp2
-do_ffmpeg $file -y -ab 128 -ac 2 -ar 44100 -f s16le -i $pcm_src $file
+if [ -n "$do_flashsv" ] ; then
+do_video_encoding flashsv.flv "" "-an -vcodec flashsv "
+do_video_decoding "" "-pix_fmt yuv420p"
+fi
 
-# mp2 decoding
-do_ffmpeg $pcm_dst -y -i $file -f wav $pcm_dst
+if [ -n "$do_mp2" ] ; then
+do_audio_encoding mp2.mp2 "-ar 44100"
+do_audio_decoding
 $tiny_psnr $pcm_dst $pcm_ref 2 1924 >> $logfile
 fi
 
-###################################
 if [ -n "$do_ac3" ] ; then
-# ac3 encoding
-file=${outfile}ac3.rm
-do_ffmpeg $file -y -ab 128 -ac 2 -f s16le  -i $pcm_src -vn $file
-
-# ac3 decoding
-#do_ffmpeg $pcm_dst -y -i $file -f wav $pcm_dst
+do_audio_encoding ac3.rm "" -vn
+#do_audio_decoding
 fi
 
-###################################
 if [ -n "$do_g726" ] ; then
-# g726 encoding
-file=${outfile}g726.wav
-do_ffmpeg $file -y -ab 128 -ac 2 -ar 44100 -f s16le -i $pcm_src -ab 32 -ac 1 -ar 8000 -acodec g726 $file
-
-# g726 decoding
-do_ffmpeg $pcm_dst -y -i $file -f wav $pcm_dst
+do_audio_encoding g726.wav "-ar 44100" "-ab 32k -ac 1 -ar 8000 -acodec g726"
+do_audio_decoding
 fi
 
-###################################
 if [ -n "$do_adpcm_ima_wav" ] ; then
-# encoding
-file=${outfile}adpcm_ima.wav
-do_ffmpeg $file -y -ab 128 -ac 2 -ar 44100 -f s16le -i $pcm_src -acodec adpcm_ima_wav $file
-
-# decoding
-do_ffmpeg $pcm_dst -y -i $file -f wav $pcm_dst
+do_audio_encoding adpcm_ima.wav "-ar 44100" "-acodec adpcm_ima_wav"
+do_audio_decoding
 fi
 
-###################################
+if [ -n "$do_adpcm_ima_qt" ] ; then
+do_audio_encoding adpcm_qt.aiff "-ar 44100" "-acodec adpcm_ima_qt"
+do_audio_decoding
+fi
+
 if [ -n "$do_adpcm_ms" ] ; then
-# encoding
-file=${outfile}adpcm_ms.wav
-do_ffmpeg $file -y -ab 128 -ac 2 -ar 44100 -f s16le -i $pcm_src -acodec adpcm_ms $file
-
-# decoding
-do_ffmpeg $pcm_dst -y -i $file -f wav $pcm_dst
+do_audio_encoding adpcm_ms.wav "-ar 44100" "-acodec adpcm_ms"
+do_audio_decoding
 fi
 
-###################################
 if [ -n "$do_adpcm_yam" ] ; then
-# encoding
-file=${outfile}adpcm_yam.wav
-do_ffmpeg $file -y -ab 128 -ac 2 -ar 44100 -f s16le -i $pcm_src -acodec adpcm_yamaha $file
-
-# decoding
-do_ffmpeg $pcm_dst -y -i $file -f wav $pcm_dst
+do_audio_encoding adpcm_yam.wav "-ar 44100" "-acodec adpcm_yamaha"
+do_audio_decoding
 fi
 
-###################################
-# libav testing
-###################################
+if [ -n "$do_adpcm_swf" ] ; then
+do_audio_encoding adpcm_swf.flv "-ar 44100" "-acodec adpcm_swf"
+do_audio_decoding
+fi
 
-if [ -n "$do_libav" ] ; then
+if [ -n "$do_flac" ] ; then
+do_audio_encoding flac.flac "-ar 44100" "-acodec flac -compression_level 2"
+do_audio_decoding
+fi
 
-# avi
-file=${outfile}libav.avi
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_wma" ] ; then
+# wmav1
+do_audio_encoding wmav1.asf "-ar 44100" "-acodec wmav1"
+do_ffmpeg_nomd5 $pcm_dst -i $file -f wav $pcm_dst
+$tiny_psnr $pcm_dst $pcm_ref 2 8192 >> $logfile
+# wmav2
+do_audio_encoding wmav2.asf "-ar 44100" "-acodec wmav2"
+do_ffmpeg_nomd5 $pcm_dst -i $file -f wav $pcm_dst
+$tiny_psnr $pcm_dst $pcm_ref 2 8192 >> $logfile
+fi
 
-# asf
-file=${outfile}libav.asf
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src -acodec mp2 $file
-do_ffmpeg_crc $file -i $file -r 25
+#if [ -n "$do_vorbis" ] ; then
+# vorbis
+#disabled because it is broken
+#do_audio_encoding vorbis.asf "-ar 44100" "-acodec vorbis"
+#do_audio_decoding
+#fi
 
-# rm
+# libavformat testing
+
+if [ -n "$do_avi" ] ; then
+do_libav avi
+fi
+
+if [ -n "$do_asf" ] ; then
+do_libav asf "-acodec mp2" "-r 25"
+fi
+
+if [ -n "$do_rm" ] ; then
 file=${outfile}libav.rm
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src $file
+do_ffmpeg $file -t 1 -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src -f s16le -i $pcm_src $file
 # broken
 #do_ffmpeg_crc $file -i $file
+fi
 
-# mpegps
-file=${outfile}libav.mpg
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_mpg" ] ; then
+do_libav mpg
+fi
 
-# mpegts
-file=${outfile}libav.ts
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_ts" ] ; then
+do_libav ts
+fi
 
-# swf (decode audio only)
-file=${outfile}libav.swf
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src -acodec mp2 $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_swf" ] ; then
+do_libav swf -an
+fi
 
-# ffm
-file=${outfile}libav.ffm
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_ffm" ] ; then
+do_libav ffm
+fi
 
-# flv
-file=${outfile}libav.flv
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src -an $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_flv_fmt" ] ; then
+do_libav flv -an
+fi
 
-# mov
-file=${outfile}libav.mov
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src -acodec pcm_alaw $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_mov" ] ; then
+do_libav mov "-acodec pcm_alaw"
+fi
 
-# nut
-file=${outfile}libav.nut
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src -acodec mp2 $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_dv_fmt" ] ; then
+do_libav dv "-ar 48000 -r 25 -s pal -ac 2"
+fi
 
-# dv
-file=${outfile}libav.dv
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f s16le -i $pcm_src -ar 48000 -r 25 -s pal -ac 2 $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_gxf" ] ; then
+do_libav gxf "-ar 48000 -r 25 -s pal -ac 1"
+fi
 
-####################
+if [ -n "$do_nut" ] ; then
+do_libav nut "-acodec mp2"
+fi
+
+if [ -n "$do_mkv" ] ; then
+do_libav mkv
+fi
+
+
 # streamed images
 # mjpeg
 #file=${outfile}libav.mjpeg
-#do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src $file
+#do_ffmpeg $file -t 1 -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src $file
 #do_ffmpeg_crc $file -i $file
 
-# pbmpipe
-file=${outfile}libav.pbm
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f image2pipe $file
-do_ffmpeg_crc $file -f image2pipe -i $file
+if [ -n "$do_pbmpipe" ] ; then
+do_streamed_images pbm
+fi
 
-# pgmpipe
-file=${outfile}libav.pgm
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f image2pipe $file
-do_ffmpeg_crc $file -f image2pipe -i $file
+if [ -n "$do_pgmpipe" ] ; then
+do_streamed_images pgm
+fi
 
-# ppmpipe
-file=${outfile}libav.ppm
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src -f image2pipe $file
-do_ffmpeg_crc $file -f image2pipe -i $file
+if [ -n "$do_ppmpipe" ] ; then
+do_streamed_images ppm
+fi
 
-# gif
+if [ -n "$do_gif" ] ; then
 file=${outfile}libav.gif
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src $file
+do_ffmpeg $file -t 1 -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src -pix_fmt rgb24 $file
 #do_ffmpeg_crc $file -i $file
+fi
 
-# yuv4mpeg
+if [ -n "$do_yuv4mpeg" ] ; then
 file=${outfile}libav.y4m
-do_ffmpeg $file -t 1 -y -qscale 10 -f pgmyuv -i $raw_src $file
+do_ffmpeg $file -t 1 -qscale 10 -f image2 -vcodec pgmyuv -i $raw_src $file
 #do_ffmpeg_crc $file -i $file
+fi
 
-####################
 # image formats
-# pgm (we do not do md5 on image files yet)
-file=${outfile}libav%02d.pgm
-$ffmpeg -t 0.5 -y -qscale 10 -f pgmyuv -i $raw_src $file
-do_ffmpeg_crc $file -i $file
 
-# ppm (we do not do md5 on image files yet)
-file=${outfile}libav%02d.ppm
-$ffmpeg -t 0.5 -y -qscale 10 -f pgmyuv -i $raw_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_pgm" ] ; then
+do_image_formats pgm
+fi
 
-# jpeg (we do not do md5 on image files yet)
-file=${outfile}libav%02d.jpg
-$ffmpeg -t 0.5 -y -qscale 10 -f pgmyuv -i $raw_src -flags +bitexact -dct fastint -idct simple -pix_fmt yuvj420p -f image2 $file
-do_ffmpeg_crc $file -f image2 -i $file
+if [ -n "$do_ppm" ] ; then
+do_image_formats ppm
+fi
 
-####################
+if [ -n "$do_bmp" ] ; then
+do_image_formats bmp
+fi
+
+if [ -n "$do_tga" ] ; then
+do_image_formats tga
+fi
+
+if [ -n "$do_tiff" ] ; then
+do_image_formats tiff "-pix_fmt rgb24"
+fi
+
+if [ -n "$do_sgi" ] ; then
+do_image_formats sgi
+fi
+
+if [ -n "$do_jpg" ] ; then
+do_image_formats jpg "-flags +bitexact -dct fastint -idct simple -pix_fmt yuvj420p" "-f image2"
+fi
+
 # audio only
 
-# wav
-file=${outfile}libav.wav
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_wav" ] ; then
+do_audio_only wav
+fi
 
-# alaw
-file=${outfile}libav.al
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_alaw" ] ; then
+do_audio_only al
+fi
 
-# mulaw
-file=${outfile}libav.ul
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_mulaw" ] ; then
+do_audio_only ul
+fi
 
-# au
-file=${outfile}libav.au
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_au" ] ; then
+do_audio_only au
+fi
 
-# mmf
-file=${outfile}libav.mmf
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_mmf" ] ; then
+do_audio_only mmf
+fi
 
-# aiff
-file=${outfile}libav.aif
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_aiff" ] ; then
+do_audio_only aif
+fi
 
-# voc
-file=${outfile}libav.voc
-do_ffmpeg $file -t 1 -y -qscale 10 -f s16le -i $pcm_src $file
-do_ffmpeg_crc $file -i $file
+if [ -n "$do_voc" ] ; then
+do_audio_only voc
+fi
 
-####################
+if [ -n "$do_ogg" ] ; then
+do_audio_only ogg
+fi
+
 # pix_fmt conversions
-conversions="yuv420p yuv422p yuv444p yuv422 yuv410p yuv411p yuvj420p \
-             yuvj422p yuvj444p rgb24 bgr24 rgba32 rgb565 rgb555 gray monow \
-             monob pal8"
+
+if [ -n "$do_pixfmt" ] ; then
+conversions="yuv420p yuv422p yuv444p yuyv422 yuv410p yuv411p yuvj420p \
+             yuvj422p yuvj444p rgb24 bgr24 rgb32 rgb565 rgb555 gray monow \
+             monob pal8 yuv440p yuvj440p"
 for pix_fmt in $conversions ; do
     file=${outfile}libav-${pix_fmt}.yuv
-    do_ffmpeg_nocheck $file -r 1 -t 1 -y -f pgmyuv -i $raw_src \
+    do_ffmpeg_nocheck $file -r 1 -t 1 -f image2 -vcodec pgmyuv -i $raw_src \
                             -f rawvideo -s 352x288 -pix_fmt $pix_fmt $raw_dst
     do_ffmpeg $file -f rawvideo -s 352x288 -pix_fmt $pix_fmt -i $raw_dst \
                     -f rawvideo -s 352x288 -pix_fmt yuv444p $file
 done
-
 fi
 
-
-
-if $diff_cmd "$logfile" "$reffile" ; then
-    echo
-    echo Regression test succeeded.
-    exit 0
-else
-    echo
-    echo Regression test: Error.
-    exit 1
-fi
+rm -f "$bench" "$bench2"

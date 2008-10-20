@@ -2,20 +2,21 @@
  * Quicktime Planar RGB (8BPS) Video Decoder
  * Copyright (C) 2003 Roberto Togni
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -25,19 +26,18 @@
  *   http://www.pcisys.net/~melanson/codecs/
  *
  * Supports: PAL8 (RGB 8bpp, paletted)
- *         : BGR24 (RGB 24bpp) (can also output it as RGBA32)
- *         : RGBA32 (RGB 32bpp, 4th plane is probably alpha and it's ignored)
+ *         : BGR24 (RGB 24bpp) (can also output it as RGB32)
+ *         : RGB32 (RGB 32bpp, 4th plane is probably alpha and it's ignored)
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include "avcodec.h"
 
 
-const enum PixelFormat pixfmt_rgb24[] = {PIX_FMT_BGR24, PIX_FMT_RGBA32, -1};
+static const enum PixelFormat pixfmt_rgb24[] = {PIX_FMT_BGR24, PIX_FMT_RGB32, PIX_FMT_NONE};
 
 /*
  * Decoder context
@@ -57,14 +57,14 @@ typedef struct EightBpsContext {
  * Decode a frame
  *
  */
-static int decode_frame(AVCodecContext *avctx, void *data, int *data_size, uint8_t *buf, int buf_size)
+static int decode_frame(AVCodecContext *avctx, void *data, int *data_size, const uint8_t *buf, int buf_size)
 {
-        EightBpsContext * const c = (EightBpsContext *)avctx->priv_data;
-        unsigned char *encoded = (unsigned char *)buf;
+        EightBpsContext * const c = avctx->priv_data;
+        const unsigned char *encoded = buf;
         unsigned char *pixptr, *pixptr_end;
         unsigned int height = avctx->height; // Real image height
         unsigned int dlen, p, row;
-        unsigned char *lp, *dp;
+        const unsigned char *lp, *dp;
         unsigned char count;
         unsigned int px_inc;
         unsigned int planes = c->planes;
@@ -87,7 +87,7 @@ static int decode_frame(AVCodecContext *avctx, void *data, int *data_size, uint8
         if (planes == 4)
                 planes--;
 
-        px_inc = planes + (avctx->pix_fmt == PIX_FMT_RGBA32);
+        px_inc = planes + (avctx->pix_fmt == PIX_FMT_RGB32);
 
         for (p = 0; p < planes; p++) {
                 /* Lines length pointer for this plane */
@@ -97,7 +97,7 @@ static int decode_frame(AVCodecContext *avctx, void *data, int *data_size, uint8
                 for(row = 0; row < height; row++) {
                         pixptr = c->pic.data[0] + row * c->pic.linesize[0] + planemap[p];
                         pixptr_end = pixptr + c->pic.linesize[0];
-                        dlen = be2me_16(*(unsigned short *)(lp+row*2));
+                        dlen = be2me_16(*(const unsigned short *)(lp+row*2));
                         /* Decode a row of this plane */
                         while(dlen > 0) {
                                 if(dp + 1 >= buf+buf_size) return -1;
@@ -148,12 +148,11 @@ static int decode_frame(AVCodecContext *avctx, void *data, int *data_size, uint8
  * Init 8BPS decoder
  *
  */
-static int decode_init(AVCodecContext *avctx)
+static av_cold int decode_init(AVCodecContext *avctx)
 {
-        EightBpsContext * const c = (EightBpsContext *)avctx->priv_data;
+        EightBpsContext * const c = avctx->priv_data;
 
         c->avctx = avctx;
-        avctx->has_b_frames = 0;
 
         c->pic.data[0] = NULL;
 
@@ -179,7 +178,7 @@ static int decode_init(AVCodecContext *avctx)
                         c->planemap[2] = 0; // 3rd plane is blue
                         break;
                 case 32:
-                        avctx->pix_fmt = PIX_FMT_RGBA32;
+                        avctx->pix_fmt = PIX_FMT_RGB32;
                         c->planes = 4;
 #ifdef WORDS_BIGENDIAN
                         c->planemap[0] = 1; // 1st plane is red
@@ -209,9 +208,9 @@ static int decode_init(AVCodecContext *avctx)
  * Uninit 8BPS decoder
  *
  */
-static int decode_end(AVCodecContext *avctx)
+static av_cold int decode_end(AVCodecContext *avctx)
 {
-        EightBpsContext * const c = (EightBpsContext *)avctx->priv_data;
+        EightBpsContext * const c = avctx->priv_data;
 
         if (c->pic.data[0])
                 avctx->release_buffer(avctx, &c->pic);
@@ -231,4 +230,5 @@ AVCodec eightbps_decoder = {
         decode_end,
         decode_frame,
         CODEC_CAP_DR1,
+        .long_name = "QuickTime 8BPS video",
 };

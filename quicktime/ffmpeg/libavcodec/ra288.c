@@ -2,18 +2,20 @@
  * RealAudio 2.0 (28.8K)
  * Copyright (c) 2003 the ffmpeg project
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -47,7 +49,7 @@ static void colmult(float *tgt, float *m1, const float *m2, int n);
 
 
 /* initial decode */
-static void unpack(unsigned short *tgt, unsigned char *src, unsigned int len)
+static void unpack(unsigned short *tgt, const unsigned char *src, unsigned int len)
 {
   int x,y,z;
   int n,temp;
@@ -206,7 +208,7 @@ static void prodsum(float *tgt, float *src, int len, int n)
   }
 }
 
-static void * decode_block(AVCodecContext * avctx, unsigned char *in, signed short int *out,unsigned len)
+static void * decode_block(AVCodecContext * avctx, const unsigned char *in, signed short int *out,unsigned len)
 {
   int x,y;
   Real288_internal *glob=avctx->priv_data;
@@ -226,7 +228,7 @@ static void * decode_block(AVCodecContext * avctx, unsigned char *in, signed sho
 /* Decode a block (celp) */
 static int ra288_decode_frame(AVCodecContext * avctx,
             void *data, int *data_size,
-            uint8_t * buf, int buf_size)
+            const uint8_t * buf, int buf_size)
 {
     void *datao;
 
@@ -253,4 +255,5 @@ AVCodec ra_288_decoder =
     NULL,
     NULL,
     ra288_decode_frame,
+    .long_name = "RealAudio 2.0 (28.8K)",
 };

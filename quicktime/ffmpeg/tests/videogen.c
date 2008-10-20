@@ -1,14 +1,33 @@
 /*
  * Generates a synthetic YUV video sequence suitable for codec testing.
- * NOTE: no floats are used to guaranty a bit exact output.
+ * NOTE: No floats are used to guarantee a bit exact output.
+ *
+ * Copyright (c) 2002 Fabrice Bellard
+ *
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * FFmpeg is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #define SCALEBITS 8
 #define ONE_HALF  (1 << (SCALEBITS - 1))
 #define FIX(x)    ((int) ((x) * (1L<<SCALEBITS) + 0.5))
-typedef unsigned char uint8_t;
 
 static void rgb24_to_yuv420p(uint8_t *lum, uint8_t *cb, uint8_t *cr,
                               uint8_t *src, int width, int height)

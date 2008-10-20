@@ -28,16 +28,21 @@
 #include <math.h>
 
 #ifndef M_PI
-#define M_PI 3.1415926535897931
+#define M_PI 3.14159265358979323846
 #endif
 
-#include "avformat.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h"
+
+#undef exit
 
 /* 5 seconds stream duration */
 #define STREAM_DURATION   5.0
 #define STREAM_FRAME_RATE 25 /* 25 images/s */
 #define STREAM_NB_FRAMES  ((int)(STREAM_DURATION * STREAM_FRAME_RATE))
 #define STREAM_PIX_FMT PIX_FMT_YUV420P /* default pix_fmt */
+
+static int sws_flags = SWS_BICUBIC;
 
 /**************************************************************/
 /* audio output */
@@ -100,7 +105,7 @@ static void open_audio(AVFormatContext *oc, AVStream *st)
     tincr2 = 2 * M_PI * 110.0 / c->sample_rate / c->sample_rate;
 
     audio_outbuf_size = 10000;
-    audio_outbuf = malloc(audio_outbuf_size);
+    audio_outbuf = av_malloc(audio_outbuf_size);
 
     /* ugly hack for PCM codecs (will be removed ASAP with new PCM
        support to compute the input frame size in samples */
@@ -119,7 +124,7 @@ static void open_audio(AVFormatContext *oc, AVStream *st)
     } else {
         audio_input_frame_size = c->frame_size;
     }
-    samples = malloc(audio_input_frame_size * 2 * c->channels);
+    samples = av_malloc(audio_input_frame_size * 2 * c->channels);
 }
 
 /* prepare a 16 bit dummy audio frame of 'frame_size' samples and
@@ -212,12 +217,12 @@ static AVStream *add_video_stream(AVFormatContext *oc, int codec_id)
         c->max_b_frames = 2;
     }
     if (c->codec_id == CODEC_ID_MPEG1VIDEO){
-        /* needed to avoid using macroblocks in which some coeffs overflow
-           this doesnt happen with normal video, it just happens here as the
-           motion of the chroma plane doesnt match the luma plane */
+        /* Needed to avoid using macroblocks in which some coeffs overflow.
+           This does not happen with normal video, it just happens here as
+           the motion of the chroma plane does not match the luma plane. */
         c->mb_decision=2;
     }
-    // some formats want stream headers to be seperate
+    // some formats want stream headers to be separate
     if(!strcmp(oc->oformat->name, "mp4") || !strcmp(oc->oformat->name, "mov") || !strcmp(oc->oformat->name, "3gp"))
         c->flags |= CODEC_FLAG_GLOBAL_HEADER;
 
@@ -234,7 +239,7 @@ static AVFrame *alloc_picture(int pix_fmt, int width, int height)
     if (!picture)
         return NULL;
     size = avpicture_get_size(pix_fmt, width, height);
-    picture_buf = malloc(size);
+    picture_buf = av_malloc(size);
     if (!picture_buf) {
         av_free(picture);
         return NULL;
@@ -268,8 +273,12 @@ static void open_video(AVFormatContext *oc, AVStream *st)
     if (!(oc->oformat->flags & AVFMT_RAWPICTURE)) {
         /* allocate output buffer */
         /* XXX: API change will be done */
+        /* buffers passed into lav* can be allocated any way you prefer,
+           as long as they're aligned enough for the architecture, and
+           they're freed appropriately (such as using av_free for buffers
+           allocated with av_malloc) */
         video_outbuf_size = 200000;
-        video_outbuf = malloc(video_outbuf_size);
+        video_outbuf = av_malloc(video_outbuf_size);
     }
 
     /* allocate the encoded raw picture */
@@ -319,6 +328,7 @@ static void write_video_frame(AVFormatContext *oc, AVStream *st)
 {
     int out_size, ret;
     AVCodecContext *c;
+    static struct SwsContext *img_convert_ctx;
 
     c = st->codec;
 
@@ -330,10 +340,20 @@ static void write_video_frame(AVFormatContext *oc, AVStream *st)
         if (c->pix_fmt != PIX_FMT_YUV420P) {
             /* as we only generate a YUV420P picture, we must convert it
                to the codec pixel format if needed */
+            if (img_convert_ctx == NULL) {
+                img_convert_ctx = sws_getContext(c->width, c->height,
+                                                 PIX_FMT_YUV420P,
+                                                 c->width, c->height,
+                                                 c->pix_fmt,
+                                                 sws_flags, NULL, NULL, NULL);
+                if (img_convert_ctx == NULL) {
+                    fprintf(stderr, "Cannot initialize the conversion context\n");
+                    exit(1);
+                }
+            }
             fill_yuv_image(tmp_picture, frame_count, c->width, c->height);
-            img_convert((AVPicture *)picture, c->pix_fmt,
-                        (AVPicture *)tmp_picture, PIX_FMT_YUV420P,
-                        c->width, c->height);
+            sws_scale(img_convert_ctx, tmp_picture->data, tmp_picture->linesize,
+                      0, c->height, picture->data, picture->linesize);
         } else {
             fill_yuv_image(picture, frame_count, c->width, c->height);
         }
@@ -518,7 +538,7 @@ int main(int argc, char **argv)
 
     if (!(fmt->flags & AVFMT_NOFILE)) {
         /* close the output file */
-        url_fclose(&oc->pb);
+        url_fclose(oc->pb);
     }
 
     /* free the stream */

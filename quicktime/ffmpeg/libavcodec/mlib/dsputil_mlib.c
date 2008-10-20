@@ -2,23 +2,25 @@
  * Sun mediaLib optimized DSP utils
  * Copyright (c) 2001 Fabrice Bellard.
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "../dsputil.h"
-#include "../mpegvideo.h"
+#include "libavcodec/dsputil.h"
+#include "libavcodec/mpegvideo.h"
 
 #include <mlib_types.h>
 #include <mlib_status.h>
@@ -372,7 +374,7 @@ static void avg_pixels8_xy2_mlib(uint8_t * dest, const uint8_t * ref,
 
 /* swap byte order of a buffer */
 
-static void bswap_buf_mlib(uint32_t *dst, uint32_t *src, int w)
+static void bswap_buf_mlib(uint32_t *dst, const uint32_t *src, int w)
 {
   mlib_VectorReverseByteOrder_U32_U32(dst, src, w);
 }
@@ -382,7 +384,7 @@ static void bswap_buf_mlib(uint32_t *dst, uint32_t *src, int w)
 static void ff_idct_put_mlib(uint8_t *dest, int line_size, DCTELEM *data)
 {
     int i;
-    uint8_t *cm = cropTbl + MAX_NEG_CROP;
+    uint8_t *cm = ff_cropTbl + MAX_NEG_CROP;
 
     mlib_VideoIDCT8x8_S16_S16 (data, data);
 
@@ -453,7 +455,7 @@ void MPV_common_init_mlib(MpegEncContext *s)
         s->dsp.fdct = ff_fdct_mlib;
     }
 
-    if(s->avctx->idct_algo==FF_IDCT_AUTO || s->avctx->idct_algo==FF_IDCT_MLIB){
+    if(s->avctx->idct_algo==FF_IDCT_MLIB){
         s->dsp.idct_put= ff_idct_put_mlib;
         s->dsp.idct_add= ff_idct_add_mlib;
         s->dsp.idct    = ff_idct_mlib;

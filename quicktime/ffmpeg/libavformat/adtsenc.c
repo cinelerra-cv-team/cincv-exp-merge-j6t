@@ -1,24 +1,27 @@
 /*
  * ADTS muxer.
  * Copyright (c) 2006 Baptiste Coudurier <baptiste.coudurier@smartjog.com>
- *                    Mans Rullgard <mru@inprovide.com>
+ *                    Mans Rullgard <mans@mansr.com>
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+#include "libavcodec/bitstream.h"
 #include "avformat.h"
-#include "bitstream.h"
 
 #define ADTS_HEADER_SIZE 7
 
@@ -82,20 +85,15 @@ static int adts_write_frame_header(AVFormatContext *s, int size)
     put_bits(&pb, 2, 0);        /* number_of_raw_data_blocks_in_frame */
 
     flush_put_bits(&pb);
-    put_buffer(&s->pb, buf, ADTS_HEADER_SIZE);
+    put_buffer(s->pb, buf, ADTS_HEADER_SIZE);
 
-    return 0;
-}
-
-static int adts_write_trailer(AVFormatContext *s)
-{
     return 0;
 }
 
 static int adts_write_packet(AVFormatContext *s, AVPacket *pkt)
 {
     ADTSContext *adts = s->priv_data;
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
 
     if (!pkt->size)
         return 0;
@@ -107,7 +105,7 @@ static int adts_write_packet(AVFormatContext *s, AVPacket *pkt)
     return 0;
 }
 
-static AVOutputFormat adts_oformat = {
+AVOutputFormat adts_muxer = {
     "adts",
     "ADTS AAC",
     "audio/aac",
@@ -117,11 +115,4 @@ static AVOutputFormat adts_oformat = {
     CODEC_ID_NONE,
     adts_write_header,
     adts_write_packet,
-    adts_write_trailer,
 };
-
-int ff_adts_init(void)
-{
-    av_register_output_format(&adts_oformat);
-    return 0;
-}

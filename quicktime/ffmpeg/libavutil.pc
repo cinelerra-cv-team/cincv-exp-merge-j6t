@@ -1,12 +1,14 @@
 prefix=/usr/local
 exec_prefix=${prefix}
-libdir=${exec_prefix}/lib
-includedir=${prefix}/include
+libdir=$(PREFIX)/lib
+includedir=$(PREFIX)/include
 
 Name: libavutil
 Description: FFmpeg utility library
-Version: 49.0.0
-Requires:
+Version: 49.6.0
+Requires: 
+Requires.private: 
 Conflicts:
-Libs: -L${libdir} -lavutil
-Cflags: -I${includedir} -I${includedir}/ffmpeg
+Libs: -L${libdir} -lavutil 
+Libs.private: 
+Cflags: -I${includedir}

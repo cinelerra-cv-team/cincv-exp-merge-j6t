@@ -2,26 +2,52 @@
  * Unbuffered io for ffmpeg system
  * Copyright (c) 2001 Fabrice Bellard
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
+#include "libavutil/avstring.h"
+#include "libavcodec/opt.h"
 #include "avformat.h"
+
+#if LIBAVFORMAT_VERSION_MAJOR >= 53
+/** @name Logging context. */
+/*@{*/
+static const char *urlcontext_to_name(void *ptr)
+{
+    URLContext *h = (URLContext *)ptr;
+    if(h->prot) return h->prot->name;
+    else        return "NULL";
+}
+static const AVOption options[] = {{NULL}};
+static const AVClass urlcontext_class =
+        { "URLContext", urlcontext_to_name, options };
+/*@}*/
+#endif
 
 static int default_interrupt_cb(void);
 
 URLProtocol *first_protocol = NULL;
 URLInterruptCB *url_interrupt_cb = default_interrupt_cb;
+
+URLProtocol *av_protocol_next(URLProtocol *p)
+{
+    if(p) return p->next;
+    else  return first_protocol;
+}
 
 int register_protocol(URLProtocol *protocol)
 {
@@ -65,14 +91,18 @@ int url_open(URLContext **puc, const char *filename, int flags)
             goto found;
         up = up->next;
     }
-    err = -ENOENT;
+    err = AVERROR(ENOENT);
     goto fail;
  found:
-    uc = av_malloc(sizeof(URLContext) + strlen(filename));
+    uc = av_malloc(sizeof(URLContext) + strlen(filename) + 1);
     if (!uc) {
-        err = -ENOMEM;
+        err = AVERROR(ENOMEM);
         goto fail;
     }
+#if LIBAVFORMAT_VERSION_MAJOR >= 53
+    uc->av_class = &urlcontext_class;
+#endif
+    uc->filename = (char *) &uc[1];
     strcpy(uc->filename, filename);
     uc->prot = up;
     uc->flags = flags;
@@ -84,6 +114,12 @@ int url_open(URLContext **puc, const char *filename, int flags)
         *puc = NULL;
         return err;
     }
+
+    //We must be carefull here as url_seek() could be slow, for example for http
+    if(   (flags & (URL_WRONLY | URL_RDWR))
+       || !strcmp(proto_str, "file"))
+        if(!uc->is_streamed && url_seek(uc, 0, SEEK_SET) < 0)
+            uc->is_streamed= 1;
     *puc = uc;
     return 0;
  fail:
@@ -95,40 +131,40 @@ int url_read(URLContext *h, unsigned char *buf, int size)
 {
     int ret;
     if (h->flags & URL_WRONLY)
-        return AVERROR_IO;
+        return AVERROR(EIO);
     ret = h->prot->url_read(h, buf, size);
     return ret;
 }
 
-#if defined(CONFIG_MUXERS) || defined(CONFIG_PROTOCOLS)
 int url_write(URLContext *h, unsigned char *buf, int size)
 {
     int ret;
     if (!(h->flags & (URL_WRONLY | URL_RDWR)))
-        return AVERROR_IO;
+        return AVERROR(EIO);
     /* avoid sending too big packets */
     if (h->max_packet_size && size > h->max_packet_size)
-        return AVERROR_IO;
+        return AVERROR(EIO);
     ret = h->prot->url_write(h, buf, size);
     return ret;
 }
-#endif //CONFIG_MUXERS || CONFIG_PROTOCOLS
 
 offset_t url_seek(URLContext *h, offset_t pos, int whence)
 {
     offset_t ret;
 
     if (!h->prot->url_seek)
-        return -EPIPE;
+        return AVERROR(EPIPE);
     ret = h->prot->url_seek(h, pos, whence);
     return ret;
 }
 
 int url_close(URLContext *h)
 {
-    int ret;
+    int ret = 0;
+    if (!h) return 0; /* can happen when url_open fails */
 
-    ret = h->prot->url_close(h);
+    if (h->prot->url_close)
+        ret = h->prot->url_close(h);
     av_free(h);
     return ret;
 }
@@ -146,20 +182,17 @@ offset_t url_filesize(URLContext *h)
 {
     offset_t pos, size;
 
-    pos = url_seek(h, 0, SEEK_CUR);
-    size = url_seek(h, -1, SEEK_END)+1;
-    url_seek(h, pos, SEEK_SET);
+    size= url_seek(h, 0, AVSEEK_SIZE);
+    if(size<0){
+        pos = url_seek(h, 0, SEEK_CUR);
+        if ((size = url_seek(h, -1, SEEK_END)) < 0)
+            return size;
+        size++;
+        url_seek(h, pos, SEEK_SET);
+    }
     return size;
 }
 
-/*
- * Return the maximum packet size associated to packetized file
- * handle. If the file is not packetized (stream like http or file on
- * disk), then 0 is returned.
- *
- * @param h file handle
- * @return maximum packet size in bytes
- */
 int url_get_max_packet_size(URLContext *h)
 {
     return h->max_packet_size;
@@ -167,7 +200,7 @@ int url_get_max_packet_size(URLContext *h)
 
 void url_get_filename(URLContext *h, char *buf, int buf_size)
 {
-    pstrcpy(buf, buf_size, h->filename);
+    av_strlcpy(buf, h->filename, buf_size);
 }
 
 
@@ -176,15 +209,24 @@ static int default_interrupt_cb(void)
     return 0;
 }
 
-/**
- * The callback is called in blocking functions to test regulary if
- * asynchronous interruption is needed. -EINTR is returned in this
- * case by the interrupted function. 'NULL' means no interrupt
- * callback is given.
- */
 void url_set_interrupt_cb(URLInterruptCB *interrupt_cb)
 {
     if (!interrupt_cb)
         interrupt_cb = default_interrupt_cb;
     url_interrupt_cb = interrupt_cb;
+}
+
+int av_url_read_pause(URLContext *h, int pause)
+{
+    if (!h->prot->url_read_pause)
+        return AVERROR(ENOSYS);
+    return h->prot->url_read_pause(h, pause);
+}
+
+offset_t av_url_read_seek(URLContext *h,
+        int stream_index, int64_t timestamp, int flags)
+{
+    if (!h->prot->url_read_seek)
+        return AVERROR(ENOSYS);
+    return h->prot->url_read_seek(h, stream_index, timestamp, flags);
 }

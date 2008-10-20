@@ -2,20 +2,21 @@
  * Miro VideoXL codec
  * Copyright (c) 2004 Konstantin Shishkov
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -24,14 +25,13 @@
  */
 
 #include "avcodec.h"
-#include "mpegvideo.h"
 
 typedef struct VideoXLContext{
     AVCodecContext *avctx;
     AVFrame pic;
 } VideoXLContext;
 
-const int xl_table[32] = {
+static const int xl_table[32] = {
    0,   1,   2,   3,   4,   5,   6,   7,
    8,   9,  12,  15,  20,  25,  34,  46,
   64,  82,  94, 103, 108, 113, 116, 119,
@@ -39,7 +39,7 @@ const int xl_table[32] = {
 
 static int decode_frame(AVCodecContext *avctx,
                         void *data, int *data_size,
-                        uint8_t *buf, int buf_size)
+                        const uint8_t *buf, int buf_size)
 {
     VideoXLContext * const a = avctx->priv_data;
     AVFrame * const p= (AVFrame*)&a->pic;
@@ -57,7 +57,7 @@ static int decode_frame(AVCodecContext *avctx,
         av_log(avctx, AV_LOG_ERROR, "get_buffer() failed\n");
         return -1;
     }
-    p->pict_type= I_TYPE;
+    p->pict_type= FF_I_TYPE;
     p->key_frame= 1;
 
     Y = a->pic.data[0];
@@ -71,7 +71,7 @@ static int decode_frame(AVCodecContext *avctx,
 
         for (j = 0; j < avctx->width; j += 4) {
             /* value is stored in LE dword with word swapped */
-            val = LE_32(buf);
+            val = AV_RL32(buf);
             buf -= 4;
             val = ((val >> 16) & 0xFFFF) | ((val & 0xFFFF) << 16);
 
@@ -117,7 +117,7 @@ static int decode_frame(AVCodecContext *avctx,
     return buf_size;
 }
 
-static int decode_init(AVCodecContext *avctx){
+static av_cold int decode_init(AVCodecContext *avctx){
 //    VideoXLContext * const a = avctx->priv_data;
 
     avctx->pix_fmt= PIX_FMT_YUV411P;
@@ -135,4 +135,5 @@ AVCodec xl_decoder = {
     NULL,
     decode_frame,
     CODEC_CAP_DR1,
+    .long_name = "Miro VideoXL",
 };

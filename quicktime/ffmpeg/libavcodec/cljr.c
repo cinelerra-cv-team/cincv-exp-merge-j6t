@@ -2,20 +2,21 @@
  * Cirrus Logic AccuPak (CLJR) codec
  * Copyright (c) 2003 Alex Beregszaszi
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -24,7 +25,8 @@
  */
 
 #include "avcodec.h"
-#include "mpegvideo.h"
+#include "dsputil.h"
+#include "bitstream.h"
 
 typedef struct CLJRContext{
     AVCodecContext *avctx;
@@ -36,7 +38,7 @@ typedef struct CLJRContext{
 
 static int decode_frame(AVCodecContext *avctx,
                         void *data, int *data_size,
-                        uint8_t *buf, int buf_size)
+                        const uint8_t *buf, int buf_size)
 {
     CLJRContext * const a = avctx->priv_data;
     AVFrame *picture = data;
@@ -51,7 +53,7 @@ static int decode_frame(AVCodecContext *avctx,
         av_log(avctx, AV_LOG_ERROR, "get_buffer() failed\n");
         return -1;
     }
-    p->pict_type= I_TYPE;
+    p->pict_type= FF_I_TYPE;
     p->key_frame= 1;
 
     init_get_bits(&a->gb, buf, buf_size);
@@ -88,7 +90,7 @@ static int encode_frame(AVCodecContext *avctx, unsigned char *buf, int buf_size,
     int mb_x, mb_y;
 
     *p = *pict;
-    p->pict_type= I_TYPE;
+    p->pict_type= FF_I_TYPE;
     p->key_frame= 1;
 
     emms_c();
@@ -103,14 +105,14 @@ static int encode_frame(AVCodecContext *avctx, unsigned char *buf, int buf_size,
 }
 #endif
 
-static void common_init(AVCodecContext *avctx){
+static av_cold void common_init(AVCodecContext *avctx){
     CLJRContext * const a = avctx->priv_data;
 
     avctx->coded_frame= (AVFrame*)&a->picture;
     a->avctx= avctx;
 }
 
-static int decode_init(AVCodecContext *avctx){
+static av_cold int decode_init(AVCodecContext *avctx){
 
     common_init(avctx);
 
@@ -120,7 +122,7 @@ static int decode_init(AVCodecContext *avctx){
 }
 
 #if 0
-static int encode_init(AVCodecContext *avctx){
+static av_cold int encode_init(AVCodecContext *avctx){
 
     common_init(avctx);
 
@@ -138,6 +140,7 @@ AVCodec cljr_decoder = {
     NULL,
     decode_frame,
     CODEC_CAP_DR1,
+    .long_name = "Cirrus Logic AccuPak",
 };
 #if 0
 #ifdef CONFIG_ENCODERS
@@ -150,6 +153,7 @@ AVCodec cljr_encoder = {
     encode_init,
     encode_frame,
     //encode_end,
+    .long_name = "Cirrus Logic AccuPak",
 };
 
 #endif //CONFIG_ENCODERS

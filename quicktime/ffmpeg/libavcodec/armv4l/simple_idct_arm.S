@@ -1,26 +1,27 @@
 /*
  * simple_idct_arm.S
  * Copyright (C) 2002 Frederic 'dilb' Boulay.
- * All Rights Reserved.
  *
  * Author: Frederic Boulay <dilb@handhelds.org>
  *
- * You can redistribute this file and/or modify
- * it under the terms of the GNU General Public License (version 2)
- * as published by the Free Software Foundation.
+ * The function defined in this file is derived from the simple_idct function
+ * from the libavcodec library part of the FFmpeg project.
  *
- * This file is distributed in the hope that it will be useful,
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this library; if not, write to the Free Software
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- *
- * The function defined in this file, is derived from the simple_idct function
- * from the libavcodec library part of the ffmpeg project.
  */
 
 /* useful constants for the algorithm, they are save in __constant_ptr__ at */
@@ -78,7 +79,7 @@ simple_idct_ARM:
 
 
 __row_loop:
-        @@ read the row and check if it is null, almost null, or not, according to strongarm specs, it is not necessary to optimise ldr accesses (i.e. split 32bits in 2 16bits words), at least it gives more usable registers :)
+        @@ read the row and check if it is null, almost null, or not, according to strongarm specs, it is not necessary to optimize ldr accesses (i.e. split 32bits in 2 16bits words), at least it gives more usable registers :)
         ldr r1, [r14, #0]        @ R1=(int32)(R12)[0]=ROWr32[0] (relative row cast to a 32b pointer)
         ldr r2, [r14, #4]        @ R2=(int32)(R12)[1]=ROWr32[1]
         ldr r3, [r14, #8]        @ R3=ROWr32[2]
@@ -420,7 +421,7 @@ __end_a_evaluation2:
         @@ col[40] = ((a2 - b2) >> COL_SHIFT);
         @@ col[48] = ((a1 - b1) >> COL_SHIFT);
         @@ col[56] = ((a0 - b0) >> COL_SHIFT);
-        @@@@@ no optimisation here @@@@@
+        @@@@@ no optimization here @@@@@
         add r8, r6, r0           @ R8=a0+b0
         add r9, r2, r1           @ R9=a1+b1
         mov r8, r8, asr #COL_SHIFT

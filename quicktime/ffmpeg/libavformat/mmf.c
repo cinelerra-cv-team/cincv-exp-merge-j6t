@@ -2,22 +2,25 @@
  * Yamaha SMAF format
  * Copyright (c) 2005 Vidar Madsen
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avformat.h"
-#include "avi.h"
+#include "raw.h"
+#include "riff.h"
 
 typedef struct {
     offset_t atrpos, atsqpos, awapos;
@@ -57,7 +60,7 @@ static void end_tag_be(ByteIOContext *pb, offset_t start)
 static int mmf_write_header(AVFormatContext *s)
 {
     MMFContext *mmf = s->priv_data;
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
     offset_t pos;
     int rate;
 
@@ -105,7 +108,7 @@ static int mmf_write_header(AVFormatContext *s)
 
 static int mmf_write_packet(AVFormatContext *s, AVPacket *pkt)
 {
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
     put_buffer(pb, pkt->data, pkt->size);
     return 0;
 }
@@ -124,12 +127,12 @@ static void put_varlength(ByteIOContext *pb, int val)
 
 static int mmf_write_trailer(AVFormatContext *s)
 {
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
     MMFContext *mmf = s->priv_data;
     offset_t pos, size;
     int gatetime;
 
-    if (!url_is_streamed(&s->pb)) {
+    if (!url_is_streamed(s->pb)) {
         /* Fill in length fields */
         end_tag_be(pb, mmf->awapos);
         end_tag_be(pb, mmf->atrpos);
@@ -165,8 +168,6 @@ static int mmf_write_trailer(AVFormatContext *s)
 static int mmf_probe(AVProbeData *p)
 {
     /* check file header */
-    if (p->buf_size <= 32)
-        return 0;
     if (p->buf[0] == 'M' && p->buf[1] == 'M' &&
         p->buf[2] == 'M' && p->buf[3] == 'D' &&
         p->buf[8] == 'C' && p->buf[9] == 'N' &&
@@ -182,7 +183,7 @@ static int mmf_read_header(AVFormatContext *s,
 {
     MMFContext *mmf = s->priv_data;
     unsigned int tag;
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
     AVStream *st;
     offset_t file_size, size;
     int rate, params;
@@ -241,7 +242,7 @@ static int mmf_read_header(AVFormatContext *s,
 
     st = av_new_stream(s, 0);
     if (!st)
-        return AVERROR_NOMEM;
+        return AVERROR(ENOMEM);
 
     st->codec->codec_type = CODEC_TYPE_AUDIO;
     st->codec->codec_id = CODEC_ID_ADPCM_YAMAHA;
@@ -264,8 +265,8 @@ static int mmf_read_packet(AVFormatContext *s,
     AVStream *st;
     int ret, size;
 
-    if (url_feof(&s->pb))
-        return AVERROR_IO;
+    if (url_feof(s->pb))
+        return AVERROR(EIO);
     st = s->streams[0];
 
     size = MAX_SIZE;
@@ -273,13 +274,13 @@ static int mmf_read_packet(AVFormatContext *s,
         size = mmf->data_size;
 
     if(!size)
-        return AVERROR_IO;
+        return AVERROR(EIO);
 
     if (av_new_packet(pkt, size))
-        return AVERROR_IO;
+        return AVERROR(EIO);
     pkt->stream_index = 0;
 
-    ret = get_buffer(&s->pb, pkt->data, pkt->size);
+    ret = get_buffer(s->pb, pkt->data, pkt->size);
     if (ret < 0)
         av_free_packet(pkt);
 
@@ -300,8 +301,8 @@ static int mmf_read_seek(AVFormatContext *s,
     return pcm_read_seek(s, stream_index, timestamp, flags);
 }
 
-
-static AVInputFormat mmf_iformat = {
+#ifdef CONFIG_MMF_DEMUXER
+AVInputFormat mmf_demuxer = {
     "mmf",
     "mmf format",
     sizeof(MMFContext),
@@ -311,9 +312,9 @@ static AVInputFormat mmf_iformat = {
     mmf_read_close,
     mmf_read_seek,
 };
-
-#ifdef CONFIG_MUXERS
-static AVOutputFormat mmf_oformat = {
+#endif
+#ifdef CONFIG_MMF_MUXER
+AVOutputFormat mmf_muxer = {
     "mmf",
     "mmf format",
     "application/vnd.smaf",
@@ -325,14 +326,4 @@ static AVOutputFormat mmf_oformat = {
     mmf_write_packet,
     mmf_write_trailer,
 };
-#endif //CONFIG_MUXERS
-
-int ff_mmf_init(void)
-{
-    av_register_input_format(&mmf_iformat);
-#ifdef CONFIG_MUXERS
-    av_register_output_format(&mmf_oformat);
-#endif //CONFIG_MUXERS
-    return 0;
-}
-
+#endif

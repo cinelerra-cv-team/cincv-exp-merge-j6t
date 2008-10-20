@@ -3,22 +3,24 @@
  *
  * Copyright (c) 2001-2003 BERO <bero@geocities.co.jp>
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "../dsputil.h"
+#include "libavcodec/dsputil.h"
 #define c1      1.38703984532214752434  /* sqrt(2)*cos(1*pi/16) */
 #define c2      1.30656296487637657577  /* sqrt(2)*cos(2*pi/16) */
 #define c3      1.17587560241935884520  /* sqrt(2)*cos(3*pi/16) */
@@ -27,14 +29,14 @@
 #define c6      0.54119610014619712324  /* sqrt(2)*cos(6*pi/16) */
 #define c7      0.27589937928294311353  /* sqrt(2)*cos(7*pi/16) */
 
-const static float even_table[] __attribute__ ((aligned(8))) = {
+static const float even_table[] __attribute__ ((aligned(8))) = {
         c4, c4, c4, c4,
         c2, c6,-c6,-c2,
         c4,-c4,-c4, c4,
         c6,-c2, c2,-c6
 };
 
-const static float odd_table[] __attribute__ ((aligned(8))) = {
+static const float odd_table[] __attribute__ ((aligned(8))) = {
         c1, c3, c5, c7,
         c3,-c7,-c1,-c5,
         c5,-c1, c7, c3,
@@ -52,7 +54,7 @@ const static float odd_table[] __attribute__ ((aligned(8))) = {
 #if defined(__SH4_SINGLE__) || defined(__SH4_SINGLE_ONLY__)
 
 #define         load_matrix(table) \
-        __asm__ volatile( \
+        asm volatile( \
         "       fschg\n" \
         "       fmov   @%0+,xd0\n" \
         "       fmov   @%0+,xd2\n" \
@@ -69,15 +71,15 @@ const static float odd_table[] __attribute__ ((aligned(8))) = {
         )
 
 #define         ftrv() \
-                __asm__ volatile("ftrv xmtrx,fv0" \
+                asm volatile("ftrv xmtrx,fv0" \
                 : "=f"(fr0),"=f"(fr1),"=f"(fr2),"=f"(fr3) \
                 :  "0"(fr0), "1"(fr1), "2"(fr2), "3"(fr3) );
 
 #define         DEFREG        \
-        register float fr0 __asm__("fr0"); \
-        register float fr1 __asm__("fr1"); \
-        register float fr2 __asm__("fr2"); \
-        register float fr3 __asm__("fr3")
+        register float fr0 asm("fr0"); \
+        register float fr1 asm("fr1"); \
+        register float fr2 asm("fr2"); \
+        register float fr3 asm("fr3")
 
 #else
 

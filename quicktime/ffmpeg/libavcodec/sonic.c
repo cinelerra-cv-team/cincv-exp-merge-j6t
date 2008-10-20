@@ -2,18 +2,20 @@
  * Simple free lossless/lossy audio codec
  * Copyright (c) 2004 Alex Beregszaszi
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include "avcodec.h"
@@ -406,6 +408,7 @@ static int predictor_calc_error(int *k, int *state, int order, int error)
     return x;
 }
 
+#ifdef CONFIG_ENCODERS
 // Heavily modified Levinson-Durbin algorithm which
 // copes better with quantization, and calculates the
 // actual whitened result as it goes.
@@ -476,6 +479,7 @@ static void modified_levinson_durbin(int *window, int window_entries,
 
     av_free(state);
 }
+#endif /* CONFIG_ENCODERS */
 
 static int samplerate_table[] =
     { 44100, 22050, 11025, 96000, 48000, 32000, 24000, 16000, 8000 };
@@ -499,7 +503,7 @@ static inline int code_samplerate(int samplerate)
     return -1;
 }
 
-static int sonic_encode_init(AVCodecContext *avctx)
+static av_cold int sonic_encode_init(AVCodecContext *avctx)
 {
     SonicContext *s = avctx->priv_data;
     PutBitContext pb;
@@ -597,14 +601,14 @@ static int sonic_encode_init(AVCodecContext *avctx)
 
     avctx->coded_frame = avcodec_alloc_frame();
     if (!avctx->coded_frame)
-        return -ENOMEM;
+        return AVERROR(ENOMEM);
     avctx->coded_frame->key_frame = 1;
     avctx->frame_size = s->block_align*s->downsampling;
 
     return 0;
 }
 
-static int sonic_encode_close(AVCodecContext *avctx)
+static av_cold int sonic_encode_close(AVCodecContext *avctx)
 {
     SonicContext *s = avctx->priv_data;
     int i;
@@ -746,7 +750,8 @@ static int sonic_encode_frame(AVCodecContext *avctx,
 }
 #endif //CONFIG_ENCODERS
 
-static int sonic_decode_init(AVCodecContext *avctx)
+#ifdef CONFIG_DECODERS
+static av_cold int sonic_decode_init(AVCodecContext *avctx)
 {
     SonicContext *s = avctx->priv_data;
     GetBitContext gb;
@@ -826,7 +831,7 @@ static int sonic_decode_init(AVCodecContext *avctx)
     return 0;
 }
 
-static int sonic_decode_close(AVCodecContext *avctx)
+static av_cold int sonic_decode_close(AVCodecContext *avctx)
 {
     SonicContext *s = avctx->priv_data;
     int i;
@@ -846,7 +851,7 @@ static int sonic_decode_close(AVCodecContext *avctx)
 
 static int sonic_decode_frame(AVCodecContext *avctx,
                             void *data, int *data_size,
-                            uint8_t *buf, int buf_size)
+                            const uint8_t *buf, int buf_size)
 {
     SonicContext *s = avctx->priv_data;
     GetBitContext gb;
@@ -921,14 +926,7 @@ static int sonic_decode_frame(AVCodecContext *avctx,
 
     // internal -> short
     for (i = 0; i < s->frame_size; i++)
-    {
-        if (s->int_samples[i] > 32767)
-            samples[i] = 32767;
-        else if (s->int_samples[i] < -32768)
-            samples[i] = -32768;
-        else
-            samples[i] = s->int_samples[i];
-    }
+        samples[i] = av_clip_int16(s->int_samples[i]);
 
     align_get_bits(&gb);
 
@@ -936,6 +934,7 @@ static int sonic_decode_frame(AVCodecContext *avctx,
 
     return (get_bits_count(&gb)+7)/8;
 }
+#endif
 
 #ifdef CONFIG_ENCODERS
 AVCodec sonic_encoder = {
@@ -947,6 +946,7 @@ AVCodec sonic_encoder = {
     sonic_encode_frame,
     sonic_encode_close,
     NULL,
+    .long_name = "Sonic",
 };
 
 AVCodec sonic_ls_encoder = {
@@ -958,6 +958,7 @@ AVCodec sonic_ls_encoder = {
     sonic_encode_frame,
     sonic_encode_close,
     NULL,
+    .long_name = "Sonic lossless",
 };
 #endif
 
@@ -971,5 +972,6 @@ AVCodec sonic_decoder = {
     NULL,
     sonic_decode_close,
     sonic_decode_frame,
+    .long_name = "Sonic",
 };
 #endif

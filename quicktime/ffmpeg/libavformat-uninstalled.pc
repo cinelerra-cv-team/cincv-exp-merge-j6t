@@ -1,12 +1,12 @@
 prefix=
 exec_prefix=
 libdir=${pcfiledir}/libavformat
-includedir=${pcfiledir}/libavformat
+includedir=${pcfiledir}
 
 Name: libavformat
 Description: FFmpeg container format library
-Version: 50.4.0
-Requires:  libavcodec = 51.9.0
+Version: 52.14.0
+Requires:  libavcodec = 51.57.0
 Conflicts:
-Libs: ${libdir}/libavformat.a -lm -lz -ldl
+Libs: ${libdir}/libavformat.a  -L/root/hvirtual/quicktime/thirdparty/faad2-2.0//libfaad/.libs/  -lz -lbz2 -pthread -lm  -ldl
 Cflags: -I${includedir}

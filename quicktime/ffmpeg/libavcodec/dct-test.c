@@ -1,3 +1,24 @@
+/*
+ * (c) 2001 Fabrice Bellard
+ *     2007 Marc Hoffman <marc.hoffman@analog.com>
+ *
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * FFmpeg is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with FFmpeg; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 /**
  * @file dct-test.c
  * DCT test. (c) 2001 Fabrice Bellard.
@@ -9,33 +30,95 @@
 #include <string.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "dsputil.h"
 
-#include "i386/mmx.h"
 #include "simple_idct.h"
 #include "faandct.h"
+#include "faanidct.h"
+#include "i386/idct_xvid.h"
 
 #ifndef MAX
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #endif
 
 #undef printf
+#undef random
 
 void *fast_memcpy(void *a, const void *b, size_t c){return memcpy(a,b,c);};
 
 /* reference fdct/idct */
 extern void fdct(DCTELEM *block);
 extern void idct(DCTELEM *block);
-extern void ff_idct_xvid_mmx(DCTELEM *block);
-extern void ff_idct_xvid_mmx2(DCTELEM *block);
 extern void init_fdct();
 
-extern void j_rev_dct(DCTELEM *data);
 extern void ff_mmx_idct(DCTELEM *data);
 extern void ff_mmxext_idct(DCTELEM *data);
 
 extern void odivx_idct_c (short *block);
+
+// BFIN
+extern void ff_bfin_idct (DCTELEM *block)  ;
+extern void ff_bfin_fdct (DCTELEM *block) ;
+
+// ALTIVEC
+extern void fdct_altivec (DCTELEM *block);
+//extern void idct_altivec (DCTELEM *block);?? no routine
+
+
+struct algo {
+  char *name;
+  enum { FDCT, IDCT } is_idct;
+  void (* func) (DCTELEM *block);
+  void (* ref)  (DCTELEM *block);
+  enum formattag { NO_PERM,MMX_PERM, MMX_SIMPLE_PERM, SCALE_PERM, SSE2_PERM } format;
+  int  mm_support;
+};
+
+#ifndef FAAN_POSTSCALE
+#define FAAN_SCALE SCALE_PERM
+#else
+#define FAAN_SCALE NO_PERM
+#endif
+
+struct algo algos[] = {
+  {"REF-DBL",         0, fdct,               fdct, NO_PERM},
+  {"FAAN",            0, ff_faandct,         fdct, FAAN_SCALE},
+  {"FAANI",           1, ff_faanidct,        idct, NO_PERM},
+  {"IJG-AAN-INT",     0, fdct_ifast,         fdct, SCALE_PERM},
+  {"IJG-LLM-INT",     0, ff_jpeg_fdct_islow, fdct, NO_PERM},
+  {"REF-DBL",         1, idct,               idct, NO_PERM},
+  {"INT",             1, j_rev_dct,          idct, MMX_PERM},
+  {"SIMPLE-C",        1, ff_simple_idct,     idct, NO_PERM},
+
+#ifdef HAVE_MMX
+  {"MMX",             0, ff_fdct_mmx,        fdct, NO_PERM, MM_MMX},
+#ifdef HAVE_MMX2
+  {"MMX2",            0, ff_fdct_mmx2,       fdct, NO_PERM, MM_MMXEXT},
+#endif
+
+#ifdef CONFIG_GPL
+  {"LIBMPEG2-MMX",    1, ff_mmx_idct,        idct, MMX_PERM, MM_MMX},
+  {"LIBMPEG2-MMXEXT", 1, ff_mmxext_idct,     idct, MMX_PERM, MM_MMXEXT},
+#endif
+  {"SIMPLE-MMX",      1, ff_simple_idct_mmx, idct, MMX_SIMPLE_PERM, MM_MMX},
+  {"XVID-MMX",        1, ff_idct_xvid_mmx,   idct, NO_PERM, MM_MMX},
+  {"XVID-MMX2",       1, ff_idct_xvid_mmx2,  idct, NO_PERM, MM_MMXEXT},
+  {"XVID-SSE2",       1, ff_idct_xvid_sse2,  idct, SSE2_PERM, MM_SSE2},
+#endif
+
+#ifdef HAVE_ALTIVEC
+  {"altivecfdct",     0, fdct_altivec,       fdct, NO_PERM, MM_ALTIVEC},
+#endif
+
+#ifdef ARCH_BFIN
+  {"BFINfdct",        0, ff_bfin_fdct,       fdct, NO_PERM},
+  {"BFINidct",        1, ff_bfin_idct,       idct, NO_PERM},
+#endif
+
+  { 0 }
+};
 
 #define AANSCALE_BITS 12
 static const unsigned short aanscales[64] = {
@@ -75,6 +158,8 @@ static short idct_simple_mmx_perm[64]={
         0x32, 0x3A, 0x36, 0x3B, 0x33, 0x3E, 0x37, 0x3F,
 };
 
+static const uint8_t idct_sse2_row_perm[8] = {0, 4, 1, 5, 2, 6, 3, 7};
+
 void idct_mmx_init(void)
 {
     int i;
@@ -86,13 +171,13 @@ void idct_mmx_init(void)
     }
 }
 
-static DCTELEM block[64] __attribute__ ((aligned (8)));
+static DCTELEM block[64] __attribute__ ((aligned (16)));
 static DCTELEM block1[64] __attribute__ ((aligned (8)));
 static DCTELEM block_org[64] __attribute__ ((aligned (8)));
 
 void dct_error(const char *name, int is_idct,
                void (*fdct_func)(DCTELEM *block),
-               void (*fdct_ref)(DCTELEM *block), int test)
+               void (*fdct_ref)(DCTELEM *block), int form, int test)
 {
     int it, i, scale;
     int err_inf, v;
@@ -143,14 +228,16 @@ void dct_error(const char *name, int is_idct,
         for(i=0; i<64; i++)
             block_org[i]= block1[i];
 
-        if (fdct_func == ff_mmx_idct ||
-            fdct_func == j_rev_dct || fdct_func == ff_mmxext_idct) {
+        if (form == MMX_PERM) {
             for(i=0;i<64;i++)
                 block[idct_mmx_perm[i]] = block1[i];
-        } else if(fdct_func == ff_simple_idct_mmx ) {
+            } else if (form == MMX_SIMPLE_PERM) {
             for(i=0;i<64;i++)
                 block[idct_simple_mmx_perm[i]] = block1[i];
 
+        } else if (form == SSE2_PERM) {
+            for(i=0; i<64; i++)
+                block[(i&0x38) | idct_sse2_row_perm[i&7]] = block1[i];
         } else {
             for(i=0; i<64; i++)
                 block[i]= block1[i];
@@ -165,13 +252,9 @@ void dct_error(const char *name, int is_idct,
 #endif
 
         fdct_func(block);
-        emms(); /* for ff_mmx_idct */
+        emms_c(); /* for ff_mmx_idct */
 
-        if (fdct_func == fdct_ifast
-#ifndef FAAN_POSTSCALE
-            || fdct_func == ff_faandct
-#endif
-            ) {
+        if (form == SCALE_PERM) {
             for(i=0; i<64; i++) {
                 scale = 8*(1 << (AANSCALE_BITS + 11)) / aanscales[i];
                 block[i] = (block[i] * scale /*+ (1<<(AANSCALE_BITS-1))*/) >> AANSCALE_BITS;
@@ -205,7 +288,7 @@ void dct_error(const char *name, int is_idct,
         }
 #endif
     }
-    for(i=0; i<64; i++) sysErrMax= MAX(sysErrMax, ABS(sysErr[i]));
+    for(i=0; i<64; i++) sysErrMax= MAX(sysErrMax, FFABS(sysErr[i]));
 
 #if 1 // dump systematic errors
     for(i=0; i<64; i++){
@@ -242,11 +325,10 @@ void dct_error(const char *name, int is_idct,
     }break;
     }
 
-    if (fdct_func == ff_mmx_idct ||
-        fdct_func == j_rev_dct || fdct_func == ff_mmxext_idct) {
+    if (form == MMX_PERM) {
         for(i=0;i<64;i++)
             block[idct_mmx_perm[i]] = block1[i];
-    } else if(fdct_func == ff_simple_idct_mmx ) {
+    } else if(form == MMX_SIMPLE_PERM) {
         for(i=0;i<64;i++)
             block[idct_simple_mmx_perm[i]] = block1[i];
     } else {
@@ -261,13 +343,13 @@ void dct_error(const char *name, int is_idct,
             for(i=0; i<64; i++)
                 block[i]= block1[i];
 //            memcpy(block, block1, sizeof(DCTELEM) * 64);
-// dont memcpy especially not fastmemcpy because it does movntq !!!
+// do not memcpy especially not fastmemcpy because it does movntq !!!
             fdct_func(block);
         }
         it1 += NB_ITS_SPEED;
         ti1 = gettime() - ti;
     } while (ti1 < 1000000);
-    emms();
+    emms_c();
 
     printf("%s %s: %0.1f kdct/s\n",
            is_idct ? "IDCT" : "DCT",
@@ -421,13 +503,13 @@ void idct248_error(const char *name,
             for(i=0; i<64; i++)
                 block[i]= block1[i];
 //            memcpy(block, block1, sizeof(DCTELEM) * 64);
-// dont memcpy especially not fastmemcpy because it does movntq !!!
+// do not memcpy especially not fastmemcpy because it does movntq !!!
             idct248_put(img_dest, 8, block);
         }
         it1 += NB_ITS_SPEED;
         ti1 = gettime() - ti;
     } while (ti1 < 1000000);
-    emms();
+    emms_c();
 
     printf("%s %s: %0.1f kdct/s\n",
            1 ? "IDCT248" : "DCT248",
@@ -442,7 +524,6 @@ void help(void)
            "            2 -> do 3. test from mpeg4 std\n"
            "-i          test IDCT implementations\n"
            "-4          test IDCT248 implementations\n");
-    exit(1);
 }
 
 int main(int argc, char **argv)
@@ -453,6 +534,7 @@ int main(int argc, char **argv)
 
     init_fdct();
     idct_mmx_init();
+    mm_flags = mm_support();
 
     for(i=0;i<256;i++) cropTbl[i + MAX_NEG_CROP] = i;
     for(i=0;i<MAX_NEG_CROP;i++) {
@@ -474,7 +556,7 @@ int main(int argc, char **argv)
         default :
         case 'h':
             help();
-            break;
+            return 0;
         }
     }
 
@@ -483,33 +565,11 @@ int main(int argc, char **argv)
     printf("ffmpeg DCT/IDCT test\n");
 
     if (test_248_dct) {
-        idct248_error("SIMPLE-C", simple_idct248_put);
+        idct248_error("SIMPLE-C", ff_simple_idct248_put);
     } else {
-        if (!test_idct) {
-            dct_error("REF-DBL", 0, fdct, fdct, test); /* only to verify code ! */
-            dct_error("IJG-AAN-INT", 0, fdct_ifast, fdct, test);
-            dct_error("IJG-LLM-INT", 0, ff_jpeg_fdct_islow, fdct, test);
-            dct_error("MMX", 0, ff_fdct_mmx, fdct, test);
-            dct_error("MMX2", 0, ff_fdct_mmx2, fdct, test);
-            dct_error("FAAN", 0, ff_faandct, fdct, test);
-        } else {
-            dct_error("REF-DBL", 1, idct, idct, test);
-            dct_error("INT", 1, j_rev_dct, idct, test);
-            dct_error("LIBMPEG2-MMX", 1, ff_mmx_idct, idct, test);
-            dct_error("LIBMPEG2-MMXEXT", 1, ff_mmxext_idct, idct, test);
-            dct_error("SIMPLE-C", 1, simple_idct, idct, test);
-            dct_error("SIMPLE-MMX", 1, ff_simple_idct_mmx, idct, test);
-            dct_error("XVID-MMX", 1, ff_idct_xvid_mmx, idct, test);
-            dct_error("XVID-MMX2", 1, ff_idct_xvid_mmx2, idct, test);
-            //        dct_error("ODIVX-C", 1, odivx_idct_c, idct);
-            //printf(" test against odivx idct\n");
-            //        dct_error("REF", 1, idct, odivx_idct_c);
-            //        dct_error("INT", 1, j_rev_dct, odivx_idct_c);
-            //        dct_error("MMX", 1, ff_mmx_idct, odivx_idct_c);
-            //        dct_error("MMXEXT", 1, ff_mmxext_idct, odivx_idct_c);
-            //        dct_error("SIMPLE-C", 1, simple_idct, odivx_idct_c);
-            //        dct_error("SIMPLE-MMX", 1, ff_simple_idct_mmx, odivx_idct_c);
-            //        dct_error("ODIVX-C", 1, odivx_idct_c, odivx_idct_c);
+      for (i=0;algos[i].name;i++)
+        if (algos[i].is_idct == test_idct && !(~mm_flags & algos[i].mm_support)) {
+          dct_error (algos[i].name, algos[i].is_idct, algos[i].func, algos[i].ref, algos[i].format, test);
         }
     }
     return 0;

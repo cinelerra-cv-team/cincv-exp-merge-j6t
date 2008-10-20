@@ -5,20 +5,21 @@
  * Copyright (c) 2005 Alex Beregszaszi
  * Copyright (c) 2005 Roberto Togni
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -96,16 +97,16 @@ typedef struct {
 /**
  * A node in the subpacket list
  */
-typedef struct _QDM2SubPNode {
+typedef struct QDM2SubPNode {
     QDM2SubPacket *packet;      ///< packet
-    struct _QDM2SubPNode *next; ///< pointer to next packet in the list, NULL if leaf node
+    struct QDM2SubPNode *next; ///< pointer to next packet in the list, NULL if leaf node
 } QDM2SubPNode;
 
 typedef struct {
     float level;
     float *samples_im;
     float *samples_re;
-    float *table;
+    const float *table;
     int   phase;
     int   phase_shift;
     int   duration;
@@ -127,7 +128,7 @@ typedef struct {
 } QDM2Complex;
 
 typedef struct {
-    QDM2Complex complex[256 + 1] __attribute__((aligned(16)));
+    DECLARE_ALIGNED_16(QDM2Complex, complex[256 + 1]);
     float       samples_im[MPA_MAX_CHANNELS][256];
     float       samples_re[MPA_MAX_CHANNELS][256];
 } QDM2FFT;
@@ -175,14 +176,14 @@ typedef struct {
     QDM2FFT fft;
 
     /// I/O data
-    uint8_t *compressed_data;
+    const uint8_t *compressed_data;
     int compressed_size;
     float output_buffer[1024];
 
     /// Synthesis filter
-    MPA_INT synth_buf[MPA_MAX_CHANNELS][512*2] __attribute__((aligned(16)));
+    DECLARE_ALIGNED_16(MPA_INT, synth_buf[MPA_MAX_CHANNELS][512*2]);
     int synth_buf_offset[MPA_MAX_CHANNELS];
-    int32_t sb_samples[MPA_MAX_CHANNELS][128][SBLIMIT] __attribute__((aligned(16)));
+    DECLARE_ALIGNED_16(int32_t, sb_samples[MPA_MAX_CHANNELS][128][SBLIMIT]);
 
     /// Mixed temporary data used in decoding
     float tone_level[MPA_MAX_CHANNELS][30][64];
@@ -227,7 +228,7 @@ static uint8_t random_dequant_index[256][5];
 static uint8_t random_dequant_type24[128][3];
 static float noise_samples[128];
 
-static MPA_INT mpa_window[512] __attribute__((aligned(16)));
+static DECLARE_ALIGNED_16(MPA_INT, mpa_window[512]);
 
 
 static void softclip_table_init(void) {
@@ -403,7 +404,7 @@ static int qdm2_get_se_vlc (VLC *vlc, GetBitContext *gb, int depth)
  *
  * @return          0 if checksum is OK
  */
-static uint16_t qdm2_packet_checksum (uint8_t *data, int length, int value) {
+static uint16_t qdm2_packet_checksum (const uint8_t *data, int length, int value) {
     int i;
 
     for (i=0; i < length; i++)
@@ -538,7 +539,7 @@ static void fix_coding_method_array (int sb, int channels, sb_int8_array coding_
                 run = 1;
                 case_val = 8;
             } else {
-                switch (switchtable[coding_method[ch][sb][j]]) {
+                switch (switchtable[coding_method[ch][sb][j]-8]) {
                     case 0: run = 10; case_val = 10; break;
                     case 1: run = 1; case_val = 16; break;
                     case 2: run = 5; case_val = 24; break;
@@ -1430,7 +1431,7 @@ static void qdm2_decode_fft_packets (QDM2Context *q)
     if (q->sub_packet_list_B[0].packet == NULL)
         return;
 
-    /* reset minimum indices for FFT coefficients */
+    /* reset minimum indexes for FFT coefficients */
     q->fft_coefs_index = 0;
     for (i=0; i < 5; i++)
         q->fft_coefs_min_index[i] = -1;
@@ -1480,7 +1481,7 @@ static void qdm2_decode_fft_packets (QDM2Context *q)
         }
     } // Loop on B packets
 
-    /* calculate maximum indices for FFT coefficients */
+    /* calculate maximum indexes for FFT coefficients */
     for (i = 0, j = -1; i < 5; i++)
         if (q->fft_coefs_min_index[i] >= 0) {
             if (j >= 0)
@@ -1597,7 +1598,7 @@ static void qdm2_fft_tone_synthesizer (QDM2Context *q, int sub_packet)
                     tone.level = (q->fft_coefs[j].exp < 0) ? 0.0 : fft_tone_level_table[q->superblocktype_2_3 ? 0 : 1][q->fft_coefs[j].exp & 63];
                     tone.samples_im = &q->fft.samples_im[ch][offset];
                     tone.samples_re = &q->fft.samples_re[ch][offset];
-                    tone.table = (float*)fft_tone_sample_table[i][q->fft_coefs[j].offset - (offset << four_i)];
+                    tone.table = fft_tone_sample_table[i][q->fft_coefs[j].offset - (offset << four_i)];
                     tone.phase = 64 * q->fft_coefs[j].phase - (offset << 8) - 128;
                     tone.phase_shift = (2 * q->fft_coefs[j].offset + 1) << (7 - four_i);
                     tone.duration = i;
@@ -1691,11 +1692,11 @@ static void qdm2_synthesis_filter (QDM2Context *q, int index)
  * @param q    context
  */
 static void qdm2_init(QDM2Context *q) {
-    static int inited = 0;
+    static int initialized = 0;
 
-    if (inited != 0)
+    if (initialized != 0)
         return;
-    inited = 1;
+    initialized = 1;
 
     qdm2_init_vlc();
     ff_mpa_synth_init(mpa_window);
@@ -1834,7 +1835,7 @@ static int qdm2_decode_init(AVCodecContext *avctx)
     extradata += 8;
     extradata_size -= 8;
 
-    size = BE_32(extradata);
+    size = AV_RB32(extradata);
 
     if(size > extradata_size){
         av_log(avctx, AV_LOG_ERROR, "extradata size too small, %i < %i\n",
@@ -1844,29 +1845,29 @@ static int qdm2_decode_init(AVCodecContext *avctx)
 
     extradata += 4;
     av_log(avctx, AV_LOG_DEBUG, "size: %d\n", size);
-    if (BE_32(extradata) != MKBETAG('Q','D','C','A')) {
+    if (AV_RB32(extradata) != MKBETAG('Q','D','C','A')) {
         av_log(avctx, AV_LOG_ERROR, "invalid extradata, expecting QDCA\n");
         return -1;
     }
 
     extradata += 8;
 
-    avctx->channels = s->nb_channels = s->channels = BE_32(extradata);
+    avctx->channels = s->nb_channels = s->channels = AV_RB32(extradata);
     extradata += 4;
 
-    avctx->sample_rate = BE_32(extradata);
+    avctx->sample_rate = AV_RB32(extradata);
     extradata += 4;
 
-    avctx->bit_rate = BE_32(extradata);
+    avctx->bit_rate = AV_RB32(extradata);
     extradata += 4;
 
-    s->group_size = BE_32(extradata);
+    s->group_size = AV_RB32(extradata);
     extradata += 4;
 
-    s->fft_size = BE_32(extradata);
+    s->fft_size = AV_RB32(extradata);
     extradata += 4;
 
-    s->checksum_size = BE_32(extradata);
+    s->checksum_size = AV_RB32(extradata);
     extradata += 4;
 
     s->fft_order = av_log2(s->fft_size) + 1;
@@ -1942,7 +1943,7 @@ static int qdm2_decode_close(AVCodecContext *avctx)
 }
 
 
-static void qdm2_decode (QDM2Context *q, uint8_t *in, int16_t *out)
+static void qdm2_decode (QDM2Context *q, const uint8_t *in, int16_t *out)
 {
     int ch, i;
     const int frame_size = (q->frame_size * q->channels);
@@ -2004,7 +2005,7 @@ static void qdm2_decode (QDM2Context *q, uint8_t *in, int16_t *out)
 
 static int qdm2_decode_frame(AVCodecContext *avctx,
             void *data, int *data_size,
-            uint8_t *buf, int buf_size)
+            const uint8_t *buf, int buf_size)
 {
     QDM2Context *s = avctx->priv_data;
 
@@ -2037,4 +2038,5 @@ AVCodec qdm2_decoder =
     .init = qdm2_decode_init,
     .close = qdm2_decode_close,
     .decode = qdm2_decode_frame,
+    .long_name = "QDesign Music Codec 2",
 };

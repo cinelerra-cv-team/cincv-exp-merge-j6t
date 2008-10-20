@@ -1,19 +1,21 @@
 /*
- * Animated GIF encoder
+ * Animated GIF muxer
  * Copyright (c) 2000 Fabrice Bellard.
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -38,7 +40,7 @@
  */
 
 #include "avformat.h"
-#include "bitstream.h"
+#include "libavcodec/bitstream.h"
 
 /* bitstream minipacket size */
 #define GIF_CHUNKS 100
@@ -113,9 +115,6 @@ static void gif_put_bits_rev(PutBitContext *s, int n, unsigned int value)
     unsigned int bit_buf;
     int bit_cnt;
 
-#ifdef STATS
-    st_out_bit_counts[st_current_index] += n;
-#endif
     //    printf("put_bits=%d %x\n", n, value);
     assert(n == 32 || value < (1U << n));
 
@@ -138,7 +137,7 @@ static void gif_put_bits_rev(PutBitContext *s, int n, unsigned int value)
         //printf("bitbuf = %08x\n", bit_buf);
         s->buf_ptr+=4;
         if (s->buf_ptr >= s->buf_end)
-            puts("bit buffer overflow !!"); // should never happen ! who got rid of the callback ???
+            abort();
 //            flush_buffer_rev(s);
         bit_cnt=bit_cnt + n - 32;
         if (bit_cnt == 0) {
@@ -187,7 +186,7 @@ static int gif_image_write_header(ByteIOContext *pb,
 
     /* the global palette */
     if (!palette) {
-        put_buffer(pb, (unsigned char *)gif_clut, 216*3);
+        put_buffer(pb, (const unsigned char *)gif_clut, 216*3);
         for(i=0;i<((256-216)*3);i++)
             put_byte(pb, 0);
     } else {
@@ -237,7 +236,7 @@ static int gif_image_write_header(ByteIOContext *pb,
 /* this is maybe slow, but allows for extensions */
 static inline unsigned char gif_clut_index(uint8_t r, uint8_t g, uint8_t b)
 {
-    return ((((r)/47)%6)*6*6+(((g)/47)%6)*6+(((b)/47)%6));
+    return (((r) / 47) % 6) * 6 * 6 + (((g) / 47) % 6) * 6 + (((b) / 47) % 6);
 }
 
 
@@ -314,7 +313,7 @@ typedef struct {
 static int gif_write_header(AVFormatContext *s)
 {
     GIFContext *gif = s->priv_data;
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
     AVCodecContext *enc, *video_enc;
     int i, width, height, loop_count /*, rate*/;
 
@@ -342,19 +341,21 @@ static int gif_write_header(AVFormatContext *s)
 //        rate = video_enc->time_base.den;
     }
 
-    /* XXX: is it allowed ? seems to work so far... */
-    video_enc->pix_fmt = PIX_FMT_RGB24;
+    if (video_enc->pix_fmt != PIX_FMT_RGB24) {
+        av_log(s, AV_LOG_ERROR, "ERROR: gif only handles the rgb24 pixel format. Use -pix_fmt rgb24.\n");
+        return AVERROR(EIO);
+    }
 
     gif_image_write_header(pb, width, height, loop_count, NULL);
 
-    put_flush_packet(&s->pb);
+    put_flush_packet(s->pb);
     return 0;
 }
 
 static int gif_write_video(AVFormatContext *s,
                            AVCodecContext *enc, const uint8_t *buf, int size)
 {
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
     GIFContext *gif = s->priv_data;
     int jiffies;
     int64_t delay;
@@ -382,7 +383,7 @@ static int gif_write_video(AVFormatContext *s,
     gif_image_write_image(pb, 0, 0, enc->width, enc->height,
                           buf, enc->width * 3, PIX_FMT_RGB24);
 
-    put_flush_packet(&s->pb);
+    put_flush_packet(s->pb);
     return 0;
 }
 
@@ -397,27 +398,14 @@ static int gif_write_packet(AVFormatContext *s, AVPacket *pkt)
 
 static int gif_write_trailer(AVFormatContext *s)
 {
-    ByteIOContext *pb = &s->pb;
+    ByteIOContext *pb = s->pb;
 
     put_byte(pb, 0x3b);
-    put_flush_packet(&s->pb);
+    put_flush_packet(s->pb);
     return 0;
 }
 
-/* better than nothing gif image writer */
-int gif_write(ByteIOContext *pb, AVImageInfo *info)
-{
-    gif_image_write_header(pb, info->width, info->height, AVFMT_NOOUTPUTLOOP,
-                           (uint32_t *)info->pict.data[1]);
-    gif_image_write_image(pb, 0, 0, info->width, info->height,
-                          info->pict.data[0], info->pict.linesize[0],
-                          PIX_FMT_PAL8);
-    put_byte(pb, 0x3b);
-    put_flush_packet(pb);
-    return 0;
-}
-
-static AVOutputFormat gif_oformat = {
+AVOutputFormat gif_muxer = {
     "gif",
     "GIF Animation",
     "image/gif",
@@ -429,12 +417,3 @@ static AVOutputFormat gif_oformat = {
     gif_write_packet,
     gif_write_trailer,
 };
-
-extern AVInputFormat gif_iformat;
-
-int gif_init(void)
-{
-    av_register_output_format(&gif_oformat);
-    av_register_input_format(&gif_iformat);
-    return 0;
-}

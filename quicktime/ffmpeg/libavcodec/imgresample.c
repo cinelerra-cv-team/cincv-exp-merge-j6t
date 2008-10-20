@@ -2,18 +2,20 @@
  * High quality image resampling with polyphase filters
  * Copyright (c) 2001 Fabrice Bellard.
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -23,11 +25,11 @@
  */
 
 #include "avcodec.h"
-#include "swscale.h"
 #include "dsputil.h"
+#include "libswscale/swscale.h"
 
-#ifdef USE_FASTMEMCPY
-#include "fastmemcpy.h"
+#ifdef HAVE_ALTIVEC
+#include "ppc/imgresample_altivec.h"
 #endif
 
 #define NB_COMPONENTS 3
@@ -44,6 +46,12 @@
 #define FILTER_BITS   8
 
 #define LINE_BUF_HEIGHT (NB_TAPS * 4)
+
+struct SwsContext {
+    const AVClass *av_class;
+    struct ImgReSampleContext *resampling_ctx;
+    enum PixelFormat src_pix_fmt, dst_pix_fmt;
+};
 
 struct ImgReSampleContext {
     int iwidth, iheight, owidth, oheight;
@@ -164,7 +172,7 @@ static void v_resample(uint8_t *dst, int dst_width, const uint8_t *src,
         src_pos += src_incr;\
 }
 
-#define DUMP(reg) movq_r2m(reg, tmp); printf(#reg "=%016Lx\n", tmp.uq);
+#define DUMP(reg) movq_r2m(reg, tmp); printf(#reg "=%016"PRIx64"\n", tmp.uq);
 
 /* XXX: do four pixels at a time */
 static void h_resample_fast4_mmx(uint8_t *dst, int dst_width,
@@ -275,136 +283,9 @@ static void v_resample4_mmx(uint8_t *dst, int dst_width, const uint8_t *src,
     }
     emms();
 }
-#endif
+#endif /* HAVE_MMX */
 
-#ifdef HAVE_ALTIVEC
-typedef         union {
-    vector unsigned char v;
-    unsigned char c[16];
-} vec_uc_t;
-
-typedef         union {
-    vector signed short v;
-    signed short s[8];
-} vec_ss_t;
-
-void v_resample16_altivec(uint8_t *dst, int dst_width, const uint8_t *src,
-                          int wrap, int16_t *filter)
-{
-    int sum, i;
-    const uint8_t *s;
-    vector unsigned char *tv, tmp, dstv, zero;
-    vec_ss_t srchv[4], srclv[4], fv[4];
-    vector signed short zeros, sumhv, sumlv;
-    s = src;
-
-    for(i=0;i<4;i++)
-    {
-        /*
-           The vec_madds later on does an implicit >>15 on the result.
-           Since FILTER_BITS is 8, and we have 15 bits of magnitude in
-           a signed short, we have just enough bits to pre-shift our
-           filter constants <<7 to compensate for vec_madds.
-        */
-        fv[i].s[0] = filter[i] << (15-FILTER_BITS);
-        fv[i].v = vec_splat(fv[i].v, 0);
-    }
-
-    zero = vec_splat_u8(0);
-    zeros = vec_splat_s16(0);
-
-
-    /*
-       When we're resampling, we'd ideally like both our input buffers,
-       and output buffers to be 16-byte aligned, so we can do both aligned
-       reads and writes. Sadly we can't always have this at the moment, so
-       we opt for aligned writes, as unaligned writes have a huge overhead.
-       To do this, do enough scalar resamples to get dst 16-byte aligned.
-    */
-    i = (-(int)dst) & 0xf;
-    while(i>0) {
-        sum = s[0 * wrap] * filter[0] +
-        s[1 * wrap] * filter[1] +
-        s[2 * wrap] * filter[2] +
-        s[3 * wrap] * filter[3];
-        sum = sum >> FILTER_BITS;
-        if (sum<0) sum = 0; else if (sum>255) sum=255;
-        dst[0] = sum;
-        dst++;
-        s++;
-        dst_width--;
-        i--;
-    }
-
-    /* Do our altivec resampling on 16 pixels at once. */
-    while(dst_width>=16) {
-        /*
-           Read 16 (potentially unaligned) bytes from each of
-           4 lines into 4 vectors, and split them into shorts.
-           Interleave the multipy/accumulate for the resample
-           filter with the loads to hide the 3 cycle latency
-           the vec_madds have.
-        */
-        tv = (vector unsigned char *) &s[0 * wrap];
-        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[i * wrap]));
-        srchv[0].v = (vector signed short) vec_mergeh(zero, tmp);
-        srclv[0].v = (vector signed short) vec_mergel(zero, tmp);
-        sumhv = vec_madds(srchv[0].v, fv[0].v, zeros);
-        sumlv = vec_madds(srclv[0].v, fv[0].v, zeros);
-
-        tv = (vector unsigned char *) &s[1 * wrap];
-        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[1 * wrap]));
-        srchv[1].v = (vector signed short) vec_mergeh(zero, tmp);
-        srclv[1].v = (vector signed short) vec_mergel(zero, tmp);
-        sumhv = vec_madds(srchv[1].v, fv[1].v, sumhv);
-        sumlv = vec_madds(srclv[1].v, fv[1].v, sumlv);
-
-        tv = (vector unsigned char *) &s[2 * wrap];
-        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[2 * wrap]));
-        srchv[2].v = (vector signed short) vec_mergeh(zero, tmp);
-        srclv[2].v = (vector signed short) vec_mergel(zero, tmp);
-        sumhv = vec_madds(srchv[2].v, fv[2].v, sumhv);
-        sumlv = vec_madds(srclv[2].v, fv[2].v, sumlv);
-
-        tv = (vector unsigned char *) &s[3 * wrap];
-        tmp = vec_perm(tv[0], tv[1], vec_lvsl(0, &s[3 * wrap]));
-        srchv[3].v = (vector signed short) vec_mergeh(zero, tmp);
-        srclv[3].v = (vector signed short) vec_mergel(zero, tmp);
-        sumhv = vec_madds(srchv[3].v, fv[3].v, sumhv);
-        sumlv = vec_madds(srclv[3].v, fv[3].v, sumlv);
-
-        /*
-           Pack the results into our destination vector,
-           and do an aligned write of that back to memory.
-        */
-        dstv = vec_packsu(sumhv, sumlv) ;
-        vec_st(dstv, 0, (vector unsigned char *) dst);
-
-        dst+=16;
-        s+=16;
-        dst_width-=16;
-    }
-
-    /*
-       If there are any leftover pixels, resample them
-       with the slow scalar method.
-    */
-    while(dst_width>0) {
-        sum = s[0 * wrap] * filter[0] +
-        s[1 * wrap] * filter[1] +
-        s[2 * wrap] * filter[2] +
-        s[3 * wrap] * filter[3];
-        sum = sum >> FILTER_BITS;
-        if (sum<0) sum = 0; else if (sum>255) sum=255;
-        dst[0] = sum;
-        dst++;
-        s++;
-        dst_width--;
-    }
-}
-#endif
-
-/* slow version to handle limit cases. Does not need optimisation */
+/* slow version to handle limit cases. Does not need optimization */
 static void h_resample_slow(uint8_t *dst, int dst_width,
                             const uint8_t *src, int src_width,
                             int src_start, int src_incr, int16_t *filters)
@@ -510,7 +391,7 @@ static void component_resample(ImgReSampleContext *s,
             h_resample(new_line, owidth,
                        src_line, iwidth, - FCENTER * POS_FRAC, s->h_incr,
                        &s->h_filters[0][0]);
-            /* handle ring buffer wraping */
+            /* handle ring buffer wrapping */
             if (ring_y >= LINE_BUF_HEIGHT) {
                 memcpy(s->line_buf + (ring_y - LINE_BUF_HEIGHT) * owidth,
                        new_line, owidth);
@@ -566,7 +447,7 @@ ImgReSampleContext *img_resample_full_init(int owidth, int oheight,
     if (!s)
         return NULL;
     if((unsigned)owidth >= UINT_MAX / (LINE_BUF_HEIGHT + NB_TAPS))
-        return NULL;
+        goto fail;
     s->line_buf = av_mallocz(owidth * (LINE_BUF_HEIGHT + NB_TAPS));
     if (!s->line_buf)
         goto fail;
@@ -631,6 +512,8 @@ void img_resample_close(ImgReSampleContext *s)
     av_free(s);
 }
 
+static const AVClass context_class = { "imgresample", NULL, NULL };
+
 struct SwsContext *sws_getContext(int srcW, int srcH, int srcFormat,
                                   int dstW, int dstH, int dstFormat,
                                   int flags, SwsFilter *srcFilter,
@@ -639,11 +522,12 @@ struct SwsContext *sws_getContext(int srcW, int srcH, int srcFormat,
     struct SwsContext *ctx;
 
     ctx = av_malloc(sizeof(struct SwsContext));
-    if (ctx == NULL) {
+    if (!ctx) {
         av_log(NULL, AV_LOG_ERROR, "Cannot allocate a resampling context!\n");
 
         return NULL;
     }
+    ctx->av_class = &context_class;
 
     if ((srcH != dstH) || (srcW != dstW)) {
         if ((srcFormat != PIX_FMT_YUV420P) || (dstFormat != PIX_FMT_YUV420P)) {
@@ -665,6 +549,8 @@ struct SwsContext *sws_getContext(int srcW, int srcH, int srcFormat,
 
 void sws_freeContext(struct SwsContext *ctx)
 {
+    if (!ctx)
+        return;
     if ((ctx->resampling_ctx->iwidth != ctx->resampling_ctx->owidth) ||
         (ctx->resampling_ctx->iheight != ctx->resampling_ctx->oheight)) {
         img_resample_close(ctx->resampling_ctx);
@@ -672,6 +558,42 @@ void sws_freeContext(struct SwsContext *ctx)
         av_free(ctx->resampling_ctx);
     }
     av_free(ctx);
+}
+
+
+/**
+ * Checks if context is valid or reallocs a new one instead.
+ * If context is NULL, just calls sws_getContext() to get a new one.
+ * Otherwise, checks if the parameters are the same already saved in context.
+ * If that is the case, returns the current context.
+ * Otherwise, frees context and gets a new one.
+ *
+ * Be warned that srcFilter, dstFilter are not checked, they are
+ * asumed to remain valid.
+ */
+struct SwsContext *sws_getCachedContext(struct SwsContext *ctx,
+                        int srcW, int srcH, int srcFormat,
+                        int dstW, int dstH, int dstFormat, int flags,
+                        SwsFilter *srcFilter, SwsFilter *dstFilter, double *param)
+{
+    if (ctx != NULL) {
+        if ((ctx->resampling_ctx->iwidth != srcW) ||
+                        (ctx->resampling_ctx->iheight != srcH) ||
+                        (ctx->src_pix_fmt != srcFormat) ||
+                        (ctx->resampling_ctx->owidth != dstW) ||
+                        (ctx->resampling_ctx->oheight != dstH) ||
+                        (ctx->dst_pix_fmt != dstFormat))
+        {
+            sws_freeContext(ctx);
+            ctx = NULL;
+        }
+    }
+    if (ctx == NULL) {
+        return sws_getContext(srcW, srcH, srcFormat,
+                        dstW, dstH, dstFormat, flags,
+                        srcFilter, dstFilter, param);
+    }
+    return ctx;
 }
 
 int sws_scale(struct SwsContext *ctx, uint8_t* src[], int srcStride[],
@@ -684,7 +606,7 @@ int sws_scale(struct SwsContext *ctx, uint8_t* src[], int srcStride[],
     uint8_t *buf1 = NULL, *buf2 = NULL;
     enum PixelFormat current_pix_fmt;
 
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < 4; i++) {
         src_pict.data[i] = src[i];
         src_pict.linesize[i] = srcStride[i];
         dst_pict.data[i] = dst[i];
@@ -756,6 +678,9 @@ int sws_scale(struct SwsContext *ctx, uint8_t* src[], int srcStride[],
             res = -1;
             goto the_end;
         }
+    } else if (resampled_picture != &dst_pict) {
+        av_picture_copy(&dst_pict, resampled_picture, current_pix_fmt,
+                        ctx->resampling_ctx->owidth, ctx->resampling_ctx->oheight);
     }
 
 the_end:
@@ -767,6 +692,7 @@ the_end:
 
 #ifdef TEST
 #include <stdio.h>
+#undef exit
 
 /* input */
 #define XSIZE 256
@@ -894,8 +820,8 @@ int main(int argc, char **argv)
         exit(1);
     }
     av_log(NULL, AV_LOG_INFO, "MMX OK\n");
-#endif
+#endif /* HAVE_MMX */
     return 0;
 }
 
-#endif
+#endif /* TEST */

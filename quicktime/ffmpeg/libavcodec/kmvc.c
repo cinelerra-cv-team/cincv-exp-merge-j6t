@@ -2,20 +2,21 @@
  * KMVC decoder
  * Copyright (c) 2006 Konstantin Shishkov
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -26,8 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include "avcodec.h"
+#include "bytestream.h"
 
 #define KMVC_KEYFRAME 0x80
 #define KMVC_PALETTE  0x40
@@ -66,7 +67,7 @@ typedef struct BitBuf {
     } \
 }
 
-static void kmvc_decode_intra_8x8(KmvcContext * ctx, uint8_t * src, int w, int h)
+static void kmvc_decode_intra_8x8(KmvcContext * ctx, const uint8_t * src, int w, int h)
 {
     BitBuf bb;
     int res, val;
@@ -141,7 +142,7 @@ static void kmvc_decode_intra_8x8(KmvcContext * ctx, uint8_t * src, int w, int h
         }
 }
 
-static void kmvc_decode_inter_8x8(KmvcContext * ctx, uint8_t * src, int w, int h)
+static void kmvc_decode_inter_8x8(KmvcContext * ctx, const uint8_t * src, int w, int h)
 {
     BitBuf bb;
     int res, val;
@@ -223,10 +224,10 @@ static void kmvc_decode_inter_8x8(KmvcContext * ctx, uint8_t * src, int w, int h
         }
 }
 
-static int decode_frame(AVCodecContext * avctx, void *data, int *data_size, uint8_t * buf,
+static int decode_frame(AVCodecContext * avctx, void *data, int *data_size, const uint8_t * buf,
                         int buf_size)
 {
-    KmvcContext *const ctx = (KmvcContext *) avctx->priv_data;
+    KmvcContext *const ctx = avctx->priv_data;
     uint8_t *out, *src;
     int i;
     int header;
@@ -242,8 +243,17 @@ static int decode_frame(AVCodecContext * avctx, void *data, int *data_size, uint
         return -1;
     }
 
-    header = buf[0];
-    buf++;
+    header = *buf++;
+
+    /* blocksize 127 is really palette change event */
+    if (buf[0] == 127) {
+        buf += 3;
+        for (i = 0; i < 127; i++) {
+            ctx->pal[i + (header & 0x81)] = AV_RB24(buf);
+            buf += 4;
+        }
+        buf -= 127 * 4 + 3;
+    }
 
     if (header & KMVC_KEYFRAME) {
         ctx->pic.key_frame = 1;
@@ -253,12 +263,18 @@ static int decode_frame(AVCodecContext * avctx, void *data, int *data_size, uint
         ctx->pic.pict_type = FF_P_TYPE;
     }
 
+    /* if palette has been changed, copy it from palctrl */
+    if (ctx->avctx->palctrl && ctx->avctx->palctrl->palette_changed) {
+        memcpy(ctx->pal, ctx->avctx->palctrl->palette, AVPALETTE_SIZE);
+        ctx->setpal = 1;
+        ctx->avctx->palctrl->palette_changed = 0;
+    }
+
     if (header & KMVC_PALETTE) {
         ctx->pic.palette_has_changed = 1;
         // palette starts from index 1 and has 127 entries
         for (i = 1; i <= ctx->palsize; i++) {
-            ctx->pal[i] = (buf[0] << 16) | (buf[1] << 8) | buf[2];
-            buf += 3;
+            ctx->pal[i] = bytestream_get_be24(&buf);
         }
     }
 
@@ -272,12 +288,16 @@ static int decode_frame(AVCodecContext * avctx, void *data, int *data_size, uint
 
     blocksize = *buf++;
 
-    if (blocksize != 8) {
+    if (blocksize != 8 && blocksize != 127) {
         av_log(avctx, AV_LOG_ERROR, "Block size = %i\n", blocksize);
         return -1;
     }
     memset(ctx->cur, 0, 320 * 200);
     switch (header & KMVC_METHOD) {
+    case 0:
+    case 1: // used in palette changed event
+        memcpy(ctx->cur, ctx->prev, 320 * 200);
+        break;
     case 3:
         kmvc_decode_intra_8x8(ctx, buf, avctx->width, avctx->height);
         break;
@@ -318,13 +338,12 @@ static int decode_frame(AVCodecContext * avctx, void *data, int *data_size, uint
 /*
  * Init kmvc decoder
  */
-static int decode_init(AVCodecContext * avctx)
+static av_cold int decode_init(AVCodecContext * avctx)
 {
-    KmvcContext *const c = (KmvcContext *) avctx->priv_data;
+    KmvcContext *const c = avctx->priv_data;
     int i;
 
     c->avctx = avctx;
-    avctx->has_b_frames = 0;
 
     c->pic.data[0] = NULL;
 
@@ -346,16 +365,19 @@ static int decode_init(AVCodecContext * avctx)
         av_log(NULL, 0, "Extradata missing, decoding may not work properly...\n");
         c->palsize = 127;
     } else {
-        c->palsize = LE_16(avctx->extradata + 10);
+        c->palsize = AV_RL16(avctx->extradata + 10);
     }
 
     if (avctx->extradata_size == 1036) {        // palette in extradata
         uint8_t *src = avctx->extradata + 12;
-        for (i = 0; i < c->palsize; i++) {
-            c->pal[i] = LE_32(src);
+        for (i = 0; i < 256; i++) {
+            c->pal[i] = AV_RL32(src);
             src += 4;
         }
         c->setpal = 1;
+        if (c->avctx->palctrl) {
+            c->avctx->palctrl->palette_changed = 0;
+        }
     }
 
     avctx->pix_fmt = PIX_FMT_PAL8;
@@ -368,14 +390,12 @@ static int decode_init(AVCodecContext * avctx)
 /*
  * Uninit kmvc decoder
  */
-static int decode_end(AVCodecContext * avctx)
+static av_cold int decode_end(AVCodecContext * avctx)
 {
-    KmvcContext *const c = (KmvcContext *) avctx->priv_data;
+    KmvcContext *const c = avctx->priv_data;
 
-    if (c->frm0)
-        av_free(c->frm0);
-    if (c->frm1)
-        av_free(c->frm1);
+    av_freep(&c->frm0);
+    av_freep(&c->frm1);
     if (c->pic.data[0])
         avctx->release_buffer(avctx, &c->pic);
 
@@ -390,5 +410,6 @@ AVCodec kmvc_decoder = {
     decode_init,
     NULL,
     decode_end,
-    decode_frame
+    decode_frame,
+    .long_name = "Karl Morton's video codec",
 };

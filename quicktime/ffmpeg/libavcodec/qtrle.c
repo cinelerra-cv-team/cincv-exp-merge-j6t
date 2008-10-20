@@ -2,20 +2,21 @@
  * Quicktime Animation (RLE) Video Decoder
  * Copyright (C) 2004 the ffmpeg project
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -27,7 +28,7 @@
  * The QT RLE decoder has seven modes of operation:
  * 1, 2, 4, 8, 16, 24, and 32 bits per pixel. For modes 1, 2, 4, and 8
  * the decoder outputs PAL8 colorspace data. 16-bit data yields RGB555
- * data. 24-bit data is RGB24 and 32-bit data is RGBA32.
+ * data. 24-bit data is RGB24 and 32-bit data is RGB32.
  */
 
 #include <stdio.h>
@@ -35,17 +36,14 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "common.h"
 #include "avcodec.h"
-#include "dsputil.h"
 
 typedef struct QtrleContext {
 
     AVCodecContext *avctx;
-    DSPContext dsp;
     AVFrame frame;
 
-    unsigned char *buf;
+    const unsigned char *buf;
     int size;
 
 } QtrleContext;
@@ -81,7 +79,7 @@ static void qtrle_decode_4bpp(QtrleContext *s)
     int rle_code;
     int row_ptr, pixel_ptr;
     int row_inc = s->frame.linesize[0];
-    unsigned char pi1, pi2, pi3, pi4, pi5, pi6, pi7, pi8;  /* 8 palette indices */
+    unsigned char pi1, pi2, pi3, pi4, pi5, pi6, pi7, pi8;  /* 8 palette indexes */
     unsigned char *rgb = s->frame.data[0];
     int pixel_limit = s->frame.linesize[0] * s->avctx->height;
 
@@ -94,15 +92,15 @@ static void qtrle_decode_4bpp(QtrleContext *s)
 
     /* fetch the header */
     CHECK_STREAM_PTR(2);
-    header = BE_16(&s->buf[stream_ptr]);
+    header = AV_RB16(&s->buf[stream_ptr]);
     stream_ptr += 2;
 
     /* if a header is present, fetch additional decoding parameters */
     if (header & 0x0008) {
         CHECK_STREAM_PTR(8);
-        start_line = BE_16(&s->buf[stream_ptr]);
+        start_line = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
-        lines_to_change = BE_16(&s->buf[stream_ptr]);
+        lines_to_change = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
     } else {
         start_line = 0;
@@ -124,7 +122,7 @@ static void qtrle_decode_4bpp(QtrleContext *s)
                 /* decode the run length code */
                 rle_code = -rle_code;
                 /* get the next 4 bytes from the stream, treat them as palette
-                 * indices, and output them rle_code times */
+                 * indexes, and output them rle_code times */
                 CHECK_STREAM_PTR(4);
                 pi1 = ((s->buf[stream_ptr]) >> 4) & 0x0f;
                 pi2 = (s->buf[stream_ptr++]) & 0x0f;
@@ -172,7 +170,7 @@ static void qtrle_decode_8bpp(QtrleContext *s)
     int rle_code;
     int row_ptr, pixel_ptr;
     int row_inc = s->frame.linesize[0];
-    unsigned char pi1, pi2, pi3, pi4;  /* 4 palette indices */
+    unsigned char pi1, pi2, pi3, pi4;  /* 4 palette indexes */
     unsigned char *rgb = s->frame.data[0];
     int pixel_limit = s->frame.linesize[0] * s->avctx->height;
 
@@ -185,15 +183,15 @@ static void qtrle_decode_8bpp(QtrleContext *s)
 
     /* fetch the header */
     CHECK_STREAM_PTR(2);
-    header = BE_16(&s->buf[stream_ptr]);
+    header = AV_RB16(&s->buf[stream_ptr]);
     stream_ptr += 2;
 
     /* if a header is present, fetch additional decoding parameters */
     if (header & 0x0008) {
         CHECK_STREAM_PTR(8);
-        start_line = BE_16(&s->buf[stream_ptr]);
+        start_line = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
-        lines_to_change = BE_16(&s->buf[stream_ptr]);
+        lines_to_change = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
     } else {
         start_line = 0;
@@ -215,7 +213,7 @@ static void qtrle_decode_8bpp(QtrleContext *s)
                 /* decode the run length code */
                 rle_code = -rle_code;
                 /* get the next 4 bytes from the stream, treat them as palette
-                 * indices, and output them rle_code times */
+                 * indexes, and output them rle_code times */
                 CHECK_STREAM_PTR(4);
                 pi1 = s->buf[stream_ptr++];
                 pi2 = s->buf[stream_ptr++];
@@ -267,15 +265,15 @@ static void qtrle_decode_16bpp(QtrleContext *s)
 
     /* fetch the header */
     CHECK_STREAM_PTR(2);
-    header = BE_16(&s->buf[stream_ptr]);
+    header = AV_RB16(&s->buf[stream_ptr]);
     stream_ptr += 2;
 
     /* if a header is present, fetch additional decoding parameters */
     if (header & 0x0008) {
         CHECK_STREAM_PTR(8);
-        start_line = BE_16(&s->buf[stream_ptr]);
+        start_line = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
-        lines_to_change = BE_16(&s->buf[stream_ptr]);
+        lines_to_change = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
     } else {
         start_line = 0;
@@ -297,7 +295,7 @@ static void qtrle_decode_16bpp(QtrleContext *s)
                 /* decode the run length code */
                 rle_code = -rle_code;
                 CHECK_STREAM_PTR(2);
-                rgb16 = BE_16(&s->buf[stream_ptr]);
+                rgb16 = AV_RB16(&s->buf[stream_ptr]);
                 stream_ptr += 2;
 
                 CHECK_PIXEL_PTR(rle_code * 2);
@@ -312,7 +310,7 @@ static void qtrle_decode_16bpp(QtrleContext *s)
 
                 /* copy pixels directly to output */
                 while (rle_code--) {
-                    rgb16 = BE_16(&s->buf[stream_ptr]);
+                    rgb16 = AV_RB16(&s->buf[stream_ptr]);
                     stream_ptr += 2;
                     *(unsigned short *)(&rgb[pixel_ptr]) = rgb16;
                     pixel_ptr += 2;
@@ -345,15 +343,15 @@ static void qtrle_decode_24bpp(QtrleContext *s)
 
     /* fetch the header */
     CHECK_STREAM_PTR(2);
-    header = BE_16(&s->buf[stream_ptr]);
+    header = AV_RB16(&s->buf[stream_ptr]);
     stream_ptr += 2;
 
     /* if a header is present, fetch additional decoding parameters */
     if (header & 0x0008) {
         CHECK_STREAM_PTR(8);
-        start_line = BE_16(&s->buf[stream_ptr]);
+        start_line = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
-        lines_to_change = BE_16(&s->buf[stream_ptr]);
+        lines_to_change = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
     } else {
         start_line = 0;
@@ -425,15 +423,15 @@ static void qtrle_decode_32bpp(QtrleContext *s)
 
     /* fetch the header */
     CHECK_STREAM_PTR(2);
-    header = BE_16(&s->buf[stream_ptr]);
+    header = AV_RB16(&s->buf[stream_ptr]);
     stream_ptr += 2;
 
     /* if a header is present, fetch additional decoding parameters */
     if (header & 0x0008) {
         CHECK_STREAM_PTR(8);
-        start_line = BE_16(&s->buf[stream_ptr]);
+        start_line = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
-        lines_to_change = BE_16(&s->buf[stream_ptr]);
+        lines_to_change = AV_RB16(&s->buf[stream_ptr]);
         stream_ptr += 4;
     } else {
         start_line = 0;
@@ -487,9 +485,9 @@ static void qtrle_decode_32bpp(QtrleContext *s)
     }
 }
 
-static int qtrle_decode_init(AVCodecContext *avctx)
+static av_cold int qtrle_decode_init(AVCodecContext *avctx)
 {
-    QtrleContext *s = (QtrleContext *)avctx->priv_data;
+    QtrleContext *s = avctx->priv_data;
 
     s->avctx = avctx;
     switch (avctx->bits_per_sample) {
@@ -513,7 +511,7 @@ static int qtrle_decode_init(AVCodecContext *avctx)
         break;
 
     case 32:
-        avctx->pix_fmt = PIX_FMT_RGBA32;
+        avctx->pix_fmt = PIX_FMT_RGB32;
         break;
 
     default:
@@ -521,8 +519,6 @@ static int qtrle_decode_init(AVCodecContext *avctx)
             avctx->bits_per_sample);
         break;
     }
-    avctx->has_b_frames = 0;
-    dsputil_init(&s->dsp, avctx);
 
     s->frame.data[0] = NULL;
 
@@ -531,9 +527,9 @@ static int qtrle_decode_init(AVCodecContext *avctx)
 
 static int qtrle_decode_frame(AVCodecContext *avctx,
                               void *data, int *data_size,
-                              uint8_t *buf, int buf_size)
+                              const uint8_t *buf, int buf_size)
 {
-    QtrleContext *s = (QtrleContext *)avctx->priv_data;
+    QtrleContext *s = avctx->priv_data;
 
     s->buf = buf;
     s->size = buf_size;
@@ -604,9 +600,9 @@ static int qtrle_decode_frame(AVCodecContext *avctx,
     return buf_size;
 }
 
-static int qtrle_decode_end(AVCodecContext *avctx)
+static av_cold int qtrle_decode_end(AVCodecContext *avctx)
 {
-    QtrleContext *s = (QtrleContext *)avctx->priv_data;
+    QtrleContext *s = avctx->priv_data;
 
     if (s->frame.data[0])
         avctx->release_buffer(avctx, &s->frame);
@@ -624,5 +620,6 @@ AVCodec qtrle_decoder = {
     qtrle_decode_end,
     qtrle_decode_frame,
     CODEC_CAP_DR1,
+    .long_name = "QuickTime Animation (RLE) video",
 };
 

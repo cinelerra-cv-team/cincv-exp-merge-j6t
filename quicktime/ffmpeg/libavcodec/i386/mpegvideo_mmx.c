@@ -2,40 +2,39 @@
  * The simplest mpeg encoder (well, it was the simplest!)
  * Copyright (c) 2000,2001 Fabrice Bellard.
  *
- * This library is free software; you can redistribute it and/or
+ * Optimized for ia32 CPUs by Nick Kurshev <nickols_k@mail.ru>
+ * h263, mpeg1, mpeg2 dequantizer & draw_edges by Michael Niedermayer <michaelni@gmx.at>
+ *
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
- * Optimized for ia32 cpus by Nick Kurshev <nickols_k@mail.ru>
- * h263, mpeg1, mpeg2 dequantizer & draw_edges by Michael Niedermayer <michaelni@gmx.at>
  */
 
-#include "../dsputil.h"
-#include "../mpegvideo.h"
-#include "../avcodec.h"
-#include "mmx.h"
+#include "libavutil/x86_cpu.h"
+#include "libavcodec/avcodec.h"
+#include "libavcodec/dsputil.h"
+#include "libavcodec/mpegvideo.h"
+#include "dsputil_mmx.h"
 
-extern uint8_t zigzag_direct_noperm[64];
 extern uint16_t inv_zigzag_direct16[64];
-
-static const unsigned long long int mm_wabs __attribute__ ((aligned(8))) = 0xffffffffffffffffULL;
-static const unsigned long long int mm_wone __attribute__ ((aligned(8))) = 0x0001000100010001ULL;
 
 
 static void dct_unquantize_h263_intra_mmx(MpegEncContext *s,
                                   DCTELEM *block, int n, int qscale)
 {
-    long level, qmul, qadd, nCoeffs;
+    x86_reg level, qmul, qadd, nCoeffs;
 
     qmul = qscale << 1;
 
@@ -66,7 +65,7 @@ asm volatile(
                 "packssdw %%mm5, %%mm5          \n\t"
                 "psubw %%mm5, %%mm7             \n\t"
                 "pxor %%mm4, %%mm4              \n\t"
-                ".balign 16                     \n\t"
+                ASMALIGN(4)
                 "1:                             \n\t"
                 "movq (%0, %3), %%mm0           \n\t"
                 "movq 8(%0, %3), %%mm1          \n\t"
@@ -110,7 +109,7 @@ asm volatile(
 static void dct_unquantize_h263_inter_mmx(MpegEncContext *s,
                                   DCTELEM *block, int n, int qscale)
 {
-    long qmul, qadd, nCoeffs;
+    x86_reg qmul, qadd, nCoeffs;
 
     qmul = qscale << 1;
     qadd = (qscale - 1) | 1;
@@ -129,7 +128,7 @@ asm volatile(
                 "packssdw %%mm5, %%mm5          \n\t"
                 "psubw %%mm5, %%mm7             \n\t"
                 "pxor %%mm4, %%mm4              \n\t"
-                ".balign 16                     \n\t"
+                ASMALIGN(4)
                 "1:                             \n\t"
                 "movq (%0, %3), %%mm0           \n\t"
                 "movq 8(%0, %3), %%mm1          \n\t"
@@ -178,7 +177,7 @@ asm volatile(
                 if (level < -2048 || level > 2047)
                     fprintf(stderr, "unquant error %d %d\n", i, level);
 #endif
-  We can suppose that result of two multiplications can't be greate of 0xFFFF
+  We can suppose that result of two multiplications can't be greater than 0xFFFF
   i.e. is 16-bit, so we use here only PMULLW instruction and can avoid
   a complex multiplication.
 =====================================================
@@ -201,7 +200,7 @@ asm volatile(
 static void dct_unquantize_mpeg1_intra_mmx(MpegEncContext *s,
                                      DCTELEM *block, int n, int qscale)
 {
-    long nCoeffs;
+    x86_reg nCoeffs;
     const uint16_t *quant_matrix;
     int block0;
 
@@ -222,7 +221,7 @@ asm volatile(
                 "packssdw %%mm6, %%mm6          \n\t"
                 "packssdw %%mm6, %%mm6          \n\t"
                 "mov %3, %%"REG_a"              \n\t"
-                ".balign 16                     \n\t"
+                ASMALIGN(4)
                 "1:                             \n\t"
                 "movq (%0, %%"REG_a"), %%mm0    \n\t"
                 "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -270,7 +269,7 @@ asm volatile(
 static void dct_unquantize_mpeg1_inter_mmx(MpegEncContext *s,
                                      DCTELEM *block, int n, int qscale)
 {
-    long nCoeffs;
+    x86_reg nCoeffs;
     const uint16_t *quant_matrix;
 
     assert(s->block_last_index[n]>=0);
@@ -285,7 +284,7 @@ asm volatile(
                 "packssdw %%mm6, %%mm6          \n\t"
                 "packssdw %%mm6, %%mm6          \n\t"
                 "mov %3, %%"REG_a"              \n\t"
-                ".balign 16                     \n\t"
+                ASMALIGN(4)
                 "1:                             \n\t"
                 "movq (%0, %%"REG_a"), %%mm0    \n\t"
                 "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -336,7 +335,7 @@ asm volatile(
 static void dct_unquantize_mpeg2_intra_mmx(MpegEncContext *s,
                                      DCTELEM *block, int n, int qscale)
 {
-    long nCoeffs;
+    x86_reg nCoeffs;
     const uint16_t *quant_matrix;
     int block0;
 
@@ -357,7 +356,7 @@ asm volatile(
                 "packssdw %%mm6, %%mm6          \n\t"
                 "packssdw %%mm6, %%mm6          \n\t"
                 "mov %3, %%"REG_a"              \n\t"
-                ".balign 16                     \n\t"
+                ASMALIGN(4)
                 "1:                             \n\t"
                 "movq (%0, %%"REG_a"), %%mm0    \n\t"
                 "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -396,13 +395,13 @@ asm volatile(
                 : "%"REG_a, "memory"
         );
     block[0]= block0;
-        //Note, we dont do mismatch control for intra as errors cannot accumulate
+        //Note, we do not do mismatch control for intra as errors cannot accumulate
 }
 
 static void dct_unquantize_mpeg2_inter_mmx(MpegEncContext *s,
                                      DCTELEM *block, int n, int qscale)
 {
-    long nCoeffs;
+    x86_reg nCoeffs;
     const uint16_t *quant_matrix;
 
     assert(s->block_last_index[n]>=0);
@@ -418,7 +417,7 @@ asm volatile(
                 "packssdw %%mm6, %%mm6          \n\t"
                 "packssdw %%mm6, %%mm6          \n\t"
                 "mov %3, %%"REG_a"              \n\t"
-                ".balign 16                     \n\t"
+                ASMALIGN(4)
                 "1:                             \n\t"
                 "movq (%0, %%"REG_a"), %%mm0    \n\t"
                 "movq 8(%0, %%"REG_a"), %%mm1   \n\t"
@@ -474,94 +473,6 @@ asm volatile(
                 ::"r" (block+nCoeffs), "r"(quant_matrix+nCoeffs), "g" (qscale), "r" (-2*nCoeffs)
                 : "%"REG_a, "memory"
         );
-}
-
-/* draw the edges of width 'w' of an image of size width, height
-   this mmx version can only handle w==8 || w==16 */
-static void draw_edges_mmx(uint8_t *buf, int wrap, int width, int height, int w)
-{
-    uint8_t *ptr, *last_line;
-    int i;
-
-    last_line = buf + (height - 1) * wrap;
-    /* left and right */
-    ptr = buf;
-    if(w==8)
-    {
-        asm volatile(
-                "1:                             \n\t"
-                "movd (%0), %%mm0               \n\t"
-                "punpcklbw %%mm0, %%mm0         \n\t"
-                "punpcklwd %%mm0, %%mm0         \n\t"
-                "punpckldq %%mm0, %%mm0         \n\t"
-                "movq %%mm0, -8(%0)             \n\t"
-                "movq -8(%0, %2), %%mm1         \n\t"
-                "punpckhbw %%mm1, %%mm1         \n\t"
-                "punpckhwd %%mm1, %%mm1         \n\t"
-                "punpckhdq %%mm1, %%mm1         \n\t"
-                "movq %%mm1, (%0, %2)           \n\t"
-                "add %1, %0                     \n\t"
-                "cmp %3, %0                     \n\t"
-                " jb 1b                         \n\t"
-                : "+r" (ptr)
-                : "r" ((long)wrap), "r" ((long)width), "r" (ptr + wrap*height)
-        );
-    }
-    else
-    {
-        asm volatile(
-                "1:                             \n\t"
-                "movd (%0), %%mm0               \n\t"
-                "punpcklbw %%mm0, %%mm0         \n\t"
-                "punpcklwd %%mm0, %%mm0         \n\t"
-                "punpckldq %%mm0, %%mm0         \n\t"
-                "movq %%mm0, -8(%0)             \n\t"
-                "movq %%mm0, -16(%0)            \n\t"
-                "movq -8(%0, %2), %%mm1         \n\t"
-                "punpckhbw %%mm1, %%mm1         \n\t"
-                "punpckhwd %%mm1, %%mm1         \n\t"
-                "punpckhdq %%mm1, %%mm1         \n\t"
-                "movq %%mm1, (%0, %2)           \n\t"
-                "movq %%mm1, 8(%0, %2)          \n\t"
-                "add %1, %0                     \n\t"
-                "cmp %3, %0                     \n\t"
-                " jb 1b                         \n\t"
-                : "+r" (ptr)
-                : "r" ((long)wrap), "r" ((long)width), "r" (ptr + wrap*height)
-        );
-    }
-
-    for(i=0;i<w;i+=4) {
-        /* top and bottom (and hopefully also the corners) */
-        ptr= buf - (i + 1) * wrap - w;
-        asm volatile(
-                "1:                             \n\t"
-                "movq (%1, %0), %%mm0           \n\t"
-                "movq %%mm0, (%0)               \n\t"
-                "movq %%mm0, (%0, %2)           \n\t"
-                "movq %%mm0, (%0, %2, 2)        \n\t"
-                "movq %%mm0, (%0, %3)           \n\t"
-                "add $8, %0                     \n\t"
-                "cmp %4, %0                     \n\t"
-                " jb 1b                         \n\t"
-                : "+r" (ptr)
-                : "r" ((long)buf - (long)ptr - w), "r" ((long)-wrap), "r" ((long)-wrap*3), "r" (ptr+width+2*w)
-        );
-        ptr= last_line + (i + 1) * wrap - w;
-        asm volatile(
-                "1:                             \n\t"
-                "movq (%1, %0), %%mm0           \n\t"
-                "movq %%mm0, (%0)               \n\t"
-                "movq %%mm0, (%0, %2)           \n\t"
-                "movq %%mm0, (%0, %2, 2)        \n\t"
-                "movq %%mm0, (%0, %3)           \n\t"
-                "add $8, %0                     \n\t"
-                "cmp %4, %0                     \n\t"
-                " jb 1b                         \n\t"
-                : "+r" (ptr)
-                : "r" ((long)last_line - (long)ptr - w), "r" ((long)wrap), "r" ((long)wrap*3), "r" (ptr+width+2*w)
-        );
-    }
 }
 
 static void  denoise_dct_mmx(MpegEncContext *s, DCTELEM *block){
@@ -672,6 +583,12 @@ static void  denoise_dct_sse2(MpegEncContext *s, DCTELEM *block){
     );
 }
 
+#ifdef HAVE_SSSE3
+#define HAVE_SSSE3_BAK
+#endif
+#undef HAVE_SSSE3
+
+#undef HAVE_SSE2
 #undef HAVE_MMX2
 #define RENAME(a) a ## _MMX
 #define RENAMEl(a) a ## _mmx
@@ -684,11 +601,21 @@ static void  denoise_dct_sse2(MpegEncContext *s, DCTELEM *block){
 #define RENAMEl(a) a ## _mmx2
 #include "mpegvideo_mmx_template.c"
 
+#define HAVE_SSE2
 #undef RENAME
 #undef RENAMEl
 #define RENAME(a) a ## _SSE2
 #define RENAMEl(a) a ## _sse2
 #include "mpegvideo_mmx_template.c"
+
+#ifdef HAVE_SSSE3_BAK
+#define HAVE_SSSE3
+#undef RENAME
+#undef RENAMEl
+#define RENAME(a) a ## _SSSE3
+#define RENAMEl(a) a ## _sse2
+#include "mpegvideo_mmx_template.c"
+#endif
 
 void MPV_common_init_mmx(MpegEncContext *s)
 {
@@ -703,8 +630,6 @@ void MPV_common_init_mmx(MpegEncContext *s)
             s->dct_unquantize_mpeg2_intra = dct_unquantize_mpeg2_intra_mmx;
         s->dct_unquantize_mpeg2_inter = dct_unquantize_mpeg2_inter_mmx;
 
-        draw_edges = draw_edges_mmx;
-
         if (mm_flags & MM_SSE2) {
             s->denoise_dct= denoise_dct_sse2;
         } else {
@@ -712,6 +637,11 @@ void MPV_common_init_mmx(MpegEncContext *s)
         }
 
         if(dct_algo==FF_DCT_AUTO || dct_algo==FF_DCT_MMX){
+#ifdef HAVE_SSSE3
+            if(mm_flags & MM_SSSE3){
+                s->dct_quantize= dct_quantize_SSSE3;
+            } else
+#endif
             if(mm_flags & MM_SSE2){
                 s->dct_quantize= dct_quantize_SSE2;
             } else if(mm_flags & MM_MMXEXT){

@@ -19,18 +19,20 @@
  * -d                turn debugging on
  * -D <directory>    where to put the fish images
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 #include <stdlib.h>
@@ -42,9 +44,12 @@
 #include <stdio.h>
 #include <dirent.h>
 
-#include "framehook.h"
-#include "dsputil.h"
-#include "avformat.h"
+#include "libavformat/avformat.h"
+#include "libavformat/framehook.h"
+#include "libavcodec/dsputil.h"
+#include "libswscale/swscale.h"
+
+static int sws_flags = SWS_BICUBIC;
 
 #define SCALEBITS 10
 #define ONE_HALF  (1 << (SCALEBITS - 1))
@@ -88,6 +93,7 @@ typedef struct {
     int64_t next_pts;
     int inset;
     int min_width;
+    struct SwsContext *toRGB_convert_ctx;
 } ContextInfo;
 
 static void dorange(const char *s, int *first, int *second, int maxval)
@@ -101,8 +107,13 @@ static void dorange(const char *s, int *first, int *second, int maxval)
 
 void Release(void *ctx)
 {
-    if (ctx)
+    ContextInfo *ci;
+    ci = (ContextInfo *) ctx;
+
+    if (ctx) {
+        sws_freeContext(ci->toRGB_convert_ctx);
         av_free(ctx);
+    }
 }
 
 int Configure(void **ctxp, int argc, char *argv[])
@@ -113,7 +124,7 @@ int Configure(void **ctxp, int argc, char *argv[])
     *ctxp = av_mallocz(sizeof(ContextInfo));
     ci = (ContextInfo *) *ctxp;
 
-    optind = 0;
+    optind = 1;
 
     ci->dir = "/tmp";
     ci->threshold = 100;
@@ -219,7 +230,7 @@ static void get_hsv(HSV *hsv, int r, int g, int b)
 void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width, int height, int64_t pts)
 {
     ContextInfo *ci = (ContextInfo *) ctx;
-    uint8_t *cm = cropTbl + MAX_NEG_CROP;
+    uint8_t *cm = ff_cropTbl + MAX_NEG_CROP;
     int rowsize = picture->linesize[0];
 
 #if 0
@@ -327,17 +338,31 @@ void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width,
             }
 
             if (foundfile < ci->file_limit) {
+                FILE *f;
+                char fname[256];
+
                 size = avpicture_get_size(PIX_FMT_RGB24, width, height);
                 buf = av_malloc(size);
 
                 avpicture_fill(&picture1, buf, PIX_FMT_RGB24, width, height);
-                if (img_convert(&picture1, PIX_FMT_RGB24,
-                                picture, pix_fmt, width, height) >= 0) {
+
+                // if we already got a SWS context, let's realloc if is not re-useable
+                ci->toRGB_convert_ctx = sws_getCachedContext(ci->toRGB_convert_ctx,
+                                            width, height, pix_fmt,
+                                            width, height, PIX_FMT_RGB24,
+                                            sws_flags, NULL, NULL, NULL);
+                if (ci->toRGB_convert_ctx == NULL) {
+                    av_log(NULL, AV_LOG_ERROR,
+                           "Cannot initialize the toRGB conversion context\n");
+                    return;
+                }
+                // img_convert parameters are          2 first destination, then 4 source
+                // sws_scale   parameters are context, 4 first source,      then 2 destination
+                sws_scale(ci->toRGB_convert_ctx,
+                              picture->data, picture->linesize, 0, height,
+                              picture1.data, picture1.linesize);
+
                     /* Write out the PPM file */
-
-                    FILE *f;
-                    char fname[256];
-
                     snprintf(fname, sizeof(fname), "%s/fishimg%ld_%"PRId64".ppm", ci->dir, (long)(av_gettime() / 1000000), pts);
                     f = fopen(fname, "w");
                     if (f) {
@@ -345,7 +370,6 @@ void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width,
                         fwrite(buf, width * height * 3, 1, f);
                         fclose(f);
                     }
-                }
 
                 av_free(buf);
                 ci->next_pts = pts + ci->min_interval;

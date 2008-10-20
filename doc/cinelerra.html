@@ -1,9 +1,9 @@
 <html lang="en">
 <head>
-<title>Secrets of Cinelerra</title>
+<title>SECRETS OF CINELERRA</title>
 <meta http-equiv="Content-Type" content="text/html">
-<meta name="description" content="Secrets of Cinelerra">
-<meta name="generator" content="makeinfo 4.8">
+<meta name="description" content="SECRETS OF CINELERRA">
+<meta name="generator" content="makeinfo 4.11">
 <link title="Top" rel="top" href="#Top">
 <link href="http://www.gnu.org/software/texinfo/" rel="generator-home" title="Texinfo Homepage">
 <meta http-equiv="Content-Style-Type" content="text/css">
@@ -20,7 +20,6 @@
 --></style>
 </head>
 <body>
-<h1 class="settitle">Secrets of Cinelerra</h1>
 <div class="node">
 <p><hr>
 <a name="Top"></a>
@@ -29,7 +28,15 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 
 </div>
 
-<h2 class="unnumbered">Secrets of Cinelerra</h2>
+<h2 class="unnumbered">SECRETS OF CINELERRA</h2>
+
+<div align="center"></div>
+
+   <p>Version 4
+
+   <p>by Adam Williams
+
+   <p>Copyright &copy; 2008
 
 <h2 class="chapter">1 SHORT CONTENTS</h2>
 
@@ -58,7 +65,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
    <div class="contents">
 <h2>Table of Contents</h2>
 <ul>
-<li><a name="toc_Top" href="#Top">Secrets of Cinelerra</a>
+<li><a name="toc_Top" href="#Top">SECRETS OF CINELERRA</a>
 <li><a name="toc_Top" href="#Top">1 SHORT CONTENTS</a>
 <li><a name="toc_ABOUT-CINELERRA" href="#ABOUT-CINELERRA">2 ABOUT CINELERRA</a>
 <ul>
@@ -209,6 +216,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <li><a href="#RENDERED-EFFECTS">10.2 RENDERED EFFECTS</a>
 <li><a href="#TRANSITIONS">10.3 TRANSITIONS</a>
 <li><a href="#LADSPA-EFFECTS">10.4 LADSPA EFFECTS</a>
+<li><a href="#EFFECT-PRESETS">10.5 EFFECT PRESETS</a>
 </li></ul>
 <li><a name="toc_SETTING-PROJECT-ATTRIBUTES" href="#SETTING-PROJECT-ATTRIBUTES">11 SETTING PROJECT ATTRIBUTES</a>
 <ul>
@@ -228,13 +236,14 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <li><a name="toc_KEYFRAMES" href="#KEYFRAMES">13 KEYFRAMES</a>
 <ul>
 <li><a href="#CURVE-KEYFRAMES">13.1 CURVE KEYFRAMES</a>
-<ul>
-<li><a href="#NAVIGATING-CURVE-KEYFRAMES">13.1.1 NAVIGATING CURVE KEYFRAMES</a>
-</li></ul>
-<li><a href="#TOGGLE-KEYFRAMES">13.2 TOGGLE KEYFRAMES</a>
-<li><a href="#AUTOMATIC-KEYFRAMES">13.3 AUTOMATIC KEYFRAMES</a>
-<li><a href="#COMPOSITOR-KEYFRAMES">13.4 COMPOSITOR KEYFRAMES</a>
-<li><a href="#EDITING-KEYFRAMES">13.5 EDITING KEYFRAMES</a>
+<li><a href="#CHANGING-BEZIER-_0026-LINEAR-MODE">13.2 CHANGING BEZIER &amp; LINEAR MODE</a>
+<li><a href="#SNAPPING-TO-NEIGHBOR-KEYFRAMES">13.3 SNAPPING TO NEIGHBOR KEYFRAMES</a>
+<li><a href="#NAVIGATING-CURVE-KEYFRAMES">13.4 NAVIGATING CURVE KEYFRAMES</a>
+<li><a href="#TOGGLE-KEYFRAMES">13.5 TOGGLE KEYFRAMES</a>
+<li><a href="#AUTOMATIC-KEYFRAMES">13.6 AUTOMATIC KEYFRAMES</a>
+<li><a href="#COMPOSITOR-KEYFRAMES">13.7 COMPOSITOR KEYFRAMES</a>
+<li><a href="#EDITING-KEYFRAMES">13.8 EDITING KEYFRAMES</a>
+<li><a href="#KEYFRAME-SPANNING">13.9 KEYFRAME SPANNING</a>
 </li></ul>
 <li><a name="toc_CAPTURING-MEDIA" href="#CAPTURING-MEDIA">14 CAPTURING MEDIA</a>
 <ul>
@@ -289,29 +298,35 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#dir">(dir)</a>
 <li><a href="#HISTOGRAM">18.9 HISTOGRAM</a>
 <li><a href="#INVERSE-TELECINE">18.10 INVERSE TELECINE</a>
 <li><a href="#INTERPOLATE-VIDEO">18.11 INTERPOLATE VIDEO</a>
-<li><a href="#LINEARIZE">18.12 LINEARIZE</a>
-<li><a href="#LIVE-AUDIO">18.13 LIVE AUDIO</a>
-<li><a href="#LIVE-VIDEO">18.14 LIVE VIDEO</a>
-<li><a href="#LOOP">18.15 LOOP</a>
-<li><a href="#MOTION">18.16 MOTION</a>
+<li><a href="#LENS">18.12 LENS</a>
+<li><a href="#LINEARIZE">18.13 LINEARIZE</a>
+<li><a href="#LIVE-AUDIO">18.14 LIVE AUDIO</a>
+<li><a href="#LIVE-VIDEO">18.15 LIVE VIDEO</a>
+<li><a href="#LOOP">18.16 LOOP</a>
+<li><a href="#MOTION">18.17 MOTION</a>
 <ul>
-<li><a href="#SECRETS-OF-MOTION-TRACKING">18.16.1 SECRETS OF MOTION TRACKING</a>
-<li><a href="#2-PASS-MOTION-TRACKING">18.16.2 2 PASS MOTION TRACKING</a>
-<li><a href="#USING-BLUR-TO-IMPROVE-MOTION-TRACKING">18.16.3 USING BLUR TO IMPROVE MOTION TRACKING</a>
-<li><a href="#USING-HISTOGRAM-TO-IMPROVE-MOTION-TRACKING">18.16.4 USING HISTOGRAM TO IMPROVE MOTION TRACKING</a>
+<li><a href="#SECRETS-OF-MOTION-TRACKING">18.17.1 SECRETS OF MOTION TRACKING</a>
+<li><a href="#2-PASS-MOTION-TRACKING">18.17.2 2 PASS MOTION TRACKING</a>
+<li><a href="#USING-BLUR-TO-IMPROVE-MOTION-TRACKING">18.17.3 USING BLUR TO IMPROVE MOTION TRACKING</a>
+<li><a href="#USING-HISTOGRAM-TO-IMPROVE-MOTION-TRACKING">18.17.4 USING HISTOGRAM TO IMPROVE MOTION TRACKING</a>
+<li><a href="#INTERPOLATING-MOTION-BETWEEN-FRAMES">18.17.5 INTERPOLATING MOTION BETWEEN FRAMES</a>
+<li><a href="#FILLING-IN-THE-BLACK-AREAS">18.17.6 FILLING IN THE BLACK AREAS</a>
 </li></ul>
-<li><a href="#REFRAMERT">18.17 REFRAMERT</a>
-<li><a href="#REFRAME">18.18 REFRAME</a>
-<li><a href="#RESAMPLE">18.19 RESAMPLE</a>
-<li><a href="#REVERSE-VIDEO_002fAUDIO">18.20 REVERSE VIDEO/AUDIO</a>
-<li><a href="#THRESHOLD">18.21 THRESHOLD</a>
-<li><a href="#TIME-AVERAGE">18.22 TIME AVERAGE</a>
-<li><a href="#TITLER">18.23 TITLER</a>
+<li><a href="#MOTION-2-POINT">18.18 MOTION 2 POINT</a>
+<li><a href="#REFRAMERT">18.19 REFRAMERT</a>
+<li><a href="#REFRAME">18.20 REFRAME</a>
+<li><a href="#RESAMPLE">18.21 RESAMPLE</a>
+<li><a href="#REVERSE-VIDEO_002fAUDIO">18.22 REVERSE VIDEO/AUDIO</a>
+<li><a href="#SWAP-FRAMES">18.23 SWAP FRAMES</a>
+<li><a href="#THRESHOLD">18.24 THRESHOLD</a>
+<li><a href="#TIME-AVERAGE">18.25 TIME AVERAGE</a>
+<li><a href="#TITLER">18.26 TITLER</a>
 <ul>
-<li><a href="#ADDING-FONTS-TO-THE-TITLER">18.23.1 ADDING FONTS TO THE TITLER</a>
-<li><a href="#THE-TITLE_002dSAFE-REGION">18.23.2 THE TITLE-SAFE REGION</a>
+<li><a href="#ADDING-FONTS-TO-THE-TITLER">18.26.1 ADDING FONTS TO THE TITLER</a>
+<li><a href="#THE-TITLE_002dSAFE-REGION">18.26.2 THE TITLE-SAFE REGION</a>
+<li><a href="#MAKING-TITLES-LOOK-GOOD">18.26.3 MAKING TITLES LOOK GOOD</a>
 </li></ul>
-<li><a href="#VIDEO-SCOPE">18.24 VIDEO SCOPE</a>
+<li><a href="#VIDEO-SCOPE">18.27 VIDEO SCOPE</a>
 </li></ul>
 <li><a name="toc_PLUGIN-AUTHORING" href="#PLUGIN-AUTHORING">19 PLUGIN AUTHORING</a>
 <ul>
@@ -371,29 +386,15 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#Top">Top</a>
 
 <h2 class="chapter">2 ABOUT CINELERRA</h2>
 
-<p>For years some people have wanted a way to edit their audio and video
-in one place as fluidly as writing text.  Cinelerra tries to be a
-single location for all your audio and video editing needs.  All the
-recording, editing, and playback are handled here.  It can be used as
-an audio player.  It can be used to record audio or video.  It can even
-be used as a photo retoucher.
-
-   <p>There are two types of moviegoers: producers who create new content,
-going back over their content at future points for further refinement,
-and consumers who want to acquire the content and watch it.  Cinelerra
-is not intended for consumers.  Cinelerra has many features for
-uncompressed content, high resolution processing, and compositing, with
-very few shortcuts.  Producers need these features because of the need
-to retouch many generations of footage with alterations to the format,
-which makes Cinelerra very complex. There are many more standard tools
-for consumers like MainActor, Kino, or Moxy, which you should consider
-before using Cinelerra.
+<p><b>BROADCAST 1.0</b>
 
    <p>In 1996 our first editor came out: Broadcast 1.0.  It was just a window
 with a waveform in it, it could cut and paste stereo audio waveforms on
 a UNIX box, except unlike other audio editors it could handle files up
 to 2 gigabytes with only 64 megs of RAM.  That was a feature normally
 only accessible to the highest end professional audio houses.
+
+   <p><b>BROADCAST 2.0</b>
 
    <p>In 1997 Broadcast 1.0 was replaced by Broadcast 2.0.  This time the
 window had a menubar, patchbay, console, and transport control. 
@@ -404,6 +405,8 @@ performed as the audio was playing back, in realtime.  A user could mix
 unlimited numbers of tracks, adjust fade, pan, and EQ, and hear the
 result instantly.   Amazingly this real time tweeking is still
 unavailable on most audio programs.
+
+   <p><b>BROADCAST 2000</b>
 
    <p>But Broadcast 2.0 still didn't handle video and it wasn't very graceful
 at audio either.  In 1999 video broke into the story with Broadcast
@@ -417,6 +420,8 @@ lot of processing and editing on video and audio that would otherwise
 involve many hours setting up command line sequences and writing to
 disk. For a time it seemed as if the original dream of immersive movie
 making for everyone regardless of income level had arrived.
+
+   <p><b>CINELERRA</b>
 
    <p>Later on Broadcast 2000 began to come short.  Its audio and video was
 graceful if you knew how to use it efficiently, but quality issues and
@@ -434,6 +439,21 @@ become a clone.  It's interface would be designed for video from the
 ground up, while supplementing that with the Broadcast audio
 interface.  As always, quality improvements would happen.
 
+   <p><b>LINUX DERIVATIVES</b>
+
+   <p>Linux became more and more fragmented after corporations adopted it. 
+Threading once worked the same on all derivatives.  Today there are more
+threading models than days of the week.  We try to focus on 1 of the
+most popular Linux derivatives at any moment.  The threading model is
+ported to that Linux derivative shortly before a release, but Linux
+derivatives quickly evolve to new threading models and everything
+breaks.
+
+   <p>Also, there is no consistent behaviour for sound and video drivers.  The
+situation with video capture has improved in that modern video sources
+can all be mounted like disk drives.  The audio capture drivers have
+been a bit more reliable.
+
 <ul class="menu">
 <li><a accesskey="1" href="#ABOUT-THIS-MANUAL">ABOUT THIS MANUAL</a>
 </ul>
@@ -447,11 +467,9 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#ABOUT-CINELERRA">ABOUT CINELERRA</a>
 
 <h3 class="section">2.1 ABOUT THIS MANUAL</h3>
 
-<p>This manual is relevant only for the heroinewarrior.com version of
-Cinelerra.  If you are using the cinelerra.org fork, you should use the
-manual for that version.  The behavior of different forks is highly
-variable.  This manual has been copied and translated into many
-languages.
+<p>This is the original manual for Cinelerra.  This manual has been copied
+and translated into many languages on many websites in varying degrees
+of completeness.
 
    <p>Organizing information in the easiest manner for users to find out what
 they need to know is sort of like cataloging the internet.  They've
@@ -2329,6 +2347,7 @@ these files with the <b>draw media</b> toggle to speed up operations.
 
      <ul>
 <li>WAV
+<li>FLAC
 <li>PCM
 <li>AIFF
 <li>AC3 audio
@@ -4239,6 +4258,7 @@ applied using the same procedure.
 <li><a accesskey="2" href="#RENDERED-EFFECTS">RENDERED EFFECTS</a>
 <li><a accesskey="3" href="#TRANSITIONS">TRANSITIONS</a>
 <li><a accesskey="4" href="#LADSPA-EFFECTS">LADSPA EFFECTS</a>
+<li><a accesskey="5" href="#EFFECT-PRESETS">EFFECT PRESETS</a>
 </ul>
 
 <div class="node">
@@ -4254,6 +4274,8 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#USING-EFFECTS">USING EFFECTS</a>
 <p>These are layered under the track they apply to.  They process the
 track when the track is played back, with no permanent storage of the
 output except when the project is rendered.
+
+   <p><b>APPLYING REALTIME EFFECTS</b>
 
    <p>All the realtime effects are listed in the resource window, divided
 into two groups: audio effects and video effects.  Audio effects should
@@ -4275,15 +4297,34 @@ track is played back, effects are processed from top to bottom.  The
 output of the top effect becomes the input of the bottom effect and so
 on and so forth.
 
-   <p>In addition to dragging from the resource window, effects may be
-applied to a track by a popup menu.  Right click on a track and select
-<b>Attach effect</b> from the popup.  The attach effect dialog gives
-you more control than pure dragging and dropping.  For one thing, the
-attach effect dialog lets you attach two more types of effects: shared
-effects and shared tracks.  Select a plugin from the <b>Plugins</b>
-column and hit <b>Attach</b> under the plugins column to attach it. 
-The effect is the same as if the effect was dragged from the resource
-window.
+   <p>In addition to dragging from the resource window, there are 2 other
+methods of applying them:
+
+     <ul>
+<li><b>APPLYING FROM THE TRACK POPUP MENU:</b>
+
+     <p>Right click on a track and select <b>Attach effect</b> from the popup.  The attach effect
+dialog gives you more control than pure dragging and dropping.  For one
+thing, the attach effect dialog lets you attach two more types of
+effects: shared effects and shared tracks.  Select a plugin from the
+<b>Plugins</b> column and hit <b>Attach</b> under the plugins column to attach
+it.  The effect is the same as if the effect was dragged from the
+resource window.
+
+     <li><b>APPLYING FROM THE AUDIO AND VIDEO MENUS:</b>
+
+     <p>Select <b>Audio-&gt;Attach effect...</b> or <b>Video-&gt;Attach effect</b> to attach
+a realtime effect to all the recordable tracks simultaneously.  The
+advantage with this is most of the time you want to attach the same
+effect to all the audio tracks and the other two methods require
+repeating the same work for every track.
+
+     <p>The menu interface has an option called  <b>Attach single standalone and
+share others</b>.  Enable this to make the first track get a standalone
+effect and to have the other tracks share the standalone effect.  Most
+of the time, you want this to be on.
+
+   </ul>
 
    <p>When an effect exists under a track, it most often needs to be
 configured.  Go to the effect and right click on it to bring up the
@@ -4590,6 +4631,7 @@ disturbance.
 <div class="node">
 <p><hr>
 <a name="LADSPA-EFFECTS"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#EFFECT-PRESETS">EFFECT PRESETS</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#TRANSITIONS">TRANSITIONS</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#USING-EFFECTS">USING EFFECTS</a>
 
@@ -4610,6 +4652,24 @@ signify that they are Plugins for Linux Audio Developers.
    <p>LADSPA Effects are enabled merely by setting the <b>LADSPA_PATH</b>
 environment variable to the location of your LADSPA plugins or putting
 them in the <b>/usr/lib/cinelerra</b> directory.
+
+<div class="node">
+<p><hr>
+<a name="EFFECT-PRESETS"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#LADSPA-EFFECTS">LADSPA EFFECTS</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#USING-EFFECTS">USING EFFECTS</a>
+
+</div>
+
+<h3 class="section">10.5 EFFECT PRESETS</h3>
+
+<p>Save and recall all the settings for an effect by using the <b>presets</b>
+window.  Bring up the effect context menu by right clicking on the
+effect on the timeline.  Go to <b>Presets...</b> to bring up the window. 
+Save all the settings to a preset by entering a title in <b>Preset
+title</b> and clicking <b>save</b>.  Recall the settings in a preset by
+highlighting it and clicking <b>Apply</b>.  Delete a preset by highlighting
+it and clicking <b>Delete</b>.
 
 <div class="node">
 <p><hr>
@@ -5223,24 +5283,28 @@ timeline over the tracks they apply to.
 How to handle the different types of keyframes is described here.
 
 <ul class="menu">
-<li><a accesskey="1" href="#CURVE-KEYFRAMES">CURVE KEYFRAMES</a>
-<li><a accesskey="2" href="#TOGGLE-KEYFRAMES">TOGGLE KEYFRAMES</a>
-<li><a accesskey="3" href="#AUTOMATIC-KEYFRAMES">AUTOMATIC KEYFRAMES</a>
-<li><a accesskey="4" href="#COMPOSITOR-KEYFRAMES">COMPOSITOR KEYFRAMES</a>
-<li><a accesskey="5" href="#EDITING-KEYFRAMES">EDITING KEYFRAMES</a>
+<li><a accesskey="1" href="#CURVE-KEYFRAMES">CURVE KEYFRAMES</a>:   Using rubber band curves
+<li><a accesskey="2" href="#CHANGING-BEZIER-_0026-LINEAR-MODE">CHANGING BEZIER &amp; LINEAR MODE</a>:   Change curves from linear to curved
+<li><a accesskey="3" href="#SNAPPING-TO-NEIGHBOR-KEYFRAMES">SNAPPING TO NEIGHBOR KEYFRAMES</a>
+<li><a accesskey="4" href="#NAVIGATING-CURVE-KEYFRAMES">NAVIGATING CURVE KEYFRAMES</a>
+<li><a accesskey="5" href="#TOGGLE-KEYFRAMES">TOGGLE KEYFRAMES</a>
+<li><a accesskey="6" href="#AUTOMATIC-KEYFRAMES">AUTOMATIC KEYFRAMES</a>
+<li><a accesskey="7" href="#COMPOSITOR-KEYFRAMES">COMPOSITOR KEYFRAMES</a>
+<li><a accesskey="8" href="#EDITING-KEYFRAMES">EDITING KEYFRAMES</a>:    Moving keyframes around
+<li><a accesskey="9" href="#KEYFRAME-SPANNING">KEYFRAME SPANNING</a>:    How to change 1 parameter in many keyframes simultaneously
 </ul>
 
 <div class="node">
 <p><hr>
 <a name="CURVE-KEYFRAMES"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#TOGGLE-KEYFRAMES">TOGGLE KEYFRAMES</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#CHANGING-BEZIER-_0026-LINEAR-MODE">CHANGING BEZIER &amp; LINEAR MODE</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
 </div>
 
 <h3 class="section">13.1 CURVE KEYFRAMES</h3>
 
-<p>Many parameters are stored in bezier curves.  Go to <b>view-&gt;fade</b> or
+<p>Many parameters are stored in rubber band curves.  Go to <b>view-&gt;fade</b> or
 <b>view-&gt;...zoom</b> to show curves on the timeline for those parameters. 
 In either arrow editing mode or i-beam editing mode, move the cursor
 over the curves in the timeline until it changes shape.  Then merely by
@@ -5249,31 +5313,79 @@ position.
 
    <p>After the keyframe is created, click drag on it again to reposition
 it.  When you click-drag a second keyframe on the curve, it creates a
-smooth ramp.  <b>ctrl-dragging</b> on a keyframe changes the value of
-either the input control or the output control.  This affects the
-sharpness of the curve.  While the input control and the output control
-can be moved horizontally as well as vertically, the horizontal
-movement is purely for legibility and isn't used in the curve value.
+smooth ramp.
 
-   <p>You may remember that The Gimp and the Compositing masks all use
-<b>shift</b> to select control points so why does the timeline use
-<b>ctrl</b>?  When you <b>shift-drag</b> on a timeline curve, the
-keyframe snaps to the value of either the next or previous keyframe,
-depending on which exists.  This lets you set a constant curve value
-without having to copy the next or previous keyframe.
+<div class="node">
+<p><hr>
+<a name="CHANGING-BEZIER-%26-LINEAR-MODE"></a>
+<a name="CHANGING-BEZIER-_0026-LINEAR-MODE"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#SNAPPING-TO-NEIGHBOR-KEYFRAMES">SNAPPING TO NEIGHBOR KEYFRAMES</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#CURVE-KEYFRAMES">CURVE KEYFRAMES</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
-<ul class="menu">
-<li><a accesskey="1" href="#NAVIGATING-CURVE-KEYFRAMES">NAVIGATING CURVE KEYFRAMES</a>
-</ul>
+</div>
+
+<h3 class="section">13.2 CHANGING BEZIER &amp; LINEAR MODE</h3>
+
+<p>The curve keyframes have bezier and linear modes.  In linear mode, the
+keyframe looks like a square and the lines emanating from it are
+straight.  In bezier mode, the keyframe is rounded and has 2 control
+lines in addition to the rubber band curve lines.
+
+   <p>These are keyframes in linear mode.
+
+   <div class="block-image"><img src="linear.png" alt="linear.png"></div>
+
+   <p>These are keyframes in bezier mode.
+
+   <div class="block-image"><img src="bezier.png" alt="bezier.png"></div>
+
+   <p>Change the mode of an existing keyframe by right clicking on it to bring
+up the context menu and selecting <b>make linear</b> or <b>make bezier</b>.
+
+   <p>Change the mode of several keyframes by highlighting the entire region of the
+timeline and selecting <b>Keyframes-&gt;change to linear</b> or
+<b>Keyframes-&gt;change to bezier</b>.
+
+   <p>When keyframes are created, they can be linear or bezier by default. 
+Change the default mode by checking or unchecking <b>Keyframes-&gt;create
+bezier</b>.
+
+   <p>For bezier keyframes, <b>ctrl-dragging</b> on the control lines of a
+keyframe changes the value of either the input control or the output
+control.  Without <b>ctrl</b> the cursor only affects the central
+keyframe.  This affects the sharpness of the curve.  The input and
+output controls can only be moved vertically.
+
+   <p>If the control lines aren't visible, <b>ctrl-drag</b> on the left or right
+of the keyframe.
+
+<div class="node">
+<p><hr>
+<a name="SNAPPING-TO-NEIGHBOR-KEYFRAMES"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#NAVIGATING-CURVE-KEYFRAMES">NAVIGATING CURVE KEYFRAMES</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#CHANGING-BEZIER-_0026-LINEAR-MODE">CHANGING BEZIER &amp; LINEAR MODE</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
+
+</div>
+
+<h3 class="section">13.3 SNAPPING TO NEIGHBOR KEYFRAMES</h3>
+
+<p><b>shift-drag</b> on a curve keyframe to make the keyframe snap to the
+value of either the next or previous keyframe, depending on which
+exists.  This lets you set a constant curve value without having to copy
+the next or previous keyframe.
 
 <div class="node">
 <p><hr>
 <a name="NAVIGATING-CURVE-KEYFRAMES"></a>
-Up:&nbsp;<a rel="up" accesskey="u" href="#CURVE-KEYFRAMES">CURVE KEYFRAMES</a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#TOGGLE-KEYFRAMES">TOGGLE KEYFRAMES</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#SNAPPING-TO-NEIGHBOR-KEYFRAMES">SNAPPING TO NEIGHBOR KEYFRAMES</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
 </div>
 
-<h4 class="subsection">13.1.1 NAVIGATING CURVE KEYFRAMES</h4>
+<h3 class="section">13.4 NAVIGATING CURVE KEYFRAMES</h3>
 
 <p>There isn't much room on the timeline for a wide range of curve
 values.  You need to zoom the curves in and out vertically to have any
@@ -5294,12 +5406,12 @@ curves in multiples of 2.  Click on its tumbler to change the zoom.
 <p><hr>
 <a name="TOGGLE-KEYFRAMES"></a>
 Next:&nbsp;<a rel="next" accesskey="n" href="#AUTOMATIC-KEYFRAMES">AUTOMATIC KEYFRAMES</a>,
-Previous:&nbsp;<a rel="previous" accesskey="p" href="#CURVE-KEYFRAMES">CURVE KEYFRAMES</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#NAVIGATING-CURVE-KEYFRAMES">NAVIGATING CURVE KEYFRAMES</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
 </div>
 
-<h3 class="section">13.2 TOGGLE KEYFRAMES</h3>
+<h3 class="section">13.5 TOGGLE KEYFRAMES</h3>
 
 <p>Mute is the only toggle keyframe.  Mute keyframes determine where the
 track is processed but not rendered to the output.  Click-drag on these
@@ -5316,7 +5428,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
 </div>
 
-<h3 class="section">13.3 AUTOMATIC KEYFRAMES</h3>
+<h3 class="section">13.6 AUTOMATIC KEYFRAMES</h3>
 
 <p>You may have noticed when a few fade curves are set up, moving the
 insertion point around the curves causes the faders to reflect the
@@ -5366,7 +5478,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
 </div>
 
-<h3 class="section">13.4 COMPOSITOR KEYFRAMES</h3>
+<h3 class="section">13.7 COMPOSITOR KEYFRAMES</h3>
 
 <p>Camera and projector translation is represented by two parameters: x
 and y.  Therefore it is cumbersome to adjust with curves.  Cinelerra
@@ -5421,12 +5533,13 @@ keyframes, is always centered while the camera boxes move.
 <div class="node">
 <p><hr>
 <a name="EDITING-KEYFRAMES"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#KEYFRAME-SPANNING">KEYFRAME SPANNING</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#COMPOSITOR-KEYFRAMES">COMPOSITOR KEYFRAMES</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
 
 </div>
 
-<h3 class="section">13.5 EDITING KEYFRAMES</h3>
+<h3 class="section">13.8 EDITING KEYFRAMES</h3>
 
 <p>Keyframes can be shifted around and moved between tracks on the
 timeline using similar cut and paste operations to editing media.  Only
@@ -5470,6 +5583,25 @@ keyframe reflected until all the non-default keyframes are removed.
 selecting a region and calling <b>keyframes-&gt;clear keyframes</b>. 
 Merely click-drag a keyframe before its preceeding keyframe or after
 its following keyframe on the track.
+
+<div class="node">
+<p><hr>
+<a name="KEYFRAME-SPANNING"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#EDITING-KEYFRAMES">EDITING KEYFRAMES</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#KEYFRAMES">KEYFRAMES</a>
+
+</div>
+
+<h3 class="section">13.9 KEYFRAME SPANNING</h3>
+
+<p>To change a single parameter in multiple keyframes without changing the
+other parameters, highlight a region on the timeline and adjust the
+parameter.  Instead of a new keyframe being created, the existing
+keyframes are modified and only the changed parameter is modified.
+
+   <p>It doesn't matter if <img src="autokeyframe.png" alt="autokeyframe.png"> auto keyframe is enabled.  It
+only works when the keyframe stores multiple parameters.  Only mask and
+effect keyframes do this.  Other types of keyframes are generated as usual.
 
 <div class="node">
 <p><hr>
@@ -6577,14 +6709,18 @@ appliances.
      ifogen -T -o dvd
      mkisofs -dvd-video -udf -o dvd.iso dvd/
 </pre>
+   <p>Chapters may be set with the following:
+
+   <p>ifogen -o dvd &ndash;chapters=0021.788,0047.447,0077.043 final.mpg
+
+   <p>Replace the chapter times.
+
    <p>dvd.iso can be burned directly to a DVD with the following:
 
-<pre class="example">     dvdrecord -ignsize -dao -v dev=0,0,0 fs=67108864 dvd.iso
+<pre class="example">     dvdrecord -ignsize -dao -v dev=/dev/hdc fs=67108864 dvd.iso
 </pre>
-   <p>The argument to dev= is determined by running <b>dvdrecord -scanbus</b>
-and picking the right 3 digit device number.  This also requires
-interfacing the DVD drive through the scsi modules <b>ide-scsi, cdrom,
-sg</b>.
+   <p>The argument to dev= is the IDE device of the DVD drive.  Burning DVD's
+through SCSI is currently not supported.
 
 <div class="node">
 <p><hr>
@@ -6735,17 +6871,20 @@ utilize fully by mere experimentation.
 <li><a accesskey="9" href="#HISTOGRAM">HISTOGRAM</a>:          How to change the mapping of different brightness values. 
 <li><a href="#INVERSE-TELECINE">INVERSE TELECINE</a>:   How to convert pulled down frames to progressive frames. 
 <li><a href="#INTERPOLATE-VIDEO">INTERPOLATE VIDEO</a>:  How to create the illusion of higher framerates. 
+<li><a href="#LENS">LENS</a>:               Correcting spherical aberration
 <li><a href="#LINEARIZE">LINEARIZE</a>:          Fix gamma in raw camera images
 <li><a href="#LIVE-AUDIO">LIVE AUDIO</a>:         Pass audio from the soundcard directly to the timeline. 
 <li><a href="#LIVE-VIDEO">LIVE VIDEO</a>:         Pass video from the capture card directly to the timeline. 
 <li><a href="#LOOP">LOOP</a>:               How to loop regions of the timeline. 
-<li><a href="#MOTION">MOTION</a>:             The art of motion tracking. 
+<li><a href="#MOTION">MOTION</a>:             Motion tracking with rotation. 
+<li><a href="#MOTION-2-POINT">MOTION 2 POINT</a>:     Motion and rotation tracking from translation only. 
 <li><a href="#REFRAMERT">REFRAMERT</a>:          Changing the number of frames in a sequence. 
 <li><a href="#REFRAME">REFRAME</a>:            Changing the number of frames in a sequence with rendering. 
 <li><a href="#RESAMPLE">RESAMPLE</a>:           Change the number of samples in a sequence with rendering. 
 <li><a href="#REVERSE-VIDEO_002fAUDIO">REVERSE VIDEO/AUDIO</a>:  How to play regions in reverse. 
+<li><a href="#SWAP-FRAMES">SWAP FRAMES</a>:        Fixing temporal field order
 <li><a href="#THRESHOLD">THRESHOLD</a>:          How to get monochrome out of a region of the image. 
-<li><a href="#TIME-AVERAGE">TIME AVERAGE</a>:       How to add trail patterns or increase still image quality. 
+<li><a href="#TIME-AVERAGE">TIME AVERAGE</a>:       How to stack images. 
 <li><a href="#TITLER">TITLER</a>:             How to add text to a track from inside Cinelerra. 
 <li><a href="#VIDEO-SCOPE">VIDEO SCOPE</a>:        How to view the dynamic range of intensity and hue. 
 </ul>
@@ -7183,7 +7322,7 @@ need to follow inverse telecine with a decimate effect.
 <div class="node">
 <p><hr>
 <a name="INTERPOLATE-VIDEO"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#LINEARIZE">LINEARIZE</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#LENS">LENS</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#INVERSE-TELECINE">INVERSE TELECINE</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
@@ -7207,14 +7346,67 @@ input frame.
 
 <div class="node">
 <p><hr>
-<a name="LINEARIZE"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#LIVE-AUDIO">LIVE AUDIO</a>,
+<a name="LENS"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#LINEARIZE">LINEARIZE</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#INTERPOLATE-VIDEO">INTERPOLATE VIDEO</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
 </div>
 
-<h3 class="section">18.12 LINEARIZE</h3>
+<h3 class="section">18.12 LENS</h3>
+
+<p>The lens affect stretches or shrinks to convert lens distorted images to
+rectilinear images.  The most common use is converting fish eye lenses
+to rectilinear lenses.  It is also useful for star tracking.
+
+   <p><b>R, G, B, A Field of view:</b> These determine how much the image is
+stretched in each channel.
+
+   <p><b>Lock:</b> This causes changes to 1 channel to affect all the channels. 
+This is normally the desired behavior.
+
+   <p><b>Aspect Ratio:</b> This changes the amount of stretching done in the X
+axis vs the Y axis.  To crop less data from stretched images, this
+allows more stretching to be done on 1 axis without creating black
+borders in the other axis.
+
+   <p><b>Radius:</b> This determines the size of the stretched region.  While
+adjusting the <b>field of view</b>, black borders may appear.  Adjust the
+<b>radius</b> to shrink or expand the output so black borders are out of
+frame.
+
+   <p><b>Center X, Y:</b> The center of the stretched region.  This is only
+useful if the image was previously translated by the software so the
+center of the lens is now off center.
+
+   <p><b>Draw center:</b> This is a visual aid when adjusting the <b>Center X, Y</b>
+but doesn't affect the results.
+
+   <p><b>Mode:</b> The type of stretching algorithm.
+
+     <ul>
+<li><b>Sphere shrink:</b> This is for making an image look like it's mapped to a sphere.
+
+     <li><b>Sphere expand:</b> This is for unmapping an image mapped to a sphere and
+flattening it.
+
+     <li><b>Rectilinear Stretch:</b> This is for flattening a fish eye lens.
+
+     <li><b>Rectilinear Shrink:</b> This is for making something flat look like it
+was taken by a fish eye lens.
+
+   </ul>
+
+<div class="node">
+<p><hr>
+<a name="LINEARIZE"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#LIVE-AUDIO">LIVE AUDIO</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#LENS">LENS</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
+
+</div>
+
+<h3 class="section">18.13 LINEARIZE</h3>
 
 <p>Raw camera images store colors in a logarithmic scale.  The blacks in
 these images are nearly 0 and the whites are supposed to be infinity. 
@@ -7249,7 +7441,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.13 LIVE AUDIO</h3>
+<h3 class="section">18.14 LIVE AUDIO</h3>
 
 <p>This effect reads audio directly from the soundcard input.  It replaces
 any audio on the track so it's normally applied to an empty track.
@@ -7292,7 +7484,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.14 LIVE VIDEO</h3>
+<h3 class="section">18.15 LIVE VIDEO</h3>
 
 <p>This effect reads video directly from the capture card input.  It
 replaces any video on the track so it's normally applied to an empty
@@ -7343,7 +7535,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.15 LOOP</h3>
+<h3 class="section">18.16 LOOP</h3>
 
 <p>Sections of audio or video can be looped by dropping a <b>loop</b> effect
 on them.  Contrary to the the <b>settings-&gt;loop playback</b> option, the
@@ -7366,13 +7558,13 @@ looped from the beginning by setting the keyframe near the end.
 <div class="node">
 <p><hr>
 <a name="MOTION"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#REFRAMERT">REFRAMERT</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#MOTION-2-POINT">MOTION 2 POINT</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#LOOP">LOOP</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
 </div>
 
-<h3 class="section">18.16 MOTION</h3>
+<h3 class="section">18.17 MOTION</h3>
 
 <p>The motion tracker is almost a complete application in itself.  The
 motion tracker tracks two types of motion: translation and rotation. 
@@ -7437,16 +7629,24 @@ image.  The center of the block should be part of the image which is
 visible at all times.
 
      <li>
-<b>Maximum absolute offset:</b> The amount of motion detected by the
-motion  tracker is unlimited if this is 100.  If it's under 100 the
-amount of motion is limited by that percentage of the image size.
+<b>Maximum absolute offset:</b> In <b>track previous frame</b> and <b>previous
+frame same block</b> modes, the motion detected between every frame is
+accumulated to form an absolute motion vector for the entire sequence. 
+The amount of motion detected by the motion tracker is unlimited if this
+is 100.  If it's under 100 the amount of motion is limited to that
+percentage of the image size.  The value must be smaller for larger
+<b>translation block sizes</b> so there is enough area under the block to
+sense motion with.
 
      <li>
-<b>Settling speed:</b> The motion detected between every frame can be
-accumulated to form an absolute motion vector.  If the settling speed
-is 100 the absolute vector is added to the next frame.  If the settling
-speed is less than 100 the absolute vector is downscaled by the
-settling amount before being added to the next frame.
+<b>Settling speed</b> In <b>track previous frame</b> and <b>previous frame
+same block</b> modes, the motion detected between every frame is
+accumulated to form an absolute motion vector for the entire sequence. 
+To keep the absolute motion from exceeding limits, it can be
+automatically reset over time by the settling speed.  If the settling
+speed is 100 the absolute vector resets to 0 after every frame.  If the
+settling speed is less than 100 the absolute vector is reduced slightly
+before the next frame is added.
 
      <li>
 <b>Track rotation:</b> Enables rotation operations.  The motion tracker
@@ -7549,6 +7749,8 @@ subpixels by changing the action setting.
 <li><a accesskey="2" href="#g_t2-PASS-MOTION-TRACKING">2 PASS MOTION TRACKING</a>
 <li><a accesskey="3" href="#USING-BLUR-TO-IMPROVE-MOTION-TRACKING">USING BLUR TO IMPROVE MOTION TRACKING</a>
 <li><a accesskey="4" href="#USING-HISTOGRAM-TO-IMPROVE-MOTION-TRACKING">USING HISTOGRAM TO IMPROVE MOTION TRACKING</a>
+<li><a accesskey="5" href="#INTERPOLATING-MOTION-BETWEEN-FRAMES">INTERPOLATING MOTION BETWEEN FRAMES</a>
+<li><a accesskey="6" href="#FILLING-IN-THE-BLACK-AREAS">FILLING IN THE BLACK AREAS</a>
 </ul>
 
 <div class="node">
@@ -7559,7 +7761,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#MOTION">MOTION</a>
 
 </div>
 
-<h4 class="subsection">18.16.1 SECRETS OF MOTION TRACKING</h4>
+<h4 class="subsection">18.17.1 SECRETS OF MOTION TRACKING</h4>
 
 <p>Since it is a very slow effect, there is a method to applying the
 motion tracker to get the most out of it.  First disable playback for
@@ -7607,7 +7809,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#MOTION">MOTION</a>
 
 </div>
 
-<h4 class="subsection">18.16.2 2 PASS MOTION TRACKING</h4>
+<h4 class="subsection">18.17.2 2 PASS MOTION TRACKING</h4>
 
 <p>The method described above is 2 pass motion tracking.  One pass is used
 just to calculate the motion vectors.  A second pass is used to apply
@@ -7639,7 +7841,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#MOTION">MOTION</a>
 
 </div>
 
-<h4 class="subsection">18.16.3 USING BLUR TO IMPROVE MOTION TRACKING</h4>
+<h4 class="subsection">18.17.3 USING BLUR TO IMPROVE MOTION TRACKING</h4>
 
 <p>With extremely noisy or interlaced footage, applying a blur effect
 before the motion tracking can improve accuracy.  Either save the
@@ -7649,12 +7851,13 @@ motion vectors in a <b>tracking pass</b> and disable the blur for the
 <div class="node">
 <p><hr>
 <a name="USING-HISTOGRAM-TO-IMPROVE-MOTION-TRACKING"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#INTERPOLATING-MOTION-BETWEEN-FRAMES">INTERPOLATING MOTION BETWEEN FRAMES</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#USING-BLUR-TO-IMPROVE-MOTION-TRACKING">USING BLUR TO IMPROVE MOTION TRACKING</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#MOTION">MOTION</a>
 
 </div>
 
-<h4 class="subsection">18.16.4 USING HISTOGRAM TO IMPROVE MOTION TRACKING</h4>
+<h4 class="subsection">18.17.4 USING HISTOGRAM TO IMPROVE MOTION TRACKING</h4>
 
 <p>A histogram is almost always applied before motion tracking to clamp
 out noise in the darker pixels.  Either save the motion vectors in a
@@ -7663,14 +7866,122 @@ apply the histogram just to the <b>master layer</b>.
 
 <div class="node">
 <p><hr>
-<a name="REFRAMERT"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#REFRAME">REFRAME</a>,
+<a name="INTERPOLATING-MOTION-BETWEEN-FRAMES"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#FILLING-IN-THE-BLACK-AREAS">FILLING IN THE BLACK AREAS</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#USING-HISTOGRAM-TO-IMPROVE-MOTION-TRACKING">USING HISTOGRAM TO IMPROVE MOTION TRACKING</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#MOTION">MOTION</a>
+
+</div>
+
+<h4 class="subsection">18.17.5 INTERPOLATING MOTION BETWEEN FRAMES</h4>
+
+<p>The motion tracker can simulate higher frame rates than the media frame
+rate by interpolating the motion.  Interpolation is enabled with the
+<b>maximum absolute offset</b> and <b>settling speed</b> options.
+
+   <p>First, go to <b>Settings-&gt;Format</b> in the main window and set the
+<b>video frame rate</b> to a number higher than the media frame rate.
+
+   <p>In the <b>Motion</b> window, select a tracking option which accumulates
+motion.  This is either <b>Track previous frame</b> or <b>Previous frame
+same block</b>.  These cause the <b>maximum absolute offset</b> and
+<b>settling speed</b> options to take effect.
+
+   <p><b>maximum absolute offset</b> must be set to the maximum motion to be
+accumulated as a percentage of the video size.  A value of 50 limits the
+motion to 50% of the video size.  50 works well.  The value must be
+smaller for larger <b>translation block sizes</b> so there is enough area
+under the block to sense motion with.
+
+   <p><b>settling speed</b> must be set to the rate at which the accumulated
+motion resets to 0 over time.  The reset happens whether or not any
+motion was detected, so when the project frame rate is higher than the
+media frame rate, the frames between media frames regress towards the
+center.  For interpolated motion, the <b>settling speed</b> value should be
+small, so the movement is smooth.  3 works well.
+
+<div class="node">
+<p><hr>
+<a name="FILLING-IN-THE-BLACK-AREAS"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#INTERPOLATING-MOTION-BETWEEN-FRAMES">INTERPOLATING MOTION BETWEEN FRAMES</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#MOTION">MOTION</a>
+
+</div>
+
+<h4 class="subsection">18.17.6 FILLING IN THE BLACK AREAS</h4>
+
+<p>Stabilization always creates black borders in the track resolution.  One
+solution is to shrink the project resolution so the borders are always
+cropped off the output.  Another solution is to apply a <b>Time Average</b>
+effect after stabilization.
+
+   <p>Configure <b>Time Average</b> the following way:
+
+     <ul>
+<li><b>Frame count:</b> 1
+<li><b>Accumulate sequence again:</b> No
+<li><b>Replace:</b> Yes
+<li><b>Threshold:</b> 1
+<li><b>Border:</b> 4
+</ul>
+
+   <p>This makes new frames replace only the pixels in the previous frames
+where there is new data.  The black areas in new frames don't replace
+previous data so the previous data shows through and fills them in.
+
+<div class="node">
+<p><hr>
+<a name="MOTION-2-POINT"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#REFRAMERT">REFRAMERT</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#MOTION">MOTION</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
 </div>
 
-<h3 class="section">18.17 REFRAMERT</h3>
+<h3 class="section">18.18 MOTION 2 POINT</h3>
+
+<p>The 2 point motion tracker is the same as using 2 of the translation
+motion trackers to track 2 points.  It doesn't have a rotation tracker. 
+Instead, it uses the angle between the 2 translation points to
+determine  rotation.  The 2 points can be enabled separately.
+
+   <p>If 1 point is enabled, only translation is tracked.
+
+   <p>If 2 points are enabled, translation is tracked by point 1 and rotation
+is tracked by point 2.  Stabilization is performed with point 1 as the center.
+
+   <p>The other parameters for the 2 point tracker are the same as the single
+point tracker.  In addition, the 2 point tracker supports <b>TRANSLATION
+SEARCH OFFSET</b>.
+
+   <p><b>TRANSLATION SEARCH OFFSET</b> forces the motion search to look in a
+region other than directly next to the translation block position.  The
+<b>translation search offset</b> is added to the new search result, giving
+contiguous motion results throughout any changes in translation search area.
+
+   <p>This is useful if the camera position changed in the middle of a
+sequence of images but the subject stayed the same.  Offset the
+translation search area when the camera position changes and the
+detected motion stays contiguous through the entire sequence.
+
+   <p>2 point tracking works best if the points don't change shape between
+frames.  It is more prone to rotation errors than single point motion
+tracking if the points change shape.  2 point tracking is mainly used
+for tracking stars.
+
+   <p>Use the smallest search blocks possible since larger blocks are harder
+to compare when they're rotated.
+
+<div class="node">
+<p><hr>
+<a name="REFRAMERT"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#REFRAME">REFRAME</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#MOTION-2-POINT">MOTION 2 POINT</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
+
+</div>
+
+<h3 class="section">18.19 REFRAMERT</h3>
 
 <p>ReframeRT changes number of frames in a sequence of video directly from
 the timeline.  It has 2 modes, selected by the 2 toggles in the GUI.
@@ -7718,7 +8029,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.18 REFRAME</h3>
+<h3 class="section">18.20 REFRAME</h3>
 
 <p>This does exactly the same thing as <b>ReframeRT</b> in <b>Stretch</b> mode. 
 It multiplies the output frame number by the scale factor to arrive at
@@ -7739,7 +8050,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.19 RESAMPLE</h3>
+<h3 class="section">18.21 RESAMPLE</h3>
 
 <p>This multiplies the number of each output sample by a scale factor to
 arrive at the number of the input sample.  The output file's sample
@@ -7757,13 +8068,13 @@ as the input sequence.
 <p><hr>
 <a name="REVERSE-VIDEO%2fAUDIO"></a>
 <a name="REVERSE-VIDEO_002fAUDIO"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#THRESHOLD">THRESHOLD</a>,
+Next:&nbsp;<a rel="next" accesskey="n" href="#SWAP-FRAMES">SWAP FRAMES</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#RESAMPLE">RESAMPLE</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
 </div>
 
-<h3 class="section">18.20 REVERSE VIDEO/AUDIO</h3>
+<h3 class="section">18.22 REVERSE VIDEO/AUDIO</h3>
 
 <p>Media can be reversed on the timeline in realtime.  This isn't to be
 confused with using the reverse playback on the transport.  The reverse
@@ -7787,14 +8098,31 @@ timeline doesn't reflect the actual reversed output.
 
 <div class="node">
 <p><hr>
-<a name="THRESHOLD"></a>
-Next:&nbsp;<a rel="next" accesskey="n" href="#TIME-AVERAGE">TIME AVERAGE</a>,
+<a name="SWAP-FRAMES"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#THRESHOLD">THRESHOLD</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#REVERSE-VIDEO_002fAUDIO">REVERSE VIDEO/AUDIO</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
 </div>
 
-<h3 class="section">18.21 THRESHOLD</h3>
+<h3 class="section">18.23 SWAP FRAMES</h3>
+
+<p>This is normally used on interlaced video which has been converted to
+fields.  One set of lines becomes one frame and the other set of lines
+becomes the next frame.  Now the frame rate is double and is showing
+fields of the original video sequentially.  The fields may be out of
+order, which is what <b>SWAP FRAMES</b> can correct.
+
+<div class="node">
+<p><hr>
+<a name="THRESHOLD"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#TIME-AVERAGE">TIME AVERAGE</a>,
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#SWAP-FRAMES">SWAP FRAMES</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
+
+</div>
+
+<h3 class="section">18.24 THRESHOLD</h3>
 
 <p>Threshold converts the image to pure luminance.  Then luminance values
 below and above the threshold range are converted to black and
@@ -7818,7 +8146,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.22 TIME AVERAGE</h3>
+<h3 class="section">18.25 TIME AVERAGE</h3>
 
 <p>Time average is one effect which has many uses besides creating nifty
 trail patterns of moving objects.  It's main use is reducing noise in
@@ -7836,31 +8164,54 @@ best applied by first disabling playback for the track, dropping the
 time average in it, configuring time average for the desired number of
 frames, and re-enabling playback for the track.
 
-   <p><b>Frames to average:</b> This determines the number of frames to be
-accumulated in the accumulation buffer.  For extremely large
-integrations it's easier to edit the EDL in a text editor and put in
-the number of frames.
+   <p><b>Frames count:</b> This determines the number of frames to be accumulated
+in the accumulation buffer.  For extremely large integrations it's
+easier to edit the EDL in a text editor and put in the number of frames.
 
-   <p><b>Accumulate:</b> This outputs the accumulation buffer without dividing it.
-
-   <p><b>Average:</b> This causes the accumulation buffer to be divided before
-being output.  This results in the average of all the frames.
-
-   <p><b>Inclusive Or:</b> This causes the accumulation buffer to be replaced by
-any pixels which aren't transparent.  In combination with motion
-tracking it allows entire sequences to be combined to form panoramas.
-
-   <p><b>Reprocess frame again:</b> If an effect before the time average is
+   <p><b>Accumulate sequence again:</b> If an effect before the time average is
 adjusted the time average normally doesn't reread the accumulation
 buffer to get the change.  This forces it to reread the accumulation
-buffer when other effects change.
+buffer when any other effects change.
 
-   <p><b>Disable subtraction:</b> In order to represent the accumulation of only
-the specified number of frames, the time average retains all the
-previous frames in memory and subtracts them out as it plays forward. 
-It would run out of memory if it had to accumulate thousands of
-frames.  By disabling subtraction the previous frames are not stored in
-memory and only the average function is affected by the frame count.
+   <p><b>Average:</b> This causes the accumulation buffer to be divided before
+being output.  The result is the average of all the frames.
+
+   <p><b>Accumulate:</b> This outputs the accumulation buffer without dividing
+it.  The result is the sum of all the frames.
+
+   <p><b>Accumulate only:</b>
+
+   <p>In order to accumulate only the specified number of frames, the time
+average retains all the previous frames in memory and subtracts them out
+as it plays forward.  <b>Accumulate only:</b> causes the history buffer to
+not be used in <b>averaging</b> and <b>accumulating</b>.  Without the history
+buffer, frames are added endlessly without ever being subtracted.  It's
+the same as an infinitely long accumulation buffer.  The only difference
+is for <b>Average</b> mode, the output is still divided by the <b>Frame
+count</b>.  <b>Accumulate only</b> is used where the number of frames in the
+accumulation would be too big to fit in memory.
+
+   <p><b>Replace:</b> This causes the accumulation buffer to be replaced by only
+pixels which aren't transparent.  This allows black borders from motion
+tracking to be filled in.
+
+   <p><b>Threshold:</b> The value a pixel must be before it replaces the previous
+pixel.  If alpha channels are enabled, the alpha is the value compared. 
+If there is no alpha channel, the brightness is the value compared.
+
+   <p><b>Border:</b> The number of pixels on the border of the image to never
+replace.  This hides errors in the replacement operation from the
+output, since errors occur at the transition between the replaced area
+and the ignored area.
+
+   <p><b>Greater:</b> Pixels are replaced if their value is greater than the
+previous pixel.  Use this to create star trails in stacks of many night
+sky photos or paint many copies of an object from its motion if it is
+lighter than the background.
+
+   <p><b>Less:</b> Pixels are replaced if their value is less than the previous
+pixel.  Use this to paint copies of an object from its motion if it is
+darker than the background.
 
 <div class="node">
 <p><hr>
@@ -7871,7 +8222,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS 
 
 </div>
 
-<h3 class="section">18.23 TITLER</h3>
+<h3 class="section">18.26 TITLER</h3>
 
 <p>While it is possible to add text to movies by importing still images
 from The Gimp and compositing them, the Titler allows you to add text
@@ -7904,15 +8255,26 @@ keep the border always visible.
    <p>In addition to the scrolling, <b>Fade in/Fade out</b> are a second type of
 animation.  If the fade seconds are 0, no fading is done.
 
-   <p><b>Color</b> picks the color to draw the text in.  Usually white is the
+   <p><b>Outline</b> draws an outline on the characters if it's greater than 0. 
+Set the outline size by changing the number.  Set the outline color with
+the <b>OUTLINE COLOR</b> button.  If no outline is visible, make sure the
+alpha in <b>OUTLINE COLOR</b> is nonzero.  To get pure outline characters,
+set <b>COLOR</b> alpha to 0.
+
+   <p><b>COLOR</b> picks the color to draw the text in.  Usually white is the
 only practical color.
+
+   <p><b>OUTLINE COLOR</b> picks the color to draw the text outline in.
 
    <p><b>Stamp timecode</b> replaces the text with the current position on the
 timeline in seconds and frames.
 
+   <p><b>SECRETS OF THE TITLER</b>
+
 <ul class="menu">
 <li><a accesskey="1" href="#ADDING-FONTS-TO-THE-TITLER">ADDING FONTS TO THE TITLER</a>:  How to add fonts to the titler
 <li><a accesskey="2" href="#THE-TITLE_002dSAFE-REGION">THE TITLE-SAFE REGION</a>:       How to keep text visible on output
+<li><a accesskey="3" href="#MAKING-TITLES-LOOK-GOOD">MAKING TITLES LOOK GOOD</a>:     How to make your titles look good. 
 </ul>
 
 <div class="node">
@@ -7923,7 +8285,7 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#TITLER">TITLER</a>
 
 </div>
 
-<h4 class="subsection">18.23.1 ADDING FONTS TO THE TITLER</h4>
+<h4 class="subsection">18.26.1 ADDING FONTS TO THE TITLER</h4>
 
 <p>The X Window system originally didn't have a suitable font renderer for
 video.  It also is restricted to the current bit depth.  It doesn't
@@ -7943,12 +8305,13 @@ frequently so this technique might not work.
 <p><hr>
 <a name="THE-TITLE-SAFE-REGION"></a>
 <a name="THE-TITLE_002dSAFE-REGION"></a>
+Next:&nbsp;<a rel="next" accesskey="n" href="#MAKING-TITLES-LOOK-GOOD">MAKING TITLES LOOK GOOD</a>,
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#ADDING-FONTS-TO-THE-TITLER">ADDING FONTS TO THE TITLER</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#TITLER">TITLER</a>
 
 </div>
 
-<h4 class="subsection">18.23.2 THE TITLE-SAFE REGION</h4>
+<h4 class="subsection">18.26.2 THE TITLE-SAFE REGION</h4>
 
 <p>If the video is displayed on a consumer TV, the outer border is going
 to be cropped by 5% on each side.  Moreover, text which is too close to
@@ -7958,13 +8321,44 @@ The text shouldn't cross the inner rectangle.
 
 <div class="node">
 <p><hr>
+<a name="MAKING-TITLES-LOOK-GOOD"></a>
+Previous:&nbsp;<a rel="previous" accesskey="p" href="#THE-TITLE_002dSAFE-REGION">THE TITLE-SAFE REGION</a>,
+Up:&nbsp;<a rel="up" accesskey="u" href="#TITLER">TITLER</a>
+
+</div>
+
+<h4 class="subsection">18.26.3 MAKING TITLES LOOK GOOD</h4>
+
+<p>No-one else is going to tell you this, but to make good looking titles,
+ignore most of the features of the titler.  The best settings are:
+
+     <ul>
+<li>Font: <b>Arial</b>
+<li>Italic: <b>off</b>
+<li>Motion: <b>No motion</b>
+<li>Bold: <b>on or off</b>
+<li>Fade in: <b>0</b>
+<li>Fade out: <b>0</b>
+<li>Color: <b>white</b>
+<li>Outline color: <b>black</b>
+<li>Drop Shadow or outline: <b>use either to improve contrast but not both</b>
+</ul>
+
+   <p>Don't waste the audience's time with fading &amp; crawls.  Use crawls only
+if there's too much text to fit on the screen.  The title should be
+legible enough to take the least amount of time to read.  You're
+supposed to show the story, not write it.  If they wanted to read a
+story, they would be reading a book instead of watching video.
+
+<div class="node">
+<p><hr>
 <a name="VIDEO-SCOPE"></a>
 Previous:&nbsp;<a rel="previous" accesskey="p" href="#TITLER">TITLER</a>,
 Up:&nbsp;<a rel="up" accesskey="u" href="#SECRETS-OF-CINELERRA-EFFECTS">SECRETS OF CINELERRA EFFECTS</a>
 
 </div>
 
-<h3 class="section">18.24 VIDEO SCOPE</h3>
+<h3 class="section">18.27 VIDEO SCOPE</h3>
 
 <p>The video scope plots two views of the image.  One view plots the
 intensity of each pixel against horizontal position.  They call this
@@ -8000,7 +8394,7 @@ The GUI is not abstracted from the programmer.  This allows the
 programmer to use whatever toolkit they want and allows more
 flexibility in appearance but it costs more.
 
-   <p>There are several types of plugins, each with a common procedure of
+   <p>There are several types of plugins, each with a common method of
 implementation and specific changes for that particular type.  The
 easiest way to implement a plugin is to take the simplest existing one
 out of the group and rename the symbols.
@@ -8109,22 +8503,14 @@ queries to identify itself and is the object you register to register
 the plugin.
 
      <li>
-<b>User interface object</b> - This is defined according to the programmer's
-discretion.  It can either use Cinelerra's toolkit or another toolkit. 
-It shows data on the screen and collects parameters from the user.
+<b>User interface object</b> - This is a subclass of
+<b>PluginClientWindow</b>.  It shows data on the screen and collects
+parameters from the user.
 
-     <p>Using Cinelerra's toolkit, the only user interface object a developer
-needs to worry about is the Window.  The window has pointers to a
-number of widgets, a few initialization methods, and a back pointer to
-the plugin's processing object.  The documentation refers to the usage
-of Cinelerra's toolkit.
-
-     <p>Depending on the user interface toolkit, a user interface thread may be
-created to run the user interface asynchronous of everything else. 
-Synchronizing the user interface to changes in the plugin's
-configuration is the most complicated aspect of the plugin, so the user
-interface thread and object are heavily supported by macros if you use
-Cinelerra's toolkit.
+     <p>The window has pointers to a number of widgets, a few initialization
+methods, and a back pointer to the plugin's processing object.  The GUI
+uses Cinelerra's toolkit.  The plugin abstraction layer handles creating
+a thread for the GUI.
 
      <li>
 <b>Configuration object</b> - This stores the user parameters and always
@@ -8161,18 +8547,6 @@ the name of the processing object like
 
 <pre class="example">     REGISTER_PLUGIN(MyPlugin)
 </pre>
-   <p>The constructor should contain
-
-<pre class="example">     PLUGIN_CONSTRUCTOR_MACRO
-</pre>
-   <p>to initialize the most common variables.
-
-   <p>The processing object should have a destructor containing
-
-<pre class="example">     PLUGIN_DESTRUCTOR_MACRO
-</pre>
-   <p>to delete the most common variables.
-
    <p>Another function which is useful but not mandatory is
 
 <pre class="example">     int is_multichannel();
@@ -8203,7 +8577,7 @@ simpler.
 position.  The class definition for load_configuration should contain
 
      <pre class="example">          LOAD_CONFIGURATION_MACRO(plugin_class, config_class)
-     </pre>
+</pre>
      <p>to implement the default behavior for load_configuration.  This stores
 whatever the current configuration is inside the plugin's configuration
 object and returns 1 if the new configuration differs from the previous
@@ -8219,7 +8593,7 @@ PLUGIN_CLASS_MEMBERS.
 
      <pre class="example">          #include "picon_png.h"
           NEW_PICON_MACRO(plugin_class)
-     </pre>
+</pre>
      <p>to implement new_picon.  In addition, the user should create a
 <b>picon_png.h</b> header file from a PNG image using <b>pngtoh</b>. 
 <b>pngtoh</b> is compiled in the <b>guicast/ARCH</b> directory.
@@ -8250,30 +8624,12 @@ have a format like
           		}
           	}
           }
-     </pre>
+</pre>
      <p>to handle concurrency and conditions of no GUI.
 
-     <li>int show_gui();
+   </ul>
 
-     <p>Instantiate the GUI and switch the plugin to GUI mode.  This is implemented with
-
-     <pre class="example">          SHOW_GUI_MACRO(plugin_class, thread_class)
-     </pre>
-     <li>int set_string();
-
-     <p>Changes the title of the GUI window to a certain string.  This is implemented with
-
-     <pre class="example">          SET_STRING_MACRO(plugin_class)
-     </pre>
-     <li>void raise_window();
-
-     <p>Raises the GUI window to the top of the stack.  This is implemented with
-
-     <pre class="example">          RAISE_WINDOW_MACRO(plugin_class)
-     </pre>
-     </ul>
-
-   <p>Iimportant functions the processing object must define are the
+   <p>Important functions the processing object must define are the
 functions which load and save configuration data from keyframes.  These
 functions are called by the macros so all you need to worry about is
 accessing the keyframe data.
@@ -8300,9 +8656,10 @@ configuration.  The BC_Hash object stores configurations in a discrete
 file on disk for each plugin but doesn't isolate different
 configurations for different projects.
 
-   <p>The function overriding <b>load_defaults</b> also needs to create the
-BC_Hash object.  See any existing plugin to see the usage of
-BC_Hash.
+   <p>The function overriding <b>load_defaults</b> also needs to call <b>defaults
+= new BC_Hash(path);</b> with the configuration path.  See any existing
+plugin to see the usage of BC_Hash.   The function overriding
+<b>save_defaults</b> does not create <b>defaults</b>.
 
    <p>Other standard members may be defined in the processing object,
 depending on the plugin type.
@@ -8422,23 +8779,14 @@ Up:&nbsp;<a rel="up" accesskey="u" href="#COMMON-PLUGIN-FUNCTIONS">COMMON PLUGIN
 
 <h4 class="subsection">19.2.3 THE USER INTERFACE OBJECT</h4>
 
-<p>The user interface object at the very least consists of a pointer to a
-window and pointers to all the widgets in the window.  Using
-Cinelerra's toolkit, it consists of a <b>BCWindow</b> derivative and a
-<b>Thread</b> derivative.  The Thread derivative is declared in the plugin
-header using
+<p>The user interface object is derived from <b>PluginClientWindow</b>.  The
+user must call <b>NEW_WINDOW_MACRO</b> in the processing object to create
+the <b>PluginClientWindow</b>.  This system is used in realtime plugins but
+not in nonrealtime plugins.
 
-<pre class="example">     PLUGIN_THREAD_HEADER(plugin_class, thread_class, window_class)
-</pre>
-   <p>Then it is defined using
-
-<pre class="example">     PLUGIN_THREAD_OBJECT(plugin_class, thread_class, window_class)
-</pre>
-   <p>This, in combination with the SHOW_GUI macro does all the work in
-instantiating the Window.  This two class system is used in realtime
-plugins but not in nonrealtime plugins.  Nonrealtime plugins create and
-destroy their GUI in their <b>get_parameters</b> function and there's no
-need for a Thread.
+   <p>Nonrealtime plugins create and destroy their own GUI in their
+<b>get_parameters</b> function and there's no need for a
+<b>PluginClientWindow</b> subclass.
 
    <p>Now the window class must be declared in the plugin header.  It's
 easiest to implement the window by copying an existing plugin and
@@ -8449,41 +8797,39 @@ appropriate arguments.
 <pre class="example">     
      #include "guicast.h"
      
-     class MyPluginWindow : public BC_Window
+     MyWindow::MyWindow(MyPlugin *plugin)
+      : PluginClientWindow(plugin,
+     	440,
+     	500,
+     	440,
+     	500,
+     	0)
      {
-     public:
-     	MyPluginWindow(MyPluginMain *plugin, int x, int y);
      
 </pre>
-   <p>This becomes a window on the screen, positioned at x and y.
+   <p>This becomes a window on the screen with the size given by the arguments
+to <b>PluginClientWindow</b>.
 
    <p>It needs two methods
 
-<pre class="example">     	int create_objects();
-     	int close_event();
+<pre class="example">     	void create_objects();
 </pre>
    <p>and a back pointer to the plugin
 
 <pre class="example">     	MyPlugin *plugin;
 </pre>
-   <p>The constructor's definition should contain extents and flags causing
-the window to be hidden when first created.  The create_objects member
-puts widgets in the window according to GuiCast's syntax.  A pointer to
-each widget which you want to synchronize to a configuration parameter
-is stored in the window class.  These are updated in the <b>update_gui</b>
-function you earlier defined for the plugin.  The widgets are usually
-derivatives of a GuiCast widget and they override functions in GuiCast
-to handle events.  Finally create_objects calls
+   <p>The create_objects member puts widgets in the window according to
+GuiCast's syntax.  A pointer to each widget which you want to
+synchronize to a configuration parameter is stored in the window class. 
+These are updated in the <b>update_gui</b> function you earlier defined for
+the plugin.  The widgets are usually derivatives of a GuiCast widget and
+they override functions in GuiCast to handle events.  Finally
+create_objects calls
 
 <pre class="example">     	show_window();
-     	flush();
 </pre>
    <p>to make the window appear all at once.
 
-   <p>The close_event member should be implemented using
-
-<pre class="example">     WINDOW_CLOSE_EVENT(window_class)
-</pre>
    <p>Every widget in the GUI needs to detect when its value changes.  In
 GuiCast the <b>handle_event</b> method is called whenever the value
 changes.  In <b>handle_event</b>, the widget then needs to call
@@ -8675,12 +9021,13 @@ selects OK or Cancel.
 
      <li>int load_defaults();
 
-     <p>This should create a defaults object and load parameters from the
-defaults object into plugin variables.
+     <p>This should set the <b>defaults</b> variable to a new <b>Defaults</b> object
+and load parameters from the defaults object into plugin variables.
 
      <li>int save_defaults();
 
-     <p>This should save plugin variables to the defaults object.
+     <p>This should save plugin variables to the defaults object.  It should not
+create the defaults object.
 
      <li>int start_loop();
 
@@ -8692,7 +9039,7 @@ instantiate the progress object with a line like
           progress = start_progress("MyPlugin progress...",
           	PluginClient::get_total_len());
           
-     </pre>
+</pre>
      <p>The usage of <b>start_progress</b> depends on whether the plugin is
 multichannel or single channel.  If it's multichannel you always call
 start_progress.  If it's single channel, you first need to know whether
@@ -8726,7 +9073,7 @@ contain the number of samples generated if it's audio.
 update the progress bar if it's 1.
 
      <pre class="example">          progress-&gt;update(total_written);
-     </pre>
+</pre>
      <p>returns 1 or 0 if the progress bar was cancelled.  If it's 1,
 process_loop should return 1 to indicate a cancellation.  In addition
 to progress bar cancellation, <b>process_loop</b> should return 1 when the

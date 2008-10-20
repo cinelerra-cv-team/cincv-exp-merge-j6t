@@ -2,20 +2,21 @@
  * LOCO codec
  * Copyright (c) 2005 Konstantin Shishkov
  *
- * This library is free software; you can redistribute it and/or
+ * This file is part of FFmpeg.
+ *
+ * FFmpeg is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * FFmpeg is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
- *
  */
 
 /**
@@ -24,7 +25,6 @@
  */
 
 #include "avcodec.h"
-#include "common.h"
 #include "bitstream.h"
 #include "golomb.h"
 
@@ -116,7 +116,7 @@ static inline int loco_predict(uint8_t* data, int stride, int step)
 }
 
 static int loco_decode_plane(LOCOContext *l, uint8_t *data, int width, int height,
-                             int stride, uint8_t *buf, int buf_size, int step)
+                             int stride, const uint8_t *buf, int buf_size, int step)
 {
     RICEContext rc;
     int val;
@@ -152,12 +152,12 @@ static int loco_decode_plane(LOCOContext *l, uint8_t *data, int width, int heigh
         data += stride;
     }
 
-    return ((get_bits_count(&rc.gb) + 7) >> 3);
+    return (get_bits_count(&rc.gb) + 7) >> 3;
 }
 
 static int decode_frame(AVCodecContext *avctx,
                         void *data, int *data_size,
-                        uint8_t *buf, int buf_size)
+                        const uint8_t *buf, int buf_size)
 {
     LOCOContext * const l = avctx->priv_data;
     AVFrame * const p= (AVFrame*)&l->pic;
@@ -225,7 +225,7 @@ static int decode_frame(AVCodecContext *avctx,
     return buf_size;
 }
 
-static int decode_init(AVCodecContext *avctx){
+static av_cold int decode_init(AVCodecContext *avctx){
     LOCOContext * const l = avctx->priv_data;
     int version;
 
@@ -235,20 +235,20 @@ static int decode_init(AVCodecContext *avctx){
                avctx->extradata_size);
         return -1;
     }
-    version = LE_32(avctx->extradata);
+    version = AV_RL32(avctx->extradata);
     switch(version) {
     case 1:
         l->lossy = 0;
         break;
     case 2:
-        l->lossy = LE_32(avctx->extradata + 8);
+        l->lossy = AV_RL32(avctx->extradata + 8);
         break;
     default:
-        l->lossy = LE_32(avctx->extradata + 8);
+        l->lossy = AV_RL32(avctx->extradata + 8);
         av_log(avctx, AV_LOG_INFO, "This is LOCO codec version %i, please upload file for study\n", version);
     }
 
-    l->mode = LE_32(avctx->extradata + 4);
+    l->mode = AV_RL32(avctx->extradata + 4);
     switch(l->mode) {
     case LOCO_CYUY2: case LOCO_YUY2: case LOCO_UYVY:
         avctx->pix_fmt = PIX_FMT_YUV422P;
@@ -260,7 +260,7 @@ static int decode_init(AVCodecContext *avctx){
         avctx->pix_fmt = PIX_FMT_YUV420P;
         break;
     case LOCO_CRGBA: case LOCO_RGBA:
-        avctx->pix_fmt = PIX_FMT_RGBA32;
+        avctx->pix_fmt = PIX_FMT_RGB32;
         break;
     default:
         av_log(avctx, AV_LOG_INFO, "Unknown colorspace, index = %i\n", l->mode);
@@ -282,4 +282,5 @@ AVCodec loco_decoder = {
     NULL,
     decode_frame,
     CODEC_CAP_DR1,
+    .long_name = "LOCO",
 };
