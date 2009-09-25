@@ -29,6 +29,7 @@
 #include "libavformat/framehook.h"
 #include "libavformat/avformat.h"
 #include "libswscale/swscale.h"
+#undef fprintf
 
 static int sws_flags = SWS_BICUBIC;
 
@@ -55,8 +56,11 @@ static rwpipe *rwpipe_open( int argc, char *argv[] )
         int input[ 2 ];
         int output[ 2 ];
 
-        pipe( input );
-        pipe( output );
+        if (!pipe( input ))
+            return NULL;
+
+        if (!pipe( output ))
+            return NULL;
 
         this->pid = fork();
 
@@ -159,7 +163,9 @@ static int rwpipe_read_ppm_header( rwpipe *rw, int *width, int *height )
     FILE *in = rwpipe_reader( rw );
     int max;
 
-    fgets( line, 3, in );
+    if (!fgets( line, 3, in ))
+        return -1;
+
     if ( !strncmp( line, "P6", 2 ) )
     {
         *width = rwpipe_read_number( rw );
@@ -211,7 +217,7 @@ int Configure(void **ctxp, int argc, char *argv[])
     if ( argc > 1 )
     {
         *ctxp = av_mallocz(sizeof(ContextInfo));
-        if ( ctxp != NULL && argc > 1 )
+        if ( *ctxp != NULL && argc > 1 )
         {
             ContextInfo *info = (ContextInfo *)*ctxp;
             info->rw = rwpipe_open( argc - 1, &argv[ 1 ] );

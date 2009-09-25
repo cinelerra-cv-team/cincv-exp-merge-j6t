@@ -20,12 +20,13 @@
  */
 
 /**
- * @file vc1test.c
+ * @file libavformat/vc1test.c
  * VC1 test bitstream file demuxer
  * by Konstantin Shishkov
  * Format specified in SMPTE standard 421 Annex L
  */
 
+#include "libavutil/intreadwrite.h"
 #include "avformat.h"
 
 #define VC1_EXTRADATA_SIZE 4
@@ -103,7 +104,7 @@ static int vc1t_read_packet(AVFormatContext *s,
 
 AVInputFormat vc1t_demuxer = {
     "vc1test",
-    "VC1 test bitstream format",
+    NULL_IF_CONFIG_SMALL("VC-1 test bitstream format"),
     0,
     vc1t_probe,
     vc1t_read_header,

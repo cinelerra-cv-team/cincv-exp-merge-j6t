@@ -21,7 +21,7 @@
  */
 
 /**
- * @file atrac3.c
+ * @file libavcodec/atrac3.c
  * Atrac 3 compatible decoder.
  * This decoder handles Sony's ATRAC3 data.
  *
@@ -108,7 +108,6 @@ typedef struct {
     float               outSamples[2048];
     uint8_t*            decoded_bytes_buffer;
     float               tempBuf[1070];
-    DECLARE_ALIGNED_16(float,mdct_tmp[512]);
     //@}
     //@{
     /** extradata */
@@ -189,10 +188,9 @@ static void iqmf (float *inlo, float *inhi, unsigned int nIn, float *pOut, float
  * @param pInput    float input
  * @param pOutput   float output
  * @param odd_band  1 if the band is an odd band
- * @param mdct_tmp  aligned temporary buffer for the mdct
  */
 
-static void IMLT(float *pInput, float *pOutput, int odd_band, float* mdct_tmp)
+static void IMLT(float *pInput, float *pOutput, int odd_band)
 {
     int     i;
 
@@ -210,7 +208,7 @@ static void IMLT(float *pInput, float *pOutput, int odd_band, float* mdct_tmp)
             FFSWAP(float, pInput[i], pInput[255-i]);
     }
 
-    mdct_ctx.fft.imdct_calc(&mdct_ctx,pOutput,pInput,mdct_tmp);
+    ff_imdct_calc(&mdct_ctx,pOutput,pInput);
 
     /* Perform windowing on the output. */
     dsp.vector_fmul(pOutput,mdct_window,512);
@@ -246,7 +244,7 @@ static int decode_bytes(const uint8_t* inbuffer, uint8_t* out, int bytes){
 }
 
 
-static void init_atrac3_transforms(ATRAC3Context *q) {
+static av_cold void init_atrac3_transforms(ATRAC3Context *q) {
     float enc_window[256];
     float s;
     int i;
@@ -277,7 +275,7 @@ static void init_atrac3_transforms(ATRAC3Context *q) {
  * Atrac3 uninit, free all allocated memory
  */
 
-static int atrac3_decode_close(AVCodecContext *avctx)
+static av_cold int atrac3_decode_close(AVCodecContext *avctx)
 {
     ATRAC3Context *q = avctx->priv_data;
 
@@ -306,7 +304,6 @@ static void readQuantSpectralCoeffs (GetBitContext *gb, int selector, int coding
 
     if (codingFlag != 0) {
         /* constant length coding (CLC) */
-        //FIXME we don't have any samples coded in CLC mode
         numBits = CLCLengthTab[selector];
 
         if (selector > 1) {
@@ -758,7 +755,7 @@ static int decodeChannelSoundUnit (ATRAC3Context *q, GetBitContext *gb, channel_
     for (band=0; band<4; band++) {
         /* Perform the IMDCT step without overlapping. */
         if (band <= numBands) {
-            IMLT(&(pSnd->spectrum[band*256]), pSnd->IMDCT_buf, band&1,q->mdct_tmp);
+            IMLT(&(pSnd->spectrum[band*256]), pSnd->IMDCT_buf, band&1);
         } else
             memset(pSnd->IMDCT_buf, 0, 512 * sizeof(float));
 
@@ -781,11 +778,11 @@ static int decodeChannelSoundUnit (ATRAC3Context *q, GetBitContext *gb, channel_
  * @param databuf       the input data
  */
 
-static int decodeFrame(ATRAC3Context *q, uint8_t* databuf)
+static int decodeFrame(ATRAC3Context *q, const uint8_t* databuf)
 {
     int   result, i;
     float   *p1, *p2, *p3, *p4;
-    uint8_t    *ptr1, *ptr2;
+    uint8_t *ptr1;
 
     if (q->codingMode == JOINT_STEREO) {
 
@@ -799,14 +796,20 @@ static int decodeFrame(ATRAC3Context *q, uint8_t* databuf)
 
         /* Framedata of the su2 in the joint-stereo mode is encoded in
          * reverse byte order so we need to swap it first. */
-        ptr1 = databuf;
-        ptr2 = databuf+q->bytes_per_frame-1;
-        for (i = 0; i < (q->bytes_per_frame/2); i++, ptr1++, ptr2--) {
-            FFSWAP(uint8_t,*ptr1,*ptr2);
+        if (databuf == q->decoded_bytes_buffer) {
+            uint8_t *ptr2 = q->decoded_bytes_buffer+q->bytes_per_frame-1;
+            ptr1 = q->decoded_bytes_buffer;
+            for (i = 0; i < (q->bytes_per_frame/2); i++, ptr1++, ptr2--) {
+                FFSWAP(uint8_t,*ptr1,*ptr2);
+            }
+        } else {
+            const uint8_t *ptr2 = databuf+q->bytes_per_frame-1;
+            for (i = 0; i < q->bytes_per_frame; i++)
+                q->decoded_bytes_buffer[i] = *ptr2--;
         }
 
         /* Skip the sync codes (0xF8). */
-        ptr1 = databuf;
+        ptr1 = q->decoded_bytes_buffer;
         for (i = 4; *ptr1 == 0xF8; i++, ptr1++) {
             if (i >= q->bytes_per_frame)
                 return -1;
@@ -878,7 +881,7 @@ static int atrac3_decode_frame(AVCodecContext *avctx,
             const uint8_t *buf, int buf_size) {
     ATRAC3Context *q = avctx->priv_data;
     int result = 0, i;
-    uint8_t* databuf;
+    const uint8_t* databuf;
     int16_t* samples = data;
 
     if (buf_size < avctx->block_align)
@@ -923,7 +926,7 @@ static int atrac3_decode_frame(AVCodecContext *avctx,
  * @param avctx     pointer to the AVCodecContext
  */
 
-static int atrac3_decode_init(AVCodecContext *avctx)
+static av_cold int atrac3_decode_init(AVCodecContext *avctx)
 {
     int i;
     const uint8_t *edata_ptr = avctx->extradata;
@@ -1059,6 +1062,7 @@ static int atrac3_decode_init(AVCodecContext *avctx)
         return AVERROR(ENOMEM);
     }
 
+    avctx->sample_fmt = SAMPLE_FMT_S16;
     return 0;
 }
 
@@ -1072,5 +1076,5 @@ AVCodec atrac3_decoder =
     .init = atrac3_decode_init,
     .close = atrac3_decode_close,
     .decode = atrac3_decode_frame,
-    .long_name = "Atrac 3 (Adaptive TRansform Acoustic Coding 3)",
+    .long_name = NULL_IF_CONFIG_SMALL("Atrac 3 (Adaptive TRansform Acoustic Coding 3)"),
 };
