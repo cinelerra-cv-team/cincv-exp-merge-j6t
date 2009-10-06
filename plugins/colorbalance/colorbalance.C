@@ -677,7 +677,7 @@ int ColorBalanceMain::handle_opengl()
 	get_output()->enable_opengl();
 
 	unsigned int shader = 0;
-	char *shader_stack[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	const char *shader_stack[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	int current_shader = 0;
 	int aggregate_interpolate = 0;
 	int aggregate_gamma = 0;

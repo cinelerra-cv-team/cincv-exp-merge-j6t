@@ -550,7 +550,7 @@ int Overlay::process_buffer(VFrame **frame,
 int Overlay::handle_opengl()
 {
 #ifdef HAVE_GL
-	static char *get_pixels_frag = 
+	static const char *get_pixels_frag = 
 		"uniform sampler2D src_tex;\n"
 		"uniform sampler2D dst_tex;\n"
 		"uniform vec2 dst_tex_dimensions;\n"
@@ -563,29 +563,29 @@ int Overlay::handle_opengl()
 		"	src_color.rgb -= chroma_offset;\n"
 		"	dst_color.rgb -= chroma_offset;\n";
 
-	static char *put_pixels_frag = 
+	static const char *put_pixels_frag = 
 		"	result_color.rgb += chroma_offset;\n"
 		"	result_color.rgb = mix(dst_color.rgb, result_color.rgb, src_color.a);\n"
 		"	result_color.a = max(src_color.a, dst_color.a);\n"
 		"	gl_FragColor = result_color;\n"
 		"}\n";
 
-	static char *blend_add_frag = 
+	static const char *blend_add_frag = 
 		"	result_color.rgb = dst_color.rgb + src_color.rgb;\n";
 
-	static char *blend_max_frag = 
+	static const char *blend_max_frag = 
 		"	result_color.r = max(abs(dst_color.r, src_color.r);\n"
 		"	result_color.g = max(abs(dst_color.g, src_color.g);\n"
 		"	result_color.b = max(abs(dst_color.b, src_color.b);\n";
 
-	static char *blend_subtract_frag = 
+	static const char *blend_subtract_frag = 
 		"	result_color.rgb = dst_color.rgb - src_color.rgb;\n";
 
 
-	static char *blend_multiply_frag = 
+	static const char *blend_multiply_frag = 
 		"	result_color.rgb = dst_color.rgb * src_color.rgb;\n";
 
-	static char *blend_divide_frag = 
+	static const char *blend_divide_frag = 
 		"	result_color.rgb = dst_color.rgb / src_color.rgb;\n"
 		"	if(src_color.r == 0.0) result_color.r = 1.0;\n"
 		"	if(src_color.g == 0.0) result_color.g = 1.0;\n"
@@ -598,7 +598,7 @@ int Overlay::handle_opengl()
 	dst->enable_opengl();
 	dst->init_screen();
 
-	char *shader_stack[] = { 0, 0, 0 };
+	const char *shader_stack[] = { 0, 0, 0 };
 	int current_shader = 0;
 
 
