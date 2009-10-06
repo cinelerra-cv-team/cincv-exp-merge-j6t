@@ -1163,7 +1163,7 @@ int FileMOV::read_samples(double *buffer, int64_t len)
 }
 
 
-char* FileMOV::strtocompression(char *string)
+const char* FileMOV::strtocompression(char *string)
 {
 	if(!strcasecmp(string, _(DIVX_NAME))) return QUICKTIME_DIVX;
 	if(!strcasecmp(string, _(H264_NAME))) return QUICKTIME_H264;
@@ -1203,7 +1203,7 @@ char* FileMOV::strtocompression(char *string)
 	return QUICKTIME_RAW;
 }
 
-char* FileMOV::compressiontostr(char *string)
+const char* FileMOV::compressiontostr(char *string)
 {
 	if(match4(string, QUICKTIME_H263)) return _(H263_NAME);
 	if(match4(string, QUICKTIME_H264)) return _(H264_NAME);

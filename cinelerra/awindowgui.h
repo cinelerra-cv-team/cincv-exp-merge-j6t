@@ -61,7 +61,7 @@ public:
 	AssetPicon(MWindow *mwindow, AWindowGUI *gui, EDL *edl);
 	AssetPicon(MWindow *mwindow, AWindowGUI *gui, PluginServer *plugin);
 	AssetPicon(MWindow *mwindow, AWindowGUI *gui, Label *plugin);
-	AssetPicon(MWindow *mwindow, AWindowGUI *gui, char *folder);
+	AssetPicon(MWindow *mwindow, AWindowGUI *gui, const char *folder);
 	virtual ~AssetPicon();
 
 	void create_objects();
@@ -147,7 +147,7 @@ public:
 // Currently displayed assets + comments
 	ArrayList<BC_ListBoxItem*> displayed_assets[2];
 
-	char *asset_titles[ASSET_COLUMNS];
+	const char *asset_titles[ASSET_COLUMNS];
 
 // Persistent icons
 	BC_Pixmap *folder_icon;

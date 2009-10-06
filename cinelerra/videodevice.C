@@ -281,23 +281,23 @@ VDeviceBase* VideoDevice::new_device_base()
 
 static char* get_channeldb_path(VideoInConfig *vconfig_in)
 {
-	char *path = "";
+	char *path = (char*)"";
 	switch(vconfig_in->driver)
 	{
 		case VIDEO4LINUX:
-			path = "channels_v4l";
+			path = (char*)"channels_v4l";
 			break;
 		case VIDEO4LINUX2:
-			path = "channels_v4l2";
+			path = (char*)"channels_v4l2";
 			break;
 		case VIDEO4LINUX2JPEG:
-			path = "channels_v4l2jpeg";
+			path = (char*)"channels_v4l2jpeg";
 			break;
 		case CAPTURE_BUZ:
-			path = "channels_buz";
+			path = (char*)"channels_buz";
 			break;
 		case CAPTURE_DVB:
-			path = "channels_dvb";
+			path = (char*)"channels_dvb";
 			break;
 	}
 	return path;
@@ -367,7 +367,7 @@ void VideoDevice::fix_asset(Asset *asset, int driver)
 }
 
 
-char* VideoDevice::drivertostr(int driver)
+const char* VideoDevice::drivertostr(int driver)
 {
 	switch(driver)
 	{

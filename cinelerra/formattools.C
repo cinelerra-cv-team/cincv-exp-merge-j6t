@@ -267,7 +267,7 @@ void FormatTools::update_driver(int driver)
 			}
 			else
 				format_text->update(File::formattostr(asset->format));
-			locked_compressor = QUICKTIME_DVSD;
+			locked_compressor = (char*)QUICKTIME_DVSD;
 			strcpy(asset->vcodec, QUICKTIME_DVSD);
 			audio_switch->update(asset->audio_data);
 			video_switch->update(asset->video_data);
@@ -283,7 +283,7 @@ void FormatTools::update_driver(int driver)
 			}
 			else
 				format_text->update(File::formattostr(asset->format));
-			locked_compressor = QUICKTIME_MJPA;
+			locked_compressor = (char*)QUICKTIME_MJPA;
 			audio_switch->update(asset->audio_data);
 			video_switch->update(asset->video_data);
 			break;
@@ -312,7 +312,7 @@ Asset* FormatTools::get_asset()
 
 void FormatTools::update_extension()
 {
-	char *extension = File::get_tag(asset->format);
+	const char *extension = File::get_tag(asset->format);
 	if(extension)
 	{
 		char *ptr = strrchr(asset->path, '.');

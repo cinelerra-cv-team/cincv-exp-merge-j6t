@@ -389,7 +389,8 @@ int MainMenu::add_aeffect(char *title)
 // add another blank effect
 	if(total_aeffects < TOTAL_EFFECTS)
 	{
-		audiomenu->add_item(aeffect[total_aeffects] = new MenuAEffectItem(aeffects, ""));
+		audiomenu->add_item(
+			aeffect[total_aeffects] = new MenuAEffectItem(aeffects, (char*)""));
 		total_aeffects++;
 	}
 
@@ -430,7 +431,8 @@ int MainMenu::add_veffect(char *title)
 // add another blank effect
 	if(total_veffects < TOTAL_EFFECTS)
 	{
-		videomenu->add_item(veffect[total_veffects] = new MenuVEffectItem(veffects, ""));
+		videomenu->add_item(veffect[total_veffects] = 
+			new MenuVEffectItem(veffects, (char*)""));
 		total_veffects++;
 	}
 
@@ -549,7 +551,7 @@ int Undo::handle_event()
 	mwindow->undo_entry(mwindow->gui);
 	return 1;
 }
-int Undo::update_caption(char *new_caption)
+int Undo::update_caption(const char *new_caption)
 {
 	char string[1024];
 	sprintf(string, _("Undo %s"), new_caption);
@@ -569,7 +571,7 @@ int Redo::handle_event()
 
 	return 1;
 }
-int Redo::update_caption(char *new_caption)
+int Redo::update_caption(const char *new_caption)
 {
 	char string[1024];
 	sprintf(string, _("Redo %s"), new_caption);

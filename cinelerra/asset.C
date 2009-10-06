@@ -665,7 +665,7 @@ int Asset::read_index(FileXML *file)
 	return 0;
 }
 
-int Asset::write_index(char *path, int data_bytes)
+int Asset::write_index(const char *path, int data_bytes)
 {
 	FILE *file;
 	if(!(file = fopen(path, "wb")))
@@ -683,7 +683,7 @@ int Asset::write_index(char *path, int data_bytes)
 // Write encoding information
 		write(&xml, 
 			1, 
-			"");
+			(char*)"");
 		xml.write_to_file(file);
 		index_start = ftell(file);
 		fseek(file, 0, SEEK_SET);
@@ -712,7 +712,7 @@ int Asset::write_index(char *path, int data_bytes)
 
 int Asset::write(FileXML *file, 
 	int include_index, 
-	char *output_path)
+	const char *output_path)
 {
 	char new_path[BCTEXTLEN];
 	char asset_directory[BCTEXTLEN];
@@ -899,7 +899,9 @@ int Asset::write_index(FileXML *file)
 
 
 
-char* Asset::construct_param(char *param, char *prefix, char *return_value)
+const char* Asset::construct_param(const char *param, 
+	const char *prefix, 
+	char *return_value)
 {
 	if(prefix)
 		sprintf(return_value, "%s%s", prefix, param);
@@ -912,7 +914,7 @@ char* Asset::construct_param(char *param, char *prefix, char *return_value)
 #define GET_DEFAULT(x, y) defaults->get(construct_param(x, prefix, string), y);
 
 void Asset::load_defaults(BC_Hash *defaults, 
-	char *prefix, 
+	const char *prefix, 
 	int do_format,
 	int do_compression,
 	int do_path,
@@ -1048,7 +1050,7 @@ void Asset::load_defaults(BC_Hash *defaults,
 }
 
 void Asset::save_defaults(BC_Hash *defaults, 
-	char *prefix,
+	const char *prefix,
 	int do_format,
 	int do_compression,
 	int do_path,

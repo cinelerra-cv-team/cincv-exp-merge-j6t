@@ -110,7 +110,7 @@ public:
 
 	int load_defaults();
 	int save_defaults();
-	int set_filename(char *filename);
+	int set_filename(const char *filename);
 // Total vertical pixels in timeline
 	int get_tracks_height();
 // Total horizontal pixels in timeline
@@ -181,7 +181,7 @@ public:
 // Cause the project filename on the top of the window to be updated.
 // Not wanted for loading backups.
 		int update_filename = 1,
-		char *reel_name = "cin0000",
+		const char *reel_name = "cin0000",
 		int reel_number = 0,
 		int overwrite_reel = 0);
 	

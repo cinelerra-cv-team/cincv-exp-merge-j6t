@@ -42,8 +42,8 @@ class FileList : public FileBase
 public:
 	FileList(Asset *asset, 
 		File *file, 
-		char *list_prefix,
-		char *file_extension, 
+		const char *list_prefix,
+		const char *file_extension, 
 		int frame_type,
 		int list_type);
 	virtual ~FileList();

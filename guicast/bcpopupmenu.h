@@ -38,15 +38,16 @@ public:
 	BC_PopupMenu(int x, 
 		int y, 
 		int w, 
-		char *text, 
+		const char *text, 
 		int use_title = 1,
 // Data for alternative title images
 		VFrame **data = 0,
 // Alternative text margin
 		int margin = -1);
+
 	BC_PopupMenu(int x, 
 		int y, 
-		char *text, 
+		const char *text, 
 		int use_title = 1,
 // Data for alternative title images
 		VFrame **data = 0);
@@ -61,7 +62,7 @@ public:
 	int total_items();
 	BC_MenuItem* get_item(int i);
 // Set title of menu
-	void set_text(char *text);
+	void set_text(const char *text);
 // Set icon of menu.  Disables text.
 	void set_icon(BC_Pixmap *pixmap);
 // Draw title of menu

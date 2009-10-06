@@ -195,7 +195,7 @@ char* ZoomPanel::get_text()
 	return zoom_text->get_text();
 }
 
-void ZoomPanel::set_text(char *text)
+void ZoomPanel::set_text(const char *text)
 {
 	zoom_text->set_text(text);
 }
@@ -206,7 +206,7 @@ void ZoomPanel::update(double value)
 	zoom_text->set_text(value_to_text(value));
 }
 
-void ZoomPanel::update(char *value)
+void ZoomPanel::update(const char *value)
 {
 	zoom_text->set_text(value);
 }

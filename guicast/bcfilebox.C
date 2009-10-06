@@ -421,9 +421,9 @@ int BC_FileBoxReload::handle_event()
 
 BC_FileBox::BC_FileBox(int x, 
 		int y, 
-		char *init_path,
-		char *title,
-		char *caption,
+		const char *init_path,
+		const char *title,
+		const char *caption,
 		int show_all_files,
 		int want_directory,
 		int multiple_files,
@@ -488,7 +488,7 @@ BC_FileBox::BC_FileBox(int x,
 		{
 			column_type[i] = get_resources()->filebox_columntype[i];
 			column_width[i] = get_resources()->filebox_columnwidth[i];
-			column_titles[i] = BC_FileBox::columntype_to_text(column_type[i]);
+			column_titles[i] = (char*)BC_FileBox::columntype_to_text(column_type[i]);
 		}
 		sort_column = get_resources()->filebox_sortcolumn;
 		sort_order = get_resources()->filebox_sortorder;
@@ -793,7 +793,7 @@ int BC_FileBox::create_tables()
 // Date entry
 		if(!is_dir || 1)
 		{
-			static char *month_text[13] = 
+			static const char *month_text[13] = 
 			{
 				"Null",
 				"Jan",
@@ -877,7 +877,7 @@ BC_Pixmap* BC_FileBox::get_icon(char *path, int is_dir)
 	return icons[icon_type];
 }
 
-char* BC_FileBox::columntype_to_text(int type)
+const char* BC_FileBox::columntype_to_text(int type)
 {
 	switch(type)
 	{
@@ -922,7 +922,7 @@ int BC_FileBox::refresh()
 	return 0;
 }
 
-int BC_FileBox::update_filter(char *filter)
+int BC_FileBox::update_filter(const char *filter)
 {
 	fs->set_filter(filter);
 	fs->update(0);
@@ -982,7 +982,7 @@ void BC_FileBox::move_column(int src, int dst)
 	{
 		get_resources()->filebox_columntype[i] = column_type[i];
 		get_resources()->filebox_columnwidth[i] = column_width[i];
-		column_titles[i] = BC_FileBox::columntype_to_text(column_type[i]);
+		column_titles[i] = (char*)BC_FileBox::columntype_to_text(column_type[i]);
 	}
 	
 

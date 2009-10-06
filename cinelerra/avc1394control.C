@@ -189,10 +189,10 @@ char *AVC1394Control::timecode()
 	return text_return;
 }
 
-void AVC1394Control::seek(char *time)
+void AVC1394Control::seek(const char *time)
 {
 //printf("AVC1394Control::seek(): 1\n");
 	device_lock->lock("AVC1394Control::seek");
-	avc1394_vcr_seek_timecode(handle, device, time);
+	avc1394_vcr_seek_timecode(handle, device, (char*)time);
 	device_lock->unlock();
 }

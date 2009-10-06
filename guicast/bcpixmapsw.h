@@ -35,7 +35,7 @@ public:
 
 	int initialize();
 	virtual int handle_event() { return 0; };
-	virtual char* get_caption() { return ""; };
+	virtual char* get_caption() { return (char*)""; };
 
 	int reposition_widget(int x, int y);
 

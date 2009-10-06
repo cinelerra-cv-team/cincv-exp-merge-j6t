@@ -34,7 +34,7 @@
 BC_Toggle::BC_Toggle(int x, int y, 
 		VFrame **data, 
 		int value, 
-		char *caption,
+		const char *caption,
 		int bottom_justify, 
 		int font,
 		int color)
@@ -106,7 +106,7 @@ void BC_Toggle::calculate_extents(BC_WindowBase *gui,
 	int *text_y, 
 	int *text_w,
 	int *text_h, 
-	char *caption)
+	const char *caption)
 {
 	BC_Resources *resources = get_resources();
 	VFrame *frame = images[0];
@@ -453,7 +453,7 @@ int BC_Toggle::has_caption()
 BC_Radial::BC_Radial(int x, 
 	int y, 
 	int value, 
-	char *caption, 
+	const char *caption, 
 	int font,
 	int color)
  : BC_Toggle(x, 
@@ -471,7 +471,7 @@ BC_Radial::BC_Radial(int x,
 BC_CheckBox::BC_CheckBox(int x, 
 	int y, 
 	int value, 
-	char *caption, 
+	const char *caption, 
 	int font,
 	int color)
  : BC_Toggle(x, 
@@ -489,7 +489,7 @@ BC_CheckBox::BC_CheckBox(int x,
 BC_CheckBox::BC_CheckBox(int x, 
 	int y, 
 	int *value, 
-	char *caption, 
+	const char *caption, 
 	int font,
 	int color)
  : BC_Toggle(x, 

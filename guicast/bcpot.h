@@ -53,7 +53,7 @@ public:
 	virtual float get_percentage() { return 0; };
 	virtual int percentage_to_value(float percentage) { return 0; };
 	virtual int handle_event() { return 0; };
-	virtual char* get_caption() { return ""; };
+	virtual char* get_caption() { return (char*)""; };
 	virtual int increase_value() { return 0; };
 	virtual int decrease_value() { return 0; };
 	void set_use_caption(int value);

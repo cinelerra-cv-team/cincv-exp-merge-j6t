@@ -103,7 +103,7 @@ MenuEffectThread::~MenuEffectThread()
 
 
 
-int MenuEffectThread::set_title(char *title)
+int MenuEffectThread::set_title(const char *title)
 {
 	strcpy(this->title, title);
 }

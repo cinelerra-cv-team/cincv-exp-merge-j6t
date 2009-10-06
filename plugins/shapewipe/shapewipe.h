@@ -111,7 +111,7 @@ class ShapeWipeLoad : public BC_FileBox
 {
 public:
 	ShapeWipeLoad(ShapeWipeFilename *filename,
-		char *init_directory);
+		const char *init_directory);
 	ShapeWipeFilename *filename;
 };
 
@@ -148,7 +148,7 @@ public:
 	int uses_gui();
 	int is_transition();
 	int is_video();
-	char* plugin_title();
+	const char* plugin_title();
 	int set_string();
 	VFrame* new_picon();
 	int read_pattern_image(int new_frame_width, int new_frame_height);

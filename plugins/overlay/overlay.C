@@ -46,10 +46,10 @@ public:
 
 
 
-	static char* mode_to_text(int mode);
+	static const char* mode_to_text(int mode);
 	int mode;
 
-	static char* direction_to_text(int direction);
+	static const char* direction_to_text(int direction);
 	int direction;
 	enum
 	{
@@ -57,7 +57,7 @@ public:
 		TOP_FIRST
 	};
 
-	static char* output_to_text(int output_layer);
+	static const char* output_to_text(int output_layer);
 	int output_layer;
 	enum
 	{
@@ -173,7 +173,7 @@ OverlayConfig::OverlayConfig()
 	output_layer = OverlayConfig::TOP;
 }
 
-char* OverlayConfig::mode_to_text(int mode)
+const char* OverlayConfig::mode_to_text(int mode)
 {
 	switch(mode)
 	{
@@ -212,7 +212,7 @@ char* OverlayConfig::mode_to_text(int mode)
 	return "";
 }
 
-char* OverlayConfig::direction_to_text(int direction)
+const char* OverlayConfig::direction_to_text(int direction)
 {
 	switch(direction)
 	{
@@ -222,7 +222,7 @@ char* OverlayConfig::direction_to_text(int direction)
 	return "";
 }
 
-char* OverlayConfig::output_to_text(int output_layer)
+const char* OverlayConfig::output_to_text(int output_layer)
 {
 	switch(output_layer)
 	{
@@ -711,7 +711,7 @@ int Overlay::handle_opengl()
 }
 
 
-char* Overlay::plugin_title() { return N_("Overlay"); }
+const char* Overlay::plugin_title() { return N_("Overlay"); }
 int Overlay::is_realtime() { return 1; }
 int Overlay::is_multichannel() { return 1; }
 int Overlay::is_synthesis() { return 1; }

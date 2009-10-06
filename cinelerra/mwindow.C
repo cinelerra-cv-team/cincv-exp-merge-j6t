@@ -822,7 +822,7 @@ void MWindow::set_brender_start()
 int MWindow::load_filenames(ArrayList<char*> *filenames, 
 	int load_mode,
 	int update_filename,
-	char *reel_name,
+	const char *reel_name,
 	int reel_number,
 	int overwrite_reel)
 {
@@ -2202,7 +2202,7 @@ void MWindow::time_format_common()
 }
 
 
-int MWindow::set_filename(char *filename)
+int MWindow::set_filename(const char *filename)
 {
 	strcpy(session->filename, filename);
 	if(gui)

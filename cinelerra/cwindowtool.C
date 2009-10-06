@@ -225,7 +225,7 @@ void CWindowTool::update_values()
 
 CWindowToolGUI::CWindowToolGUI(MWindow *mwindow, 
 	CWindowTool *thread, 
-	char *title,
+	const char *title,
 	int w, 
 	int h)
  : BC_Window(title,
@@ -1388,7 +1388,7 @@ CWindowMaskMode::CWindowMaskMode(MWindow *mwindow,
 	CWindowToolGUI *gui, 
 	int x, 
 	int y,
-	char *text)
+	const char *text)
  : BC_PopupMenu(x,
  	y,
 	200,

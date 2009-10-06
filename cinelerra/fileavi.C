@@ -1050,7 +1050,7 @@ void AVIConfigVideo::generate_attributelist()
 #endif
 }
 
-char* AVIConfigVideo::get_current_attribute_text()
+const char* AVIConfigVideo::get_current_attribute_text()
 {
 	BC_ListBoxItem *item = attributes->get_selection(0, 0);
 
@@ -1062,7 +1062,7 @@ char* AVIConfigVideo::get_current_attribute_text()
 		return "";
 }
 
-char* AVIConfigVideo::get_current_attribute_value()
+const char* AVIConfigVideo::get_current_attribute_value()
 {
 	BC_ListBoxItem *item = attributes->get_selection(1, 0);
 

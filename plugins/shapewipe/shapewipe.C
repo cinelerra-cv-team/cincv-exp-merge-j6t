@@ -168,7 +168,7 @@ int ShapeWipeBrowseButton::handle_event()
 
 ShapeWipeLoad::ShapeWipeLoad(
 	ShapeWipeFilename *filename, 
-	char *init_directory)
+	const char *init_directory)
  : BC_FileBox(
 	1,
 	1,
@@ -270,7 +270,7 @@ ShapeWipeMain::~ShapeWipeMain()
 	PLUGIN_DESTRUCTOR_MACRO
 }
 
-char* ShapeWipeMain::plugin_title() { return N_("Shape Wipe"); }
+const char* ShapeWipeMain::plugin_title() { return N_("Shape Wipe"); }
 int ShapeWipeMain::is_video() { return 1; }
 int ShapeWipeMain::is_transition() { return 1; }
 int ShapeWipeMain::uses_gui() { return 1; }

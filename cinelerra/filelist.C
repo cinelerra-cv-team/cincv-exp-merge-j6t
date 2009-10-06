@@ -42,16 +42,16 @@
 
 FileList::FileList(Asset *asset, 
 	File *file, 
-	char *list_prefix,
-	char *file_extension, 
+	const char *list_prefix,
+	const char *file_extension, 
 	int frame_type,
 	int list_type)
  : FileBase(asset, file)
 {
 	reset_parameters();
 	asset->video_data = 1;
-	this->list_prefix = list_prefix;
-	this->file_extension = file_extension;
+	this->list_prefix = (char*)list_prefix;
+	this->file_extension = (char*)file_extension;
 	this->frame_type = frame_type;
 	this->list_type = list_type;
 	table_lock = new Mutex("FileList::table_lock");
@@ -495,7 +495,7 @@ char* FileList::create_path(int number_override)
 
 
 
-	char *path = "";
+	char *path = (char*)"";
 	char output[BCTEXTLEN];
 	if(file->current_frame >= path_list.total || !asset->use_header)
 	{

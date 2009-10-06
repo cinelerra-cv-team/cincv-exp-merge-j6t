@@ -86,7 +86,7 @@ int RenderProfile::calculate_h(BC_WindowBase *gui)
 int RenderProfile::create_objects()
 {
 	int x = this->x, y = this->y;
-	char *default_text = "";
+	const char *default_text = "";
 	rwindow->add_subwindow(new BC_Title(x, 
 		y, 
 			_("RenderProfile:")));
@@ -185,7 +185,7 @@ int RenderProfileListBox::handle_event()
 	return 1;
 }
 
-int RenderProfile::get_profile_slot_by_name(char * profile_name)
+int RenderProfile::get_profile_slot_by_name(const char * profile_name)
 {
 	for (int i = 1; i < MAX_PROFILES; i++)
 	{
@@ -216,7 +216,7 @@ int RenderProfile::get_new_profile_slot()
 }
 
 
-int RenderProfile::save_to_slot(int profile_slot, char *profile_name)
+int RenderProfile::save_to_slot(int profile_slot, const char *profile_name)
 {
 	char string_name[100];
 	sprintf(string_name, "RENDER_%i_PROFILE_NAME", profile_slot);

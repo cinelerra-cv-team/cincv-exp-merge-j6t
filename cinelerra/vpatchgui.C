@@ -349,7 +349,7 @@ void VModePatch::update(int mode)
 }
 
 
-char* VModePatch::mode_to_text(int mode)
+const char* VModePatch::mode_to_text(int mode)
 {
 	switch(mode)
 	{
@@ -393,7 +393,7 @@ char* VModePatch::mode_to_text(int mode)
 
 
 
-VModePatchItem::VModePatchItem(VModePatch *popup, char *text, int mode)
+VModePatchItem::VModePatchItem(VModePatch *popup, const char *text, int mode)
  : BC_MenuItem(text)
 {
 	this->popup = popup;

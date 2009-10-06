@@ -38,7 +38,7 @@ extern char dcraw_info[1024];
 extern float **dcraw_data;
 extern int dcraw_alpha;
 extern float dcraw_matrix[9];
-int dcraw_main (int argc, char **argv);
+int dcraw_main (int argc, const char **argv);
 }
 
 
@@ -68,7 +68,7 @@ int FileCR2::check_sig(Asset *asset)
 
 	strcpy(string, asset->path);
 
-	char *argv[4];
+	const char *argv[4];
 	argv[0] = "dcraw";
 	argv[1] = "-i";
 	argv[2] = string;
@@ -86,7 +86,7 @@ int FileCR2::open_file(int rd, int wr)
 	cr2_mutex.lock("FileCR2::check_sig");
 
 	int argc = 3;
-	char *argv[3] = 
+	const char *argv[3] = 
 	{
 		"dcraw",
 		"-i",
@@ -139,22 +139,22 @@ int FileCR2::read_frame(VFrame *frame)
 // output to stdout
 	int argc = 0;
 	char *argv[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	argv[argc++] = "dcraw";
+	argv[argc++] = (char*)"dcraw";
 // write to stdout
-	argv[argc++] = "-c";
+	argv[argc++] = (char*)"-c";
 // Use camera white balance.  
 // Before 2006, DCraw had no Canon white balance.
 // In 2006 DCraw seems to support Canon white balance.
 // Still no gamma support.
 // Need to toggle this in preferences because it defeats dark frame subtraction.
 	if(file->white_balance_raw)
-		argv[argc++] = "-w";
+		argv[argc++] = (char*)"-w";
 	if(!file->interpolate_raw)
 	{
 // Trying to do everything but interpolate doesn't work because convert_to_rgb
 // doesn't work with bayer patterns.
 // Use document mode and hack dcraw to apply white balance in the write_ function.
-		argv[argc++] = "-d";
+		argv[argc++] = (char*)"-d";
 	}
 
 	argv[argc++] = asset->path;
@@ -162,7 +162,7 @@ int FileCR2::read_frame(VFrame *frame)
 	dcraw_data = (float**)frame->get_rows();
 
 //Timer timer;
-	int result = dcraw_main(argc, argv);
+	int result = dcraw_main(argc, (const char**) argv);
 
 	char string[BCTEXTLEN];
 	sprintf(string, 
