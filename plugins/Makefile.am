@@ -3,19 +3,23 @@ THEMES= \
 	bluedottheme \
 	defaulttheme
 
+# burn must come before any other effecttv plugin
+# colors must come before any plugin
+# parametric must come before fourier plugins
+# motion must come before perspective
+
 SUBDIRS= \
 	$(THEMES) \
-	libfourier \
 	colors \
-	libeffecttv \
 	1080to540 \
 	720to480 \
-	aging \
 	bandslide \
 	bandwipe \
 	blur \
 	brightness \
 	burn \
+	parametric \
+	aging \
 	cdripper \
 	chromakey \
 	chromakeyhsv \
@@ -67,7 +71,6 @@ SUBDIRS= \
 	oilpainting \
 	overlay \
 	overlayaudio \
-	parametric \
 	perspective \
 	pitch \
 	polar \
