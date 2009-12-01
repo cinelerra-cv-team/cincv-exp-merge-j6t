@@ -94,7 +94,7 @@ public:
 		int y);
 	~PluginDialog();
 
-	int create_objects();
+	void create_objects();
 
 	int attach_new(int number);
 	int attach_shared(int number);

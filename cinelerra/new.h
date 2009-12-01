@@ -41,7 +41,7 @@ class New : public BC_MenuItem
 {
 public:
 	New(MWindow *mwindow);
-	int create_objects();
+	void create_objects();
 
 	int handle_event();
 	int run_script(FileXML *script);
@@ -81,7 +81,7 @@ public:
 	NewWindow(MWindow *mwindow, NewThread *new_thread, int x, int y);
 	~NewWindow();
 	
-	int create_objects();
+	void create_objects();
 	int update();
 
 	MWindow *mwindow;

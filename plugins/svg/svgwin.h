@@ -45,7 +45,7 @@ public:
 	SvgWin(SvgMain *client, int x, int y);
 	~SvgWin();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	SvgCoord *in_x, *in_y, *in_w, *in_h, *out_x, *out_y, *out_w, *out_h;

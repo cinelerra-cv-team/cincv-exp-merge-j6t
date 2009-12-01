@@ -151,7 +151,7 @@ public:
 	ThresholdWindow(ThresholdMain *plugin, int x, int y);
 	~ThresholdWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_low_color();
 	void update_mid_color();

@@ -58,7 +58,7 @@ ZoomBar::~ZoomBar()
 	delete track_zoom;
 }
 
-int ZoomBar::create_objects()
+void ZoomBar::create_objects()
 {
 	int x = 3;
 	int y = get_h() / 2 - 
@@ -119,7 +119,6 @@ int ZoomBar::create_objects()
 
 	add_subwindow(zoom_value = new BC_Title(x, 100, _("--"), MEDIUMFONT, BLACK));
 	update();
-	return 0;
 }
 
 

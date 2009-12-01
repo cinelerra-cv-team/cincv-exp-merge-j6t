@@ -123,7 +123,7 @@ TrackCanvas::~TrackCanvas()
 	delete resource_timer;
 }
 
-int TrackCanvas::create_objects()
+void TrackCanvas::create_objects()
 {
 	background_pixmap = new BC_Pixmap(this, get_w(), get_h());
 //	transition_handles = new TransitionHandles(mwindow, this);
@@ -138,7 +138,6 @@ int TrackCanvas::create_objects()
 	draw();
 	update_cursor();
 	flash();
-	return 0;
 }
 
 void TrackCanvas::resize_event()

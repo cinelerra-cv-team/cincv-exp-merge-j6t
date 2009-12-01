@@ -81,7 +81,7 @@ SharpenWindow::~SharpenWindow()
 {
 }
 
-int SharpenWindow::create_objects()
+void SharpenWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Sharpness")));
@@ -95,7 +95,6 @@ int SharpenWindow::create_objects()
 	add_tool(sharpen_luminance = new SharpenLuminance(client, x, y));
 	show_window();
 	flush();
-	return 0;
 }
 
 int SharpenWindow::close_event()

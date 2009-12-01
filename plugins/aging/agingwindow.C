@@ -53,7 +53,7 @@ AgingWindow::~AgingWindow()
 {
 }
 
-int AgingWindow::create_objects()
+void AgingWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, 
@@ -78,7 +78,6 @@ int AgingWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(AgingWindow)

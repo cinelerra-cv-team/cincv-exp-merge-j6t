@@ -568,7 +568,7 @@ VorbisConfigAudio::~VorbisConfigAudio()
 {
 }
 
-int VorbisConfigAudio::create_objects()
+void VorbisConfigAudio::create_objects()
 {
 	int x = 10, y = 10;
 	int x1 = 150;
@@ -596,7 +596,6 @@ int VorbisConfigAudio::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 int VorbisConfigAudio::close_event()

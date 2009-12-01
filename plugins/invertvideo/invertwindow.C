@@ -36,7 +36,7 @@ InvertWindow::~InvertWindow()
 	delete invert;
 }
 
-int InvertWindow::create_objects()
+void InvertWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Invert")));

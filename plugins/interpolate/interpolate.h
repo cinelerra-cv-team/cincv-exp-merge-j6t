@@ -70,7 +70,7 @@ public:
 	InterpolatePixelsWindow(InterpolatePixelsMain *client, int x, int y);
 	~InterpolatePixelsWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	InterpolatePixelsMain *client;

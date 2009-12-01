@@ -51,7 +51,7 @@ CPanel::~CPanel()
 {
 }
 
-int CPanel::create_objects()
+void CPanel::create_objects()
 {
 	int x = this->x, y = this->y;
 	subwindow->add_subwindow(operation[CWINDOW_PROTECT] = new CPanelProtect(mwindow, this, x, y));
@@ -71,7 +71,6 @@ int CPanel::create_objects()
 	subwindow->add_subwindow(operation[CWINDOW_TOOL_WINDOW] = new CPanelToolWindow(mwindow, this, x, y));
 	y += operation[CWINDOW_TOOL_WINDOW]->get_h();
 	subwindow->add_subwindow(operation[CWINDOW_TITLESAFE] = new CPanelTitleSafe(mwindow, this, x, y));
-	return 0;
 }
 
 void CPanel::reposition_buttons(int x, int y)

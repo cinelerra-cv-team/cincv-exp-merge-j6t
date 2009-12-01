@@ -51,7 +51,7 @@ UnsharpWindow::~UnsharpWindow()
 {
 }
 
-int UnsharpWindow::create_objects()
+void UnsharpWindow::create_objects()
 {
 	int x = 10, y = 10;
 	BC_Title *title;
@@ -75,7 +75,6 @@ int UnsharpWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 

@@ -46,7 +46,7 @@ public:
 	DeInterlaceWindow(DeInterlaceMain *client, int x, int y);
 	~DeInterlaceWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int set_mode(int mode, int recursive);
 	void get_status_string(char *string, int changed_rows);

@@ -55,7 +55,7 @@ ReverbWindow::~ReverbWindow()
 {
 }
 
-int ReverbWindow::create_objects()
+void ReverbWindow::create_objects()
 {
 	int x = 170, y = 10;
 	add_tool(new BC_Title(5, y + 10, _("Initial signal level:")));
@@ -76,7 +76,6 @@ int ReverbWindow::create_objects()
 	add_tool(lowpass2 = new ReverbLowPass2(reverb, x + 35, y)); y += 40;
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(ReverbWindow)

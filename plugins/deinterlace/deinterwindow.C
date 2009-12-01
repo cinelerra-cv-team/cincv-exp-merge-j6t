@@ -56,7 +56,7 @@ DeInterlaceWindow::~DeInterlaceWindow()
 {
 }
 
-int DeInterlaceWindow::create_objects()
+void DeInterlaceWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Select deinterlacing mode")));
@@ -73,7 +73,6 @@ int DeInterlaceWindow::create_objects()
 	flash();
 	show_window();
 	set_mode(client->config.mode,0);
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(DeInterlaceWindow)

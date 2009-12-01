@@ -100,7 +100,7 @@ public:
 	LinearBlurWindow(LinearBlurMain *plugin, int x, int y);
 	~LinearBlurWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	LinearBlurSize *angle, *steps, *radius;
@@ -284,7 +284,7 @@ LinearBlurWindow::~LinearBlurWindow()
 {
 }
 
-int LinearBlurWindow::create_objects()
+void LinearBlurWindow::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -311,7 +311,6 @@ int LinearBlurWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(LinearBlurWindow)

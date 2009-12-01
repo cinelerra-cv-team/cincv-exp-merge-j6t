@@ -43,7 +43,7 @@ public:
 	TranslateWin(TranslateMain *client, int x, int y);
 	~TranslateWin();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	TranslateCoord *in_x, *in_y, *in_w, *in_h, *out_x, *out_y, *out_w, *out_h;

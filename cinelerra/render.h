@@ -252,7 +252,7 @@ public:
 	RenderWindow(MWindow *mwindow, Render *render, Asset *asset);
 	~RenderWindow();
 
-	int create_objects();
+	void create_objects();
 	void update_range_type(int range_type);
 	int load_profile(int profile_slot);
 	

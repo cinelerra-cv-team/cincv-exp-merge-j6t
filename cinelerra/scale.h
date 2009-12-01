@@ -79,7 +79,7 @@ public:
 	ScaleWindow(ScaleThread *thread);
 	~ScaleWindow();
 	
-	int create_objects();
+	void create_objects();
 	ScaleThread *thread;
 	ScaleSizeText *dimension[4];
 	ScaleRatioText *ratio[4];

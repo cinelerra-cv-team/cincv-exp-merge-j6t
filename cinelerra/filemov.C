@@ -1423,7 +1423,7 @@ void MOVConfigAudio::reset()
 	mp4a_quantqual = 0;
 }
 
-int MOVConfigAudio::create_objects()
+void MOVConfigAudio::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -1454,7 +1454,6 @@ int MOVConfigAudio::create_objects()
 	update_parameters();
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 void MOVConfigAudio::update_parameters()
@@ -1697,7 +1696,7 @@ MOVConfigVideo::~MOVConfigVideo()
 	compression_items.remove_all_objects();
 }
 
-int MOVConfigVideo::create_objects()
+void MOVConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -1761,7 +1760,6 @@ int MOVConfigVideo::create_objects()
 	update_parameters();
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int MOVConfigVideo::close_event()

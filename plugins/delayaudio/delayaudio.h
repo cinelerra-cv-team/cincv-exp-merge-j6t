@@ -71,7 +71,7 @@ public:
 	DelayAudioWindow(DelayAudio *plugin, int x, int y);
 	~DelayAudioWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_gui();
 

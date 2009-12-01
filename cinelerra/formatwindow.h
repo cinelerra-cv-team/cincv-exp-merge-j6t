@@ -39,7 +39,7 @@ class FormatAWindow : public BC_Window
 public:
 	FormatAWindow(Asset *asset, int *dither);
 	~FormatAWindow();
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	Asset *asset;
@@ -53,7 +53,7 @@ class FormatVWindow : public BC_Window
 public:
 	FormatVWindow(Asset *asset, int recording);
 	~FormatVWindow();
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	Asset *asset;

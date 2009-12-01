@@ -103,7 +103,7 @@ public:
 	DownSampleWindow(DownSampleMain *plugin, int x, int y);
 	~DownSampleWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	DownSampleToggle *r, *g, *b, *a;
@@ -269,7 +269,7 @@ DownSampleWindow::~DownSampleWindow()
 {
 }
 
-int DownSampleWindow::create_objects()
+void DownSampleWindow::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -336,7 +336,6 @@ int DownSampleWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int DownSampleWindow::close_event()

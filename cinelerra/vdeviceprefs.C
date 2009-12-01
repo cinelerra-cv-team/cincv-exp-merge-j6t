@@ -524,7 +524,7 @@ char* VDriverMenu::driver_to_string(int driver)
 	return string;
 }
 
-int VDriverMenu::create_objects()
+void VDriverMenu::create_objects()
 {
 	if(do_input)
 	{
@@ -555,7 +555,6 @@ int VDriverMenu::create_objects()
 		add_item(new VDriverItem(this, PLAYBACK_IEC61883_TITLE, PLAYBACK_IEC61883));
 #endif
 	}
-	return 0;
 }
 
 

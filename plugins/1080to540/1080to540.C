@@ -92,7 +92,7 @@ _1080to540Window::~_1080to540Window()
 {
 }
 
-int _1080to540Window::create_objects()
+void _1080to540Window::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -102,7 +102,6 @@ int _1080to540Window::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(_1080to540Window)

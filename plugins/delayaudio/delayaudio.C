@@ -290,14 +290,13 @@ DelayAudioWindow::~DelayAudioWindow()
 {
 }
 
-int DelayAudioWindow::create_objects()
+void DelayAudioWindow::create_objects()
 {
 	add_subwindow(new BC_Title(10, 10, _("Delay seconds:")));
 	add_subwindow(length = new DelayAudioTextBox(plugin, 10, 40));
 	update_gui();
 	show_window();
 	flush();
-	return 0;
 }
 
 int DelayAudioWindow::close_event()

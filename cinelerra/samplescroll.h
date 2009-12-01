@@ -32,7 +32,6 @@ public:
 	SampleScroll(MWindow *mwindow, MWindowGUI *gui, int x, int y, int w);
 	~SampleScroll();
 
-	int create_objects();
 	int flip_vertical();
 	int in_use();
 	int resize_event();

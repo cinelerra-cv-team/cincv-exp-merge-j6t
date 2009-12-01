@@ -44,7 +44,7 @@ public:
 		int y);
 	~RecordTransport();
 
-	int create_objects();
+	void create_objects();
 	void reposition_window(int x, int y);
 	int keypress_event();
 	int get_h();

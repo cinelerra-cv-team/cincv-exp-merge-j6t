@@ -34,7 +34,7 @@ public:
 	BC_NewFolder(int x, int y, BC_FileBox *filebox);
 	~BC_NewFolder();
 
-	int create_objects();
+	void create_objects();
 	char* get_text();
 
 private:

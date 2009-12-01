@@ -42,7 +42,7 @@ ByteOrderPopup::~ByteOrderPopup()
 		delete byteorder_items.values[i];
 }
 
-int ByteOrderPopup::create_objects()
+void ByteOrderPopup::create_objects()
 {
 	byteorder_items.append(new BC_ListBoxItem(File::byteorder_to_str(0)));
 	byteorder_items.append(new BC_ListBoxItem(File::byteorder_to_str(1)));
@@ -50,7 +50,6 @@ int ByteOrderPopup::create_objects()
 	parent_window->add_subwindow(textbox = new ByteOrderText(this, x, y));
 	x += textbox->get_w();
 	parent_window->add_subwindow(menu = new ByteOrderList(this, x, y));
-	return 0;
 }
 
 ByteOrderList::ByteOrderList(ByteOrderPopup *popup, int x, int y)

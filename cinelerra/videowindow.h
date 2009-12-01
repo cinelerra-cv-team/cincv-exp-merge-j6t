@@ -36,7 +36,7 @@ public:
 	VideoWindow(MWindow *mwindow);
 	~VideoWindow();
 	
-	int create_objects();
+	void create_objects();
 	int init_window();
 	int load_defaults(BC_Hash *defaults);
 	int update_defaults(BC_Hash *defaults);

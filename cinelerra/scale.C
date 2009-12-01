@@ -201,7 +201,7 @@ ScaleWindow::~ScaleWindow()
 {
 }
 
-int ScaleWindow::create_objects()
+void ScaleWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, _("New camera size:")));

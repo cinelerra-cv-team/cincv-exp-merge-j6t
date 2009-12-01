@@ -153,7 +153,7 @@ TimeFrontWindow::~TimeFrontWindow()
 {
 }
 
-int TimeFrontWindow::create_objects()
+void TimeFrontWindow::create_objects()
 {
 	int x = 10, y = 10;
 	BC_Title *title;
@@ -181,7 +181,6 @@ int TimeFrontWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 void TimeFrontWindow::update_shape()

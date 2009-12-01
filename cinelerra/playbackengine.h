@@ -46,7 +46,7 @@ public:
 	PlaybackEngine(MWindow *mwindow, Canvas *output);
 	virtual ~PlaybackEngine();
 
-	int create_objects();
+	void create_objects();
 	virtual int create_render_engine();
 	void delete_render_engine();
 	void arm_render_engine();

@@ -43,7 +43,7 @@ public:
 	GainWindow(Gain *gain, int x, int y);
 	~GainWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	Gain *gain;

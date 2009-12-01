@@ -72,7 +72,7 @@ RecordMonitor::~RecordMonitor()
 	delete window;
 }
 
-int RecordMonitor::create_objects()
+void RecordMonitor::create_objects()
 {
 	int min_w = 150;
 	mwindow->session->rwindow_fullscreen = 0;
@@ -122,7 +122,6 @@ SET_TRACE
 SET_TRACE
 
 	Thread::start();
-	return 0;
 }
 
 
@@ -254,7 +253,7 @@ RecordMonitorGUI::~RecordMonitorGUI()
 #endif
 }
 
-int RecordMonitorGUI::create_objects()
+void RecordMonitorGUI::create_objects()
 {
 // y offset for video canvas if we have the transport controls
 	int do_channel = (mwindow->edl->session->vconfig_in->driver == VIDEO4LINUX ||
@@ -390,7 +389,6 @@ int RecordMonitorGUI::create_objects()
 			1);
 		meters->create_objects();
 	}
-	return 0;
 }
 
 int RecordMonitorGUI::button_press_event()

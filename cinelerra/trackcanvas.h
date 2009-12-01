@@ -50,7 +50,7 @@ public:
 	TrackCanvas(MWindow *mwindow, MWindowGUI *gui);
 	~TrackCanvas();
 
-	int create_objects();
+	void create_objects();
 	void resize_event();
 	int drag_start_event();
 	int drag_motion_event();

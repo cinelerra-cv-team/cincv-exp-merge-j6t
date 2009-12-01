@@ -98,13 +98,12 @@ int ATrack::load_derived(FileXML *file, uint32_t load_flags)
 	return 0;
 }
 
-int ATrack::create_objects()
+void ATrack::create_objects()
 {
 	Track::create_objects();
 	automation = new AAutomation(edl, this);
 	automation->create_objects();
 	edits = new AEdits(edl, this);
-	return 0;
 }
 
 int ATrack::vertical_span(Theme *theme)

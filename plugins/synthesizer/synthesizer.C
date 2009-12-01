@@ -570,7 +570,7 @@ SynthWindow::~SynthWindow()
 {
 }
 
-int SynthWindow::create_objects()
+void SynthWindow::create_objects()
 {
 	BC_MenuBar *menu;
 	add_subwindow(menu = new BC_MenuBar(0, 0, get_w()));
@@ -658,7 +658,6 @@ int SynthWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int SynthWindow::close_event()
@@ -1007,7 +1006,7 @@ SynthWaveForm::~SynthWaveForm()
 {
 }
 
-int SynthWaveForm::create_objects()
+void SynthWaveForm::create_objects()
 {
 //	add_item(new SynthWaveFormItem(synth, _("DC"), DC));
 	add_item(new SynthWaveFormItem(synth, _("Sine"), SINE));
@@ -1016,7 +1015,6 @@ int SynthWaveForm::create_objects()
 	add_item(new SynthWaveFormItem(synth, _("Triangle"), TRIANGLE));
 	add_item(new SynthWaveFormItem(synth, _("Pulse"), PULSE));
 	add_item(new SynthWaveFormItem(synth, _("Noise"), NOISE));
-	return 0;
 }
 
 SynthWaveFormItem::SynthWaveFormItem(Synth *synth, char *text, int value)

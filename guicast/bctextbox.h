@@ -244,7 +244,7 @@ public:
 		int text_w,
 		int list_h);
 	virtual ~BC_PopupTextBox();
-	int create_objects();
+	void create_objects();
 	virtual int handle_event();
 	char* get_text();
 	int get_number();
@@ -316,7 +316,7 @@ public:
 		int text_w);
 	virtual ~BC_TumbleTextBox();
 
-	int create_objects();
+	void create_objects();
 	void reset();
 	virtual int handle_event();
 	char* get_text();

@@ -71,7 +71,7 @@ public:
 		ChannelPicker *channel_picker);
 	~ChannelEditWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int add_channel();  // Start the thread for adding a channel
 	int delete_channel(int channel);
@@ -446,7 +446,7 @@ public:
 	~ChannelEditPictureWindow();
 
 	int calculate_h(ChannelPicker *channel_picker);
-	int create_objects();
+	void create_objects();
 
 	ChannelEditPictureThread *thread;
 	ChannelPicker *channel_picker;

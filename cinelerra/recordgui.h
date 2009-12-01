@@ -83,7 +83,7 @@ public:
 
 	void load_defaults();
 	void save_defaults();
-	int create_objects();
+	void create_objects();
 	void flash_batch();
 	void update_batches();
 	void update_sources();

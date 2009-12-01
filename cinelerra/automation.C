@@ -90,13 +90,12 @@ int Automation::autogrouptype(int autoidx, Track *track)
 	return (autogrouptype);
 }
 
-int Automation::create_objects()
+void Automation::create_objects()
 {
 	autos[AUTOMATION_MUTE] = new IntAutos(edl, track, 0);
 	autos[AUTOMATION_MUTE]->create_objects();
 	autos[AUTOMATION_MUTE]->autoidx = AUTOMATION_MUTE; 
 	autos[AUTOMATION_MUTE]->autogrouptype = AUTOGROUPTYPE_INT255;
-	return 0;
 }
 
 Automation& Automation::operator=(Automation& automation)

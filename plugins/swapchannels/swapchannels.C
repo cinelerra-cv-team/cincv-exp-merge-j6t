@@ -147,7 +147,7 @@ int SwapMenu::handle_event()
 	return 1;
 }
 
-int SwapMenu::create_objects()
+void SwapMenu::create_objects()
 {
 	add_item(new SwapItem(this, client->output_to_text(RED_SRC)));
 	add_item(new SwapItem(this, client->output_to_text(GREEN_SRC)));
@@ -155,7 +155,6 @@ int SwapMenu::create_objects()
 	add_item(new SwapItem(this, client->output_to_text(ALPHA_SRC)));
 	add_item(new SwapItem(this, client->output_to_text(NO_SRC)));
 	add_item(new SwapItem(this, client->output_to_text(MAX_SRC)));
-	return 0;
 }
 
 

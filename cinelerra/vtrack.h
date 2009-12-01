@@ -42,7 +42,7 @@ public:
 	VTrack(EDL *edl, Tracks *tracks);
 	~VTrack();
 
-	int create_objects();
+	void create_objects();
 	int load_defaults(BC_Hash *defaults);
 	void set_default_title();
 	PluginSet* new_plugins();

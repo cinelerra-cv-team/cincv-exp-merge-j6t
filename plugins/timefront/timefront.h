@@ -204,7 +204,7 @@ public:
 	TimeFrontWindow(TimeFrontMain *plugin, int x, int y);
 	~TimeFrontWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_shape();
 

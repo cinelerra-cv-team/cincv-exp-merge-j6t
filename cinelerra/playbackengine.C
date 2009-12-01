@@ -82,9 +82,8 @@ PlaybackEngine::~PlaybackEngine()
 	delete start_lock;
 }
 
-int PlaybackEngine::create_objects()
+void PlaybackEngine::create_objects()
 {
-	int result = 0;
 	preferences = new Preferences;
 	command = new TransportCommand;
 	que = new TransportQue;
@@ -96,7 +95,6 @@ int PlaybackEngine::create_objects()
 	done = 0;
 	Thread::start();
 	start_lock->lock("PlaybackEngine::create_objects");
-	return result;
 }
 
 ChannelDB* PlaybackEngine::get_channeldb()

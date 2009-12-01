@@ -134,7 +134,7 @@ PerspectiveWindow::~PerspectiveWindow()
 {
 }
 
-int PerspectiveWindow::create_objects()
+void PerspectiveWindow::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -205,7 +205,6 @@ int PerspectiveWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(PerspectiveWindow)

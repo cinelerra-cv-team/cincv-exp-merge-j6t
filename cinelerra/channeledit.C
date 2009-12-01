@@ -220,7 +220,7 @@ ChannelEditWindow::~ChannelEditWindow()
 	delete scan_confirm_thread;
 }
 
-int ChannelEditWindow::create_objects()
+void ChannelEditWindow::create_objects()
 {
 	int x = 10, y = 10, i;
 	char string[1024];
@@ -269,7 +269,6 @@ int ChannelEditWindow::create_objects()
 		channel_picker);
 	picture_thread = new ChannelEditPictureThread(channel_picker, this);
 	show_window();
-	return 0;
 }
 
 int ChannelEditWindow::close_event()
@@ -1458,7 +1457,7 @@ int ChannelEditPictureWindow::calculate_h(ChannelPicker *channel_picker)
 	return result;
 }
 
-int ChannelEditPictureWindow::create_objects()
+void ChannelEditPictureWindow::create_objects()
 {
 	int x = 10, y = 10;
 	int x1 = 110, x2 = 145;
@@ -1545,7 +1544,6 @@ SET_TRACE
 
 	y += pad;
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 

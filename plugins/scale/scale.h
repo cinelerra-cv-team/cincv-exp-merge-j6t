@@ -94,7 +94,7 @@ public:
 	ScaleWin(ScaleMain *client, int x, int y);
 	~ScaleWin();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	ScaleMain *client;

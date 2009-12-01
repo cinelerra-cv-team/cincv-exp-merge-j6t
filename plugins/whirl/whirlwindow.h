@@ -55,7 +55,7 @@ public:
 	WhirlWindow(WhirlMain *client);
 	~WhirlWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	WhirlMain *client;

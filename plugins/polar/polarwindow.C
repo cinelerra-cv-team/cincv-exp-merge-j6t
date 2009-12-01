@@ -57,7 +57,7 @@ PolarWindow::~PolarWindow()
 	delete automation[1];
 }
 
-int PolarWindow::create_objects()
+void PolarWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Depth")));

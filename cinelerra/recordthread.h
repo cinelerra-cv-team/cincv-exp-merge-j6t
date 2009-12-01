@@ -40,7 +40,7 @@ public:
 	RecordThread(MWindow *mwindow, Record *record);
 	~RecordThread();
 
-	int create_objects();
+	void create_objects();
 	int start_recording(int monitor, int context);
 	int stop_recording(int resume_monitor);
 	int pause_recording();

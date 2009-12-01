@@ -41,7 +41,7 @@ public:
 		int use_recording = 0);
 	~MeterPanel();
 
-	int create_objects();
+	void create_objects();
 	int set_meters(int meter_count, int use_meters);
 	static int get_meters_width(int meter_count, int use_meters);
 	void reposition_window(int x, int y, int h);

@@ -32,7 +32,7 @@ public:
 	
 
 
-	int create_objects();
+	void create_objects();
 };
 
 

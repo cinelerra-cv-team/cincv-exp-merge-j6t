@@ -183,7 +183,7 @@ AssetEditWindow::~AssetEditWindow()
 
 
 
-int AssetEditWindow::create_objects()
+void AssetEditWindow::create_objects()
 {
 	int y = 10, x = 10, x1 = 10, x2 = 160;
 	char string[BCTEXTLEN];
@@ -541,7 +541,6 @@ int AssetEditWindow::create_objects()
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 AssetEditChannels::AssetEditChannels(AssetEditWindow *fwindow, 

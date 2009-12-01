@@ -33,7 +33,7 @@ public:
 	ByteOrderPopup(BC_WindowBase *parent_window, int x, int y, int *output);
 	~ByteOrderPopup();
 
-	int create_objects();
+	void create_objects();
 
 	ArrayList<BC_ListBoxItem*> byteorder_items;
 	BC_WindowBase *parent_window;

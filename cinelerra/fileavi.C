@@ -774,7 +774,7 @@ int AVIConfigAudio::calculate_h(int format)
 	}
 }
 
-int AVIConfigAudio::create_objects()
+void AVIConfigAudio::create_objects()
 {
 	switch(asset->format)
 	{
@@ -799,7 +799,6 @@ int AVIConfigAudio::create_objects()
 	}
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int AVIConfigAudio::close_event()
@@ -917,7 +916,7 @@ int AVIConfigVideo::calculate_h(int format)
 	}
 }
 
-int AVIConfigVideo::create_objects()
+void AVIConfigVideo::create_objects()
 {
 	switch(asset->format)
 	{
@@ -950,7 +949,6 @@ int AVIConfigVideo::create_objects()
 	}
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int AVIConfigVideo::close_event()

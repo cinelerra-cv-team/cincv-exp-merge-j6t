@@ -33,7 +33,7 @@ public:
 	NewFolder(MWindow *mwindow, AWindowGUI *awindow, int x, int y);
 	~NewFolder();
 
-	int create_objects();
+	void create_objects();
 	char* get_text();
 
 private:

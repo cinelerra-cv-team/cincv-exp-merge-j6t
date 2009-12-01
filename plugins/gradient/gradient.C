@@ -180,7 +180,7 @@ GradientWindow::~GradientWindow()
 	delete out_color_thread;
 }
 
-int GradientWindow::create_objects()
+void GradientWindow::create_objects()
 {
 	int x = 10, y = 10;
 	BC_Title *title;
@@ -222,7 +222,6 @@ int GradientWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 void GradientWindow::update_shape()

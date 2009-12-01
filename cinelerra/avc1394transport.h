@@ -59,7 +59,7 @@ public:
 	AVC1394Transport(MWindow *mwindow, AVC1394Control *avc, BC_WindowBase *window, int x, int y);
 	~AVC1394Transport();
 
-	int create_objects();
+	void create_objects();
 	void reposition_window(int x, int y);
 	int keypress_event(int keypress);
 	

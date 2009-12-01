@@ -54,7 +54,7 @@ GainWindow::~GainWindow()
 {
 }
 
-int GainWindow::create_objects()
+void GainWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(5, y, _("Level:")));
@@ -62,7 +62,6 @@ int GainWindow::create_objects()
 	add_tool(level = new GainLevel(gain, x, y));
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(GainWindow)

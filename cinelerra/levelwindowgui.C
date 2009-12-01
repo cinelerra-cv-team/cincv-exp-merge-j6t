@@ -52,7 +52,7 @@ LevelWindowGUI::~LevelWindowGUI()
 	delete panel;
 }
 
-int LevelWindowGUI::create_objects()
+void LevelWindowGUI::create_objects()
 {
 	mwindow->theme->draw_lwindow_bg(this);
 	panel = new MeterPanel(mwindow, 
@@ -63,7 +63,6 @@ int LevelWindowGUI::create_objects()
 		mwindow->edl->session->audio_channels,
 		1);
 	panel->create_objects();
-	return 0;
 }
 
 

@@ -95,7 +95,7 @@ InterpolatePixelsWindow::~InterpolatePixelsWindow()
 {
 }
 
-int InterpolatePixelsWindow::create_objects()
+void InterpolatePixelsWindow::create_objects()
 {
 	int x = 10, y = 10;
 	
@@ -114,7 +114,6 @@ int InterpolatePixelsWindow::create_objects()
 	y += MAX(y_offset->get_h(), title->get_h()) + 5;
 
 	show_window();
-	return 0;
 }
 
 

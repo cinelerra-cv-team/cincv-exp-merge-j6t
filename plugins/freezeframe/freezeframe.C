@@ -93,7 +93,7 @@ FreezeFrameWindow::~FreezeFrameWindow()
 {
 }
 
-int FreezeFrameWindow::create_objects()
+void FreezeFrameWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(enabled = new FreezeFrameToggle(client, 
@@ -111,7 +111,6 @@ int FreezeFrameWindow::create_objects()
 // 		_("Line double")));
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(FreezeFrameWindow)

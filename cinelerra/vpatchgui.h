@@ -41,7 +41,7 @@ public:
 		int y);
 	~VPatchGUI();
 
-	int create_objects();
+	void create_objects();
 	int reposition(int x, int y);
 	int update(int x, int y);
 	void synchronize_fade(float value_change);
@@ -68,7 +68,7 @@ public:
 	VModePatch(MWindow *mwindow, VPatchGUI *patch, int x, int y);
 
 	int handle_event();
-	int create_objects();         // add initial items
+	void create_objects();         // add initial items
 	static const char* mode_to_text(int mode);
 	static IntAuto* get_keyframe(MWindow *mwindow, VPatchGUI *patch);
 	void update(int mode);

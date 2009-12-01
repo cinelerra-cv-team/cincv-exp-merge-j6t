@@ -38,7 +38,7 @@ public:
 	PlayTransport(MWindow *mwindow, BC_WindowBase *subwindow, int x, int y);
 	~PlayTransport();
 
-	int create_objects();
+	void create_objects();
 	void reposition_buttons(int x, int y);
 
 	virtual void goto_start();

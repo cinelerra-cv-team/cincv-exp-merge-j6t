@@ -385,7 +385,7 @@ YUVConfigVideo::~YUVConfigVideo()
 	delete ffmpeg;
 }
 
-int YUVConfigVideo::create_objects()
+void YUVConfigVideo::create_objects()
 {
 	BC_Title *bt;
 	int init_x = 10;
@@ -442,7 +442,6 @@ int YUVConfigVideo::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
-	return 0;
 }
 
 int YUVConfigVideo::close_event()

@@ -138,7 +138,7 @@ public:
 
 	static int calculate_w(int format);
 	static int calculate_h(int format);
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int generate_codeclist();
 	void update_codecs();
@@ -192,7 +192,7 @@ public:
 
 	static int calculate_w(int format);
 	static int calculate_h(int format);
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int generate_codeclist();
 	void generate_attributelist();

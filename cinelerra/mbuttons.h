@@ -55,7 +55,7 @@ public:
 	MButtons(MWindow *mwindow, MWindowGUI *gui);
 	~MButtons();
 
-	int create_objects();
+	void create_objects();
 	int resize_event();
 	int keypress_event();
 	void update();

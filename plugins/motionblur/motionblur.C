@@ -86,7 +86,7 @@ public:
 	MotionBlurWindow(MotionBlurMain *plugin, int x, int y);
 	~MotionBlurWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	MotionBlurSize *steps, *radius;
@@ -250,7 +250,7 @@ MotionBlurWindow::~MotionBlurWindow()
 {
 }
 
-int MotionBlurWindow::create_objects()
+void MotionBlurWindow::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -264,7 +264,6 @@ int MotionBlurWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(MotionBlurWindow)

@@ -206,13 +206,12 @@ TimeBar::~TimeBar()
 	presentations.remove_all_objects();
 }
 
-int TimeBar::create_objects()
+void TimeBar::create_objects()
 {
 	in_point = 0;
 	out_point = 0;
 	current_operation = TIMEBAR_NONE;
 	update();
-	return 0;
 }
 
 

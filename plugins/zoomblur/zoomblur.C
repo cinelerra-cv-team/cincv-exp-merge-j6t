@@ -102,7 +102,7 @@ public:
 	ZoomBlurWindow(ZoomBlurMain *plugin, int x, int y);
 	~ZoomBlurWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	ZoomBlurSize *x, *y, *radius, *steps;
@@ -290,7 +290,7 @@ ZoomBlurWindow::~ZoomBlurWindow()
 {
 }
 
-int ZoomBlurWindow::create_objects()
+void ZoomBlurWindow::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -321,7 +321,6 @@ int ZoomBlurWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int ZoomBlurWindow::close_event()

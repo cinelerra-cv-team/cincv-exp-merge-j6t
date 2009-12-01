@@ -77,7 +77,7 @@ SET_TRACE
 SET_TRACE
 }
 
-int RecordThread::create_objects()
+void RecordThread::create_objects()
 {
 	if(record->default_asset->audio_data) 
 		record_audio = new RecordAudio(mwindow, 
@@ -89,7 +89,6 @@ int RecordThread::create_objects()
 			record, 
 			this);
 	engine_done = 0;
-	return 0;
 }
 
 int RecordThread::start_recording(int monitor, int context)

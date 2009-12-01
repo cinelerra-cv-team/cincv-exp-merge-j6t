@@ -33,7 +33,7 @@ public:
 	LevelWindow(MWindow *mwindow);
 	~LevelWindow();
 	
-	int create_objects();
+	void create_objects();
 	void run();
 	
 	LevelWindowGUI *gui;

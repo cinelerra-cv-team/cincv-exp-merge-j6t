@@ -50,7 +50,7 @@ PlaybackPrefs::~PlaybackPrefs()
 	delete video_device;
 }
 
-int PlaybackPrefs::create_objects()
+void PlaybackPrefs::create_objects()
 {
 	int x, y, x2;
 	char string[BCTEXTLEN];
@@ -243,7 +243,6 @@ SET_TRACE
 
 SET_TRACE	
 
-	return 0;
 }
 
 

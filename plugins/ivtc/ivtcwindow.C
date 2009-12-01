@@ -61,7 +61,7 @@ IVTCWindow::~IVTCWindow()
 {
 }
 
-int IVTCWindow::create_objects()
+void IVTCWindow::create_objects()
 {
 	int x = 10, y = 10;
 	
@@ -97,7 +97,6 @@ int IVTCWindow::create_objects()
 //	add_tool(threshold = new IVTCAutoThreshold(client, x, y));
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(IVTCWindow)

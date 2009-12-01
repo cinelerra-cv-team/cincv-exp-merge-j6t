@@ -31,7 +31,7 @@ public:
 	VideoWindowGUI(VideoWindow *thread, int w, int h);
 	~VideoWindowGUI();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 	int close_event();
 	int keypress_event();

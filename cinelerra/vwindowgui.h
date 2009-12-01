@@ -53,7 +53,7 @@ public:
 	VWindowGUI(MWindow *mwindow, VWindow *vwindow);
 	~VWindowGUI();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 	int translation_event();
 	int close_event();

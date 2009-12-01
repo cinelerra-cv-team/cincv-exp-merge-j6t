@@ -59,7 +59,7 @@ public:
 	PlaybackPrefs(MWindow *mwindow, PreferencesWindow *pwindow);
 	~PlaybackPrefs();
 
-	int create_objects();
+	void create_objects();
 //	int set_strategy(int strategy);
 	int get_buffer_bytes();
 

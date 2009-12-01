@@ -41,11 +41,10 @@ LevelWindow::~LevelWindow()
 	if(gui) delete gui;
 }
 
-int LevelWindow::create_objects()
+void LevelWindow::create_objects()
 {
 	gui = new LevelWindowGUI(mwindow, this);
 	gui->create_objects();
-	return 0;
 }
 
 

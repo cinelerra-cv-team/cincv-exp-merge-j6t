@@ -40,7 +40,7 @@ public:
 		int use_float,
 		int use_32linear);
 	~BitsPopup();
-	int create_objects();
+	void create_objects();
 	int get_w();
 	int get_h();
 	

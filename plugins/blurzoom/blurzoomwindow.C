@@ -81,7 +81,7 @@ BlurZoomWindow::~BlurZoomWindow()
 {
 }
 
-int BlurZoomWindow::create_objects()
+void BlurZoomWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, 
@@ -91,7 +91,6 @@ int BlurZoomWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int BlurZoomWindow::close_event()

@@ -66,7 +66,7 @@ public:
 
 
 	int handle_event();
-	int create_objects();
+	void create_objects();
 
 	SwapMain *client;
 	int *output;

@@ -83,9 +83,9 @@ PatchGUI::~PatchGUI()
 	if(nudge) delete nudge;
 }
 
-int PatchGUI::create_objects()
+void PatchGUI::create_objects()
 {
-	return update(x, y);
+	update(x, y);
 }
 
 int PatchGUI::reposition(int x, int y)

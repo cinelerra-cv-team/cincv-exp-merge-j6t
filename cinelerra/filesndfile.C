@@ -385,7 +385,7 @@ SndFileConfig::~SndFileConfig()
 {
 	if(bits_popup) delete bits_popup;
 }
-int SndFileConfig::create_objects()
+void SndFileConfig::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -419,7 +419,6 @@ int SndFileConfig::create_objects()
 		add_subwindow(lohi = new SndFileLOHI(this, x + 170, y));
 	}
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int SndFileConfig::close_event()

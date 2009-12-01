@@ -52,7 +52,7 @@ BurnWindow::~BurnWindow()
 {
 }
 
-int BurnWindow::create_objects()
+void BurnWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, 
@@ -62,7 +62,6 @@ int BurnWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(BurnWindow)

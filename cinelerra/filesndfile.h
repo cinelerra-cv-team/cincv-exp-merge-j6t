@@ -89,7 +89,7 @@ public:
 	SndFileConfig(BC_WindowBase *parent_window, Asset *asset);
 	~SndFileConfig();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BC_WindowBase *parent_window;

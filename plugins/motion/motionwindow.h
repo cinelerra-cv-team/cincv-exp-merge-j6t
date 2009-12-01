@@ -307,7 +307,7 @@ public:
 	MotionWindow(MotionMain *plugin, int x, int y);
 	~MotionWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_mode();
 	char* get_radius_title();

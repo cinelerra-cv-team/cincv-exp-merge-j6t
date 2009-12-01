@@ -43,7 +43,7 @@ RecordTransport::RecordTransport(MWindow *mwindow,
 	this->y = y;
 }
 
-int RecordTransport::create_objects()
+void RecordTransport::create_objects()
 {
 	int x = this->x, y = this->y;
 
@@ -76,7 +76,6 @@ int RecordTransport::create_objects()
 //	window->add_subwindow(end_button = new RecordGUIEnd(mwindow, record, x, y));
 //	x += end_button->get_w();
 	x_end = x + 10;
-	return 0;
 }
 
 void RecordTransport::reposition_window(int x, int y)

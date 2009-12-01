@@ -303,7 +303,7 @@ int EditPopupTitleWindow::close_event()
 	return 1;
 }
 
-int EditPopupTitleWindow::create_objects()
+void EditPopupTitleWindow::create_objects()
 {
 	int x = 5;
 	int y = 10;
@@ -317,7 +317,6 @@ int EditPopupTitleWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 

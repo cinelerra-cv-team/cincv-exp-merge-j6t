@@ -70,7 +70,7 @@ public:
 	FreezeFrameWindow(FreezeFrameMain *client, int x, int y);
 	~FreezeFrameWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	FreezeFrameMain *client;

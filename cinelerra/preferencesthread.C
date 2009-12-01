@@ -353,7 +353,7 @@ PreferencesWindow::~PreferencesWindow()
 		delete categories.values[i];
 }
 
-int PreferencesWindow::create_objects()
+void PreferencesWindow::create_objects()
 {
 	BC_Button *button;
 
@@ -395,7 +395,6 @@ int PreferencesWindow::create_objects()
 
 	set_current_dialog(thread->current_dialog);
 	show_window();
-	return 0;
 }
 
 int PreferencesWindow::update_framerate()

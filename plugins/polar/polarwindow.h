@@ -43,7 +43,7 @@ public:
 	PolarWindow(PolarMain *client);
 	~PolarWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	PolarMain *client;

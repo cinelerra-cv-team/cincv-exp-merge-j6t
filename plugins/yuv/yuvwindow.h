@@ -55,7 +55,7 @@ public:
 	YUVWindow(YUVMain *client);
 	~YUVWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	YUVMain *client;

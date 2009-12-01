@@ -366,7 +366,7 @@ AWindowGUI::~AWindowGUI()
 	if(temp_picon) delete temp_picon;
 }
 
-int AWindowGUI::create_objects()
+void AWindowGUI::create_objects()
 {
 	int x, y;
 	AssetPicon *picon;
@@ -495,8 +495,6 @@ SET_TRACE
 
 SET_TRACE
 	create_custom_xatoms();
-
-	return 0;
 }
 
 int AWindowGUI::resize_event(int w, int h)

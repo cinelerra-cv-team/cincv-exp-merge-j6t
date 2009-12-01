@@ -598,7 +598,7 @@ TIFFConfigVideo::~TIFFConfigVideo()
 {
 }
 
-int TIFFConfigVideo::create_objects()
+void TIFFConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -613,7 +613,6 @@ int TIFFConfigVideo::create_objects()
 	menu2->create_objects();
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int TIFFConfigVideo::close_event()

@@ -53,7 +53,7 @@ RGB601Window::~RGB601Window()
 {
 }
 
-int RGB601Window::create_objects()
+void RGB601Window::create_objects()
 {
 	int x = 10, y = 10;
 	
@@ -73,7 +73,6 @@ int RGB601Window::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 void RGB601Window::update()

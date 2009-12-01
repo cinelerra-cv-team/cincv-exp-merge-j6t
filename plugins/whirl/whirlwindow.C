@@ -67,7 +67,7 @@ WhirlWindow::~WhirlWindow()
 	delete automation[2];
 }
 
-int WhirlWindow::create_objects()
+void WhirlWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Angle")));

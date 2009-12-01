@@ -47,7 +47,7 @@ PerformancePrefs::~PerformancePrefs()
 	nodes[3].remove_all_objects();
 }
 
-int PerformancePrefs::create_objects()
+void PerformancePrefs::create_objects()
 {
 	int x, y;
 	int xmargin1;
@@ -229,7 +229,6 @@ N_("Master node framerate: %0.3f")
 // 		y));
 // 	y += 30;
 
-	return 0;
 }
 
 void PerformancePrefs::generate_node_list()

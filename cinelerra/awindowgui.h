@@ -95,7 +95,7 @@ public:
 	AWindowGUI(MWindow *mwindow, AWindow *awindow);
 	~AWindowGUI();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 	int translation_event();
 	int close_event();

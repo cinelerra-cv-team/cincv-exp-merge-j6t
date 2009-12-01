@@ -77,7 +77,7 @@ int PlayTransport::get_transport_width(MWindow *mwindow)
 		mwindow->theme->get_image_set("rewind")[0]->get_w() * 2;
 }
 
-int PlayTransport::create_objects()
+void PlayTransport::create_objects()
 {
 	int x = this->x, y = this->y;
 	subwindow->add_subwindow(rewind_button = new RewindButton(mwindow, this, x, y));
@@ -102,7 +102,6 @@ int PlayTransport::create_objects()
 	reverse = 0;
 	speed = 0;
 
-	return 0;
 }
 
 void PlayTransport::reposition_buttons(int x, int y)

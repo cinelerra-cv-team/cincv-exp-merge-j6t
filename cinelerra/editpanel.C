@@ -464,10 +464,9 @@ void EditPanel::reposition_buttons(int x, int y)
 
 
 
-int EditPanel::create_objects()
+void EditPanel::create_objects()
 {
 	create_buttons();
-	return 0;
 }
 
 int EditPanel::get_w()

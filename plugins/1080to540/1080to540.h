@@ -35,7 +35,7 @@ public:
 	_1080to540Window(_1080to540Main *client, int x, int y);
 	~_1080to540Window();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int set_first_field(int first_field, int send_event);
 	

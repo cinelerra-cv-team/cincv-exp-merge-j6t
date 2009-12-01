@@ -71,7 +71,7 @@ public:
 	int get_w();
 	void calculate_menu();
 	void update_menu();
-	int create_objects();
+	void create_objects();
 	double get_value();
 	char* get_text();
 	void set_text(const char *text);

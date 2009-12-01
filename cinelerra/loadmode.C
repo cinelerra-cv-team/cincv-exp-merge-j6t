@@ -84,7 +84,7 @@ char* LoadMode::mode_to_text()
 	return _("Unknown");
 }
 
-int LoadMode::create_objects()
+void LoadMode::create_objects()
 {
 	int x = this->x, y = this->y;
 	char *default_text;
@@ -99,8 +99,6 @@ int LoadMode::create_objects()
 		default_text));
 	x += textbox->get_w();
 	window->add_subwindow(listbox = new LoadModeListBox(window, this, x, y));
-
-	return 0;
 }
 
 int LoadMode::get_h()

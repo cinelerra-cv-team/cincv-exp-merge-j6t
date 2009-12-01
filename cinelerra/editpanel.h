@@ -381,7 +381,7 @@ public:
 	void delete_buttons();
 	void create_buttons();
 	void reposition_buttons(int x, int y);
-	int create_objects();
+	void create_objects();
 	int get_w();
 	virtual void copy_selection();
 	virtual void splice_selection();

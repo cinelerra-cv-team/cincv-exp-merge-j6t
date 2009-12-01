@@ -1803,13 +1803,12 @@ BC_PopupTextBox::~BC_PopupTextBox()
 	}
 }
 
-int BC_PopupTextBox::create_objects()
+void BC_PopupTextBox::create_objects()
 {
 	int x = this->x, y = this->y;
 	parent_window->add_subwindow(textbox = new BC_PopupTextBoxText(this, x, y));
 	x += textbox->get_w();
 	parent_window->add_subwindow(listbox = new BC_PopupTextBoxList(this, x, y));
-	return 0;
 }
 
 void BC_PopupTextBox::update(const char *text)
@@ -2065,7 +2064,7 @@ void BC_TumbleTextBox::set_log_floatincrement(int value)
 	if(tumbler) tumbler->set_log_floatincrement(value);
 }
 
-int BC_TumbleTextBox::create_objects()
+void BC_TumbleTextBox::create_objects()
 {
 	int x = this->x, y = this->y;
 
@@ -2104,7 +2103,6 @@ int BC_TumbleTextBox::create_objects()
 
 	tumbler->set_increment(increment);
 	tumbler->set_log_floatincrement(log_floatincrement);
-	return 0;
 }
 
 char* BC_TumbleTextBox::get_text()

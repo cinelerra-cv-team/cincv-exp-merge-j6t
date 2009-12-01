@@ -261,7 +261,7 @@ PluginDialog::~PluginDialog()
 //	delete out;
 }
 
-int PluginDialog::create_objects()
+void PluginDialog::create_objects()
 {
 	int use_default = 1;
 	char string[BCTEXTLEN];
@@ -427,7 +427,6 @@ int PluginDialog::create_objects()
 	
 	show_window();
 	flush();
-	return 0;
 }
 
 int PluginDialog::resize_event(int w, int h)

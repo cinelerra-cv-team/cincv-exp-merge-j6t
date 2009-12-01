@@ -79,7 +79,7 @@ MainMenu::~MainMenu()
 {
 }
 
-int MainMenu::create_objects()
+void MainMenu::create_objects()
 {
 	BC_Menu *viewmenu, *windowmenu, *settingsmenu, *trackmenu;
 	PreferencesMenuitem *preferences;
@@ -214,8 +214,6 @@ SET_TRACE
 	windowmenu->add_item(show_lwindow = new ShowLWindow(mwindow));
 	windowmenu->add_item(new TileWindows(mwindow));
 
-SET_TRACE
-	return 0;
 }
 
 int MainMenu::load_defaults(BC_Hash *defaults)

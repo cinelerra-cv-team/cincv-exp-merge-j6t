@@ -76,7 +76,7 @@ TitleWindow::~TitleWindow()
 	delete title_y;
 }
 
-int TitleWindow::create_objects()
+void TitleWindow::create_objects()
 {
 	int x = 10, y = 10;
 	timecodeformats.append(new BC_ListBoxItem(TIME_SECONDS__STR));
@@ -323,7 +323,6 @@ int TitleWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int TitleWindow::resize_event(int w, int h)

@@ -68,7 +68,7 @@ public:
 	AssetEditWindow(MWindow *mwindow, AssetEdit *asset_edit);
 	~AssetEditWindow();
 
-	int create_objects();
+	void create_objects();
 	Asset *asset;
 	AssetEditPathText *path_text;
 	AssetEditPath *path_button;

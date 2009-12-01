@@ -48,7 +48,7 @@ FormatPopup::FormatPopup(ArrayList<PluginServer*> *plugindb,
 	set_tooltip(_("Change file format"));
 }
 
-int FormatPopup::create_objects()
+void FormatPopup::create_objects()
 {
 	if(!use_brender)
 	{
@@ -96,7 +96,6 @@ int FormatPopup::create_objects()
 		0,
 		0,
 		1);
-	return 0;
 }
 
 FormatPopup::~FormatPopup()

@@ -46,7 +46,7 @@ public:
 	ColorBalanceWindow(ColorBalanceMain *client, int x, int y);
 	~ColorBalanceWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update();
 

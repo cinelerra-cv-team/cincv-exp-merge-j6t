@@ -83,7 +83,7 @@ int RenderProfile::calculate_h(BC_WindowBase *gui)
 	return BC_TextBox::calculate_h(gui, MEDIUMFONT, 1, 1);
 }
 
-int RenderProfile::create_objects()
+void RenderProfile::create_objects()
 {
 	int x = this->x, y = this->y;
 	const char *default_text = "";
@@ -112,10 +112,6 @@ int RenderProfile::create_objects()
 	rwindow->add_subwindow(deleteprofile = new DeleteRenderProfileButton(this, 
 		x, 
 		y));
-
-
-
-	return 0;
 }
 
 int RenderProfile::get_h()

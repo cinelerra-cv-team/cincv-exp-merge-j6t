@@ -159,7 +159,7 @@ void VWindowGUI::update_sources(char *title)
 	unlock_window();
 }
 
-int VWindowGUI::create_objects()
+void VWindowGUI::create_objects()
 {
 	in_point = 0;
 	out_point = 0;
@@ -233,7 +233,6 @@ int VWindowGUI::create_objects()
 //printf("VWindowGUI::create_objects 2\n");
 	deactivate();
 	slider->activate();
-	return 0;
 }
 
 int VWindowGUI::resize_event(int w, int h)

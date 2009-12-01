@@ -62,7 +62,7 @@ OilWindow::~OilWindow()
 	delete radius;
 }
 
-int OilWindow::create_objects()
+void OilWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Oil Painting")));

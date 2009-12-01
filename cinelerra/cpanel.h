@@ -33,7 +33,7 @@ public:
 	CPanel(MWindow *mwindow, CWindowGUI *subwindow, int x, int y, int w, int h);
 	~CPanel();
 
-	int create_objects();
+	void create_objects();
 	void reposition_buttons(int x, int y);
 	void set_operation(int value);
 
