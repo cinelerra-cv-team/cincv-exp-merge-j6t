@@ -90,7 +90,11 @@ void _720to480Window::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(_720to480Window)
+int _720to480Window::close_event()
+{
+	set_done(0);
+	return 1;
+}
 
 int _720to480Window::set_first_field(int first_field)
 {
@@ -180,13 +184,10 @@ _720to480Main::_720to480Main(PluginServer *server)
  : PluginVClient(server)
 {
 	temp = 0;
-	load_defaults();
 }
 
 _720to480Main::~_720to480Main()
 {
-	save_defaults();
-	delete defaults;
 
 	if(temp) delete temp;
 }

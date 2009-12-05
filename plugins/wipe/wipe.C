@@ -91,27 +91,19 @@ int WipeRight::handle_event()
 
 
 
-WipeWindow::WipeWindow(WipeMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+WipeWindow::WipeWindow(WipeMain *plugin)
+ : PluginClientWindow(plugin, 
 	320, 
 	50, 
 	320, 
 	50, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
 
 
-int WipeWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
+
 
 void WipeWindow::create_objects()
 {
@@ -134,7 +126,6 @@ void WipeWindow::create_objects()
 
 
 
-PLUGIN_THREAD_OBJECT(WipeMain, WipeThread, WipeWindow)
 
 
 
@@ -145,12 +136,12 @@ WipeMain::WipeMain(PluginServer *server)
  : PluginVClient(server)
 {
 	direction = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 WipeMain::~WipeMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* WipeMain::plugin_title() { return N_("Wipe"); }
@@ -158,9 +149,7 @@ int WipeMain::is_video() { return 1; }
 int WipeMain::is_transition() { return 1; }
 int WipeMain::uses_gui() { return 1; }
 
-SHOW_GUI_MACRO(WipeMain, WipeThread);
-SET_STRING_MACRO(WipeMain)
-RAISE_WINDOW_MACRO(WipeMain)
+NEW_WINDOW_MACRO(WipeMain, WipeWindow)
 
 
 VFrame* WipeMain::new_picon()
@@ -216,9 +205,10 @@ void WipeMain::read_data(KeyFrame *keyframe)
 	}
 }
 
-void WipeMain::load_configuration()
+int WipeMain::load_configuration()
 {
 	read_data(get_prev_keyframe(get_source_position()));
+	return 1;
 }
 
 

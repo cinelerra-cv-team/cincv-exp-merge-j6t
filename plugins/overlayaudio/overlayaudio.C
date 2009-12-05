@@ -61,19 +61,19 @@ public:
 	OverlayAudio *plugin;
 };
 
-class OverlayAudioWindow : public BC_Window
+class OverlayAudioWindow : public PluginClientWindow
 {
 public:
-	OverlayAudioWindow(OverlayAudio *plugin, int x, int y);
+	OverlayAudioWindow(OverlayAudio *plugin);
 
 	void create_objects();
-	int close_event();
+
 
 	OverlayAudio *plugin;
 	OutputTrack *output;
 };
 
-PLUGIN_THREAD_HEADER(OverlayAudio, OverlayAudioThread, OverlayAudioWindow)
+
 
 class OverlayAudio : public PluginAClient
 {
@@ -94,7 +94,7 @@ public:
 	void update_gui();
 
 
-	PLUGIN_CLASS_MEMBERS(OverlayAudioConfig, OverlayAudioThread)
+	PLUGIN_CLASS_MEMBERS(OverlayAudioConfig)
 };
 
 
@@ -144,17 +144,13 @@ const char* OverlayAudioConfig::output_to_text(int output_layer)
 
 
 
-OverlayAudioWindow::OverlayAudioWindow(OverlayAudio *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+OverlayAudioWindow::OverlayAudioWindow(OverlayAudio *plugin)
+ : PluginClientWindow(plugin, 
 	400, 
 	100, 
 	400, 
 	100, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -170,7 +166,7 @@ void OverlayAudioWindow::create_objects()
 	show_window();
 }
 
-WINDOW_CLOSE_EVENT(OverlayAudioWindow)
+
 
 
 
@@ -214,7 +210,7 @@ int OutputTrack::handle_event()
 }
 
 
-PLUGIN_THREAD_OBJECT(OverlayAudio, OverlayAudioThread, OverlayAudioWindow)
+
 
 
 
@@ -227,12 +223,12 @@ REGISTER_PLUGIN(OverlayAudio)
 OverlayAudio::OverlayAudio(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 OverlayAudio::~OverlayAudio()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* OverlayAudio::plugin_title() { return N_("Overlay"); }
@@ -302,7 +298,7 @@ void OverlayAudio::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("OverlayAudio::update_gui");
-			thread->window->output->set_text(
+			((OverlayAudioWindow*)thread->window)->output->set_text(
 				OverlayAudioConfig::output_to_text(config.output_track));
 			thread->window->unlock_window();
 		}
@@ -310,9 +306,7 @@ void OverlayAudio::update_gui()
 }
 
 NEW_PICON_MACRO(OverlayAudio)
-SHOW_GUI_MACRO(OverlayAudio, OverlayAudioThread)
-RAISE_WINDOW_MACRO(OverlayAudio)
-SET_STRING_MACRO(OverlayAudio)
+NEW_WINDOW_MACRO(OverlayAudio, OverlayAudioWindow)
 LOAD_CONFIGURATION_MACRO(OverlayAudio, OverlayAudioConfig)
 
 

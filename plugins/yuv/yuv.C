@@ -62,40 +62,32 @@ public:
 	float *output;
 };
 
-class YUVWindow : public BC_Window
+class YUVWindow : public PluginClientWindow
 {
 public:
-	YUVWindow(YUVEffect *plugin, int x, int y);
+	YUVWindow(YUVEffect *plugin);
 	void create_objects();
-	int close_event();
 	YUVLevel *y, *u, *v;
 	YUVEffect *plugin;
 };
 
-PLUGIN_THREAD_HEADER(YUVEffect, YUVThread, YUVWindow)
+
 
 class YUVEffect : public PluginVClient
 {
 public:
 	YUVEffect(PluginServer *server);
 	~YUVEffect();
+
+
+	PLUGIN_CLASS_MEMBERS(YUVConfig)
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
-	int show_gui();
-	void raise_window();
-	int set_string();
-	int load_configuration();
-
-	YUVConfig config;
-	YUVThread *thread;
-	BC_Hash *defaults;
 };
 
 
@@ -172,17 +164,13 @@ int YUVLevel::handle_event()
 }
 
 
-YUVWindow::YUVWindow(YUVEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+YUVWindow::YUVWindow(YUVEffect *plugin)
+ : PluginClientWindow(plugin, 
 	260, 
 	100, 
 	260, 
 	100, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -203,18 +191,8 @@ void YUVWindow::create_objects()
 	flush();
 }
 
-int YUVWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
 
 
-
-
-
-PLUGIN_THREAD_OBJECT(YUVEffect, YUVThread, YUVWindow)
 
 
 
@@ -224,11 +202,11 @@ PLUGIN_THREAD_OBJECT(YUVEffect, YUVThread, YUVWindow)
 YUVEffect::YUVEffect(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 YUVEffect::~YUVEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* YUVEffect::plugin_title() { return N_("YUV"); }
@@ -236,9 +214,7 @@ int YUVEffect::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(YUVEffect)
-SHOW_GUI_MACRO(YUVEffect, YUVThread)
-RAISE_WINDOW_MACRO(YUVEffect)
-SET_STRING_MACRO(YUVEffect)
+NEW_WINDOW_MACRO(YUVEffect, YUVWindow)
 LOAD_CONFIGURATION_MACRO(YUVEffect, YUVConfig)
 
 void YUVEffect::update_gui()
@@ -247,9 +223,9 @@ void YUVEffect::update_gui()
 	{
 		thread->window->lock_window();
 		load_configuration();
-		thread->window->y->update(config.y);
-		thread->window->u->update(config.u);
-		thread->window->v->update(config.v);
+		((YUVWindow*)thread->window)->y->update(config.y);
+		((YUVWindow*)thread->window)->u->update(config.u);
+		((YUVWindow*)thread->window)->v->update(config.v);
 		thread->window->unlock_window();
 	}
 }

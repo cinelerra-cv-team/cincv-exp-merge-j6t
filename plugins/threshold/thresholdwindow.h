@@ -145,14 +145,13 @@ public:
 	int center_x;
 };
 
-class ThresholdWindow : public BC_Window
+class ThresholdWindow : public PluginClientWindow
 {
 public:
-	ThresholdWindow(ThresholdMain *plugin, int x, int y);
+	ThresholdWindow(ThresholdMain *plugin);
 	~ThresholdWindow();
 	
 	void create_objects();
-	int close_event();
 	void update_low_color();
 	void update_mid_color();
 	void update_high_color();
@@ -174,7 +173,6 @@ public:
 	int high_color_x, high_color_y;
 };
 
-PLUGIN_THREAD_HEADER(ThresholdMain, ThresholdThread, ThresholdWindow)
 
 
 #endif

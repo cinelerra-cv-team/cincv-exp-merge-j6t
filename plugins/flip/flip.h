@@ -51,7 +51,7 @@ public:
 	FlipMain(PluginServer *server);
 	~FlipMain();
 
-	PLUGIN_CLASS_MEMBERS(FlipConfig, FlipThread);
+	PLUGIN_CLASS_MEMBERS(FlipConfig);
 
 // required for all realtime plugins
 	int process_buffer(VFrame *frame,

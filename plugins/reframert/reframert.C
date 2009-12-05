@@ -98,13 +98,12 @@ public:
 	ReframeRTWindow *gui;
 };
 
-class ReframeRTWindow : public BC_Window
+class ReframeRTWindow : public PluginClientWindow
 {
 public:
-	ReframeRTWindow(ReframeRT *plugin, int x, int y);
+	ReframeRTWindow(ReframeRT *plugin);
 	~ReframeRTWindow();
 	void create_objects();
-	int close_event();
 	ReframeRT *plugin;
 	ReframeRTScale *scale;
 	ReframeRTStretch *stretch;
@@ -112,7 +111,6 @@ public:
 	ReframeRTInterpolate *interpolate;
 };
 
-PLUGIN_THREAD_HEADER(ReframeRT, ReframeRTThread, ReframeRTWindow)
 
 class ReframeRT : public PluginVClient
 {
@@ -120,7 +118,7 @@ public:
 	ReframeRT(PluginServer *server);
 	~ReframeRT();
 
-	PLUGIN_CLASS_MEMBERS(ReframeRTConfig, ReframeRTThread)
+	PLUGIN_CLASS_MEMBERS(ReframeRTConfig)
 
 	int load_defaults();
 	int save_defaults();
@@ -198,17 +196,13 @@ void ReframeRTConfig::boundaries()
 
 
 
-ReframeRTWindow::ReframeRTWindow(ReframeRT *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+ReframeRTWindow::ReframeRTWindow(ReframeRT *plugin)
+ : PluginClientWindow(plugin, 
 	210, 
 	160, 
 	200, 
 	160, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -248,10 +242,7 @@ void ReframeRTWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(ReframeRTWindow)
 
-
-PLUGIN_THREAD_OBJECT(ReframeRT, ReframeRTThread, ReframeRTWindow)
 
 
 
@@ -342,13 +333,13 @@ int ReframeRTInterpolate::handle_event()
 ReframeRT::ReframeRT(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
 ReframeRT::~ReframeRT()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* ReframeRT::plugin_title() { return N_("ReframeRT"); }
@@ -358,11 +349,7 @@ int ReframeRT::is_synthesis() { return 1; }
 #include "picon_png.h"
 NEW_PICON_MACRO(ReframeRT)
 
-SHOW_GUI_MACRO(ReframeRT, ReframeRTThread)
-
-RAISE_WINDOW_MACRO(ReframeRT)
-
-SET_STRING_MACRO(ReframeRT)
+NEW_WINDOW_MACRO(ReframeRT, ReframeRTWindow)
 
 LOAD_CONFIGURATION_MACRO(ReframeRT, ReframeRTConfig)
 
@@ -504,10 +491,10 @@ void ReframeRT::update_gui()
 		if(changed)
 		{
 			thread->window->lock_window("ReframeRT::update_gui");
-			thread->window->scale->update((float)config.scale);
-			thread->window->stretch->update(config.stretch);
-			thread->window->downsample->update(!config.stretch);
-			thread->window->interpolate->update(config.interp);
+			((ReframeRTWindow*)thread->window)->scale->update((float)config.scale);
+			((ReframeRTWindow*)thread->window)->stretch->update(config.stretch);
+			((ReframeRTWindow*)thread->window)->downsample->update(!config.stretch);
+			((ReframeRTWindow*)thread->window)->interpolate->update(config.interp);
 			thread->window->unlock_window();
 		}
 	}

@@ -301,14 +301,13 @@ public:
 
 
 
-class MotionWindow : public BC_Window
+class MotionWindow : public PluginClientWindow
 {
 public:
-	MotionWindow(MotionMain *plugin, int x, int y);
+	MotionWindow(MotionMain *plugin);
 	~MotionWindow();
 
 	void create_objects();
-	int close_event();
 	void update_mode();
 	char* get_radius_title();
 
@@ -345,7 +344,7 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(MotionMain, MotionThread, MotionWindow)
+
 
 
 

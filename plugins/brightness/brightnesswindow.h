@@ -34,16 +34,14 @@ class BrightnessLuma;
 #include "pluginvclient.h"
 #include "thread.h"
 
-PLUGIN_THREAD_HEADER(BrightnessMain, BrightnessThread, BrightnessWindow)
 
-class BrightnessWindow : public BC_Window
+class BrightnessWindow : public PluginClientWindow
 {
 public:
-	BrightnessWindow(BrightnessMain *client, int x, int y);
+	BrightnessWindow(BrightnessMain *client);
 	~BrightnessWindow();
 
 	void create_objects();
-	int close_event();
 
 	BrightnessMain *client;
 	BrightnessSlider *brightness;
@@ -76,3 +74,7 @@ public:
 };
 
 #endif
+
+
+
+

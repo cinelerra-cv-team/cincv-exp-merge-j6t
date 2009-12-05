@@ -113,7 +113,7 @@ public:
 	GammaEngine *engine;
 	VFrame *frame;
 
-	PLUGIN_CLASS_MEMBERS(GammaConfig, GammaThread)
+	PLUGIN_CLASS_MEMBERS(GammaConfig)
 };
 
 

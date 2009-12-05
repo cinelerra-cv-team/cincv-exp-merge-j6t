@@ -60,19 +60,17 @@ public:
 
 
 
-class WipeWindow : public BC_Window
+class WipeWindow : public PluginClientWindow
 {
 public:
-	WipeWindow(WipeMain *plugin, int x, int y);
+	WipeWindow(WipeMain *plugin);
 	void create_objects();
-	int close_event();
 	WipeMain *plugin;
 	WipeLeft *left;
 	WipeRight *right;
 };
 
 
-PLUGIN_THREAD_HEADER(WipeMain, WipeThread, WipeWindow)
 
 
 class WipeMain : public PluginVClient
@@ -82,24 +80,20 @@ public:
 	~WipeMain();
 
 // required for all realtime plugins
-	void load_configuration();
+	int load_configuration();
 	int process_realtime(VFrame *incoming, VFrame *outgoing);
+	PluginClientWindow* new_window();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	void raise_window();
 	int uses_gui();
 	int is_transition();
 	int is_video();
 	const char* plugin_title();
-	int set_string();
 	VFrame* new_picon();
 
 	int direction;
-	WipeThread *thread;
-	BC_Hash *defaults;
 };
 
 #endif

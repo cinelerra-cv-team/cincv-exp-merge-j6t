@@ -28,7 +28,6 @@
 #define N_(String) gettext_noop (String)
 
 
-PLUGIN_THREAD_OBJECT(SharpenMain, SharpenThread, SharpenWindow)
 
 
 
@@ -36,17 +35,14 @@ PLUGIN_THREAD_OBJECT(SharpenMain, SharpenThread, SharpenWindow)
 
 
 
-SharpenWindow::SharpenWindow(SharpenMain *client, int x, int y)
- : BC_Window(client->gui_string, 
-	x,
-	y,
+
+SharpenWindow::SharpenWindow(SharpenMain *client)
+ : PluginClientWindow(client,
 	210, 
 	120, 
 	210, 
 	120, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -71,12 +67,10 @@ void SharpenWindow::create_objects()
 	flush();
 }
 
-int SharpenWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
+
+
+
+
 
 SharpenSlider::SharpenSlider(SharpenMain *client, float *output, int x, int y)
  : BC_ISlider(x, 

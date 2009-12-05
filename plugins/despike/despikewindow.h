@@ -30,20 +30,18 @@ class DespikeWindow;
 #include "mutex.h"
 #include "pluginclient.h"
 
-PLUGIN_THREAD_HEADER(Despike, DespikeThread, DespikeWindow)
 
 class DespikeLevel;
 class DespikeSlope;
 
-class DespikeWindow : public BC_Window
+class DespikeWindow : public PluginClientWindow
 {
 public:
-	DespikeWindow(Despike *despike, int x, int y);
+	DespikeWindow(Despike *despike);
 	~DespikeWindow();
 	
 	void create_objects();
-	int close_event();
-	
+
 	Despike *despike;
 	DespikeLevel *level;
 	DespikeSlope *slope;

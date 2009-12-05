@@ -170,17 +170,13 @@ int DenoiseVideoToggle::handle_event()
 
 
 
-DenoiseVideoWindow::DenoiseVideoWindow(DenoiseVideo *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+DenoiseVideoWindow::DenoiseVideoWindow(DenoiseVideo *plugin)
+ : PluginClientWindow(plugin, 
 	210, 
 	240, 
 	200, 
 	240, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -208,18 +204,9 @@ void DenoiseVideoWindow::create_objects()
 	flush();
 }
 
-int DenoiseVideoWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 
 
-
-
-
-PLUGIN_THREAD_OBJECT(DenoiseVideo, DenoiseVideoThread, DenoiseVideoWindow)
 
 
 
@@ -234,14 +221,14 @@ PLUGIN_THREAD_OBJECT(DenoiseVideo, DenoiseVideoThread, DenoiseVideoWindow)
 DenoiseVideo::DenoiseVideo(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	accumulation = 0;
 }
 
 
 DenoiseVideo::~DenoiseVideo()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(accumulation) delete [] accumulation;
 }
@@ -347,12 +334,7 @@ int DenoiseVideo::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(DenoiseVideo)
-
-SHOW_GUI_MACRO(DenoiseVideo, DenoiseVideoThread)
-
-RAISE_WINDOW_MACRO(DenoiseVideo)
-
-SET_STRING_MACRO(DenoiseVideo);
+NEW_WINDOW_MACRO(DenoiseVideo, DenoiseVideoWindow)
 
 LOAD_CONFIGURATION_MACRO(DenoiseVideo, DenoiseVideoConfig)
 
@@ -361,10 +343,10 @@ void DenoiseVideo::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->frames->update(config.frames);
-		thread->window->threshold->update(config.threshold);
-		thread->window->unlock_window();
+		((DenoiseVideoWindow*)thread->window)->lock_window();
+		((DenoiseVideoWindow*)thread->window)->frames->update(config.frames);
+		((DenoiseVideoWindow*)thread->window)->threshold->update(config.threshold);
+		((DenoiseVideoWindow*)thread->window)->unlock_window();
 	}
 }
 

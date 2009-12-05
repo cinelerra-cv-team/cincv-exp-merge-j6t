@@ -159,14 +159,13 @@ public:
 	HistogramWindow *gui;
 };
 
-class HistogramWindow : public BC_Window
+class HistogramWindow : public PluginClientWindow
 {
 public:
-	HistogramWindow(HistogramMain *plugin, int x, int y);
+	HistogramWindow(HistogramMain *plugin);
 	~HistogramWindow();
 
 	void create_objects();
-	int close_event();
 	void update(int do_input);
 	void update_mode();
 	void update_canvas();
@@ -205,7 +204,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(HistogramMain, HistogramThread, HistogramWindow)
 
 
 

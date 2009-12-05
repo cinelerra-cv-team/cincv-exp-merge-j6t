@@ -95,14 +95,14 @@ public:
 };
 
 
-class LiveVideoWindow : public BC_Window
+class LiveVideoWindow : public PluginClientWindow
 {
 public:
-	LiveVideoWindow(LiveVideo *plugin, int x, int y);
+	LiveVideoWindow(LiveVideo *plugin);
 	~LiveVideoWindow();
 
 	void create_objects();
-	int close_event();
+
 	int resize_event(int w, int h);
 
 	ArrayList<BC_ListBoxItem*> channel_list;
@@ -113,7 +113,7 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(LiveVideo, LiveVideoThread, LiveVideoWindow)
+
 
 
 
@@ -124,7 +124,7 @@ public:
 	~LiveVideo();
 
 
-	PLUGIN_CLASS_MEMBERS(LiveVideoConfig, LiveVideoThread);
+	PLUGIN_CLASS_MEMBERS(LiveVideoConfig);
 
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
@@ -195,16 +195,12 @@ void LiveVideoConfig::interpolate(LiveVideoConfig &prev,
 
 
 
-LiveVideoWindow::LiveVideoWindow(LiveVideo *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+LiveVideoWindow::LiveVideoWindow(LiveVideo *plugin)
+ : PluginClientWindow(plugin, 
 	plugin->w, 
 	plugin->h, 
 	100, 
 	100, 
-	1, 
-	0,
 	1)
 {
 	this->plugin = plugin;
@@ -244,7 +240,7 @@ void LiveVideoWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(LiveVideoWindow)
+
 
 int LiveVideoWindow::resize_event(int w, int h)
 {
@@ -325,7 +321,7 @@ int LiveChannelSelect::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(LiveVideo, LiveVideoThread, LiveVideoWindow)
+
 
 
 
@@ -356,13 +352,13 @@ LiveVideo::LiveVideo(PluginServer *server)
 	mjpeg = 0;
 	picture = 0;
 	picture_defaults = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
 LiveVideo::~LiveVideo()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(vdevice)
 	{
 		vdevice->interrupt_crash();
@@ -568,11 +564,7 @@ int LiveVideo::is_synthesis() { return 1; }
 
 NEW_PICON_MACRO(LiveVideo) 
 
-SHOW_GUI_MACRO(LiveVideo, LiveVideoThread)
-
-RAISE_WINDOW_MACRO(LiveVideo)
-
-SET_STRING_MACRO(LiveVideo);
+NEW_WINDOW_MACRO(LiveVideo, LiveVideoWindow)
 
 LOAD_CONFIGURATION_MACRO(LiveVideo, LiveVideoConfig)
 
@@ -645,10 +637,11 @@ void LiveVideo::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("LiveVideo::update_gui");
-			thread->window->list->set_selected(&thread->window->channel_list, 
+			((LiveVideoWindow*)thread->window)->list->set_selected(
+				&((LiveVideoWindow*)thread->window)->channel_list, 
 				config.channel, 
 				1);
-			thread->window->list->draw_items(1);
+			((LiveVideoWindow*)thread->window)->list->draw_items(1);
 			thread->window->unlock_window();
 		}
 	}

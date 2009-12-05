@@ -1674,6 +1674,8 @@ void MWindow::hide_plugin(Plugin *plugin, int lock)
 			plugin_guis->remove(ptr);
 			if(lock) plugin_gui_lock->unlock();
 // Last command executed in client side close
+// Schedule for deletion
+			ptr->hide_gui();
 			delete ptr;
 			return;
 		}

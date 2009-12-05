@@ -74,21 +74,19 @@ void GainConfig::interpolate(GainConfig &prev,
 Gain::Gain(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 Gain::~Gain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* Gain::plugin_title() { return N_("Gain"); }
 int Gain::is_realtime() { return 1; }
 
 
-SHOW_GUI_MACRO(Gain, GainThread)
-SET_STRING_MACRO(Gain)
-RAISE_WINDOW_MACRO(Gain)
+NEW_WINDOW_MACRO(Gain, GainWindow)
 NEW_PICON_MACRO(Gain)
 LOAD_CONFIGURATION_MACRO(Gain, GainConfig)
 
@@ -173,7 +171,7 @@ void Gain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->level->update(config.level);
+		((GainWindow*)thread->window)->level->update(config.level);
 		thread->window->unlock_window();
 	}
 }

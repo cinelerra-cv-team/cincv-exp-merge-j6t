@@ -95,12 +95,11 @@ public:
 	WhirlEffect *plugin;
 };
 
-class WhirlWindow : public BC_Window
+class WhirlWindow : public PluginClientWindow
 {
 public:
-	WhirlWindow(WhirlEffect *plugin, int x, int y);
+	WhirlWindow(WhirlEffect *plugin);
 	void create_objects();
-	int close_event();
 	WhirlEffect *plugin;
 	WhirlRadius *radius;
 	WhirlPinch *pinch;
@@ -108,7 +107,7 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(WhirlEffect, WhirlThread, WhirlWindow)
+
 
 
 class WhirlPackage : public LoadPackage
@@ -147,15 +146,10 @@ public:
 	WhirlEffect(PluginServer *server);
 	~WhirlEffect();
 
+	PLUGIN_CLASS_MEMBERS(WhirlConfig)
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int show_gui();
-	void raise_window();
 	void update_gui();
-	int set_string();
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
@@ -164,16 +158,12 @@ public:
 	WhirlEngine *engine;
 	VFrame *temp_frame;
 	VFrame *input, *output;
-	WhirlConfig config;
-	BC_Hash *defaults;
-	WhirlThread *thread;
 	int need_reconfigure;
 };
 
 
 
 
-PLUGIN_THREAD_OBJECT(WhirlEffect, WhirlThread, WhirlWindow)
 
 
 REGISTER_PLUGIN(WhirlEffect)
@@ -237,17 +227,13 @@ void WhirlConfig::interpolate(WhirlConfig &prev,
 
 
 
-WhirlWindow::WhirlWindow(WhirlEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+WhirlWindow::WhirlWindow(WhirlEffect *plugin)
+ : PluginClientWindow(plugin, 
 	220, 
 	200, 
 	220, 
 	200, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -273,11 +259,6 @@ void WhirlWindow::create_objects()
 	flush();
 }
 
-int WhirlWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 
 
@@ -370,12 +351,12 @@ WhirlEffect::WhirlEffect(PluginServer *server)
 	need_reconfigure = 1;
 	engine = 0;
 	temp_frame = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 WhirlEffect::~WhirlEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 	if(temp_frame) delete temp_frame;
 }
@@ -390,11 +371,9 @@ int WhirlEffect::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(WhirlEffect)
 
-SHOW_GUI_MACRO(WhirlEffect, WhirlThread)
 
-RAISE_WINDOW_MACRO(WhirlEffect)
+NEW_WINDOW_MACRO(WhirlEffect, WhirlWindow)
 
-SET_STRING_MACRO(WhirlEffect)
 
 void WhirlEffect::update_gui()
 {
@@ -402,9 +381,9 @@ void WhirlEffect::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->angle->update(config.angle);
-		thread->window->pinch->update(config.pinch);
-		thread->window->radius->update(config.radius);
+		((WhirlWindow*)thread->window)->angle->update(config.angle);
+		((WhirlWindow*)thread->window)->pinch->update(config.pinch);
+		((WhirlWindow*)thread->window)->radius->update(config.radius);
 		thread->window->unlock_window();
 	}
 }

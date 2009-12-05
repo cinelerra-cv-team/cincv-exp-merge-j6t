@@ -74,16 +74,12 @@ int SpectrogramLevel::handle_event()
 
 
 
-SpectrogramWindow::SpectrogramWindow(Spectrogram *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+SpectrogramWindow::SpectrogramWindow(Spectrogram *plugin)
+ : PluginClientWindow(plugin, 
 	640, 
 	480, 
 	640, 
 	480,
-	0, 
-	0,
 	1)
 {
 	this->plugin = plugin;
@@ -124,7 +120,7 @@ void SpectrogramWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(SpectrogramWindow)
+
 
 
 void SpectrogramWindow::update_gui()
@@ -141,7 +137,6 @@ void SpectrogramWindow::update_gui()
 
 
 
-PLUGIN_THREAD_OBJECT(Spectrogram, SpectrogramThread, SpectrogramWindow)
 
 
 
@@ -199,13 +194,10 @@ Spectrogram::Spectrogram(PluginServer *server)
  : PluginAClient(server)
 {
 	reset();
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 Spectrogram::~Spectrogram()
 {
-	PLUGIN_DESTRUCTOR_MACRO
-
 	if(fft) delete fft;
 	if(data) delete [] data;
 }
@@ -252,22 +244,21 @@ int Spectrogram::process_buffer(int64_t size,
 	return 0;
 }
 
-SET_STRING_MACRO(Spectrogram)
 
 NEW_PICON_MACRO(Spectrogram)
 
-SHOW_GUI_MACRO(Spectrogram, SpectrogramThread)
 
-RAISE_WINDOW_MACRO(Spectrogram)
+NEW_WINDOW_MACRO(Spectrogram, SpectrogramWindow)
 
 void Spectrogram::update_gui()
 {
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window("Spectrogram::update_gui");
-		thread->window->update_gui();
-		thread->window->unlock_window();
+		SpectrogramWindow *window = (SpectrogramWindow*)thread->get_window();
+		window->lock_window("Spectrogram::update_gui");
+		window->update_gui();
+		thread->get_window()->unlock_window();
 	}
 }
 
@@ -278,7 +269,7 @@ void Spectrogram::render_gui(void *data, int size)
 		thread->window->lock_window("Spectrogram::render_gui");
 		float *frame = (float*)data;
 		int niquist = get_project_samplerate();
-		BC_SubWindow *canvas = thread->window->canvas;
+		BC_SubWindow *canvas = ((SpectrogramWindow*)thread->get_window())->canvas;
 		int h = canvas->get_h();
 		int input1 = HALF_WINDOW - 1;
 		double *temp = new double[h];
@@ -336,12 +327,13 @@ void Spectrogram::render_gui(void *data, int size)
 	}
 }
 
-void Spectrogram::load_configuration()
+int Spectrogram::load_configuration()
 {
 	KeyFrame *prev_keyframe;
 	prev_keyframe = get_prev_keyframe(get_source_position());
 
  	read_data(prev_keyframe);
+	return 1;
 }
 
 void Spectrogram::read_data(KeyFrame *keyframe)

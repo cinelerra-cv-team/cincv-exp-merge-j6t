@@ -68,14 +68,13 @@ public:
 };
 
 
-class DelayVideoWindow : public BC_Window
+class DelayVideoWindow : public PluginClientWindow
 {
 public:
-	DelayVideoWindow(DelayVideo *plugin, int x, int y);
+	DelayVideoWindow(DelayVideo *plugin);
 	~DelayVideoWindow();
 	
 	void create_objects();
-	int close_event();
 	void update_gui();
 	
 	DelayVideo *plugin;
@@ -83,7 +82,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(DelayVideo, DelayVideoThread, DelayVideoWindow)
 
 
 
@@ -94,21 +92,16 @@ public:
 	DelayVideo(PluginServer *server);
 	~DelayVideo();
 	
+	PLUGIN_CLASS_MEMBERS(DelayVideoConfig);
 	int process_realtime(VFrame *input_ptr, VFrame *output_ptr);
 	int is_realtime();
-	const char* plugin_title();
-	int show_gui();
-	void raise_window();
-	int set_string();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	VFrame* new_picon();
 	void reset();
 	void reconfigure();
 
 
 
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void update_gui();
@@ -116,10 +109,7 @@ public:
 
 	int need_reconfigure;
 	int allocation;
-	DelayVideoConfig config;
-	DelayVideoThread *thread;
 	VFrame **buffer;
-	BC_Hash *defaults;
 	VFrame *input, *output;
 };
 

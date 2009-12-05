@@ -30,24 +30,19 @@
 #define N_(String) gettext_noop (String)
 
 
-PLUGIN_THREAD_OBJECT(Despike, DespikeThread, DespikeWindow)
 
 
 
 
 
 
-DespikeWindow::DespikeWindow(Despike *despike, int x, int y)
- : BC_Window(despike->gui_string, 
- 	x, 
-	y, 
+DespikeWindow::DespikeWindow(Despike *despike)
+ : PluginClientWindow(despike, 
 	230, 
 	110, 
 	230, 
 	110, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->despike = despike; 
 }
@@ -68,13 +63,6 @@ void DespikeWindow::create_objects()
 	add_tool(slope = new DespikeSlope(despike, x, y));
 	show_window();
 	flush();
-}
-
-int DespikeWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
 }
 
 

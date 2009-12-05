@@ -119,27 +119,17 @@ int BandSlideOut::handle_event()
 
 
 
-BandSlideWindow::BandSlideWindow(BandSlideMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+BandSlideWindow::BandSlideWindow(BandSlideMain *plugin)
+ : PluginClientWindow(plugin, 
 	320, 
 	100, 
 	320, 
 	100, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
 
-
-int BandSlideWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 void BandSlideWindow::create_objects()
 {
@@ -173,7 +163,6 @@ void BandSlideWindow::create_objects()
 
 
 
-PLUGIN_THREAD_OBJECT(BandSlideMain, BandSlideThread, BandSlideWindow)
 
 
 
@@ -185,22 +174,19 @@ BandSlideMain::BandSlideMain(PluginServer *server)
 {
 	bands = 9;
 	direction = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 BandSlideMain::~BandSlideMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* BandSlideMain::plugin_title() { return N_("BandSlide"); }
-int BandSlideMain::is_video() { return 1; }
 int BandSlideMain::is_transition() { return 1; }
 int BandSlideMain::uses_gui() { return 1; }
 
-SHOW_GUI_MACRO(BandSlideMain, BandSlideThread);
-SET_STRING_MACRO(BandSlideMain)
-RAISE_WINDOW_MACRO(BandSlideMain)
+NEW_WINDOW_MACRO(BandSlideMain, BandSlideWindow);
 
 
 VFrame* BandSlideMain::new_picon()
@@ -260,9 +246,10 @@ void BandSlideMain::read_data(KeyFrame *keyframe)
 	}
 }
 
-void BandSlideMain::load_configuration()
+int BandSlideMain::load_configuration()
 {
 	read_data(get_prev_keyframe(get_source_position()));
+	return 1;
 }
 
 

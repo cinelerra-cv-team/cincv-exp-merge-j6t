@@ -49,13 +49,13 @@ REGISTER_PLUGIN(PitchEffect);
 PitchEffect::PitchEffect(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	reset();
 }
 
 PitchEffect::~PitchEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(fft) delete fft;
 }
@@ -124,11 +124,7 @@ int PitchEffect::save_defaults()
 
 LOAD_CONFIGURATION_MACRO(PitchEffect, PitchConfig)
 
-SHOW_GUI_MACRO(PitchEffect, PitchThread)
-
-RAISE_WINDOW_MACRO(PitchEffect)
-
-SET_STRING_MACRO(PitchEffect)
+NEW_WINDOW_MACRO(PitchEffect, PitchWindow)
 
 NEW_PICON_MACRO(PitchEffect)
 
@@ -144,7 +140,7 @@ void PitchEffect::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window("PitchEffect::update_gui");
-		thread->window->update();
+		((PitchWindow*)thread->window)->update();
 		thread->window->unlock_window();
 	}
 }
@@ -369,7 +365,6 @@ void PitchConfig::interpolate(PitchConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(PitchEffect, PitchThread, PitchWindow) 
 
 
 
@@ -379,17 +374,13 @@ PLUGIN_THREAD_OBJECT(PitchEffect, PitchThread, PitchWindow)
 
 
 
-PitchWindow::PitchWindow(PitchEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+PitchWindow::PitchWindow(PitchEffect *plugin)
+ : PluginClientWindow(plugin, 
 	150, 
 	50, 
 	150, 
 	50,
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -405,7 +396,7 @@ void PitchWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(PitchWindow)
+
 
 void PitchWindow::update()
 {

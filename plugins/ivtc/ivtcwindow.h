@@ -33,7 +33,6 @@ class IVTCWindow;
 
 #define TOTAL_PATTERNS 3
 
-PLUGIN_THREAD_HEADER(IVTCMain, IVTCThread, IVTCWindow)
 
 
 class IVTCOffset;
@@ -42,15 +41,14 @@ class IVTCAuto;
 class IVTCAutoThreshold;
 class IVTCPattern;
 
-class IVTCWindow : public BC_Window
+class IVTCWindow : public PluginClientWindow
 {
 public:
-	IVTCWindow(IVTCMain *client, int x, int y);
+	IVTCWindow(IVTCMain *client);
 	~IVTCWindow();
 	
 	void create_objects();
-	int close_event();
-	
+
 	IVTCMain *client;
 	IVTCOffset *frame_offset;
 	IVTCFieldOrder *first_field;

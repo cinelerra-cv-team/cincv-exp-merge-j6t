@@ -85,14 +85,13 @@ public:
 };
 
 
-class DenoiseVideoWindow : public BC_Window
+class DenoiseVideoWindow : public PluginClientWindow
 {
 public:
-	DenoiseVideoWindow(DenoiseVideo *plugin, int x, int y);
+	DenoiseVideoWindow(DenoiseVideo *plugin);
 
 	void create_objects();
-	int close_event();
-	
+
 	DenoiseVideo *plugin;
 	DenoiseVideoFrames *frames;
 	DenoiseVideoThreshold *threshold;
@@ -100,7 +99,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(DenoiseVideo, DenoiseVideoThread, DenoiseVideoWindow)
 
 class DenoiseVideo : public PluginVClient
 {
@@ -108,24 +106,16 @@ public:
 	DenoiseVideo(PluginServer *server);
 	~DenoiseVideo();
 
+	PLUGIN_CLASS_MEMBERS(DenoiseVideoConfig)
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int show_gui();
-	int load_configuration();
-	int set_string();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	void raise_window();
 	void update_gui();
 
 	float *accumulation;
-	DenoiseVideoThread *thread;
-	DenoiseVideoConfig config;
-	BC_Hash *defaults;
 };
 
 

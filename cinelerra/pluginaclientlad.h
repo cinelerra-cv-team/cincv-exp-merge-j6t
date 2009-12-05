@@ -117,16 +117,14 @@ public:
 };
 
 
-class PluginAClientWindow : public BC_Window
+class PluginAClientWindow : public PluginClientWindow
 {
 public:
-	PluginAClientWindow(PluginAClientLAD *plugin, 
-		int x, 
-		int y);
+	PluginAClientWindow(PluginAClientLAD *plugin);
 	~PluginAClientWindow();
 	
 	void create_objects();
-	int close_event();
+
 
 
 
@@ -138,7 +136,6 @@ public:
 	PluginAClientLAD *plugin;
 };
 
-PLUGIN_THREAD_HEADER(PluginAClientLAD, PluginAClientThread, PluginAClientWindow)
 
 class PluginAClientLAD : public PluginAClient
 {
@@ -163,7 +160,7 @@ public:
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 
-	PLUGIN_CLASS_MEMBERS(PluginAClientConfig, PluginAClientThread)
+	PLUGIN_CLASS_MEMBERS(PluginAClientConfig)
 
 
 	static char* lad_to_string(char *string, const char *input);

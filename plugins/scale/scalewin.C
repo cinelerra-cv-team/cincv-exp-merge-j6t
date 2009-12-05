@@ -28,7 +28,6 @@
 
 
 
-PLUGIN_THREAD_OBJECT(ScaleMain, ScaleThread, ScaleWin)
 
 
 
@@ -37,17 +36,13 @@ PLUGIN_THREAD_OBJECT(ScaleMain, ScaleThread, ScaleWin)
 
 
 
-ScaleWin::ScaleWin(ScaleMain *client, int x, int y)
- : BC_Window(client->gui_string, 
- 	x,
-	y,
+ScaleWin::ScaleWin(ScaleMain *client)
+ : PluginClientWindow(client,
 	150, 
 	150, 
 	150, 
 	150, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -73,12 +68,6 @@ void ScaleWin::create_objects()
 	add_tool(constrain = new ScaleConstrain(client, x, y));
 	show_window();
 	flush();
-}
-
-int ScaleWin::close_event()
-{
-	set_done(1);
-	return 1;
 }
 
 ScaleWidth::ScaleWidth(ScaleWin *win, 

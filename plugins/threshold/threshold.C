@@ -116,14 +116,14 @@ REGISTER_PLUGIN(ThresholdMain)
 ThresholdMain::ThresholdMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	threshold_engine = 0;
 }
 
 ThresholdMain::~ThresholdMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete engine;
 	delete threshold_engine;
 }
@@ -142,11 +142,7 @@ const char* ThresholdMain::plugin_title()
 #include "picon_png.h"
 NEW_PICON_MACRO(ThresholdMain)
 
-SHOW_GUI_MACRO(ThresholdMain, ThresholdThread)
-
-SET_STRING_MACRO(ThresholdMain)
-
-RAISE_WINDOW_MACRO(ThresholdMain)
+NEW_WINDOW_MACRO(ThresholdMain, ThresholdWindow)
 
 LOAD_CONFIGURATION_MACRO(ThresholdMain, ThresholdConfig)
 
@@ -254,15 +250,15 @@ void ThresholdMain::update_gui()
 		thread->window->lock_window("ThresholdMain::update_gui");
 		if(load_configuration())
 		{
-			thread->window->min->update(config.min);
-			thread->window->max->update(config.max);
-			thread->window->plot->update(config.plot);
-			thread->window->update_low_color();
-			thread->window->update_mid_color();
-			thread->window->update_high_color();
-			thread->window->low_color_thread->update_gui(config.low_color.getRGB(), config.low_color.a);
-			thread->window->mid_color_thread->update_gui(config.mid_color.getRGB(), config.mid_color.a);
-			thread->window->high_color_thread->update_gui(config.high_color.getRGB(), config.high_color.a);
+			((ThresholdWindow*)thread->window)->min->update(config.min);
+			((ThresholdWindow*)thread->window)->max->update(config.max);
+			((ThresholdWindow*)thread->window)->plot->update(config.plot);
+			((ThresholdWindow*)thread->window)->update_low_color();
+			((ThresholdWindow*)thread->window)->update_mid_color();
+			((ThresholdWindow*)thread->window)->update_high_color();
+			((ThresholdWindow*)thread->window)->low_color_thread->update_gui(config.low_color.getRGB(), config.low_color.a);
+			((ThresholdWindow*)thread->window)->mid_color_thread->update_gui(config.mid_color.getRGB(), config.mid_color.a);
+			((ThresholdWindow*)thread->window)->high_color_thread->update_gui(config.high_color.getRGB(), config.high_color.a);
 		}
 		thread->window->unlock_window();
 	}
@@ -274,7 +270,7 @@ void ThresholdMain::render_gui(void *data)
 	{
 		calculate_histogram((VFrame*)data);
 		thread->window->lock_window("ThresholdMain::render_gui");
-		thread->window->canvas->draw();
+		((ThresholdWindow*)thread->window)->canvas->draw();
 		thread->window->unlock_window();
 	}
 }

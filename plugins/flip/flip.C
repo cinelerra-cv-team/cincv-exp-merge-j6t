@@ -78,12 +78,12 @@ void FlipConfig::interpolate(FlipConfig &prev,
 FlipMain::FlipMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 FlipMain::~FlipMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* FlipMain::plugin_title() { return N_("Flip"); }
@@ -206,14 +206,8 @@ int FlipMain::process_buffer(VFrame *frame,
 }
 
 
-SHOW_GUI_MACRO(FlipMain, FlipThread)
-
-RAISE_WINDOW_MACRO(FlipMain)
-
-SET_STRING_MACRO(FlipMain)
-
 NEW_PICON_MACRO(FlipMain)
-
+NEW_WINDOW_MACRO(FlipMain, FlipWindow)
 LOAD_CONFIGURATION_MACRO(FlipMain, FlipConfig)
 
 void FlipMain::update_gui()
@@ -222,8 +216,8 @@ void FlipMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->flip_vertical->update((int)config.flip_vertical);
-		thread->window->flip_horizontal->update((int)config.flip_horizontal);
+		((FlipWindow*)thread->window)->flip_vertical->update((int)config.flip_vertical);
+		((FlipWindow*)thread->window)->flip_horizontal->update((int)config.flip_horizontal);
 		thread->window->unlock_window();
 	}
 }

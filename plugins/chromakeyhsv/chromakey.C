@@ -149,16 +149,13 @@ ChromaKeyConfig::get_color ()
 
 
 
-ChromaKeyWindow::ChromaKeyWindow (ChromaKeyHSV * plugin, int x, int y):BC_Window (plugin->gui_string,
-	   x,
-	   y, 
+ChromaKeyWindow::ChromaKeyWindow (ChromaKeyHSV * plugin)
+ : PluginClientWindow(plugin, 
 	   400, 
 	   450, 
 	   400, 
 	   450, 
-	   0, 
-	   0, 
-	   1)
+	   0)
 {
   this->plugin = plugin;
   color_thread = 0;
@@ -294,7 +291,6 @@ ChromaKeyWindow::update_sample ()
 
 
 
-WINDOW_CLOSE_EVENT (ChromaKeyWindow)
   ChromaKeyColor::ChromaKeyColor (ChromaKeyHSV * plugin,
 				  ChromaKeyWindow * gui, int x, int y):
 BC_GenericButton (x, y, _("Color..."))
@@ -552,7 +548,7 @@ ChromaKeyColorThread::handle_new_color (int output, int alpha)
 
 
 
-PLUGIN_THREAD_OBJECT (ChromaKeyHSV, ChromaKeyThread, ChromaKeyWindow) ChromaKeyServer::ChromaKeyServer (ChromaKeyHSV * plugin):LoadServer (plugin->PluginClient::smp + 1,
+ChromaKeyServer::ChromaKeyServer (ChromaKeyHSV * plugin):LoadServer (plugin->PluginClient::smp + 1,
 	    plugin->PluginClient::smp +
 	    1)
 {
@@ -872,13 +868,13 @@ REGISTER_PLUGIN(ChromaKeyHSV)
 ChromaKeyHSV::ChromaKeyHSV(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 ChromaKeyHSV::~ChromaKeyHSV()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 }
 
@@ -1033,11 +1029,7 @@ ChromaKeyHSV::read_data (KeyFrame * keyframe)
 }
 
 
-SHOW_GUI_MACRO(ChromaKeyHSV, ChromaKeyThread)
-
-SET_STRING_MACRO(ChromaKeyHSV)
-
-RAISE_WINDOW_MACRO(ChromaKeyHSV)
+NEW_WINDOW_MACRO(ChromaKeyHSV, ChromaKeyWindow)
 
 void ChromaKeyHSV::update_gui ()
 {
@@ -1045,18 +1037,18 @@ void ChromaKeyHSV::update_gui ()
     {
       load_configuration ();
       thread->window->lock_window ();
-      thread->window->min_brightness->update (config.min_brightness);
-      thread->window->max_brightness->update (config.max_brightness);
-      thread->window->saturation->update (config.saturation);
-      thread->window->min_saturation->update (config.min_saturation);
-      thread->window->tolerance->update (config.tolerance);
-      thread->window->in_slope->update (config.in_slope);
-      thread->window->out_slope->update (config.out_slope);
-      thread->window->alpha_offset->update (config.alpha_offset);
-      thread->window->spill_threshold->update (config.spill_threshold);
-      thread->window->spill_amount->update (config.spill_amount);
-      thread->window->show_mask->update (config.show_mask);
-      thread->window->update_sample ();
+      ((ChromaKeyWindow*)thread->window)->min_brightness->update (config.min_brightness);
+      ((ChromaKeyWindow*)thread->window)->max_brightness->update (config.max_brightness);
+      ((ChromaKeyWindow*)thread->window)->saturation->update (config.saturation);
+      ((ChromaKeyWindow*)thread->window)->min_saturation->update (config.min_saturation);
+      ((ChromaKeyWindow*)thread->window)->tolerance->update (config.tolerance);
+      ((ChromaKeyWindow*)thread->window)->in_slope->update (config.in_slope);
+      ((ChromaKeyWindow*)thread->window)->out_slope->update (config.out_slope);
+      ((ChromaKeyWindow*)thread->window)->alpha_offset->update (config.alpha_offset);
+      ((ChromaKeyWindow*)thread->window)->spill_threshold->update (config.spill_threshold);
+      ((ChromaKeyWindow*)thread->window)->spill_amount->update (config.spill_amount);
+      ((ChromaKeyWindow*)thread->window)->show_mask->update (config.show_mask);
+      ((ChromaKeyWindow*)thread->window)->update_sample ();
       thread->window->unlock_window ();
     }
 }

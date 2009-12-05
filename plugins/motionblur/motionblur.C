@@ -80,14 +80,14 @@ public:
 };
 
 
-class MotionBlurWindow : public BC_Window
+class MotionBlurWindow : public PluginClientWindow
 {
 public:
-	MotionBlurWindow(MotionBlurMain *plugin, int x, int y);
+	MotionBlurWindow(MotionBlurMain *plugin);
 	~MotionBlurWindow();
 
 	void create_objects();
-	int close_event();
+
 
 	MotionBlurSize *steps, *radius;
 	MotionBlurMain *plugin;
@@ -95,7 +95,7 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(MotionBlurMain, MotionBlurThread, MotionBlurWindow)
+
 
 
 class MotionBlurMain : public PluginVClient
@@ -112,7 +112,7 @@ public:
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
 
-	PLUGIN_CLASS_MEMBERS(MotionBlurConfig, MotionBlurThread)
+	PLUGIN_CLASS_MEMBERS(MotionBlurConfig)
 
 	void delete_tables();
 	VFrame *input, *output, *temp;
@@ -228,20 +228,17 @@ void MotionBlurConfig::interpolate(MotionBlurConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(MotionBlurMain, MotionBlurThread, MotionBlurWindow)
 
 
 
-MotionBlurWindow::MotionBlurWindow(MotionBlurMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x,
-	y,
+
+MotionBlurWindow::MotionBlurWindow(MotionBlurMain *plugin)
+ : PluginClientWindow(plugin,
 	260, 
 	120, 
 	260, 
 	120, 
-	0, 
-	1)
+	0)
 {
 	this->plugin = plugin; 
 }
@@ -266,7 +263,7 @@ void MotionBlurWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(MotionBlurWindow)
+
 
 
 
@@ -300,7 +297,7 @@ int MotionBlurSize::handle_event()
 MotionBlurMain::MotionBlurMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	scale_x_table = 0;
 	scale_y_table = 0;
@@ -311,7 +308,7 @@ MotionBlurMain::MotionBlurMain(PluginServer *server)
 
 MotionBlurMain::~MotionBlurMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 	delete_tables();
 	if(accum) delete [] accum;
@@ -323,12 +320,7 @@ int MotionBlurMain::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(MotionBlurMain)
-
-SHOW_GUI_MACRO(MotionBlurMain, MotionBlurThread)
-
-SET_STRING_MACRO(MotionBlurMain)
-
-RAISE_WINDOW_MACRO(MotionBlurMain)
+NEW_WINDOW_MACRO(MotionBlurMain, MotionBlurWindow)
 
 LOAD_CONFIGURATION_MACRO(MotionBlurMain, MotionBlurConfig)
 
@@ -481,8 +473,8 @@ void MotionBlurMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->radius->update(config.radius);
-		thread->window->steps->update(config.steps);
+		((MotionBlurWindow*)thread->window)->radius->update(config.radius);
+		((MotionBlurWindow*)thread->window)->steps->update(config.steps);
 		thread->window->unlock_window();
 	}
 }

@@ -30,22 +30,18 @@
 
 
 
-PLUGIN_THREAD_OBJECT(DeInterlaceMain, DeInterlaceThread, DeInterlaceWindow)
 
 
 
 
-DeInterlaceWindow::DeInterlaceWindow(DeInterlaceMain *client, int x, int y)
- : BC_Window(client->gui_string, 
- 	x, 
-	y, 
+
+DeInterlaceWindow::DeInterlaceWindow(DeInterlaceMain *client)
+ : PluginClientWindow(client, 
 	400, 
 	200, 
 	400, 
 	200, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 	adaptive=0; dominance_top=0; dominance_bottom=0; threshold=0;
@@ -75,7 +71,6 @@ void DeInterlaceWindow::create_objects()
 	set_mode(client->config.mode,0);
 }
 
-WINDOW_CLOSE_EVENT(DeInterlaceWindow)
 
 void DeInterlaceWindow::get_status_string(char *string, int changed_rows)
 {

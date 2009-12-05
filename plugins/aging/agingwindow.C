@@ -28,23 +28,20 @@
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
-PLUGIN_THREAD_OBJECT(AgingMain, AgingThread, AgingWindow)
 
 
 
 
 
-AgingWindow::AgingWindow(AgingMain *client, int x, int y)
- : BC_Window(client->gui_string, 
-	x,
-	y,
+
+
+AgingWindow::AgingWindow(AgingMain *client)
+ : PluginClientWindow(client, 
 	300, 
 	170, 
 	300, 
 	170, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -80,7 +77,6 @@ void AgingWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(AgingWindow)
 
 
 

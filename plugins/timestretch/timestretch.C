@@ -313,8 +313,6 @@ int PitchEngine::signal_process_oversample(int reset)
 TimeStretch::TimeStretch(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
-	load_defaults();
 	temp = 0;
 	pitch = 0;
 	resample = 0;
@@ -326,7 +324,6 @@ TimeStretch::TimeStretch(PluginServer *server)
 
 TimeStretch::~TimeStretch()
 {
-	PLUGIN_DESTRUCTOR_MACRO
 	if(temp) delete [] temp;
 	if(input) delete [] input;
 	if(pitch) delete pitch;
@@ -429,11 +426,7 @@ void TimeStretchConfig::interpolate(TimeStretchConfig &prev,
 
 LOAD_CONFIGURATION_MACRO(TimeStretch, TimeStretchConfig)
 
-SHOW_GUI_MACRO(TimeStretch, TimeStretchThread)
-
-RAISE_WINDOW_MACRO(TimeStretch)
-
-SET_STRING_MACRO(TimeStretch)
+NEW_WINDOW_MACRO(TimeStretch, TimeStretchWindow)
 
 NEW_PICON_MACRO(TimeStretch)
 
@@ -444,7 +437,7 @@ void TimeStretch::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window("TimeStretch::update_gui");
-		thread->window->update();
+		((TimeStretchWindow *)thread->window)->update();
 		thread->window->unlock_window();
 	}
 }
@@ -454,7 +447,7 @@ void TimeStretch::update_gui()
 int TimeStretch::get_parameters()
 {
 	BC_DisplayInfo info;
-	TimeStretchWindow window(this, info.get_abs_cursor_x(), info.get_abs_cursor_y());
+	TimeStretchWindow window(this);
 	window.create_objects();
 	int result = window.run_window();
 	
@@ -492,20 +485,15 @@ int TimeStretch::process_buffer(int64_t size,
 
 
 
-PLUGIN_THREAD_OBJECT(TimeStretch, TimeStretchThread, TimeStretchWindow) 
 
 
-TimeStretchWindow::TimeStretchWindow(TimeStretch *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+TimeStretchWindow::TimeStretchWindow(TimeStretch *plugin)
+ : PluginClientWindow(plugin,
 	150, 
 	50, 
 	150, 
 	50,
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -521,7 +509,6 @@ void TimeStretchWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(TimeStretchWindow)
 
 void TimeStretchWindow::update()
 {

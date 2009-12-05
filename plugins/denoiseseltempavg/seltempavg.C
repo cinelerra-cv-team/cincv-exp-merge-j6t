@@ -89,7 +89,7 @@ int SelTempAvgConfig::equivalent(SelTempAvgConfig *src)
 SelTempAvgMain::SelTempAvgMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	accumulation = 0;
 	history = 0;
 	history_size = 0;
@@ -101,7 +101,7 @@ SelTempAvgMain::SelTempAvgMain(PluginServer *server)
 
 SelTempAvgMain::~SelTempAvgMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(accumulation) 
 	{
@@ -123,12 +123,7 @@ int SelTempAvgMain::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(SelTempAvgMain)
-
-SHOW_GUI_MACRO(SelTempAvgMain, SelTempAvgThread)
-
-SET_STRING_MACRO(SelTempAvgMain)
-
-RAISE_WINDOW_MACRO(SelTempAvgMain);
+NEW_WINDOW_MACRO(SelTempAvgMain, SelTempAvgWindow);
 
 int SelTempAvgMain::process_buffer(VFrame *frame,
 		int64_t start_position,
@@ -946,38 +941,38 @@ void SelTempAvgMain::update_gui()
 	{
 		if(load_configuration())
 		{
-			thread->window->lock_window("SelTempAvgMain::update_gui");
-			thread->window->total_frames->update(config.frames);
+			((SelTempAvgWindow*)thread->window)->lock_window("SelTempAvgMain::update_gui");
+			((SelTempAvgWindow*)thread->window)->total_frames->update(config.frames);
 
-			thread->window->method_none->update(         config.method == SelTempAvgConfig::METHOD_NONE);
-			thread->window->method_seltempavg->update(   config.method == SelTempAvgConfig::METHOD_SELTEMPAVG);
-			thread->window->method_average->update(      config.method == SelTempAvgConfig::METHOD_AVERAGE);
-			thread->window->method_stddev->update(       config.method == SelTempAvgConfig::METHOD_STDDEV);
+			((SelTempAvgWindow*)thread->window)->method_none->update(         config.method == SelTempAvgConfig::METHOD_NONE);
+			((SelTempAvgWindow*)thread->window)->method_seltempavg->update(   config.method == SelTempAvgConfig::METHOD_SELTEMPAVG);
+			((SelTempAvgWindow*)thread->window)->method_average->update(      config.method == SelTempAvgConfig::METHOD_AVERAGE);
+			((SelTempAvgWindow*)thread->window)->method_stddev->update(       config.method == SelTempAvgConfig::METHOD_STDDEV);
 
-			thread->window->offset_fixed->update(        config.offsetmode == SelTempAvgConfig::OFFSETMODE_FIXED);
-			thread->window->offset_restartmarker->update(config.offsetmode == SelTempAvgConfig::OFFSETMODE_RESTARTMARKERSYS);
+			((SelTempAvgWindow*)thread->window)->offset_fixed->update(        config.offsetmode == SelTempAvgConfig::OFFSETMODE_FIXED);
+			((SelTempAvgWindow*)thread->window)->offset_restartmarker->update(config.offsetmode == SelTempAvgConfig::OFFSETMODE_RESTARTMARKERSYS);
 
 
-			thread->window->paranoid->update(config.paranoid);
-			thread->window->no_subtract->update(config.nosubtract);
+			((SelTempAvgWindow*)thread->window)->paranoid->update(config.paranoid);
+			((SelTempAvgWindow*)thread->window)->no_subtract->update(config.nosubtract);
 
-			thread->window->offset_fixed_value->update((int64_t)config.offset_fixed_value);
-			thread->window->gain->update(config.gain);
+			((SelTempAvgWindow*)thread->window)->offset_fixed_value->update((int64_t)config.offset_fixed_value);
+			((SelTempAvgWindow*)thread->window)->gain->update(config.gain);
 
-			thread->window->avg_threshold_RY->update((float)config.avg_threshold_RY);
-			thread->window->avg_threshold_GU->update((float)config.avg_threshold_GU);
-			thread->window->avg_threshold_BV->update((float)config.avg_threshold_BV);
-			thread->window->std_threshold_RY->update((float)config.std_threshold_RY);
-			thread->window->std_threshold_GU->update((float)config.std_threshold_GU);
-			thread->window->std_threshold_BV->update((float)config.std_threshold_BV);
+			((SelTempAvgWindow*)thread->window)->avg_threshold_RY->update((float)config.avg_threshold_RY);
+			((SelTempAvgWindow*)thread->window)->avg_threshold_GU->update((float)config.avg_threshold_GU);
+			((SelTempAvgWindow*)thread->window)->avg_threshold_BV->update((float)config.avg_threshold_BV);
+			((SelTempAvgWindow*)thread->window)->std_threshold_RY->update((float)config.std_threshold_RY);
+			((SelTempAvgWindow*)thread->window)->std_threshold_GU->update((float)config.std_threshold_GU);
+			((SelTempAvgWindow*)thread->window)->std_threshold_BV->update((float)config.std_threshold_BV);
 
-			thread->window->mask_RY->update(config.mask_RY);
-			thread->window->mask_GU->update(config.mask_GU);
-			thread->window->mask_BV->update(config.mask_BV);
-			thread->window->unlock_window();
+			((SelTempAvgWindow*)thread->window)->mask_RY->update(config.mask_RY);
+			((SelTempAvgWindow*)thread->window)->mask_GU->update(config.mask_GU);
+			((SelTempAvgWindow*)thread->window)->mask_BV->update(config.mask_BV);
+			((SelTempAvgWindow*)thread->window)->unlock_window();
 		}
-		thread->window->offset_restartmarker_pos->update((int64_t)restartoffset);
-		thread->window->offset_restartmarker_keyframe->update((config.offset_restartmarker_keyframe) && (onakeyframe));
+		((SelTempAvgWindow*)thread->window)->offset_restartmarker_pos->update((int64_t)restartoffset);
+		((SelTempAvgWindow*)thread->window)->offset_restartmarker_keyframe->update((config.offset_restartmarker_keyframe) && (onakeyframe));
 	}
 }
 

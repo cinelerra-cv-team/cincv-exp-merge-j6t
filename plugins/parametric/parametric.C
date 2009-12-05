@@ -162,7 +162,7 @@ int ParametricFreq::handle_event()
 {
 	plugin->config.band[band].freq = get_value();
 	plugin->send_configure_change();
-	plugin->thread->window->update_canvas();
+	((ParametricWindow*)plugin->thread->window)->update_canvas();
 	return 1;
 }
 
@@ -185,7 +185,7 @@ int ParametricQuality::handle_event()
 {
 	plugin->config.band[band].quality = get_value();
 	plugin->send_configure_change();
-	plugin->thread->window->update_canvas();
+	((ParametricWindow*)plugin->thread->window)->update_canvas();
 	return 1;
 }
 
@@ -210,7 +210,7 @@ int ParametricMagnitude::handle_event()
 {
 	plugin->config.band[band].magnitude = get_value();
 	plugin->send_configure_change();
-	plugin->thread->window->update_canvas();
+	((ParametricWindow*)plugin->thread->window)->update_canvas();
 	return 1;
 }
 
@@ -246,7 +246,7 @@ int ParametricMode::handle_event()
 {
 	plugin->config.band[band].mode = text_to_mode(get_text());
 	plugin->send_configure_change();
-	plugin->thread->window->update_canvas();
+	((ParametricWindow*)plugin->thread->window)->update_canvas();
 	return 1;
 }
 
@@ -342,7 +342,7 @@ int ParametricWetness::handle_event()
 {
 	plugin->config.wetness = get_value();
 	plugin->send_configure_change();
-	plugin->thread->window->update_canvas();
+	((ParametricWindow*)plugin->thread->window)->update_canvas();
 	return 1;
 }
 
@@ -351,17 +351,13 @@ int ParametricWetness::handle_event()
 
 
 
-ParametricWindow::ParametricWindow(ParametricEQ *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+ParametricWindow::ParametricWindow(ParametricEQ *plugin)
+ : PluginClientWindow(plugin, 
 	320, 
 	400, 
 	320, 
 	400,
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -488,12 +484,7 @@ SET_TRACE
 SET_TRACE	
 }
 
-int ParametricWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
+
 
 void ParametricWindow::update_gui()
 {
@@ -576,7 +567,6 @@ void ParametricWindow::update_canvas()
 
 
 
-PLUGIN_THREAD_OBJECT(ParametricEQ, ParametricThread, ParametricWindow)
 
 
 
@@ -630,25 +620,20 @@ int ParametricFFT::read_samples(int64_t output_sample,
 ParametricEQ::ParametricEQ(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	fft = 0;
 	need_reconfigure = 1;
 }
 
 ParametricEQ::~ParametricEQ()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(fft) delete fft;
 }
 
+NEW_WINDOW_MACRO(ParametricEQ, ParametricWindow)
 NEW_PICON_MACRO(ParametricEQ)
-
-SHOW_GUI_MACRO(ParametricEQ, ParametricThread)
-
-RAISE_WINDOW_MACRO(ParametricEQ)
-
-SET_STRING_MACRO(ParametricEQ)
 
 LOAD_CONFIGURATION_MACRO(ParametricEQ, ParametricConfig)
 
@@ -898,10 +883,12 @@ void ParametricEQ::update_gui()
 {
 	if(thread)
 	{
-		load_configuration();
-		thread->window->lock_window("ParametricEQ::update_gui");
-		thread->window->update_gui();
-		thread->window->unlock_window();
+		if(load_configuration())
+		{
+			((ParametricWindow*)thread->window)->lock_window("ParametricEQ::update_gui");
+			((ParametricWindow*)thread->window)->update_gui();
+			((ParametricWindow*)thread->window)->unlock_window();
+		}
 	}
 }
 

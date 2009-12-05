@@ -138,27 +138,21 @@ int SlideOut::handle_event()
 
 
 
-SlideWindow::SlideWindow(SlideMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+SlideWindow::SlideWindow(SlideMain *plugin)
+ : PluginClientWindow(plugin, 
 	320, 
 	100, 
 	320, 
 	100, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
 
 
-int SlideWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
+
+
+
 
 void SlideWindow::create_objects()
 {
@@ -196,7 +190,7 @@ void SlideWindow::create_objects()
 
 
 
-PLUGIN_THREAD_OBJECT(SlideMain, SlideThread, SlideWindow)
+
 
 
 
@@ -208,12 +202,12 @@ SlideMain::SlideMain(PluginServer *server)
 {
 	motion_direction = 0;
 	direction = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 SlideMain::~SlideMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* SlideMain::plugin_title() { return N_("Slide"); }
@@ -221,9 +215,7 @@ int SlideMain::is_video() { return 1; }
 int SlideMain::is_transition() { return 1; }
 int SlideMain::uses_gui() { return 1; }
 
-SHOW_GUI_MACRO(SlideMain, SlideThread);
-SET_STRING_MACRO(SlideMain)
-RAISE_WINDOW_MACRO(SlideMain)
+NEW_WINDOW_MACRO(SlideMain, SlideWindow)
 
 
 VFrame* SlideMain::new_picon()
@@ -283,9 +275,10 @@ void SlideMain::read_data(KeyFrame *keyframe)
 	}
 }
 
-void SlideMain::load_configuration()
+int SlideMain::load_configuration()
 {
 	read_data(get_prev_keyframe(get_source_position()));
+	return 1;
 }
 
 

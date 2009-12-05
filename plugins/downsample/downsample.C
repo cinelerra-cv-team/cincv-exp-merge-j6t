@@ -97,14 +97,13 @@ public:
 	int *output;
 };
 
-class DownSampleWindow : public BC_Window
+class DownSampleWindow : public PluginClientWindow
 {
 public:
-	DownSampleWindow(DownSampleMain *plugin, int x, int y);
+	DownSampleWindow(DownSampleMain *plugin);
 	~DownSampleWindow();
 	
 	void create_objects();
-	int close_event();
 
 	DownSampleToggle *r, *g, *b, *a;
 	DownSampleSize *h, *v, *h_x, *v_y;
@@ -113,7 +112,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(DownSampleMain, DownSampleThread, DownSampleWindow)
 
 
 class DownSampleMain : public PluginVClient
@@ -130,7 +128,7 @@ public:
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
 
-	PLUGIN_CLASS_MEMBERS(DownSampleConfig, DownSampleThread)
+	PLUGIN_CLASS_MEMBERS(DownSampleConfig)
 
 	VFrame *input, *output;
 	DownSampleServer *engine;
@@ -247,20 +245,16 @@ void DownSampleConfig::interpolate(DownSampleConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(DownSampleMain, DownSampleThread, DownSampleWindow)
 
 
 
-DownSampleWindow::DownSampleWindow(DownSampleMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x,
-	y,
+DownSampleWindow::DownSampleWindow(DownSampleMain *plugin)
+ : PluginClientWindow(plugin,
 	230, 
 	380, 
 	230, 
 	380, 
-	0, 
-	1)
+	0)
 {
 	this->plugin = plugin; 
 }
@@ -338,12 +332,6 @@ void DownSampleWindow::create_objects()
 	flush();
 }
 
-int DownSampleWindow::close_event()
-{
-// Set result to 1 to indicate a plugin side close
-	set_done(1);
-	return 1;
-}
 
 
 
@@ -408,13 +396,13 @@ int DownSampleSize::handle_event()
 DownSampleMain::DownSampleMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 DownSampleMain::~DownSampleMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(engine) delete engine;
 }
@@ -424,12 +412,7 @@ int DownSampleMain::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(DownSampleMain)
-
-SHOW_GUI_MACRO(DownSampleMain, DownSampleThread)
-
-SET_STRING_MACRO(DownSampleMain)
-
-RAISE_WINDOW_MACRO(DownSampleMain)
+NEW_WINDOW_MACRO(DownSampleMain, DownSampleWindow)
 
 LOAD_CONFIGURATION_MACRO(DownSampleMain, DownSampleConfig)
 
@@ -461,16 +444,16 @@ void DownSampleMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->h->update(config.horizontal);
-		thread->window->v->update(config.vertical);
-		thread->window->h_x->update(config.horizontal_x);
-		thread->window->v_y->update(config.vertical_y);
-		thread->window->r->update(config.r);
-		thread->window->g->update(config.g);
-		thread->window->b->update(config.b);
-		thread->window->a->update(config.a);
-		thread->window->unlock_window();
+		((DownSampleWindow*)thread->window)->lock_window();
+		((DownSampleWindow*)thread->window)->h->update(config.horizontal);
+		((DownSampleWindow*)thread->window)->v->update(config.vertical);
+		((DownSampleWindow*)thread->window)->h_x->update(config.horizontal_x);
+		((DownSampleWindow*)thread->window)->v_y->update(config.vertical_y);
+		((DownSampleWindow*)thread->window)->r->update(config.r);
+		((DownSampleWindow*)thread->window)->g->update(config.g);
+		((DownSampleWindow*)thread->window)->b->update(config.b);
+		((DownSampleWindow*)thread->window)->a->update(config.a);
+		((DownSampleWindow*)thread->window)->unlock_window();
 	}
 }
 

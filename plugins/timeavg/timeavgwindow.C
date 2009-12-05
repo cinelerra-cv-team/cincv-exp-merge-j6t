@@ -23,23 +23,18 @@
 #include "language.h"
 #include "timeavgwindow.h"
 
-PLUGIN_THREAD_OBJECT(TimeAvgMain, TimeAvgThread, TimeAvgWindow)
 
 
 #define MAX_FRAMES 1024
 
 
-TimeAvgWindow::TimeAvgWindow(TimeAvgMain *client, int x, int y)
- : BC_Window(client->gui_string, 
- 	x, 
-	y, 
+TimeAvgWindow::TimeAvgWindow(TimeAvgMain *client)
+ : PluginClientWindow(client, 
 	210, 
 	210, 
 	200, 
 	210, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -68,7 +63,6 @@ void TimeAvgWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(TimeAvgWindow)
 
 TimeAvgSlider::TimeAvgSlider(TimeAvgMain *client, int x, int y)
  : BC_ISlider(x, 

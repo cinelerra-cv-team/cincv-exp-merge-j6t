@@ -128,13 +128,10 @@ SvgMain::SvgMain(PluginServer *server)
 	overlayer = 0;
 	need_reconfigure = 0;
 	force_raw_render = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 SvgMain::~SvgMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
-
 	if(temp_frame) delete temp_frame;
 	temp_frame = 0;
 	if(overlayer) delete overlayer;
@@ -404,11 +401,7 @@ int SvgMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 
 
 
-SHOW_GUI_MACRO(SvgMain, SvgThread)
-                                                              
-RAISE_WINDOW_MACRO(SvgMain)
-
-SET_STRING_MACRO(SvgMain)
+NEW_WINDOW_MACRO(SvgMain, SvgWin)
 
 void SvgMain::update_gui()
 {
@@ -416,15 +409,15 @@ void SvgMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-//		thread->window->in_x->update(config.in_x);
-//		thread->window->in_y->update(config.in_y);
-//		thread->window->in_w->update(config.in_w);
-//		thread->window->in_h->update(config.in_h);
-		thread->window->out_x->update(config.out_x);
-		thread->window->out_y->update(config.out_y);
-//		thread->window->out_w->update(config.out_w);
-//		thread->window->out_h->update(config.out_h);
-		thread->window->svg_file_title->update(config.svg_file);
+//		((SvgWin *)thread->window)->in_x->update(config.in_x);
+//		((SvgWin *)thread->window)->in_y->update(config.in_y);
+//		((SvgWin *)thread->window)->in_w->update(config.in_w);
+//		((SvgWin *)thread->window)->in_h->update(config.in_h);
+		((SvgWin *)thread->window)->out_x->update(config.out_x);
+		((SvgWin *)thread->window)->out_y->update(config.out_y);
+//		((SvgWin *)thread->window)->out_w->update(config.out_w);
+//		((SvgWin *)thread->window)->out_h->update(config.out_h);
+		((SvgWin *)thread->window)->svg_file_title->update(config.svg_file);
 		thread->window->unlock_window();
 	}
 }

@@ -23,5 +23,7 @@
 #define PLUGINCLIENT_INC
 
 class PluginClient;
+class PluginClientThread;
+class PluginClientWindow;
 
 #endif

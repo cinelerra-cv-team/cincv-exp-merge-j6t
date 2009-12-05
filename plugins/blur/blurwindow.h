@@ -32,7 +32,6 @@ class BlurWindow;
 #include "mutex.h"
 #include "thread.h"
 
-PLUGIN_THREAD_HEADER(BlurMain, BlurThread, BlurWindow)
 
 class BlurVertical;
 class BlurHorizontal;
@@ -42,15 +41,14 @@ class BlurR;
 class BlurG;
 class BlurB;
 
-class BlurWindow : public BC_Window
+class BlurWindow : public PluginClientWindow
 {
 public:
-	BlurWindow(BlurMain *client, int x, int y);
+	BlurWindow(BlurMain *client);
 	~BlurWindow();
 	
 	void create_objects();
-	int close_event();
-	
+
 	BlurMain *client;
 	BlurVertical *vertical;
 	BlurHorizontal *horizontal;

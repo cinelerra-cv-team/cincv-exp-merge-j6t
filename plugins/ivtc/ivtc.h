@@ -63,7 +63,7 @@ public:
 	int is_realtime();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	PLUGIN_CLASS_MEMBERS(IVTCConfig, IVTCThread)
+	PLUGIN_CLASS_MEMBERS(IVTCConfig)
 	void update_gui();
 	void render_stop();
 

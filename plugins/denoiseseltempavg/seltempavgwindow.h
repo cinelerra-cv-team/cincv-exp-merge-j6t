@@ -45,8 +45,6 @@ class SelTempAvgGainValue;
 #include "mutex.h"
 #include "seltempavg.h"
 
-PLUGIN_THREAD_HEADER(SelTempAvgMain, SelTempAvgThread, SelTempAvgWindow)
-
 
 
 
@@ -67,14 +65,13 @@ enum {
 };
 
 
-class SelTempAvgWindow : public BC_Window
+class SelTempAvgWindow : public PluginClientWindow
 {
 public:
-	SelTempAvgWindow(SelTempAvgMain *client, int x, int y);
+	SelTempAvgWindow(SelTempAvgMain *client);
 	~SelTempAvgWindow();
 	
 	void create_objects();
-	int close_event();
 	
 	SelTempAvgMain *client;
 	SelTempAvgSlider *total_frames;

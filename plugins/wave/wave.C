@@ -124,13 +124,12 @@ public:
 
 
 
-class WaveWindow : public BC_Window
+class WaveWindow : public PluginClientWindow
 {
 public:
-	WaveWindow(WaveEffect *plugin, int x, int y);
+	WaveWindow(WaveEffect *plugin);
 	~WaveWindow();
 	void create_objects();
-	int close_event();
 	void update_mode();
 	WaveEffect *plugin;
 //	WaveSmear *smear;
@@ -142,7 +141,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(WaveEffect, WaveThread, WaveWindow)
 
 
 
@@ -187,25 +185,17 @@ public:
 	WaveEffect(PluginServer *server);
 	~WaveEffect();
 
+	PLUGIN_CLASS_MEMBERS(WaveConfig)
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	int set_string();
-	void raise_window();
 	void update_gui();
 
-	WaveConfig config;
 	VFrame *temp_frame;
 	VFrame *input, *output;
-	BC_Hash *defaults;
-	WaveThread *thread;
 	WaveServer *engine;
 };
 
@@ -388,17 +378,13 @@ int WaveLength::handle_event()
 
 
 
-WaveWindow::WaveWindow(WaveEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+WaveWindow::WaveWindow(WaveEffect *plugin)
+ : PluginClientWindow(plugin, 
 	320, 
 	150, 
 	320, 
 	150, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -431,12 +417,6 @@ void WaveWindow::create_objects()
 	flush();
 }
 
-int WaveWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
-
 void WaveWindow::update_mode()
 {
 //	smear->update(plugin->config.mode == SMEAR);
@@ -444,7 +424,7 @@ void WaveWindow::update_mode()
 }
 
 
-PLUGIN_THREAD_OBJECT(WaveEffect, WaveThread, WaveWindow)
+
 
 
 
@@ -459,12 +439,12 @@ WaveEffect::WaveEffect(PluginServer *server)
 {
 	temp_frame = 0;
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 WaveEffect::~WaveEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(temp_frame) delete temp_frame;
 	if(engine) delete engine;
@@ -476,11 +456,7 @@ int WaveEffect::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(WaveEffect)
 
-SHOW_GUI_MACRO(WaveEffect, WaveThread)
-
-RAISE_WINDOW_MACRO(WaveEffect)
-
-SET_STRING_MACRO(WaveEffect)
+NEW_WINDOW_MACRO(WaveEffect, WaveWindow)
 
 void WaveEffect::update_gui()
 {
@@ -488,11 +464,11 @@ void WaveEffect::update_gui()
 	{
 		thread->window->lock_window();
 		load_configuration();
-		thread->window->update_mode();
+		((WaveWindow*)thread->window)->update_mode();
 //		thread->window->reflective->update(config.reflective);
-		thread->window->amplitude->update(config.amplitude);
-		thread->window->phase->update(config.phase);
-		thread->window->wavelength->update(config.wavelength);
+		((WaveWindow*)thread->window)->amplitude->update(config.amplitude);
+		((WaveWindow*)thread->window)->phase->update(config.phase);
+		((WaveWindow*)thread->window)->wavelength->update(config.wavelength);
 		thread->window->unlock_window();
 	}
 }

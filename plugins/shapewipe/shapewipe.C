@@ -179,25 +179,15 @@ ShapeWipeLoad::ShapeWipeLoad(
    this->filename = filename;
 }
 
-ShapeWipeWindow::ShapeWipeWindow(ShapeWipeMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
-	x, 
-	y, 
+ShapeWipeWindow::ShapeWipeWindow(ShapeWipeMain *plugin)
+ : PluginClientWindow(plugin, 
 	450, 
 	125, 
-	450, 
-	125, 
-	0, 
-	0,
-	1)
+	450,
+	125,
+	0)
 {
 	this->plugin = plugin;
-}
-
-int ShapeWipeWindow::close_event()
-{
-	set_done(1);
-	return 1;
 }
 
 void ShapeWipeWindow::create_objects()
@@ -247,7 +237,6 @@ void ShapeWipeWindow::create_objects()
 	flush();
 }
 
-PLUGIN_THREAD_OBJECT(ShapeWipeMain, ShapeWipeThread, ShapeWipeWindow)
 
 ShapeWipeMain::ShapeWipeMain(PluginServer *server)
  : PluginVClient(server)
@@ -261,13 +250,11 @@ ShapeWipeMain::ShapeWipeMain(PluginServer *server)
 	antialias = 0;
 	preserve_aspect = 0;
 	last_preserve_aspect = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 ShapeWipeMain::~ShapeWipeMain()
 {
 	reset_pattern_image();
-	PLUGIN_DESTRUCTOR_MACRO
 }
 
 const char* ShapeWipeMain::plugin_title() { return N_("Shape Wipe"); }
@@ -275,9 +262,7 @@ int ShapeWipeMain::is_video() { return 1; }
 int ShapeWipeMain::is_transition() { return 1; }
 int ShapeWipeMain::uses_gui() { return 1; }
 
-SHOW_GUI_MACRO(ShapeWipeMain, ShapeWipeThread);
-SET_STRING_MACRO(ShapeWipeMain)
-RAISE_WINDOW_MACRO(ShapeWipeMain)
+NEW_WINDOW_MACRO(ShapeWipeMain, ShapeWipeWindow);
 
 
 VFrame* ShapeWipeMain::new_picon()
@@ -345,9 +330,10 @@ void ShapeWipeMain::read_data(KeyFrame *keyframe)
 	}
 }
 
-void ShapeWipeMain::load_configuration()
+int ShapeWipeMain::load_configuration()
 {
 	read_data(get_prev_keyframe(get_source_position()));
+	return 1;
 }
 
 int ShapeWipeMain::read_pattern_image(int new_frame_width, int new_frame_height)

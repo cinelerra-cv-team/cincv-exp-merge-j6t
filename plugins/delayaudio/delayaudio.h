@@ -65,14 +65,13 @@ public:
 
 
 
-class DelayAudioWindow : public BC_Window
+class DelayAudioWindow : public PluginClientWindow
 {
 public:
-	DelayAudioWindow(DelayAudio *plugin, int x, int y);
+	DelayAudioWindow(DelayAudio *plugin);
 	~DelayAudioWindow();
 	
 	void create_objects();
-	int close_event();
 	void update_gui();
 
 	DelayAudio *plugin;
@@ -102,31 +101,22 @@ public:
 	DelayAudio(PluginServer *server);
 	~DelayAudio();
 
-	VFrame* new_picon();
-	const char* plugin_title();
 	int is_realtime();
 	int load_defaults();
 	int save_defaults();
 	void read_data(KeyFrame *keyframe);
 	void save_data(KeyFrame *keyframe);
 	int process_realtime(int64_t size, double *input_ptr, double *output_ptr);
-	int show_gui();
-	void raise_window();
-	int set_string();
 
 
 
 
-
-	void load_configuration();
+	PLUGIN_CLASS_MEMBERS(DelayAudioConfig);
 	void update_gui();
 
 
 
 	std::vector<double> buffer;
-	DelayAudioThread *thread;
-	BC_Hash *defaults;
-	DelayAudioConfig config;
 };
 
 

@@ -51,7 +51,7 @@ public:
 
 	int process_realtime(int64_t size, double *input_ptr, double *output_ptr);
 
-	PLUGIN_CLASS_MEMBERS(GainConfig, GainThread)
+	PLUGIN_CLASS_MEMBERS(GainConfig)
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	int load_defaults();

@@ -24,7 +24,6 @@
 
 #include "guicast.h"
 
-class SharpenThread;
 class SharpenWindow;
 class SharpenInterlace;
 
@@ -36,21 +35,19 @@ class SharpenInterlace;
 
 
 
-PLUGIN_THREAD_HEADER(SharpenMain, SharpenThread, SharpenWindow)
 
 class SharpenSlider;
 class SharpenHorizontal;
 class SharpenLuminance;
 
-class SharpenWindow : public BC_Window
+class SharpenWindow : public PluginClientWindow
 {
 public:
-	SharpenWindow(SharpenMain *client, int x, int y);
+	SharpenWindow(SharpenMain *client);
 	~SharpenWindow();
 	
 	void create_objects();
-	int close_event();
-	
+
 	SharpenMain *client;
 	SharpenSlider *sharpen_slider;
 	SharpenInterlace *sharpen_interlace;

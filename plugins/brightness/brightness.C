@@ -86,22 +86,20 @@ BrightnessMain::BrightnessMain(PluginServer *server)
 {
     redo_buffers = 1;
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 BrightnessMain::~BrightnessMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 }
 
 const char* BrightnessMain::plugin_title() { return N_("Brightness/Contrast"); }
 int BrightnessMain::is_realtime() { return 1; }
 
+NEW_WINDOW_MACRO(BrightnessMain, BrightnessWindow)	
 NEW_PICON_MACRO(BrightnessMain)	
-SHOW_GUI_MACRO(BrightnessMain, BrightnessThread)
-RAISE_WINDOW_MACRO(BrightnessMain)
-SET_STRING_MACRO(BrightnessMain)
 LOAD_CONFIGURATION_MACRO(BrightnessMain, BrightnessConfig)
 
 int BrightnessMain::process_buffer(VFrame *frame,
@@ -269,11 +267,11 @@ void BrightnessMain::update_gui()
 	{
 		if(load_configuration())
 		{
-			thread->window->lock_window("BrightnessMain::update_gui");
-			thread->window->brightness->update(config.brightness);
-			thread->window->contrast->update(config.contrast);
-			thread->window->luma->update(config.luma);
-			thread->window->unlock_window();
+			((BrightnessWindow*)thread->window)->lock_window("BrightnessMain::update_gui");
+			((BrightnessWindow*)thread->window)->brightness->update(config.brightness);
+			((BrightnessWindow*)thread->window)->contrast->update(config.contrast);
+			((BrightnessWindow*)thread->window)->luma->update(config.luma);
+			((BrightnessWindow*)thread->window)->unlock_window();
 		}
 	}
 }

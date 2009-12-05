@@ -148,22 +148,18 @@ int GradientConfig::get_out_color()
 
 
 
-PLUGIN_THREAD_OBJECT(GradientMain, GradientThread, GradientWindow)
 
 
 #define COLOR_W 100
 #define COLOR_H 30
 
-GradientWindow::GradientWindow(GradientMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x,
-	y,
+GradientWindow::GradientWindow(GradientMain *plugin)
+ : PluginClientWindow(plugin,
 	350, 
 	290, 
 	350, 
 	290, 
-	0, 
-	1)
+	0)
 {
 	this->plugin = plugin;
 	angle = 0;
@@ -266,12 +262,8 @@ void GradientWindow::update_shape()
 	}
 }
 
-int GradientWindow::close_event()
-{
-// Set result to 1 to indicate a plugin side close
-	set_done(1);
-	return 1;
-}
+
+
 
 void GradientWindow::update_in_color()
 {
@@ -578,7 +570,7 @@ int GradientOutColorThread::handle_new_color(int output, int alpha)
 GradientMain::GradientMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	need_reconfigure = 1;
 	gradient = 0;
 	engine = 0;
@@ -587,7 +579,7 @@ GradientMain::GradientMain(PluginServer *server)
 
 GradientMain::~GradientMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(gradient) delete gradient;
 	if(engine) delete engine;
@@ -599,12 +591,7 @@ int GradientMain::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(GradientMain)
-
-SHOW_GUI_MACRO(GradientMain, GradientThread)
-
-SET_STRING_MACRO(GradientMain)
-
-RAISE_WINDOW_MACRO(GradientMain)
+NEW_WINDOW_MACRO(GradientMain, GradientWindow)
 
 LOAD_CONFIGURATION_MACRO(GradientMain, GradientConfig)
 
@@ -694,23 +681,23 @@ void GradientMain::update_gui()
 	{
 		if(load_configuration())
 		{
-			thread->window->lock_window("GradientMain::update_gui");
-			thread->window->rate->set_text(GradientRate::to_text(config.rate));
-			thread->window->in_radius->update(config.in_radius);
-			thread->window->out_radius->update(config.out_radius);
-			thread->window->shape->set_text(GradientShape::to_text(config.shape));
-			if(thread->window->angle)
-				thread->window->angle->update(config.angle);
-			if(thread->window->center_x)
-				thread->window->center_x->update(config.center_x);
-			if(thread->window->center_y)
-				thread->window->center_y->update(config.center_y);
-			thread->window->update_in_color();
-			thread->window->update_out_color();
-			thread->window->update_shape();
-			thread->window->unlock_window();
-			thread->window->in_color_thread->update_gui(config.get_in_color(), config.in_a);
-			thread->window->out_color_thread->update_gui(config.get_out_color(), config.out_a);
+			((GradientWindow*)thread->window)->lock_window("GradientMain::update_gui");
+			((GradientWindow*)thread->window)->rate->set_text(GradientRate::to_text(config.rate));
+			((GradientWindow*)thread->window)->in_radius->update(config.in_radius);
+			((GradientWindow*)thread->window)->out_radius->update(config.out_radius);
+			((GradientWindow*)thread->window)->shape->set_text(GradientShape::to_text(config.shape));
+			if(((GradientWindow*)thread->window)->angle)
+				((GradientWindow*)thread->window)->angle->update(config.angle);
+			if(((GradientWindow*)thread->window)->center_x)
+				((GradientWindow*)thread->window)->center_x->update(config.center_x);
+			if(((GradientWindow*)thread->window)->center_y)
+				((GradientWindow*)thread->window)->center_y->update(config.center_y);
+			((GradientWindow*)thread->window)->update_in_color();
+			((GradientWindow*)thread->window)->update_out_color();
+			((GradientWindow*)thread->window)->update_shape();
+			((GradientWindow*)thread->window)->unlock_window();
+			((GradientWindow*)thread->window)->in_color_thread->update_gui(config.get_in_color(), config.in_a);
+			((GradientWindow*)thread->window)->out_color_thread->update_gui(config.get_out_color(), config.out_a);
 		}
 	}
 }

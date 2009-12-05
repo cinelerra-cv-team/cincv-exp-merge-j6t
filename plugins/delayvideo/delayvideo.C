@@ -70,17 +70,13 @@ void DelayVideoConfig::interpolate(DelayVideoConfig &prev,
 
 
 
-DelayVideoWindow::DelayVideoWindow(DelayVideo *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
-	x,
-	y,
+DelayVideoWindow::DelayVideoWindow(DelayVideo *plugin)
+ : PluginClientWindow(plugin, 
 	210, 
 	120, 
 	210, 
 	120, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -102,7 +98,6 @@ void DelayVideoWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(DelayVideoWindow)
 
 void DelayVideoWindow::update_gui()
 {
@@ -145,8 +140,6 @@ int DelayVideoSlider::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(DelayVideo, DelayVideoThread, DelayVideoWindow)
-
 
 
 
@@ -162,8 +155,6 @@ DelayVideo::DelayVideo(PluginServer *server)
 
 DelayVideo::~DelayVideo()
 {
-	PLUGIN_DESTRUCTOR_MACRO
-
 	if(buffer)
 	{
 //printf("DelayVideo::~DelayVideo 1\n");
@@ -253,15 +244,9 @@ int DelayVideo::is_realtime()
 
 const char* DelayVideo::plugin_title() { return N_("Delay Video"); }
 
-SET_STRING_MACRO(DelayVideo)
-
 NEW_PICON_MACRO(DelayVideo)
-
 LOAD_CONFIGURATION_MACRO(DelayVideo, DelayVideoConfig)
-
-SHOW_GUI_MACRO(DelayVideo, DelayVideoThread)
-
-RAISE_WINDOW_MACRO(DelayVideo)
+NEW_WINDOW_MACRO(DelayVideo, DelayVideoWindow)
 
 
 void DelayVideo::save_data(KeyFrame *keyframe)
@@ -303,9 +288,9 @@ void DelayVideo::update_gui()
 	if(thread) 
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->slider->update(config.length);
-		thread->window->unlock_window();
+		((DelayVideoWindow*)thread->window)->lock_window();
+		((DelayVideoWindow*)thread->window)->slider->update(config.length);
+		((DelayVideoWindow*)thread->window)->unlock_window();
 	}
 }
 

@@ -34,24 +34,19 @@
 
 
 
-PLUGIN_THREAD_OBJECT(TranslateMain, TranslateThread, TranslateWin)
 
 
 
 
 
 
-TranslateWin::TranslateWin(TranslateMain *client, int x, int y)
- : BC_Window(client->gui_string, 
- 	x,
-	y,
+TranslateWin::TranslateWin(TranslateMain *client)
+ : PluginClientWindow(client,
 	300, 
 	220, 
 	300, 
 	220, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -121,11 +116,7 @@ void TranslateWin::create_objects()
 	flush();
 }
 
-int TranslateWin::close_event()
-{
-	set_done(1);
-	return 1;
-}
+
 
 TranslateCoord::TranslateCoord(TranslateWin *win, 
 	TranslateMain *client, 

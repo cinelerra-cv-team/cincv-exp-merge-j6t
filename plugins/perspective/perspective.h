@@ -140,14 +140,13 @@ public:
 	int value;
 };
 
-class PerspectiveWindow : public BC_Window
+class PerspectiveWindow : public PluginClientWindow
 {
 public:
-	PerspectiveWindow(PerspectiveMain *plugin, int x, int y);
+	PerspectiveWindow(PerspectiveMain *plugin);
 	~PerspectiveWindow();
 
 	void create_objects();
-	int close_event();
 	int resize_event(int x, int y);
 	void update_canvas();
 	void update_mode();
@@ -171,7 +170,7 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(PerspectiveMain, PerspectiveThread, PerspectiveWindow)
+
 
 
 class PerspectiveMain : public PluginVClient
@@ -191,7 +190,7 @@ public:
 	void update_gui();
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(PerspectiveConfig, PerspectiveThread)
+	PLUGIN_CLASS_MEMBERS(PerspectiveConfig)
 
 	float get_current_x();
 	float get_current_y();

@@ -80,19 +80,19 @@ public:
 	OilEffect *plugin;
 };
 
-class OilWindow : public BC_Window
+class OilWindow : public PluginClientWindow
 {
 public:
-	OilWindow(OilEffect *plugin, int x, int y);
+	OilWindow(OilEffect *plugin);
 	~OilWindow();
 	void create_objects();
-	int close_event();
+
 	OilEffect *plugin;
 	OilRadius *radius;
 	OilIntensity *intensity;
 };
 
-PLUGIN_THREAD_HEADER(OilEffect, OilThread, OilWindow)
+
 
 
 
@@ -136,26 +136,18 @@ class OilEffect : public PluginVClient
 public:
 	OilEffect(PluginServer *server);
 	~OilEffect();
-
+	
+	PLUGIN_CLASS_MEMBERS(OilConfig);
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	int set_string();
-	void raise_window();
 	void update_gui();
 
-	OilConfig config;
 	VFrame *temp_frame;
 	VFrame *input, *output;
-	BC_Hash *defaults;
-	OilThread *thread;
 	OilServer *engine;
 	int need_reconfigure;
 };
@@ -258,17 +250,13 @@ int OilIntensity::handle_event()
 
 
 
-OilWindow::OilWindow(OilEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+OilWindow::OilWindow(OilEffect *plugin)
+ : PluginClientWindow(plugin, 
 	300, 
 	160, 
 	300, 
 	160, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -289,11 +277,11 @@ void OilWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(OilWindow)
 
 
 
-PLUGIN_THREAD_OBJECT(OilEffect, OilThread, OilWindow)
+
+
 
 
 
@@ -309,12 +297,12 @@ OilEffect::OilEffect(PluginServer *server)
 	temp_frame = 0;
 	need_reconfigure = 1;
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 OilEffect::~OilEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(temp_frame) delete temp_frame;
 	if(engine) delete engine;
@@ -327,11 +315,7 @@ int OilEffect::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(OilEffect)
 
-SHOW_GUI_MACRO(OilEffect, OilThread)
-
-RAISE_WINDOW_MACRO(OilEffect)
-
-SET_STRING_MACRO(OilEffect)
+NEW_WINDOW_MACRO(OilEffect, OilWindow)
 
 void OilEffect::update_gui()
 {
@@ -341,8 +325,8 @@ void OilEffect::update_gui()
 		load_configuration();
 //printf("OilEffect::update_gui 1 %ld %f\n", get_source_position(), config.radius);
 
-		thread->window->radius->update(config.radius);
-		thread->window->intensity->update(config.use_intensity);
+		((OilWindow*)thread->window)->radius->update(config.radius);
+		((OilWindow*)thread->window)->intensity->update(config.use_intensity);
 		thread->window->unlock_window();
 	}
 }

@@ -25,22 +25,17 @@
 
 
 
-PLUGIN_THREAD_OBJECT(HoloMain, HoloThread, HoloWindow)
 
 
 
 
-HoloWindow::HoloWindow(HoloMain *client, int x, int y)
- : BC_Window(client->gui_string, 
-	x,
-	y,
+HoloWindow::HoloWindow(HoloMain *client)
+ : PluginClientWindow(client,
 	300, 
 	170, 
 	300, 
 	170, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -61,7 +56,6 @@ void HoloWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(HoloWindow)
 
 
 

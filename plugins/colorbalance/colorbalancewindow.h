@@ -38,16 +38,14 @@ class ColorBalanceReset;
 #include "pluginclient.h"
 
 
-PLUGIN_THREAD_HEADER(ColorBalanceMain, ColorBalanceThread, ColorBalanceWindow)
 
-class ColorBalanceWindow : public BC_Window
+class ColorBalanceWindow : public PluginClientWindow
 {
 public:
-	ColorBalanceWindow(ColorBalanceMain *client, int x, int y);
+	ColorBalanceWindow(ColorBalanceMain *client);
 	~ColorBalanceWindow();
 
 	void create_objects();
-	int close_event();
 	void update();
 
 	ColorBalanceMain *client;

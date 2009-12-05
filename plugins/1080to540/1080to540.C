@@ -72,17 +72,13 @@ void _1080to540Config::interpolate(_1080to540Config &prev,
 
 
 
-_1080to540Window::_1080to540Window(_1080to540Main *client, int x, int y)
- : BC_Window(client->gui_string, 
- 	x, 
-	y, 
+_1080to540Window::_1080to540Window(_1080to540Main *client)
+ : PluginClientWindow(client, 
 	200, 
 	100, 
 	200, 
 	100, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -103,8 +99,6 @@ void _1080to540Window::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(_1080to540Window)
 
 int _1080to540Window::set_first_field(int first_field, int send_event)
 {
@@ -147,8 +141,6 @@ int _1080to540Option::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(_1080to540Main, _1080to540Thread, _1080to540Window)
-
 
 
 
@@ -158,22 +150,20 @@ PLUGIN_THREAD_OBJECT(_1080to540Main, _1080to540Thread, _1080to540Window)
 _1080to540Main::_1080to540Main(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	temp = 0;
 }
 
 _1080to540Main::~_1080to540Main()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(temp) delete temp;
 }
 
 const char* _1080to540Main::plugin_title() { return N_("1080 to 540"); }
 int _1080to540Main::is_realtime() { return 1; }
 
-SHOW_GUI_MACRO(_1080to540Main, _1080to540Thread)
-RAISE_WINDOW_MACRO(_1080to540Main)
-SET_STRING_MACRO(_1080to540Main)
+NEW_WINDOW_MACRO(_1080to540Main, _1080to540Window)
 NEW_PICON_MACRO(_1080to540Main)
 LOAD_CONFIGURATION_MACRO(_1080to540Main, _1080to540Config)
 
@@ -320,7 +310,7 @@ void _1080to540Main::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->set_first_field(config.first_field, 0);
+		((_1080to540Window*)thread->window)->set_first_field(config.first_field, 0);
 		thread->window->unlock_window();
 	}
 }

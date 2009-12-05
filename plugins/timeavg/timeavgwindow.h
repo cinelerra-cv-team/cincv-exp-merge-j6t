@@ -35,18 +35,16 @@ class TimeAvgNoSubtract;
 #include "mutex.h"
 #include "timeavg.h"
 
-PLUGIN_THREAD_HEADER(TimeAvgMain, TimeAvgThread, TimeAvgWindow)
 
 class TimeAvgSlider;
 
-class TimeAvgWindow : public BC_Window
+class TimeAvgWindow : public PluginClientWindow
 {
 public:
-	TimeAvgWindow(TimeAvgMain *client, int x, int y);
+	TimeAvgWindow(TimeAvgMain *client);
 	~TimeAvgWindow();
 	
 	void create_objects();
-	int close_event();
 	
 	TimeAvgMain *client;
 	TimeAvgSlider *total_frames;

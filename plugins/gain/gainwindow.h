@@ -33,19 +33,18 @@ class GainWindow;
 #include "mutex.h"
 #include "pluginclient.h"
 
-PLUGIN_THREAD_HEADER(Gain, GainThread, GainWindow)
+
 
 class GainLevel;
 
-class GainWindow : public BC_Window
+class GainWindow : public PluginClientWindow
 {
 public:
-	GainWindow(Gain *gain, int x, int y);
+	GainWindow(Gain *gain);
 	~GainWindow();
 	
 	void create_objects();
-	int close_event();
-	
+
 	Gain *gain;
 	GainLevel *level;
 };

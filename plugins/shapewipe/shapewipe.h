@@ -115,20 +115,17 @@ public:
 	ShapeWipeFilename *filename;
 };
 
-class ShapeWipeWindow : public BC_Window
+class ShapeWipeWindow : public PluginClientWindow
 {
 public:
-	ShapeWipeWindow(ShapeWipeMain *plugin, int x, int y);
+	ShapeWipeWindow(ShapeWipeMain *plugin);
 	void create_objects();
-	int close_event();
 	void reset_pattern_image();
 	ShapeWipeMain *plugin;
 	ShapeWipeW2B *left;
 	ShapeWipeB2W *right;
 	ShapeWipeFilename *filename_widget;
 };
-
-PLUGIN_THREAD_HEADER(ShapeWipeMain, ShapeWipeThread, ShapeWipeWindow)
 
 class ShapeWipeMain : public PluginVClient
 {
@@ -137,14 +134,13 @@ public:
 	~ShapeWipeMain();
 
 // required for all realtime plugins
-	void load_configuration();
+	int load_configuration();
 	int process_realtime(VFrame *incoming, VFrame *outgoing);
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	void raise_window();
+	PluginClientWindow* new_window();
 	int uses_gui();
 	int is_transition();
 	int is_video();
@@ -165,8 +161,6 @@ public:
 	int antialias;
 	int preserve_aspect;
 	int last_preserve_aspect;
-	ShapeWipeThread *thread;
-	BC_Hash *defaults;
 };
 
 #endif

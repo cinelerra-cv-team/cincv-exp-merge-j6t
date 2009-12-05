@@ -31,21 +31,16 @@
 
 #include <unistd.h>
 
-PLUGIN_THREAD_OBJECT(HistogramMain, HistogramThread, HistogramWindow)
 
 
 
-HistogramWindow::HistogramWindow(HistogramMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x,
-	y,
+HistogramWindow::HistogramWindow(HistogramMain *plugin)
+ : PluginClientWindow(plugin, 
 	440, 
 	500, 
 	440, 
 	500, 
-	0, 
-	1,
-	1)
+	0)
 {
 	this->plugin = plugin; 
 }
@@ -220,7 +215,6 @@ void HistogramWindow::create_objects()
 	show_window();
 }
 
-WINDOW_CLOSE_EVENT(HistogramWindow)
 
 int HistogramWindow::keypress_event()
 {
@@ -597,8 +591,8 @@ HistogramReset::HistogramReset(HistogramMain *plugin,
 int HistogramReset::handle_event()
 {
 	plugin->config.reset(0);
-	plugin->thread->window->update(1);
-	plugin->thread->window->update_canvas();
+	((HistogramWindow*)plugin->thread->window)->update(1);
+	((HistogramWindow*)plugin->thread->window)->update_canvas();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -836,12 +830,12 @@ int HistogramMode::handle_event()
 {
 	plugin->mode = value;
 	plugin->current_point= -1;
-	plugin->thread->window->update_canvas();
-	plugin->thread->window->update_mode();
-	plugin->thread->window->update_input();
-	plugin->thread->window->update_canvas();
-	plugin->thread->window->update_output();
-	plugin->thread->window->output->update();
+	((HistogramWindow*)plugin->thread->window)->update_canvas();
+	((HistogramWindow*)plugin->thread->window)->update_mode();
+	((HistogramWindow*)plugin->thread->window)->update_input();
+	((HistogramWindow*)plugin->thread->window)->update_canvas();
+	((HistogramWindow*)plugin->thread->window)->update_output();
+	((HistogramWindow*)plugin->thread->window)->output->update();
 //	plugin->send_configure_change();
 	return 1;
 }
@@ -881,7 +875,7 @@ int HistogramOutputText::handle_event()
 		*output = atof(get_text());
 	}
 
-	plugin->thread->window->output->update();
+	((HistogramWindow*)plugin->thread->window)->output->update();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -933,7 +927,7 @@ int HistogramInputText::handle_event()
 			plugin->config.boundaries();
 			gui->update_canvas();
 
-			plugin->thread->window->output->update();
+			((HistogramWindow*)plugin->thread->window)->output->update();
 			plugin->send_configure_change();
 		}
 	}

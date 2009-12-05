@@ -79,17 +79,13 @@ void SwapConfig::copy_from(SwapConfig &that)
 
 
 
-SwapWindow::SwapWindow(SwapMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
-	x,
-	y,
+SwapWindow::SwapWindow(SwapMain *plugin)
+ : PluginClientWindow(plugin,
 	250, 
 	170, 
 	250, 
 	170, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -126,7 +122,7 @@ void SwapWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(SwapWindow)
+
 
 
 
@@ -182,7 +178,7 @@ int SwapItem::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(SwapMain, SwapThread, SwapWindow)
+
 
 
 
@@ -197,12 +193,12 @@ SwapMain::SwapMain(PluginServer *server)
  : PluginVClient(server)
 {
 	reset();
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 SwapMain::~SwapMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	
 	if(temp) delete temp;
 }
@@ -217,11 +213,8 @@ const char* SwapMain::plugin_title()  { return N_("Swap channels"); }
 int SwapMain::is_synthesis() { return 1; }
 int SwapMain::is_realtime()  { return 1; }
 
-
-SHOW_GUI_MACRO(SwapMain, SwapThread)
 NEW_PICON_MACRO(SwapMain)
-SET_STRING_MACRO(SwapMain)
-RAISE_WINDOW_MACRO(SwapMain)
+NEW_WINDOW_MACRO(SwapMain, SwapWindow)
 
 int SwapMain::load_defaults()
 {
@@ -300,21 +293,22 @@ void SwapMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->red->set_text(output_to_text(config.red));
-		thread->window->green->set_text(output_to_text(config.green));
-		thread->window->blue->set_text(output_to_text(config.blue));
-		thread->window->alpha->set_text(output_to_text(config.alpha));
+		((SwapWindow*)thread->window)->red->set_text(output_to_text(config.red));
+		((SwapWindow*)thread->window)->green->set_text(output_to_text(config.green));
+		((SwapWindow*)thread->window)->blue->set_text(output_to_text(config.blue));
+		((SwapWindow*)thread->window)->alpha->set_text(output_to_text(config.alpha));
 		thread->window->unlock_window();
 	}
 }
 
 
-void SwapMain::load_configuration()
+int SwapMain::load_configuration()
 {
 	KeyFrame *prev_keyframe;
 	prev_keyframe = get_prev_keyframe(get_source_position());
 	
  	read_data(prev_keyframe);
+	return 1;
 }
 
 

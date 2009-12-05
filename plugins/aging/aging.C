@@ -67,26 +67,21 @@ AgingConfig::AgingConfig()
 AgingMain::AgingMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	aging_server = 0;
 }
 
 AgingMain::~AgingMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(aging_server) delete aging_server;
 }
 
 const char* AgingMain::plugin_title() { return N_("AgingTV"); }
 int AgingMain::is_realtime() { return 1; }
 
+NEW_WINDOW_MACRO(AgingMain, AgingWindow)
 NEW_PICON_MACRO(AgingMain)
-
-SHOW_GUI_MACRO(AgingMain, AgingThread)
-
-SET_STRING_MACRO(AgingMain)
-
-RAISE_WINDOW_MACRO(AgingMain)
 
 int AgingMain::load_defaults()
 {
@@ -98,8 +93,9 @@ int AgingMain::save_defaults()
 	return 0;
 }
 
-void AgingMain::load_configuration()
+int AgingMain::load_configuration()
 {
+	return 0;
 }
 
 

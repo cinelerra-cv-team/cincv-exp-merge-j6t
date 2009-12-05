@@ -33,16 +33,14 @@ class HoloWindow;
 #include "pluginclient.h"
 
 
-PLUGIN_THREAD_HEADER(HoloMain, HoloThread, HoloWindow)
 
-class HoloWindow : public BC_Window
+class HoloWindow : public PluginClientWindow
 {
 public:
-	HoloWindow(HoloMain *client, int x, int y);
+	HoloWindow(HoloMain *client);
 	~HoloWindow();
 
 	void create_objects();
-	int close_event();
 
 	HoloMain *client;
 };

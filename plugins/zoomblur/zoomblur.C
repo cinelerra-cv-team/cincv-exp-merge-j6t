@@ -96,14 +96,13 @@ public:
 	int *output;
 };
 
-class ZoomBlurWindow : public BC_Window
+class ZoomBlurWindow : public PluginClientWindow
 {
 public:
-	ZoomBlurWindow(ZoomBlurMain *plugin, int x, int y);
+	ZoomBlurWindow(ZoomBlurMain *plugin);
 	~ZoomBlurWindow();
 
 	void create_objects();
-	int close_event();
 
 	ZoomBlurSize *x, *y, *radius, *steps;
 	ZoomBlurToggle *r, *g, *b, *a;
@@ -112,7 +111,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(ZoomBlurMain, ZoomBlurThread, ZoomBlurWindow)
 
 
 // Output coords for a layer of blurring
@@ -141,7 +139,7 @@ public:
 	void update_gui();
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(ZoomBlurConfig, ZoomBlurThread)
+	PLUGIN_CLASS_MEMBERS(ZoomBlurConfig)
 
 	void delete_tables();
 	VFrame *input, *output, *temp;
@@ -268,20 +266,16 @@ void ZoomBlurConfig::interpolate(ZoomBlurConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(ZoomBlurMain, ZoomBlurThread, ZoomBlurWindow)
 
 
 
-ZoomBlurWindow::ZoomBlurWindow(ZoomBlurMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x,
-	y,
+ZoomBlurWindow::ZoomBlurWindow(ZoomBlurMain *plugin)
+ : PluginClientWindow(plugin,
 	230, 
 	340, 
 	230, 
 	340, 
-	0, 
-	1)
+	0)
 {
 	this->plugin = plugin; 
 }
@@ -323,12 +317,7 @@ void ZoomBlurWindow::create_objects()
 	flush();
 }
 
-int ZoomBlurWindow::close_event()
-{
-// Set result to 1 to indicate a plugin side close
-	set_done(1);
-	return 1;
-}
+
 
 
 
@@ -393,7 +382,7 @@ int ZoomBlurSize::handle_event()
 ZoomBlurMain::ZoomBlurMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	scale_x_table = 0;
 	scale_y_table = 0;
@@ -406,7 +395,7 @@ ZoomBlurMain::ZoomBlurMain(PluginServer *server)
 
 ZoomBlurMain::~ZoomBlurMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 	delete_tables();
 	if(accum) delete [] accum;
@@ -419,11 +408,7 @@ int ZoomBlurMain::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(ZoomBlurMain)
 
-SHOW_GUI_MACRO(ZoomBlurMain, ZoomBlurThread)
-
-SET_STRING_MACRO(ZoomBlurMain)
-
-RAISE_WINDOW_MACRO(ZoomBlurMain)
+NEW_WINDOW_MACRO(ZoomBlurMain, ZoomBlurWindow)
 
 LOAD_CONFIGURATION_MACRO(ZoomBlurMain, ZoomBlurConfig)
 
@@ -608,14 +593,14 @@ void ZoomBlurMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->x->update(config.x);
-		thread->window->y->update(config.y);
-		thread->window->radius->update(config.radius);
-		thread->window->steps->update(config.steps);
-		thread->window->r->update(config.r);
-		thread->window->g->update(config.g);
-		thread->window->b->update(config.b);
-		thread->window->a->update(config.a);
+		((ZoomBlurWindow*)thread->window)->x->update(config.x);
+		((ZoomBlurWindow*)thread->window)->y->update(config.y);
+		((ZoomBlurWindow*)thread->window)->radius->update(config.radius);
+		((ZoomBlurWindow*)thread->window)->steps->update(config.steps);
+		((ZoomBlurWindow*)thread->window)->r->update(config.r);
+		((ZoomBlurWindow*)thread->window)->g->update(config.g);
+		((ZoomBlurWindow*)thread->window)->b->update(config.b);
+		((ZoomBlurWindow*)thread->window)->a->update(config.a);
 		thread->window->unlock_window();
 	}
 }

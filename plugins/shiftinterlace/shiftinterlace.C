@@ -78,13 +78,12 @@ public:
 	ShiftInterlaceMain *plugin;
 };
 
-class ShiftInterlaceWindow : public BC_Window
+class ShiftInterlaceWindow : public PluginClientWindow
 {
 public:
-	ShiftInterlaceWindow(ShiftInterlaceMain *plugin, int x, int y);
+	ShiftInterlaceWindow(ShiftInterlaceMain *plugin);
 
 	void create_objects();
-	int close_event();
 
 	ShiftInterlaceOdd *odd_offset;
 	ShiftInterlaceEven *even_offset;
@@ -92,7 +91,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(ShiftInterlaceMain, ShiftInterlaceThread, ShiftInterlaceWindow)
 
 
 
@@ -104,17 +102,12 @@ public:
 	~ShiftInterlaceMain();
 
 // required for all realtime plugins
+	PLUGIN_CLASS_MEMBERS(ShiftInterlaceConfig)
 	int process_realtime(VFrame *input_ptr, VFrame *output_ptr);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int show_gui();
-	void raise_window();
 	void update_gui();
-	int set_string();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 
@@ -125,11 +118,6 @@ public:
 		int row);
 
 
-
-
-	ShiftInterlaceConfig config;
-	ShiftInterlaceThread *thread;
-	BC_Hash *defaults;
 };
 
 
@@ -180,19 +168,13 @@ void ShiftInterlaceConfig::interpolate(ShiftInterlaceConfig &prev,
 
 
 
-ShiftInterlaceWindow::ShiftInterlaceWindow(ShiftInterlaceMain *plugin, 
-	int x, 
-	int y)
- : BC_Window(plugin->gui_string, 
-	x,
-	y,
+ShiftInterlaceWindow::ShiftInterlaceWindow(ShiftInterlaceMain *plugin)
+ : PluginClientWindow(plugin,
 	310, 
 	100, 
 	310, 
 	100, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -213,7 +195,7 @@ void ShiftInterlaceWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(ShiftInterlaceWindow)
+
 
 ShiftInterlaceOdd::ShiftInterlaceOdd(ShiftInterlaceMain *plugin, int x, int y)
  : BC_ISlider(x,
@@ -265,19 +247,18 @@ int ShiftInterlaceEven::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(ShiftInterlaceMain, ShiftInterlaceThread, ShiftInterlaceWindow)
 
 
 
 ShiftInterlaceMain::ShiftInterlaceMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 ShiftInterlaceMain::~ShiftInterlaceMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 
@@ -285,15 +266,13 @@ const char* ShiftInterlaceMain::plugin_title()  { return N_("ShiftInterlace"); }
 int ShiftInterlaceMain::is_realtime() { return 1; }
 
 
-SHOW_GUI_MACRO(ShiftInterlaceMain, ShiftInterlaceThread)
 
 NEW_PICON_MACRO(ShiftInterlaceMain)
 
-SET_STRING_MACRO(ShiftInterlaceMain)
 
 LOAD_CONFIGURATION_MACRO(ShiftInterlaceMain, ShiftInterlaceConfig)
 
-RAISE_WINDOW_MACRO(ShiftInterlaceMain)
+NEW_WINDOW_MACRO(ShiftInterlaceMain, ShiftInterlaceWindow)
 
 
 int ShiftInterlaceMain::load_defaults()
@@ -365,8 +344,8 @@ void ShiftInterlaceMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->odd_offset->update(config.odd_offset);
-		thread->window->even_offset->update(config.even_offset);
+		((ShiftInterlaceWindow*)thread->window)->odd_offset->update(config.odd_offset);
+		((ShiftInterlaceWindow*)thread->window)->even_offset->update(config.even_offset);
 		thread->window->unlock_window();
 	}
 }

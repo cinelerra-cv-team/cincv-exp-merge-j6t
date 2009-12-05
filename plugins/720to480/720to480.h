@@ -114,7 +114,6 @@ public:
 	void reduce_field(VFrame *output, VFrame *input, int dest_row);
 
 
-	BC_Hash *defaults;
 	MainProgressBar *progress;
 
 	_720to480Config config;

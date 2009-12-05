@@ -44,25 +44,13 @@ struct fifo_struct {
 #include "empty_svg.h"
 
 
-
-PLUGIN_THREAD_OBJECT(SvgMain, SvgThread, SvgWin)
-
-
-
-
-
-
-SvgWin::SvgWin(SvgMain *client, int x, int y)
- : BC_Window(client->gui_string, 
- 	x,
-	y,
+SvgWin::SvgWin(SvgMain *client)
+ : PluginClientWindow(client,
 	300, 
 	280, 
 	300, 
 	280, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 	this->editing = 0;
@@ -136,12 +124,6 @@ void SvgWin::create_objects()
 
 	show_window();
 	flush();
-}
-
-int SvgWin::close_event()
-{
-	set_done(1);
-	return 1;
 }
 
 SvgCoord::SvgCoord(SvgWin *win, 

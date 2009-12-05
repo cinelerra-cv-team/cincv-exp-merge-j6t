@@ -41,18 +41,16 @@ public:
 	DenoiseEffect *plugin;
 };
 
-class DenoiseWindow : public BC_Window
+class DenoiseWindow : public PluginClientWindow
 {
 public:
-	DenoiseWindow(DenoiseEffect *plugin, int x, int y);
+	DenoiseWindow(DenoiseEffect *plugin);
 	void create_objects();
 	void update();
-	int close_event();
 	DenoiseLevel *scale;
 	DenoiseEffect *plugin;
 };
 
-PLUGIN_THREAD_HEADER(DenoiseEffect, DenoiseThread, DenoiseWindow)
 
 class DenoiseConfig
 {
@@ -157,7 +155,7 @@ public:
 		double *out_data);
 
 
-	PLUGIN_CLASS_MEMBERS(DenoiseConfig, DenoiseThread)
+	PLUGIN_CLASS_MEMBERS(DenoiseConfig)
 
 // buffer for storing fragments until a complete window size is armed
 	double *input_buffer;

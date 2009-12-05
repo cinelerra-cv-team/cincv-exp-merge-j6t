@@ -74,17 +74,13 @@ void FreezeFrameConfig::interpolate(FreezeFrameConfig &prev,
 
 
 
-FreezeFrameWindow::FreezeFrameWindow(FreezeFrameMain *client, int x, int y)
- : BC_Window(client->get_gui_string(),
- 	x,
-	y,
+FreezeFrameWindow::FreezeFrameWindow(FreezeFrameMain *client)
+ : PluginClientWindow(client,
 	200,
 	100,
 	200,
 	100,
-	0,
-	0,
-	1)
+	0)
 {
 	this->client = client; 
 }
@@ -113,12 +109,6 @@ void FreezeFrameWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(FreezeFrameWindow)
-
-
-
-
-PLUGIN_THREAD_OBJECT(FreezeFrameMain, FreezeFrameThread, FreezeFrameWindow)
 
 
 
@@ -158,14 +148,14 @@ int FreezeFrameToggle::handle_event()
 FreezeFrameMain::FreezeFrameMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	first_frame = 0;
 	first_frame_position = -1;
 }
 
 FreezeFrameMain::~FreezeFrameMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(first_frame) delete first_frame;
 }
 
@@ -174,12 +164,7 @@ int FreezeFrameMain::is_synthesis() { return 1; }
 int FreezeFrameMain::is_realtime() { return 1; }
 
 
-SHOW_GUI_MACRO(FreezeFrameMain, FreezeFrameThread)
-
-RAISE_WINDOW_MACRO(FreezeFrameMain)
-
-SET_STRING_MACRO(FreezeFrameMain)
-
+NEW_WINDOW_MACRO(FreezeFrameMain, FreezeFrameWindow)
 NEW_PICON_MACRO(FreezeFrameMain)
 
 int FreezeFrameMain::load_configuration()
@@ -198,8 +183,8 @@ void FreezeFrameMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->enabled->update(config.enabled);
+		((FreezeFrameWindow*)thread->window)->lock_window();
+		((FreezeFrameWindow*)thread->window)->enabled->update(config.enabled);
 //		thread->window->line_double->update(config.line_double);
 		thread->window->unlock_window();
 	}

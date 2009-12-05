@@ -200,6 +200,10 @@ void ReFrameWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(ReFrameWindow)
+int ReFrameWindow::close_event()
+{
+	set_done(0);
+	return 1;
+}
 
 

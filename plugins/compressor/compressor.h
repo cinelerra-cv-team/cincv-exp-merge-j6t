@@ -129,15 +129,14 @@ public:
 
 
 
-class CompressorWindow : public BC_Window
+class CompressorWindow : public PluginClientWindow
 {
 public:
-	CompressorWindow(CompressorEffect *plugin, int x, int y);
+	CompressorWindow(CompressorEffect *plugin);
 	void create_objects();
 	void update();
 	void update_textboxes();
 	void update_canvas();
-	int close_event();
 	void draw_scales();
 	
 	
@@ -153,7 +152,6 @@ public:
 	CompressorEffect *plugin;
 };
 
-PLUGIN_THREAD_HEADER(CompressorEffect, CompressorThread, CompressorWindow)
 
 
 typedef struct
@@ -229,7 +227,7 @@ public:
 	void update_gui();
 	void delete_dsp();
 
-	PLUGIN_CLASS_MEMBERS(CompressorConfig, CompressorThread)
+	PLUGIN_CLASS_MEMBERS(CompressorConfig)
 
 // The raw input data for each channel with readahead
 	double **input_buffer;

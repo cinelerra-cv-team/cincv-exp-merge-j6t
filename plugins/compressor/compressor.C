@@ -73,12 +73,12 @@ CompressorEffect::CompressorEffect(PluginServer *server)
  : PluginAClient(server)
 {
 	reset();
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 CompressorEffect::~CompressorEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete_dsp();
 	levels.remove_all();
 }
@@ -243,7 +243,7 @@ void CompressorEffect::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("CompressorEffect::update_gui");
-			thread->window->update();
+			((CompressorWindow*)thread->window)->update();
 			thread->window->unlock_window();
 		}
 	}
@@ -251,11 +251,8 @@ void CompressorEffect::update_gui()
 
 
 NEW_PICON_MACRO(CompressorEffect)
-SHOW_GUI_MACRO(CompressorEffect, CompressorThread)
-RAISE_WINDOW_MACRO(CompressorEffect)
-SET_STRING_MACRO(CompressorEffect)
 LOAD_CONFIGURATION_MACRO(CompressorEffect, CompressorConfig)
-
+NEW_WINDOW_MACRO(CompressorEffect, CompressorWindow)
 
 
 
@@ -868,7 +865,6 @@ void CompressorConfig::optimize()
 
 
 
-PLUGIN_THREAD_OBJECT(CompressorEffect, CompressorThread, CompressorWindow)
 
 
 
@@ -882,17 +878,13 @@ PLUGIN_THREAD_OBJECT(CompressorEffect, CompressorThread, CompressorWindow)
 
 
 
-CompressorWindow::CompressorWindow(CompressorEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+CompressorWindow::CompressorWindow(CompressorEffect *plugin)
+ : PluginClientWindow(plugin,
 	650, 
 	480, 
 	650, 
 	480,
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -945,8 +937,6 @@ void CompressorWindow::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(CompressorWindow)
 
 void CompressorWindow::draw_scales()
 {
@@ -1145,7 +1135,7 @@ int CompressorCanvas::button_press_event()
 
 		current_point = plugin->config.set_point(x_db, y_db);
 		current_operation = DRAG;
-		plugin->thread->window->update();
+		((CompressorWindow*)plugin->thread->window)->update();
 		plugin->send_configure_change();
 		return 1;
 	}
@@ -1171,7 +1161,7 @@ int CompressorCanvas::button_release_event()
 				plugin->config.remove_point(current_point);
 		}
 
-		plugin->thread->window->update();
+		((CompressorWindow*)plugin->thread->window)->update();
 		plugin->send_configure_change();
 		current_operation = NONE;
 		return 1;
@@ -1192,7 +1182,7 @@ int CompressorCanvas::cursor_motion_event()
 		double y_db = (double)y / get_h() * plugin->config.min_db;
 		plugin->config.levels.values[current_point].x = x_db;
 		plugin->config.levels.values[current_point].y = y_db;
-		plugin->thread->window->update();
+		((CompressorWindow*)plugin->thread->window)->update();
 		plugin->send_configure_change();
 		return 1;
 //plugin->config.dump();
@@ -1280,11 +1270,11 @@ CompressorX::CompressorX(CompressorEffect *plugin, int x, int y)
 }
 int CompressorX::handle_event()
 {
-	int current_point = plugin->thread->window->canvas->current_point;
+	int current_point = ((CompressorWindow*)plugin->thread->window)->canvas->current_point;
 	if(current_point < plugin->config.levels.total)
 	{
 		plugin->config.levels.values[current_point].x = atof(get_text());
-		plugin->thread->window->update_canvas();
+		((CompressorWindow*)plugin->thread->window)->update_canvas();
 		plugin->send_configure_change();
 	}
 	return 1;
@@ -1299,11 +1289,11 @@ CompressorY::CompressorY(CompressorEffect *plugin, int x, int y)
 }
 int CompressorY::handle_event()
 {
-	int current_point = plugin->thread->window->canvas->current_point;
+	int current_point = ((CompressorWindow*)plugin->thread->window)->canvas->current_point;
 	if(current_point < plugin->config.levels.total)
 	{
 		plugin->config.levels.values[current_point].y = atof(get_text());
-		plugin->thread->window->update_canvas();
+		((CompressorWindow*)plugin->thread->window)->update_canvas();
 		plugin->send_configure_change();
 	}
 	return 1;
@@ -1362,7 +1352,7 @@ CompressorInput::CompressorInput(CompressorEffect *plugin, int x, int y)
 int CompressorInput::handle_event()
 {
 	plugin->config.input = text_to_value(get_text());
-	plugin->thread->window->update();
+	((CompressorWindow*)plugin->thread->window)->update();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -1412,7 +1402,7 @@ int CompressorClear::handle_event()
 {
 	plugin->config.levels.remove_all();
 //plugin->config.dump();
-	plugin->thread->window->update();
+	((CompressorWindow*)plugin->thread->window)->update();
 	plugin->send_configure_change();
 	return 1;
 }

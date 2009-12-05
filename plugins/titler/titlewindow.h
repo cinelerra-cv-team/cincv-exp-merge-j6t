@@ -34,7 +34,6 @@ class TitleInterlace;
 #include "title.h"
 
 
-PLUGIN_THREAD_HEADER(TitleMain, TitleThread, TitleWindow)
 
 
 
@@ -66,14 +65,13 @@ class TitleSpeed;
 class TitleTimecode;
 class TitleTimecodeFormat;
 
-class TitleWindow : public BC_Window
+class TitleWindow : public PluginClientWindow
 {
 public:
-	TitleWindow(TitleMain *client, int x, int y);
+	TitleWindow(TitleMain *client);
 	~TitleWindow();
 	
 	void create_objects();
-	int close_event();
 	int resize_event(int w, int h);
 	void update_color();
 	void update_justification();

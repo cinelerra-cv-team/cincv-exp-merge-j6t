@@ -31,16 +31,14 @@ class DotWindow;
 #include "mutex.h"
 #include "dot.h"
 
-PLUGIN_THREAD_HEADER(DotMain, DotThread, DotWindow)
 
-class DotWindow : public BC_Window
+class DotWindow : public PluginClientWindow
 {
 public:
-	DotWindow(DotMain *client, int x, int y);
+	DotWindow(DotMain *client);
 	~DotWindow();
 
 	void create_objects();
-	int close_event();
 
 	DotMain *client;
 };

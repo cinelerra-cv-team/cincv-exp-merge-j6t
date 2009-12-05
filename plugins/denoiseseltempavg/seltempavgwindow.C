@@ -23,23 +23,18 @@
 #include "language.h"
 #include "seltempavgwindow.h"
 
-PLUGIN_THREAD_OBJECT(SelTempAvgMain, SelTempAvgThread, SelTempAvgWindow)
 
 
 #define MAX_FRAMES 1024
 
 
-SelTempAvgWindow::SelTempAvgWindow(SelTempAvgMain *client, int x, int y)
- : BC_Window(client->gui_string,
-	x,
-	y,
+SelTempAvgWindow::SelTempAvgWindow(SelTempAvgMain *client)
+ : PluginClientWindow(client,
 	310,
 	540,
 	300,
 	540,
-	0,
-	0,
-	1)
+	0)
 {
 	this->client = client;
 }
@@ -121,7 +116,6 @@ void SelTempAvgWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(SelTempAvgWindow)
 
 
 

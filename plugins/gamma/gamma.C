@@ -386,12 +386,12 @@ GammaMain::GammaMain(PluginServer *server)
  : PluginVClient(server)
 {
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 GammaMain::~GammaMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	delete engine;
 }
@@ -404,10 +404,8 @@ int GammaMain::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(GammaMain)
+NEW_WINDOW_MACRO(GammaMain, GammaWindow)
 LOAD_CONFIGURATION_MACRO(GammaMain, GammaConfig)
-SHOW_GUI_MACRO(GammaMain, GammaThread)
-RAISE_WINDOW_MACRO(GammaMain)
-SET_STRING_MACRO(GammaMain)
 
 
 
@@ -489,7 +487,7 @@ void GammaMain::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("GammaMain::update_gui");
-			thread->window->update();
+			((GammaWindow*)thread->window)->update();
 			thread->window->unlock_window();
 		}
 	}
@@ -507,7 +505,7 @@ void GammaMain::render_gui(void *data)
 			ptr->engine->accum, 
 			sizeof(int) * HISTOGRAM_SIZE);
 		thread->window->lock_window("GammaMain::render_gui");
-		thread->window->update();
+		((GammaWindow*)thread->window)->update();
 		thread->window->unlock_window();
 	}
 	else
@@ -515,7 +513,7 @@ void GammaMain::render_gui(void *data)
 		engine->process_packages(GammaEngine::HISTOGRAM, 
 			ptr->frame);
 		thread->window->lock_window("GammaMain::render_gui");
-		thread->window->update_histogram();
+		((GammaWindow*)thread->window)->update_histogram();
 		thread->window->unlock_window();
 	}
 

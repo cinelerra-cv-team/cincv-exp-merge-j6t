@@ -60,19 +60,17 @@ public:
 
 
 
-class IrisSquareWindow : public BC_Window
+class IrisSquareWindow : public PluginClientWindow
 {
 public:
-	IrisSquareWindow(IrisSquareMain *plugin, int x, int y);
+	IrisSquareWindow(IrisSquareMain *plugin);
 	void create_objects();
-	int close_event();
 	IrisSquareMain *plugin;
 	IrisSquareIn *in;
 	IrisSquareOut *out;
 };
 
 
-PLUGIN_THREAD_HEADER(IrisSquareMain, IrisSquareThread, IrisSquareWindow)
 
 
 class IrisSquareMain : public PluginVClient
@@ -82,24 +80,20 @@ public:
 	~IrisSquareMain();
 
 // required for all realtime plugins
-	void load_configuration();
 	int process_realtime(VFrame *incoming, VFrame *outgoing);
+	PluginClientWindow* new_window();
+	VFrame* new_picon();
+	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	void raise_window();
 	int uses_gui();
 	int is_transition();
 	int is_video();
 	const char* plugin_title();
-	int set_string();
-	VFrame* new_picon();
 
 	int direction;
-	IrisSquareThread *thread;
-	BC_Hash *defaults;
 };
 
 #endif

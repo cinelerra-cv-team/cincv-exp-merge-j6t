@@ -153,13 +153,13 @@ public:
     RotateWindow *window;
 };
 
-class RotateWindow : public BC_Window
+class RotateWindow : public PluginClientWindow
 {
 public:
-	RotateWindow(RotateEffect *plugin, int x, int y);
+	RotateWindow(RotateEffect *plugin);
 
 	void create_objects();
-	int close_event();
+
 	int update();
 	int update_fine();
 	int update_text();
@@ -179,7 +179,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(RotateEffect, RotateThread, RotateWindow)
 
 
 class RotateEffect : public PluginVClient
@@ -188,27 +187,19 @@ public:
 	RotateEffect(PluginServer *server);
 	~RotateEffect();
 	
+	PLUGIN_CLASS_MEMBERS(RotateConfig)
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
 		double frame_rate);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int show_gui();
-	void raise_window();
 	void update_gui();
-	int set_string();
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	int handle_opengl();
 
-	RotateConfig config;
 	AffineEngine *engine;
-	RotateThread *thread;
-	BC_Hash *defaults;
 	int need_reconfigure;
 };
 
@@ -449,17 +440,13 @@ int RotateY::handle_event()
 
 
 
-RotateWindow::RotateWindow(RotateEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
-	x,
-	y,
+RotateWindow::RotateWindow(RotateEffect *plugin)
+ : PluginClientWindow(plugin,
 	250, 
 	230, 
 	250, 
 	230, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -541,7 +528,7 @@ void RotateWindow::create_objects()
 
 }
 
-WINDOW_CLOSE_EVENT(RotateWindow)
+
 
 int RotateWindow::update()
 {
@@ -590,7 +577,7 @@ int RotateWindow::update_toggles()
 
 
 
-PLUGIN_THREAD_OBJECT(RotateEffect, RotateThread, RotateWindow)
+
 
 
 
@@ -614,12 +601,12 @@ RotateEffect::RotateEffect(PluginServer *server)
 {
 	engine = 0;
 	need_reconfigure = 1;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 RotateEffect::~RotateEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 }
 
@@ -630,11 +617,7 @@ int RotateEffect::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(RotateEffect)
 
-SET_STRING_MACRO(RotateEffect)
-
-SHOW_GUI_MACRO(RotateEffect, RotateThread)
-
-RAISE_WINDOW_MACRO(RotateEffect)
+NEW_WINDOW_MACRO(RotateEffect, RotateWindow)
 
 
 void RotateEffect::update_gui()
@@ -643,7 +626,7 @@ void RotateEffect::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->update();
+		((RotateWindow*)thread->window)->update();
 		thread->window->unlock_window();
 	}
 }

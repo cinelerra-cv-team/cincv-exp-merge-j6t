@@ -192,14 +192,13 @@ public:
 
 
 
-class GradientWindow : public BC_Window
+class GradientWindow : public PluginClientWindow
 {
 public:
-	GradientWindow(GradientMain *plugin, int x, int y);
+	GradientWindow(GradientMain *plugin);
 	~GradientWindow();
 	
 	void create_objects();
-	int close_event();
 	void update_in_color();
 	void update_out_color();
 	void update_shape();
@@ -227,7 +226,8 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(GradientMain, GradientThread, GradientWindow)
+
+
 
 
 class GradientMain : public PluginVClient
@@ -248,7 +248,7 @@ public:
 	int is_synthesis();
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(GradientConfig, GradientThread)
+	PLUGIN_CLASS_MEMBERS(GradientConfig)
 
 	int need_reconfigure;
 

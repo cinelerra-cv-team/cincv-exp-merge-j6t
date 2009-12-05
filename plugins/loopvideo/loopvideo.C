@@ -50,18 +50,16 @@ public:
 	LoopVideo *plugin;
 };
 
-class LoopVideoWindow : public BC_Window
+class LoopVideoWindow : public PluginClientWindow
 {
 public:
-	LoopVideoWindow(LoopVideo *plugin, int x, int y);
+	LoopVideoWindow(LoopVideo *plugin);
 	~LoopVideoWindow();
 	void create_objects();
-	int close_event();
 	LoopVideo *plugin;
 	LoopVideoFrames *frames;
 };
 
-PLUGIN_THREAD_HEADER(LoopVideo, LoopVideoThread, LoopVideoWindow)
 
 class LoopVideo : public PluginVClient
 {
@@ -69,7 +67,7 @@ public:
 	LoopVideo(PluginServer *server);
 	~LoopVideo();
 
-	PLUGIN_CLASS_MEMBERS(LoopVideoConfig, LoopVideoThread)
+	PLUGIN_CLASS_MEMBERS(LoopVideoConfig)
 
 	int load_defaults();
 	int save_defaults();
@@ -102,17 +100,13 @@ LoopVideoConfig::LoopVideoConfig()
 
 
 
-LoopVideoWindow::LoopVideoWindow(LoopVideo *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+LoopVideoWindow::LoopVideoWindow(LoopVideo *plugin)
+ : PluginClientWindow(plugin, 
 	210, 
 	160, 
 	200, 
 	160, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -134,10 +128,10 @@ void LoopVideoWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(LoopVideoWindow)
 
 
-PLUGIN_THREAD_OBJECT(LoopVideo, LoopVideoThread, LoopVideoWindow)
+
+
 
 
 
@@ -175,13 +169,13 @@ int LoopVideoFrames::handle_event()
 LoopVideo::LoopVideo(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
 LoopVideo::~LoopVideo()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* LoopVideo::plugin_title() { return N_("Loop video"); }
@@ -191,11 +185,8 @@ int LoopVideo::is_synthesis() { return 1; }
 #include "picon_png.h"
 NEW_PICON_MACRO(LoopVideo)
 
-SHOW_GUI_MACRO(LoopVideo, LoopVideoThread)
+NEW_WINDOW_MACRO(LoopVideo, LoopVideoWindow)
 
-RAISE_WINDOW_MACRO(LoopVideo)
-
-SET_STRING_MACRO(LoopVideo);
 
 
 int LoopVideo::process_buffer(VFrame *frame,
@@ -318,7 +309,7 @@ void LoopVideo::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->frames->update(config.frames);
+		((LoopVideoWindow*)thread->window)->frames->update(config.frames);
 		thread->window->unlock_window();
 	}
 }

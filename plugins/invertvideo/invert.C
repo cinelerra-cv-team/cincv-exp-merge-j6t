@@ -63,43 +63,32 @@ public:
 	int *output;
 };
 
-class InvertVideoWindow : public BC_Window
+class InvertVideoWindow : public PluginClientWindow
 {
 public:
-	InvertVideoWindow(InvertVideoEffect *plugin, int x, int y);
+	InvertVideoWindow(InvertVideoEffect *plugin);
 	void create_objects();
-	int close_event();
 	InvertVideoEnable *r, *g, *b, *a;
 	InvertVideoEffect *plugin;
 };
 
-PLUGIN_THREAD_HEADER(InvertVideoEffect, InvertVideoThread, InvertVideoWindow)
 
 class InvertVideoEffect : public PluginVClient
 {
 public:
 	InvertVideoEffect(PluginServer *server);
 	~InvertVideoEffect();
+	PLUGIN_CLASS_MEMBERS(InvertVideoConfig)
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
 		double frame_rate);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
-	int show_gui();
-	void raise_window();
-	int set_string();
-	int load_configuration();
 	int handle_opengl();
-
-	InvertVideoConfig config;
-	InvertVideoThread *thread;
-	BC_Hash *defaults;
 };
 
 
@@ -170,17 +159,13 @@ int InvertVideoEnable::handle_event()
 
 
 
-InvertVideoWindow::InvertVideoWindow(InvertVideoEffect *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x, 
-	y, 
+InvertVideoWindow::InvertVideoWindow(InvertVideoEffect *plugin)
+ : PluginClientWindow(plugin, 
 	260, 
 	130, 
 	260, 
 	130, 
-	0, 
-	0,
-	1)
+	0)
 {
 	this->plugin = plugin;
 }
@@ -200,13 +185,9 @@ void InvertVideoWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(InvertVideoWindow)
 
 
 
-
-
-PLUGIN_THREAD_OBJECT(InvertVideoEffect, InvertVideoThread, InvertVideoWindow)
 
 
 
@@ -216,20 +197,18 @@ PLUGIN_THREAD_OBJECT(InvertVideoEffect, InvertVideoThread, InvertVideoWindow)
 InvertVideoEffect::InvertVideoEffect(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 InvertVideoEffect::~InvertVideoEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* InvertVideoEffect::plugin_title() { return N_("Invert Video"); }
 int InvertVideoEffect::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(InvertVideoEffect)
-SHOW_GUI_MACRO(InvertVideoEffect, InvertVideoThread)
-RAISE_WINDOW_MACRO(InvertVideoEffect)
-SET_STRING_MACRO(InvertVideoEffect)
+NEW_WINDOW_MACRO(InvertVideoEffect, InvertVideoWindow)
 LOAD_CONFIGURATION_MACRO(InvertVideoEffect, InvertVideoConfig)
 
 void InvertVideoEffect::update_gui()
@@ -238,10 +217,10 @@ void InvertVideoEffect::update_gui()
 	{
 		thread->window->lock_window();
 		load_configuration();
-		thread->window->r->update(config.r);
-		thread->window->g->update(config.g);
-		thread->window->b->update(config.b);
-		thread->window->a->update(config.a);
+		((InvertVideoWindow*)thread->window)->r->update(config.r);
+		((InvertVideoWindow*)thread->window)->g->update(config.g);
+		((InvertVideoWindow*)thread->window)->b->update(config.b);
+		((InvertVideoWindow*)thread->window)->a->update(config.a);
 		thread->window->unlock_window();
 	}
 }

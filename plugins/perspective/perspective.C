@@ -111,20 +111,17 @@ void PerspectiveConfig::interpolate(PerspectiveConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(PerspectiveMain, PerspectiveThread, PerspectiveWindow)
 
 
 
-PerspectiveWindow::PerspectiveWindow(PerspectiveMain *plugin, int x, int y)
- : BC_Window(plugin->gui_string, 
- 	x,
-	y,
+
+PerspectiveWindow::PerspectiveWindow(PerspectiveMain *plugin)
+ : PluginClientWindow(plugin,
 	plugin->config.window_w, 
 	plugin->config.window_h, 
 	plugin->config.window_w,
 	plugin->config.window_h,
-	0, 
-	1)
+	0)
 {
 //printf("PerspectiveWindow::PerspectiveWindow 1 %d %d\n", plugin->config.window_w, plugin->config.window_h);
 	this->plugin = plugin; 
@@ -207,7 +204,7 @@ void PerspectiveWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(PerspectiveWindow)
+
 
 int PerspectiveWindow::resize_event(int w, int h)
 {
@@ -350,7 +347,7 @@ int PerspectiveCanvas::button_press_event()
 		int x1, y1, x2, y2, x3, y3, x4, y4;
 		int cursor_x = get_cursor_x();
 		int cursor_y = get_cursor_y();
-		plugin->thread->window->calculate_canvas_coords(x1, y1, x2, y2, x3, y3, x4, y4);
+		((PerspectiveWindow*)plugin->thread->window)->calculate_canvas_coords(x1, y1, x2, y2, x3, y3, x4, y4);
 
 		float distance1 = DISTANCE(cursor_x, cursor_y, x1, y1);
 		float distance2 = DISTANCE(cursor_x, cursor_y, x2, y2);
@@ -416,8 +413,8 @@ int PerspectiveCanvas::button_press_event()
 			start_x1 = plugin->get_current_x();
 			start_y1 = plugin->get_current_y();
 		}
-		plugin->thread->window->update_coord();
-		plugin->thread->window->update_canvas();
+		((PerspectiveWindow*)plugin->thread->window)->update_coord();
+		((PerspectiveWindow*)plugin->thread->window)->update_canvas();
 		return 1;
 	}
 
@@ -478,8 +475,8 @@ int PerspectiveCanvas::cursor_motion_event()
 			plugin->config.x4 = center_x + (start_x4 - center_x) * zoom;
 			plugin->config.y4 = center_y + (start_y4 - center_y) * zoom;
 		}
-		plugin->thread->window->update_canvas();
-		plugin->thread->window->update_coord();
+		((PerspectiveWindow*)plugin->thread->window)->update_canvas();
+		((PerspectiveWindow*)plugin->thread->window)->update_coord();
 		plugin->send_configure_change();
 		return 1;
 	}
@@ -510,7 +507,7 @@ int PerspectiveCoord::handle_event()
 		plugin->set_current_x(atof(get_text()));
 	else
 		plugin->set_current_y(atof(get_text()));
-	plugin->thread->window->update_canvas();
+	((PerspectiveWindow*)plugin->thread->window)->update_canvas();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -539,8 +536,8 @@ int PerspectiveReset::handle_event()
 	plugin->config.y3 = 100;
 	plugin->config.x4 = 0;
 	plugin->config.y4 = 100;
-	plugin->thread->window->update_canvas();
-	plugin->thread->window->update_coord();
+	((PerspectiveWindow*)plugin->thread->window)->update_canvas();
+	((PerspectiveWindow*)plugin->thread->window)->update_coord();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -568,8 +565,8 @@ PerspectiveMode::PerspectiveMode(PerspectiveMain *plugin,
 int PerspectiveMode::handle_event()
 {
 	plugin->config.mode = value;
-	plugin->thread->window->update_mode();
-	plugin->thread->window->update_canvas();
+	((PerspectiveWindow*)plugin->thread->window)->update_mode();
+	((PerspectiveWindow*)plugin->thread->window)->update_canvas();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -590,7 +587,7 @@ PerspectiveDirection::PerspectiveDirection(PerspectiveMain *plugin,
 int PerspectiveDirection::handle_event()
 {
 	plugin->config.forward = value;
-	plugin->thread->window->update_mode();
+	((PerspectiveWindow*)plugin->thread->window)->update_mode();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -609,14 +606,14 @@ int PerspectiveDirection::handle_event()
 PerspectiveMain::PerspectiveMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	temp = 0;
 }
 
 PerspectiveMain::~PerspectiveMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 	if(temp) delete temp;
 }
@@ -627,11 +624,7 @@ int PerspectiveMain::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(PerspectiveMain)
 
-SHOW_GUI_MACRO(PerspectiveMain, PerspectiveThread)
-
-SET_STRING_MACRO(PerspectiveMain)
-
-RAISE_WINDOW_MACRO(PerspectiveMain)
+NEW_WINDOW_MACRO(PerspectiveMain, PerspectiveWindow)
 
 LOAD_CONFIGURATION_MACRO(PerspectiveMain, PerspectiveConfig)
 
@@ -645,9 +638,9 @@ void PerspectiveMain::update_gui()
 		thread->window->lock_window();
 //printf("PerspectiveMain::update_gui 2\n");
 		load_configuration();
-		thread->window->update_coord();
-		thread->window->update_mode();
-		thread->window->update_canvas();
+		((PerspectiveWindow*)thread->window)->update_coord();
+		((PerspectiveWindow*)thread->window)->update_mode();
+		((PerspectiveWindow*)thread->window)->update_canvas();
 		thread->window->unlock_window();
 //printf("PerspectiveMain::update_gui 3\n");
 	}

@@ -24,24 +24,17 @@
 #include "language.h"
 #include "pluginclient.h"
 
-PLUGIN_THREAD_OBJECT(DotMain, DotThread, DotWindow)
 
 
 
 
-
-
-DotWindow::DotWindow(DotMain *client, int x, int y)
- : BC_Window(client->gui_string, 
-	x,
-	y,
+DotWindow::DotWindow(DotMain *client)
+ : PluginClientWindow(client,
 	300, 
 	170, 
 	300, 
 	170, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -61,8 +54,6 @@ void DotWindow::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(DotWindow)
 
 
 

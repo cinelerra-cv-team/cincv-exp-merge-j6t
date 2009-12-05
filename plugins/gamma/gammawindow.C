@@ -27,21 +27,17 @@
 
 
 
-PLUGIN_THREAD_OBJECT(GammaMain, GammaThread, GammaWindow)
 
 
 
 
 
-
-GammaWindow::GammaWindow(GammaMain *client, int x, int y)
- : BC_Window(client->gui_string, x,
- 	y,
+GammaWindow::GammaWindow(GammaMain *client)
+ : PluginClientWindow(client,
 	400, 
 	350, 
 	400, 
 	350, 
-	0, 
 	0)
 { 
 	this->client = client; 
@@ -166,7 +162,8 @@ void GammaWindow::update_histogram()
 	histogram->flash();
 }
 
-WINDOW_CLOSE_EVENT(GammaWindow)
+
+
 
 MaxSlider::MaxSlider(GammaMain *client, 
 	GammaWindow *gui, 

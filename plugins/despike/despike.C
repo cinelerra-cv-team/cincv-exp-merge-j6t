@@ -45,24 +45,20 @@ REGISTER_PLUGIN(Despike)
 Despike::Despike(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	last_sample = 0;
 }
 
 Despike::~Despike()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* Despike::plugin_title() { return N_("Despike"); }
 int Despike::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(Despike)
-
-
-SHOW_GUI_MACRO(Despike, DespikeThread)
-SET_STRING_MACRO(Despike)
-RAISE_WINDOW_MACRO(Despike)
+NEW_WINDOW_MACRO(Despike, DespikeWindow)
 
 LOAD_CONFIGURATION_MACRO(Despike, DespikeConfig)
 
@@ -163,10 +159,10 @@ void Despike::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->level->update(config.level);
-		thread->window->slope->update(config.slope);
-		thread->window->unlock_window();
+		((DespikeWindow*)thread->window)->lock_window();
+		((DespikeWindow*)thread->window)->level->update(config.level);
+		((DespikeWindow*)thread->window)->slope->update(config.slope);
+		((DespikeWindow*)thread->window)->unlock_window();
 	}
 }
 

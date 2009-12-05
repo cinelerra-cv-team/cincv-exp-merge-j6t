@@ -32,18 +32,15 @@ class BurnWindow;
 #include "burn.h"
 
 
-PLUGIN_THREAD_HEADER(BurnMain, BurnThread, BurnWindow)
 
 
-
-class BurnWindow : public BC_Window
+class BurnWindow : public PluginClientWindow
 {
 public:
-	BurnWindow(BurnMain *client, int x, int y);
+	BurnWindow(BurnMain *client);
 	~BurnWindow();
 
 	void create_objects();
-	int close_event();
 
 	BurnMain *client;
 };

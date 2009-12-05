@@ -34,7 +34,7 @@ class ReverbWindow;
 
 
 
-PLUGIN_THREAD_HEADER(Reverb, ReverbThread, ReverbWindow)
+
 
 
 class ReverbLevelInit;
@@ -47,14 +47,13 @@ class ReverbLowPass1;
 class ReverbLowPass2;
 class ReverbMenu;
 
-class ReverbWindow : public BC_Window
+class ReverbWindow : public PluginClientWindow
 {
 public:
-	ReverbWindow(Reverb *reverb, int x, int y);
+	ReverbWindow(Reverb *reverb);
 	~ReverbWindow();
 	
 	void create_objects();
-	int close_event();
 	
 	Reverb *reverb;
 	ReverbLevelInit *level_init;
