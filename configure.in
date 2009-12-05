@@ -551,7 +551,10 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 					plugins/synthesizer/Makefile \
 					plugins/threshold/Makefile \
 					plugins/timeavg/Makefile \
-					plugins/timestretch/Makefile plugins/titler/Makefile plugins/translate/Makefile \
+	plugins/timestretch/Makefile \
+	plugins/titler/Makefile \
+	plugins/titler/fonts/Makefile \
+	plugins/translate/Makefile \
 					plugins/unsharp/Makefile \
 					plugins/videoscope/Makefile plugins/wave/Makefile plugins/whirl/Makefile \
 					plugins/wipe/Makefile \
@@ -562,7 +565,6 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 					plugins/timefront/Makefile \
 					plugins/svg/Makefile \
 					plugins/diffkey/Makefile \
-					plugins/fonts/Makefile \
 					image/Makefile)
 
 succeeded=yes

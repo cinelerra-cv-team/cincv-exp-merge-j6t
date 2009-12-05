@@ -1,3 +1,5 @@
+SUBDIRS = fonts
+
 plugin_LTLIBRARIES = titler.la
 titler_la_LDFLAGS = -avoid-version -module -shared 
 titler_la_LIBADD = $(top_builddir)/plugins/colors/libcolors.la -lfreetype
