@@ -1,14 +1,14 @@
 BUILDDATE=$(shell date)
+GITVERSION=$(shell cd "$(top_srcdir)" && git describe --always 2>/dev/null || echo "unknown")
 
 if BUILDINFO_RECOMPILE
-BUILDINFO_NONRC_S=
+FORCE_RECOMPILE=yes
 
 main.o: versioninfo
 aboutprefs.o: versioninfo
 
 versioninfo:
 else
-BUILDINFO_NONRC_S=[unsure]
 
 main.o: versioninfo.h
 aboutprefs.o: versioninfo.h
@@ -18,29 +18,18 @@ endif
 	echo '#define BUILDDATE "$(BUILDDATE)"' > versioninfo.h
 
 if BUILDINFO_GIT
-GITVERSION=$(shell if [ -d $(top_srcdir)/.git ]; then cd $(top_srcdir); git rev-parse HEAD; else echo "unknown"; fi)
-	echo '#define REPOMAINTXT " GIT::$(GITVERSION) $(BUILDINFO_NONRC_S) (C) 2006 Heroine Virtual Ltd.\n@FFMPEG_EXTERNALTEXT@\nCompiled on $(BUILDDATE)"' >> versioninfo.h
-	echo '#define REPOABOUTPREFTXT "Git SHA-1: $(GITVERSION)"' >> versioninfo.h
+	echo '#define REPOREVISION "GIT revision $(GITVERSION)"' >> versioninfo.h
+ ifdef FORCE_RECOMPILE
+	echo '#define FORCE_RECOMPILE 1' >> versioninfo.h
+ endif
 else
 
-if BUILDINFO_SVN
-SVNVERSION=$(shell if [ -d $(top_srcdir)/.svn ]; then svnversion $(top_srcdir); else echo "unknown"; fi)
-	echo '#define REPOMAINTXT      " SVN $(SVNVERSION) $(BUILDINFO_NONRC_S) (C) 2006 Heroine Virtual Ltd.\n@FFMPEG_EXTERNALTEXT@\nCompiled on $(BUILDDATE)"' >> versioninfo.h
-	echo '#define REPOABOUTPREFTXT "SVN Version: $(SVNVERSION) $(BUILDINFO_NONRC_S)"' >> versioninfo.h
-
-else
 if BUILDINFO_CUST
 
-	echo '#define REPOMAINTXT      " $(BUILDINFO_CUSTOM_TAG) (C) 2006 Heroine Virtual Ltd.\n@FFMPEG_EXTERNALTEXT@\nCompiled on $(BUILDDATE)"' >> versioninfo.h
-	echo '#define REPOABOUTPREFTXT "$(BUILDINFO_CUSTOM_TAG)"' >> versioninfo.h
-
+	echo '#define REPOREVISION "$(BUILDINFO_CUSTOM_TAG)"' >> versioninfo.h
 
 else # (no repository)
 
-
-	echo '#define REPOMAINTXT      "(C) 2006 Heroine Virtual Ltd.\nCompiled on $(BUILDDATE)"' >> versioninfo.h
-	echo '#define REPOABOUTPREFTXT ""' >> versioninfo.h
-endif
 endif
 endif
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h

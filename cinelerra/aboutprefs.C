@@ -66,8 +66,16 @@ int AboutPrefs::create_objects()
 	char license2[BCTEXTLEN];
 	sprintf(license2, "%s%s%s%s", 
 		_("(C) 2006 Heroine Virtual Ltd.\n\n"),
-		REPOABOUTPREFTXT,
-		_("\nBuild date: "), 
+#ifdef REPOREVISION
+		REPOREVISION
+#ifndef FORCE_RECOMPILE
+		" (uncertain)"
+#endif
+		"\n",
+#else
+		"",
+#endif
+		_("Build date: "), 
 		BUILDDATE);
 	set_font(MEDIUMFONT);
 	draw_text(x, y, license2);
