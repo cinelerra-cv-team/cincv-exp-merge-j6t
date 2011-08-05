@@ -1,11 +1,11 @@
 prefix=
 exec_prefix=
 libdir=${pcfiledir}
-includedir=/root/hvirtual/quicktime/thirdparty/ffmpeg.030209
+includedir=/root/hvirtual/quicktime/thirdparty/ffmpeg-0.6.1
 
 Name: libavutil
 Description: FFmpeg utility library
-Version: 49.15.0
+Version: 50.15.1
 Requires: 
 Conflicts:
 Libs: ${libdir}/libavutil.a 
