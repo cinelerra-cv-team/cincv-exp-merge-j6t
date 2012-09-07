@@ -35,10 +35,10 @@ public:
 	MotionWindow *gui;
 };
 
-class Mode1 : public BC_PopupMenu
+class ActionType : public BC_PopupMenu
 {
 public:
-	Mode1(MotionMain *plugin, MotionWindow *gui, int x, int y);
+	ActionType(MotionMain *plugin, MotionWindow *gui, int x, int y);
 	int handle_event();
 	void create_objects();
 	static int calculate_w(MotionWindow *gui);
@@ -48,10 +48,10 @@ public:
 	MotionWindow *gui;
 };
 
-class Mode2 : public BC_PopupMenu
+class TrackingType : public BC_PopupMenu
 {
 public:
-	Mode2(MotionMain *plugin, MotionWindow *gui, int x, int y);
+	TrackingType(MotionMain *plugin, MotionWindow *gui, int x, int y);
 	int handle_event();
 	void create_objects();
 	static int calculate_w(MotionWindow *gui);
@@ -61,10 +61,10 @@ public:
 	MotionWindow *gui;
 };
 
-class Mode3 : public BC_PopupMenu
+class TrackDirection : public BC_PopupMenu
 {
 public:
-	Mode3(MotionMain *plugin, MotionWindow *gui, int x, int y);
+	TrackDirection(MotionMain *plugin, MotionWindow *gui, int x, int y);
 	int handle_event();
 	void create_objects();
 	static int calculate_w(MotionWindow *gui);
@@ -259,7 +259,7 @@ public:
 	MotionMain *plugin;
 };
 
-class MotionReturnSpeed : public BC_FPot
+class MotionReturnSpeed : public BC_IPot
 {
 public:
 	MotionReturnSpeed(MotionMain *plugin, 
@@ -269,7 +269,8 @@ public:
 	MotionMain *plugin;
 };
 
-class MotionRReturnSpeed : public BC_FPot
+
+class MotionRReturnSpeed : public BC_IPot
 {
 public:
 	MotionRReturnSpeed(MotionMain *plugin, 
@@ -278,7 +279,6 @@ public:
 	int handle_event();
 	MotionMain *plugin;
 };
-
 
 
 class MotionDrawVectors : public BC_CheckBox
@@ -336,8 +336,8 @@ public:
 	RotationCenter *rotation_center;
 	BlockSize *global_block_w;
 	BlockSize *global_block_h;
-//	BlockSize *rotation_block_w;
-//	BlockSize *rotation_block_h;
+	BlockSize *rotation_block_w;
+	BlockSize *rotation_block_h;
 	MotionBlockX *block_x;
 	MotionBlockY *block_y;
 	MotionBlockXText *block_x_text;
@@ -348,7 +348,7 @@ public:
 	MotionRMagnitude *rotate_magnitude;
 	MotionReturnSpeed *return_speed;
 	MotionRReturnSpeed *rotate_return_speed;
-	Mode1 *mode1;
+	ActionType *action_type;
 	MotionDrawVectors *vectors;
 	MotionGlobal *global;
 	MotionRotate *rotate;
@@ -357,8 +357,8 @@ public:
 	TrackPreviousFrame *track_previous;
 	PreviousFrameSameBlock *previous_same;
 	MasterLayer *master_layer;
-	Mode2 *mode2;
-	Mode3 *mode3;
+	TrackingType *tracking_type;
+	TrackDirection *track_direction;
 
 	MotionMain *plugin;
 };
