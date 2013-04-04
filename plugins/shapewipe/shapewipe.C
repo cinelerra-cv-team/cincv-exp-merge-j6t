@@ -245,7 +245,7 @@ ShapeWipeMain::ShapeWipeMain(PluginServer *server)
 	strcpy(filename, DEFAULT_SHAPE);	// is defined by a -D compiler instruction
 	last_read_filename[0] = '\0';
 	pattern_image = NULL;
-	min_value = 256;
+	min_value = 255;
 	max_value = 0;
 	antialias = 0;
 	preserve_aspect = 0;
@@ -372,7 +372,7 @@ int ShapeWipeMain::read_pattern_image(int new_frame_width, int new_frame_height)
 	}
 
 	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-		png_voidp_NULL, png_error_ptr_NULL, png_error_ptr_NULL);
+		NULL, NULL, NULL);
 
 	if (!png_ptr)
 	{
@@ -385,14 +385,14 @@ int ShapeWipeMain::read_pattern_image(int new_frame_width, int new_frame_height)
 	info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr)
 	{
-		png_destroy_read_struct(&png_ptr, png_infopp_NULL, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, NULL, NULL);
 		return 1;
 	}
 
 	end_info = png_create_info_struct(png_ptr);
 	if (!end_info)
 	{
-		png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 		return 1;
 	}
 
@@ -500,7 +500,7 @@ void ShapeWipeMain::reset_pattern_image()
 		}
 		free (pattern_image);
 		pattern_image = NULL;
-		min_value = 256, max_value = 0;	// are recalc'd in read_pattern_image
+		min_value = 255, max_value = 0;	// are recalc'd in read_pattern_image
 	}
 }
 

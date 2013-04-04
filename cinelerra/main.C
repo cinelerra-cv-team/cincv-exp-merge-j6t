@@ -200,14 +200,18 @@ int main(int argc, char *argv[])
 	fprintf(stderr, 
 		PROGRAM_NAME " " 
 		CINELERRA_VERSION " " 
-#ifdef REPOREVISION
-		REPOREVISION
-#ifndef FORCE_RECOMPILE
-		" (uncertain)"
+#if defined(REPOMAINTXT)
+		" " REPOMAINTXT
 #endif
+		"\n" COPYRIGHTTEXT1 "\n"
+#if defined(COPYRIGHTTEXT2)
+		COPYRIGHTTEXT2 "\n"
 #endif
-		" " BUILDDATE "\n"
-		"(C) 2006 Heroine Virtual Ltd.\n\n"
+		FFMPEG_EXTERNALTEXT "\n"
+#if defined(COMPILEDATE)
+		COMPILEDATE "\n"
+#endif
+		"\n"
 
 PROGRAM_NAME " is free software, covered by the GNU General Public License,\n"
 "and you are welcome to change it and/or distribute copies of it under\n"

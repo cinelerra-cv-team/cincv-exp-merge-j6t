@@ -118,20 +118,18 @@ int VAutomation::direct_copy_possible(int64_t start, int direction)
 // Projector must be centered.
 	FloatAuto *previous = 0, *next = 0;
 	float z = ((FloatAutos*)autos[AUTOMATION_PROJECTOR_Z])->get_value(
-		start, direction, previous, next);
+		start, previous, next);
 	if(!EQUIV(z, 1)) return 0;
 
 	previous = 0;
 	next = 0;
 	float x = ((FloatAutos*)autos[AUTOMATION_PROJECTOR_X])->get_value(start,
-				direction,
 				previous, 
 				next);
 	if(!EQUIV(x, 0)) return 0;
 	previous = 0;
 	next = 0;
 	float y = ((FloatAutos*)autos[AUTOMATION_PROJECTOR_Y])->get_value(start,
-				direction,
 				previous, 
 				next);
 	if(!EQUIV(y, 0)) return 0;
@@ -144,7 +142,6 @@ int VAutomation::direct_copy_possible(int64_t start, int direction)
 	next = 0;
 	z = ((FloatAutos*)autos[AUTOMATION_CAMERA_Z])->get_value(
 		start, 
-		direction, 
 		previous, 
 		next);
 	if(!EQUIV(z, 1)) return 0;
@@ -154,7 +151,6 @@ int VAutomation::direct_copy_possible(int64_t start, int direction)
 	previous = 0;
 	next = 0;
 	x = ((FloatAutos*)autos[AUTOMATION_CAMERA_X])->get_value(start,
-				direction,
 				previous, 
 				next);
 	if(!EQUIV(x, 0)) return 0;
@@ -162,7 +158,6 @@ int VAutomation::direct_copy_possible(int64_t start, int direction)
 	previous = 0;
 	next = 0;
 	y = ((FloatAutos*)autos[AUTOMATION_CAMERA_Y])->get_value(start,
-				direction,
 				previous, 
 				next);
 
@@ -185,19 +180,16 @@ void VAutomation::get_projector(float *x,
 	before = 0;
 	after = 0;
 	*x = ((FloatAutos*)autos[AUTOMATION_PROJECTOR_X])->get_value(position,
-		direction,
 		before,
 		after);
 	before = 0;
 	after = 0;
 	*y = ((FloatAutos*)autos[AUTOMATION_PROJECTOR_Y])->get_value(position,
-		direction,
 		before,
 		after);
 	before = 0;
 	after = 0;
 	*z = ((FloatAutos*)autos[AUTOMATION_PROJECTOR_Z])->get_value(position,
-		direction,
 		before,
 		after);
 }
@@ -213,19 +205,16 @@ void VAutomation::get_camera(float *x,
 	before = 0;
 	after = 0;
 	*x = ((FloatAutos*)autos[AUTOMATION_CAMERA_X])->get_value(position,
-		direction,
 		before,
 		after);
 	before = 0;
 	after = 0;
 	*y = ((FloatAutos*)autos[AUTOMATION_CAMERA_Y])->get_value(position,
-		direction,
 		before,
 		after);
 	before = 0;
 	after = 0;
 	*z = ((FloatAutos*)autos[AUTOMATION_CAMERA_Z])->get_value(position,
-		direction,
 		before,
 		after);
 }

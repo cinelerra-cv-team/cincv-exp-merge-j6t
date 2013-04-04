@@ -372,7 +372,7 @@ void NewWindow::create_objects()
 	y += 40;
 	add_subwindow(new BC_Title(x, y, _("Color model:")));
 	add_subwindow(textbox = new BC_TextBox(x + 100, y, 200, 1, ""));
-	add_subwindow(new ColormodelPulldown(mwindow, 
+	add_subwindow(color_model = new ColormodelPulldown(mwindow, 
 		textbox, 
 		&new_edl->session->color_model,
 		x + 100 + textbox->get_w(),
@@ -412,6 +412,7 @@ int NewWindow::update()
 	aspect_w_text->update((float)new_edl->session->aspect_w);
 	aspect_h_text->update((float)new_edl->session->aspect_h);
 	interlace_pulldown->update(new_edl->session->interlace_mode);
+	color_model->update_value(new_edl->session->color_model);
 	return 0;
 }
 
@@ -842,6 +843,13 @@ const char* ColormodelPulldown::colormodel_to_text()
 			return mwindow->colormodels.values[i]->get_text();
 	return "Unknown";
 }
+
+void ColormodelPulldown::update_value(int value)
+{
+	*output_value = value;
+	output_text->update(colormodel_to_text());
+}
+
 
 InterlacemodeItem::InterlacemodeItem(char *text, int value)
  : BC_ListBoxItem(text)

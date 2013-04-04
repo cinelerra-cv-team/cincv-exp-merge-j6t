@@ -40,18 +40,17 @@
 #include "vframe.h"
 #include "videoconfig.h"
 #include "videodevice.h"
+#include "videodev.h"
 
 #include <errno.h>
 #include <stdint.h>
 #include <linux/kernel.h>
-//#include <linux/videodev2.h>
-#include <linux/videodev.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
-
+#define BASE_VIDIOCPRIVATE	192	
 
 #define READ_TIMEOUT 5000000
 
@@ -585,7 +584,7 @@ int VDeviceBUZ::open_input_core(Channel *channel)
 		PROT_READ, 
 		MAP_SHARED, 
 		jvideo_fd, 
-		0)) <= 0)
+		0)) == MAP_FAILED)
 		perror("VDeviceBUZ::open_input mmap");
 
 
@@ -655,7 +654,7 @@ int VDeviceBUZ::open_output_core(Channel *channel)
 		PROT_READ | PROT_WRITE, 
 		MAP_SHARED, 
 		jvideo_fd, 
-		0)) <= 0)
+		0)) == MAP_FAILED)
 		perror("VDeviceBUZ::open_output mmap");
 
 	if(ioctl(jvideo_fd, BUZIOC_G_PARAMS, &bparm) < 0)

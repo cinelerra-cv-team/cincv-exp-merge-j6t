@@ -2,36 +2,39 @@ BUILDDATE=$(shell date)
 GITVERSION=$(shell cd "$(top_srcdir)" && git describe --always 2>/dev/null || echo "unknown")
 
 if BUILDINFO_RECOMPILE
-FORCE_RECOMPILE=yes
+BUILDINFO_NONRC_S=
 
 main.o: versioninfo
 aboutprefs.o: versioninfo
 
 versioninfo:
 else
+BUILDINFO_NONRC_S=[unsure]
 
 main.o: versioninfo.h
 aboutprefs.o: versioninfo.h
 
 versioninfo.h:
 endif
-	echo '#define BUILDDATE "$(BUILDDATE)"' > versioninfo.h
+	echo >versioninfo.h
+	echo '#define CINELERRA_VERSION "$(VERSION)"' >> versioninfo.h
+	echo >> versioninfo.h
+	echo '#define BUILDDATE "$(BUILDDATE)"' >> versioninfo.h
 
 if BUILDINFO_GIT
-	echo '#define REPOREVISION "GIT revision $(GITVERSION)"' >> versioninfo.h
- ifdef FORCE_RECOMPILE
-	echo '#define FORCE_RECOMPILE 1' >> versioninfo.h
- endif
+	echo '#define REPOMAINTXT "GIT::$(GITVERSION) $(BUILDINFO_NONRC_S)"' >> versioninfo.h
+
 else
 
 if BUILDINFO_CUST
 
-	echo '#define REPOREVISION "$(BUILDINFO_CUSTOM_TAG)"' >> versioninfo.h
-
-else # (no repository)
+	echo '#define REPOMAINTXT      "$(BUILDINFO_CUSTOM_TAG)"' >> versioninfo.h
 
 endif
 endif
+	echo '#define COPYRIGHTTEXT1 "(C) 2006 Heroine Virtual Ltd."' >> versioninfo.h
+	echo '#define COPYRIGHTTEXT2 "(C) 2006-2011 The CinelerraCV Community"' >> versioninfo.h
+	echo '#define COMPILEDATE "Compiled on $(BUILDDATE)"' >> versioninfo.h
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h
 
 SUBDIRS = data
@@ -112,6 +115,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    cwindowgui.C \
 		    cwindowtool.C \
 		    dcoffset.C \
+		    defaultformats.h \
 		    dcraw.c \
 		    deleteallindexes.C \
 		    devicedvbinput.C \
@@ -521,6 +525,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 newfolder.h \
 		 new.h \
 		 newpresets.h \
+		 ntsczones.h \
 		 overlayframe.h \
 		 packagedispatcher.h \
 		 packagerenderer.h \
@@ -672,7 +677,9 @@ cinelerra_LDADD = \
 	$(XIPH_LIBS) \
 	$(A52DEC_LIBS) \
 	$(OPENEXR_LIBS) \
+	$(OPENGL_LIBS) \
 	-lsndfile \
+	-lmp3lame \
 	-lpng -ljpeg -ltiff -lz \
 	$(SOUND_LDFLAGS) \
 	$(FIREWIRE_LDFLAGS) \
