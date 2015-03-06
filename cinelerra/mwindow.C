@@ -1246,7 +1246,7 @@ SET_TRACE
 	new_files.remove_all_objects();
 
 SET_TRACE
-	undo->update_undo(_("load"), LOAD_ALL, 0);
+	undo->update_undo_after(_("load"), LOAD_ALL, 0);
 
 
 SET_TRACE
@@ -2120,7 +2120,7 @@ void MWindow::remove_assets_from_project(int push_undo)
 	edl->remove_from_project(session->drag_assets);
 	edl->remove_from_project(session->drag_clips);
 	save_backup();
-	if(push_undo) undo->update_undo(_("remove assets"), LOAD_ALL);
+	if(push_undo) undo->update_undo_after(_("remove assets"), LOAD_ALL);
 	restart_brender();
 
 	gui->lock_window("MWindow::remove_assets_from_project 3");

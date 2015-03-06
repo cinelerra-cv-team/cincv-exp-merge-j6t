@@ -180,7 +180,7 @@ void PluginDialogThread::run()
 
 			
 			mwindow->save_backup();
-			mwindow->undo->update_undo(_("attach effect"), LOAD_EDITS | LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("attach effect"), LOAD_EDITS | LOAD_PATCHES);
 			mwindow->restart_brender();
 			mwindow->update_plugin_states();
 			mwindow->sync_parameters(CHANGE_EDL);

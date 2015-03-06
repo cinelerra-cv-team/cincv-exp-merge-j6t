@@ -118,7 +118,6 @@ int New::create_new_project()
 	new_edl->create_default_tracks();
 
 	mwindow->set_filename("");
-	mwindow->undo->update_undo(_("New"), LOAD_ALL);
 
 	mwindow->hide_plugins();
 	delete mwindow->edl;
@@ -128,6 +127,7 @@ int New::create_new_project()
 // Load file sequence
 	mwindow->update_project(LOAD_REPLACE);
 	mwindow->session->changes_made = 0;
+	mwindow->undo->update_undo_after(_("New"), LOAD_ALL);
 	mwindow->gui->unlock_window();
 	return 0;
 }

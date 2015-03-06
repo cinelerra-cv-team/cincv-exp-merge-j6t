@@ -45,8 +45,8 @@ public:
    // be populated before calling this function.
    void push_undo_item(UndoStackItem *item);
 
-	void update_undo(const char *description, 
-		uint32_t load_flags, 
+	void update_undo_after(const char *description, 
+		uint32_t load_flags,
 		void *creator = 0,
 		int changes_made = 1);
 

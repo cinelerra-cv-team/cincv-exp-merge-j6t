@@ -4545,7 +4545,7 @@ int TrackCanvas::button_release_event()
 //				mwindow->session->drag_auto->autos->optimize();
 				update_overlay = 1;
 			}
-			mwindow->undo->update_undo(_("keyframe"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("keyframe"), LOAD_AUTOMATION);
 			result = 1;
 			break;
 
@@ -4562,7 +4562,7 @@ int TrackCanvas::button_release_event()
 			{
 				if(mwindow->session->current_operation == SELECT_REGION)
 				{
-					mwindow->undo->update_undo(_("select"), LOAD_SESSION, 0, 0);
+					mwindow->undo->update_undo_after(_("select"), LOAD_SESSION, 0, 0);
 				}
 
 				mwindow->session->current_operation = NO_OPERATION;

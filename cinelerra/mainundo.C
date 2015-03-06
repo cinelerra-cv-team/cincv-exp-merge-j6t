@@ -80,8 +80,10 @@ MainUndo::~MainUndo()
 	delete last_update;
 }
 
-void MainUndo::update_undo(const char *description, uint32_t load_flags, 
-		void *creator, int changes_made)
+void MainUndo::update_undo_after(const char *description, 
+	uint32_t load_flags,
+	void *creator,
+	int changes_made)
 {
 	if (ignore_push(description, load_flags, creator))
 	{

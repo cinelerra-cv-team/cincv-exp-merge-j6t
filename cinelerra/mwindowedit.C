@@ -86,7 +86,7 @@ void MWindow::add_audio_track_entry(int above, Track *dst)
 {
 	add_audio_track(above, dst);
 	save_backup();
-	undo->update_undo(_("add track"), LOAD_ALL);
+	undo->update_undo_after(_("add track"), LOAD_ALL);
 
 	restart_brender();
 	gui->get_scrollbars();
@@ -104,7 +104,7 @@ void MWindow::add_audio_track_entry(int above, Track *dst)
 void MWindow::add_video_track_entry(Track *dst)
 {
 	add_video_track(1, dst);
-	undo->update_undo(_("add track"), LOAD_ALL);
+	undo->update_undo_after(_("add track"), LOAD_ALL);
 
 	restart_brender();
 	gui->get_scrollbars();
@@ -177,7 +177,7 @@ void MWindow::asset_to_size()
 
 		save_backup();
 
-		undo->update_undo(_("asset to size"), LOAD_ALL);
+		undo->update_undo_after(_("asset to size"), LOAD_ALL);
 		restart_brender();
 		sync_parameters(CHANGE_ALL);
 	}
@@ -197,7 +197,7 @@ void MWindow::asset_to_rate()
 
 		save_backup();
 
-		undo->update_undo(_("asset to rate"), LOAD_ALL);
+		undo->update_undo_after(_("asset to rate"), LOAD_ALL);
 		restart_brender();
 		gui->update(1,
 			2,
@@ -218,7 +218,7 @@ void MWindow::clear_entry()
 
 	edl->optimize();
 	save_backup();
-	undo->update_undo(_("clear"), LOAD_EDITS | LOAD_TIMEBAR);
+	undo->update_undo_after(_("clear"), LOAD_EDITS | LOAD_TIMEBAR);
 
 	restart_brender();
 	update_plugin_guis();
@@ -249,7 +249,7 @@ void MWindow::straighten_automation()
 		edl->local_session->get_selectionstart(), 
 		edl->local_session->get_selectionend()); 
 	save_backup();
-	undo->update_undo(_("straighten curves"), LOAD_AUTOMATION); 
+	undo->update_undo_after(_("straighten curves"), LOAD_AUTOMATION); 
 
 	restart_brender();
 	update_plugin_guis();
@@ -265,7 +265,7 @@ void MWindow::clear_automation()
 	edl->tracks->clear_automation(edl->local_session->get_selectionstart(), 
 		edl->local_session->get_selectionend()); 
 	save_backup();
-	undo->update_undo(_("clear keyframes"), LOAD_AUTOMATION); 
+	undo->update_undo_after(_("clear keyframes"), LOAD_AUTOMATION); 
 
 	restart_brender();
 	update_plugin_guis();
@@ -280,7 +280,7 @@ int MWindow::clear_default_keyframe()
 {
 	edl->tracks->clear_default_keyframe();
 	save_backup();
-	undo->update_undo(_("clear default keyframe"), LOAD_AUTOMATION);
+	undo->update_undo_after(_("clear default keyframe"), LOAD_AUTOMATION);
 	
 	restart_brender();
 	gui->canvas->draw_overlays();
@@ -296,7 +296,7 @@ void MWindow::clear_labels()
 {
 	clear_labels(edl->local_session->get_selectionstart(), 
 		edl->local_session->get_selectionend()); 
-	undo->update_undo(_("clear labels"), LOAD_TIMEBAR);
+	undo->update_undo_after(_("clear labels"), LOAD_TIMEBAR);
 	
 	gui->timebar->update();
 	cwindow->update(0, 0, 0, 0, 1);
@@ -313,7 +313,7 @@ void MWindow::concatenate_tracks()
 {
 	edl->tracks->concatenate_tracks(edl->session->plugins_follow_edits);
 	save_backup();
-	undo->update_undo(_("concatenate tracks"), LOAD_EDITS);
+	undo->update_undo_after(_("concatenate tracks"), LOAD_EDITS);
 
 	restart_brender();
 	gui->update(1, 1, 0, 0, 1, 0, 0);
@@ -427,7 +427,7 @@ void MWindow::crop_video()
 			edl->session->output_h);
 	}
 
-	undo->update_undo(_("crop"), LOAD_ALL);
+	undo->update_undo_after(_("crop"), LOAD_ALL);
 
 	restart_brender();
 	cwindow->playback_engine->que->send_command(CURRENT_FRAME,
@@ -452,7 +452,7 @@ void MWindow::cut()
 
 	edl->optimize();
 	save_backup();
-	undo->update_undo(_("cut"), LOAD_EDITS | LOAD_TIMEBAR);
+	undo->update_undo_after(_("cut"), LOAD_EDITS | LOAD_TIMEBAR);
 
 	restart_brender();
 	update_plugin_guis();
@@ -471,7 +471,7 @@ int MWindow::cut_automation()
 	edl->tracks->clear_automation(edl->local_session->get_selectionstart(), 
 		edl->local_session->get_selectionend()); 
 	save_backup();
-	undo->update_undo(_("cut keyframes"), LOAD_AUTOMATION); 
+	undo->update_undo_after(_("cut keyframes"), LOAD_AUTOMATION); 
 
 
 	restart_brender();
@@ -489,7 +489,7 @@ int MWindow::cut_default_keyframe()
 
 	copy_default_keyframe();
 	edl->tracks->clear_default_keyframe();
-	undo->update_undo(_("cut default keyframe"), LOAD_AUTOMATION);
+	undo->update_undo_after(_("cut default keyframe"), LOAD_AUTOMATION);
 
 	restart_brender();
 	gui->canvas->draw_overlays();
@@ -524,7 +524,7 @@ void MWindow::delete_track()
 void MWindow::delete_tracks()
 {
 	edl->tracks->delete_tracks();
-	undo->update_undo(_("delete tracks"), LOAD_ALL);
+	undo->update_undo_after(_("delete tracks"), LOAD_ALL);
 	save_backup();
 
 	restart_brender();
@@ -539,7 +539,7 @@ void MWindow::delete_tracks()
 void MWindow::delete_track(Track *track)
 {
 	edl->tracks->delete_track(track);
-	undo->update_undo(_("delete track"), LOAD_ALL);
+	undo->update_undo_after(_("delete track"), LOAD_ALL);
 
 	restart_brender();
 	update_plugin_states();
@@ -557,7 +557,7 @@ void MWindow::detach_transition(Transition *transition)
 	int is_video = (transition->edit->track->data_type == TRACK_VIDEO);
 	transition->edit->detach_transition();
 	save_backup();
-	undo->update_undo(_("detach transition"), LOAD_ALL);
+	undo->update_undo_after(_("detach transition"), LOAD_ALL);
 
 	if(is_video) restart_brender();
 	gui->update(0,
@@ -642,7 +642,7 @@ void MWindow::insert_effects_canvas(double start,
 	}
 
 	save_backup();
-	undo->update_undo(_("insert effect"), LOAD_EDITS | LOAD_PATCHES);
+	undo->update_undo_after(_("insert effect"), LOAD_EDITS | LOAD_PATCHES);
 	restart_brender();
 	sync_parameters(CHANGE_EDL);
 // GUI updated in TrackCanvas, after current_operations are reset
@@ -679,7 +679,7 @@ void MWindow::insert_effects_cwindow(Track *dest_track)
 	}
 
 	save_backup();
-	undo->update_undo(_("insert effect"), LOAD_EDITS | LOAD_PATCHES);
+	undo->update_undo_after(_("insert effect"), LOAD_EDITS | LOAD_PATCHES);
 	restart_brender();
 	sync_parameters(CHANGE_EDL);
 	gui->update(1,
@@ -797,9 +797,9 @@ void MWindow::finish_modify_handles()
 		edl->local_session->set_selectionstart(0);
 		edl->local_session->set_selectionend(0);
 	}
+	undo->update_undo_after(_("drag handle"), LOAD_EDITS | LOAD_TIMEBAR);
 
 	save_backup();
-	undo->update_undo(_("drag handle"), LOAD_EDITS | LOAD_TIMEBAR);
 	restart_brender();
 	sync_parameters(CHANGE_EDL);
 	update_plugin_guis();
@@ -812,7 +812,7 @@ void MWindow::match_output_size(Track *track)
 	track->track_w = edl->session->output_w;
 	track->track_h = edl->session->output_h;
 	save_backup();
-	undo->update_undo(_("match output size"), LOAD_ALL);
+	undo->update_undo_after(_("match output size"), LOAD_ALL);
 
 	restart_brender();
 	sync_parameters(CHANGE_EDL);
@@ -833,7 +833,7 @@ void MWindow::move_edits(ArrayList<Edit*> *edits,
 		behaviour);
 
 	save_backup();
-	undo->update_undo(_("move edit"), LOAD_ALL);
+	undo->update_undo_after(_("move edit"), LOAD_ALL);
 
 	restart_brender();
 	cwindow->playback_engine->que->send_command(CURRENT_FRAME, 
@@ -863,7 +863,7 @@ void MWindow::move_effect(Plugin *plugin,
 		dest_position);
 
 	save_backup();
-	undo->update_undo(_("move effect"), LOAD_ALL);
+	undo->update_undo_after(_("move effect"), LOAD_ALL);
 
 	restart_brender();
 	cwindow->playback_engine->que->send_command(CURRENT_FRAME, 
@@ -887,7 +887,7 @@ void MWindow::move_plugins_up(PluginSet *plugin_set)
 	plugin_set->track->move_plugins_up(plugin_set);
 
 	save_backup();
-	undo->update_undo(_("move effect up"), LOAD_ALL);
+	undo->update_undo_after(_("move effect up"), LOAD_ALL);
 	restart_brender();
 	gui->update(1,
 		1,      // 1 for incremental drawing.  2 for full refresh
@@ -905,7 +905,7 @@ void MWindow::move_plugins_down(PluginSet *plugin_set)
 	plugin_set->track->move_plugins_down(plugin_set);
 
 	save_backup();
-	undo->update_undo(_("move effect down"), LOAD_ALL);
+	undo->update_undo_after(_("move effect down"), LOAD_ALL);
 	restart_brender();
 	gui->update(1,
 		1,      // 1 for incremental drawing.  2 for full refresh
@@ -921,7 +921,7 @@ void MWindow::move_track_down(Track *track)
 {
 	edl->tracks->move_track_down(track);
 	save_backup();
-	undo->update_undo(_("move track down"), LOAD_ALL);
+	undo->update_undo_after(_("move track down"), LOAD_ALL);
 
 	restart_brender();
 	gui->update(1, 1, 0, 0, 1, 0, 0);
@@ -933,7 +933,7 @@ void MWindow::move_tracks_down()
 {
 	edl->tracks->move_tracks_down();
 	save_backup();
-	undo->update_undo(_("move tracks down"), LOAD_ALL);
+	undo->update_undo_after(_("move tracks down"), LOAD_ALL);
 
 	restart_brender();
 	gui->update(1, 1, 0, 0, 1, 0, 0);
@@ -945,7 +945,7 @@ void MWindow::move_track_up(Track *track)
 {
 	edl->tracks->move_track_up(track);
 	save_backup();
-	undo->update_undo(_("move track up"), LOAD_ALL);
+	undo->update_undo_after(_("move track up"), LOAD_ALL);
 	restart_brender();
 	gui->update(1, 1, 0, 0, 1, 0, 0);
 	sync_parameters(CHANGE_EDL);
@@ -956,7 +956,7 @@ void MWindow::move_tracks_up()
 {
 	edl->tracks->move_tracks_up();
 	save_backup();
-	undo->update_undo(_("move tracks up"), LOAD_ALL);
+	undo->update_undo_after(_("move tracks up"), LOAD_ALL);
 	restart_brender();
 	gui->update(1, 1, 0, 0, 1, 0, 0);
 	sync_parameters(CHANGE_EDL);
@@ -977,7 +977,7 @@ void MWindow::mute_selection()
 		edl->local_session->set_selectionstart(start);
 		edl->paste_silence(start, end, 0, edl->session->plugins_follow_edits);
 		save_backup();
-		undo->update_undo(_("mute"), LOAD_EDITS);
+		undo->update_undo_after(_("mute"), LOAD_EDITS);
 
 		restart_brender();
 		update_plugin_guis();
@@ -1037,7 +1037,7 @@ void MWindow::overwrite(EDL *source)
 	edl->local_session->set_selectionend(dst_start + overwrite_len);
 
 	save_backup();
-	undo->update_undo(_("overwrite"), LOAD_EDITS);
+	undo->update_undo_after(_("overwrite"), LOAD_EDITS);
 
 	restart_brender();
 	update_plugin_guis();
@@ -1104,7 +1104,7 @@ void MWindow::paste()
 		save_backup();
 
 
-		undo->update_undo(_("paste"), LOAD_EDITS | LOAD_TIMEBAR);
+		undo->update_undo_after(_("paste"), LOAD_EDITS | LOAD_TIMEBAR);
 		restart_brender();
 		update_plugin_guis();
 		gui->update(1, 2, 1, 1, 0, 1, 0);
@@ -1150,7 +1150,7 @@ int MWindow::paste_assets(double position, Track *dest_track, int overwrite)
 
 	save_backup();
 
-	undo->update_undo(_("paste assets"), LOAD_EDITS);
+	undo->update_undo_after(_("paste assets"), LOAD_EDITS);
 	restart_brender();
 	gui->update(1, 
 		2,
@@ -1231,7 +1231,7 @@ int MWindow::paste_automation()
 			&file,
 			0); 
 		save_backup();
-		undo->update_undo(_("paste keyframes"), LOAD_AUTOMATION);
+		undo->update_undo_after(_("paste keyframes"), LOAD_AUTOMATION);
 		delete [] string;
 
 
@@ -1260,7 +1260,7 @@ int MWindow::paste_default_keyframe()
 		FileXML file;
 		file.read_from_string(string);
 		edl->tracks->paste_default_keyframe(&file); 
-		undo->update_undo(_("paste default keyframe"), LOAD_AUTOMATION);
+		undo->update_undo_after(_("paste default keyframe"), LOAD_AUTOMATION);
 
 
 		restart_brender();
@@ -1646,7 +1646,7 @@ void MWindow::paste_silence()
 		edl->session->plugins_follow_edits);
 	edl->optimize();
 	save_backup();
-	undo->update_undo(_("silence"), LOAD_EDITS | LOAD_TIMEBAR);
+	undo->update_undo_after(_("silence"), LOAD_EDITS | LOAD_TIMEBAR);
 
 	update_plugin_guis();
 	restart_brender();
@@ -1669,7 +1669,7 @@ void MWindow::paste_transition()
 
 	edl->tracks->paste_transition(server, session->edit_highlighted);
 	save_backup();
-	undo->update_undo(_("transition"), LOAD_EDITS);
+	undo->update_undo_after(_("transition"), LOAD_EDITS);
 
 	if(server->video) restart_brender();
 	sync_parameters(CHANGE_ALL);
@@ -1680,7 +1680,7 @@ void MWindow::paste_transition_cwindow(Track *dest_track)
 	PluginServer *server = session->drag_pluginservers->values[0];
 	edl->tracks->paste_video_transition(server, 1);
 	save_backup();
-	undo->update_undo(_("transition"), LOAD_EDITS);
+	undo->update_undo_after(_("transition"), LOAD_EDITS);
 	restart_brender();
 	gui->update(0, 1, 0, 0, 0, 0, 0);
 	sync_parameters(CHANGE_ALL);
@@ -1700,7 +1700,7 @@ void MWindow::paste_audio_transition()
 
 	edl->tracks->paste_audio_transition(server);
 	save_backup();
-	undo->update_undo(_("transition"), LOAD_EDITS);
+	undo->update_undo_after(_("transition"), LOAD_EDITS);
 
 	sync_parameters(CHANGE_ALL);
 	gui->update(0, 1, 0, 0, 0, 0, 0);
@@ -1721,7 +1721,7 @@ void MWindow::paste_video_transition()
 
 	edl->tracks->paste_video_transition(server);
 	save_backup();
-	undo->update_undo(_("transition"), LOAD_EDITS);
+	undo->update_undo_after(_("transition"), LOAD_EDITS);
 
 	sync_parameters(CHANGE_ALL);
 	restart_brender();
@@ -1782,7 +1782,7 @@ void MWindow::resize_track(Track *track, int w, int h)
 		(h - track->track_h) / 2);
 	track->track_w = w;
 	track->track_h = h;
-	undo->update_undo(_("resize track"), LOAD_ALL);
+	undo->update_undo_after(_("resize track"), LOAD_ALL);
 	save_backup();
 
 	restart_brender();
@@ -1965,7 +1965,7 @@ void MWindow::splice(EDL *source)
 		source_start);
 
 	save_backup();
-	undo->update_undo(_("splice"), LOAD_EDITS | LOAD_TIMEBAR);
+	undo->update_undo_after(_("splice"), LOAD_EDITS | LOAD_TIMEBAR);
 	update_plugin_guis();
 	restart_brender();
 	gui->update(1, 1, 1, 1, 0, 1, 0);
@@ -2112,7 +2112,7 @@ void MWindow::trim_selection()
 		edl->session->plugins_follow_edits);
 
 	save_backup();
-	undo->update_undo(_("trim selection"), LOAD_EDITS | LOAD_TIMEBAR);
+	undo->update_undo_after(_("trim selection"), LOAD_EDITS | LOAD_TIMEBAR);
 	update_plugin_guis();
 	gui->update(1, 2, 1, 1, 1, 1, 0);
 	restart_brender();
@@ -2180,13 +2180,13 @@ void MWindow::undo_entry(BC_WindowBase *calling_window_gui)
 void MWindow::new_folder(char *new_folder)
 {
 	edl->new_folder(new_folder);
-	undo->update_undo(_("new folder"), LOAD_ALL);
+	undo->update_undo_after(_("new folder"), LOAD_ALL);
 	awindow->gui->async_update_assets();
 }
 
 void MWindow::delete_folder(char *folder)
 {
-//	undo->update_undo(_("delete folder"), LOAD_ALL);
+//	undo->update_undo_after(_("delete folder"), LOAD_ALL);
 }
 
 void MWindow::select_point(double position)
@@ -2272,7 +2272,7 @@ void MWindow::map_audio(int pattern)
 				current_channel = 0;
 		}
 	}
-	undo->update_undo(_("map 1:1"), LOAD_AUTOMATION, 0);
+	undo->update_undo_after(_("map 1:1"), LOAD_AUTOMATION, 0);
 	sync_parameters(CHANGE_PARAMS);
 	gui->update(0,
 		1,

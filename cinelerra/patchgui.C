@@ -297,7 +297,7 @@ void PatchGUI::toggle_behavior(int type,
 			mwindow->restart_brender();
 			mwindow->sync_parameters(CHANGE_EDL);
 			mwindow->gui->lock_window("PatchGUI::toggle_behavior 1");
-			mwindow->undo->update_undo(_("play patch"), LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("play patch"), LOAD_PATCHES);
 			break;
 
 		case Tracks::MUTE:
@@ -305,26 +305,26 @@ void PatchGUI::toggle_behavior(int type,
 			mwindow->restart_brender();
 			mwindow->sync_parameters(CHANGE_PARAMS);
 			mwindow->gui->lock_window("PatchGUI::toggle_behavior 2");
-			mwindow->undo->update_undo(_("mute patch"), LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("mute patch"), LOAD_PATCHES);
 			break;
 
 // Update affected tracks in cwindow
 		case Tracks::RECORD:
 			mwindow->cwindow->update(0, 1, 1);
-			mwindow->undo->update_undo(_("record patch"), LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("record patch"), LOAD_PATCHES);
 			break;
 
 		case Tracks::GANG:
-			mwindow->undo->update_undo(_("gang patch"), LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("gang patch"), LOAD_PATCHES);
 			break;
 
 		case Tracks::DRAW:
-			mwindow->undo->update_undo(_("draw patch"), LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("draw patch"), LOAD_PATCHES);
 			mwindow->gui->update(0, 1, 0, 0, 0, 0, 0);
 			break;
 
 		case Tracks::EXPAND:
-			mwindow->undo->update_undo(_("expand patch"), LOAD_PATCHES);
+			mwindow->undo->update_undo_after(_("expand patch"), LOAD_PATCHES);
 			break;
 	}
 }
@@ -612,7 +612,7 @@ int MutePatch::button_press_event()
 			&current->value);
 
 
-		mwindow->undo->update_undo(_("keyframe"), LOAD_AUTOMATION);
+		mwindow->undo->update_undo_after(_("keyframe"), LOAD_AUTOMATION);
 
 		if(mwindow->edl->session->auto_conf->autos[AUTOMATION_MUTE])
 		{
@@ -719,7 +719,7 @@ int TitlePatch::handle_event()
 	mwindow->update_plugin_titles();
 	mwindow->gui->canvas->draw_overlays();
 	mwindow->gui->canvas->flash();
-	mwindow->undo->update_undo(_("track title"), LOAD_PATCHES);
+	mwindow->undo->update_undo_after(_("track title"), LOAD_PATCHES);
 	return 1;
 }
 
@@ -760,7 +760,7 @@ void NudgePatch::set_value(int64_t value)
 	if(patch->track->gang)
 		patch->patchbay->synchronize_nudge(patch->track->nudge, patch->track);
 
-	mwindow->undo->update_undo("nudge", LOAD_AUTOMATION, this);
+	mwindow->undo->update_undo_after(_("nudge"), LOAD_PATCHES);
 
 	mwindow->gui->unlock_window();
 	if(patch->track->data_type == TRACK_VIDEO)

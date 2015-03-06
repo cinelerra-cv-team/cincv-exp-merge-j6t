@@ -378,7 +378,7 @@ int LoadPrevious::handle_event()
 
 
 	mwindow->defaults->update("LOAD_MODE", load_mode);
-	mwindow->undo->update_undo(_("load previous"), LOAD_ALL);
+	mwindow->undo->update_undo_after(_("load previous"), LOAD_ALL);
 	mwindow->save_backup();
 	mwindow->session->changes_made = 0;
 	return 1;
@@ -432,7 +432,7 @@ int LoadBackup::handle_event()
 // path of the project.
 	mwindow->set_filename(mwindow->edl->project_path);
 	path_list.remove_all_objects();
-	mwindow->undo->update_undo(_("load backup"), LOAD_ALL, 0, 0);
+	mwindow->undo->update_undo_after(_("load backup"), LOAD_ALL, 0, 0);
 	mwindow->save_backup();
 // We deliberately mark the project changed, because the backup is most likely
 // not identical to the project file that it refers to.

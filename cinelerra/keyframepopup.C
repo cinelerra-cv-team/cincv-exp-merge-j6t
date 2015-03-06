@@ -163,7 +163,7 @@ int KeyframePopupDelete::handle_event()
 {
 	delete popup->keyframe_auto;
 	mwindow->save_backup();
-	mwindow->undo->update_undo(_("delete keyframe"), LOAD_ALL);
+	mwindow->undo->update_undo_after(_("delete keyframe"), LOAD_ALL);
 
 	mwindow->gui->update(0,
 	        1,      // 1 for incremental drawing.  2 for full refresh
@@ -448,7 +448,7 @@ int KeyframePopupTangentMode::handle_event()
 		// if we switched to some "auto" mode, this may imply a
 		// real change to parameters, so this needs to be undoable...
 		mwindow->save_backup();
-		mwindow->undo->update_undo(_("change keyframe tangent mode"), LOAD_ALL);
+		mwindow->undo->update_undo_after(_("change keyframe tangent mode"), LOAD_ALL);
 		
 		mwindow->gui->update(0, 1, 0,0,0,0,0); // incremental redraw for canvas
 		mwindow->cwindow->update(0,0, 1, 0,0); // redraw tool window in compositor

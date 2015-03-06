@@ -246,7 +246,7 @@ float AFadePatch::update_edl()
 	float result = get_value() - current->get_value();
 	current->set_value(this->get_value());
 
-	mwindow->undo->update_undo(_("fade"), 
+	mwindow->undo->update_undo_after(_("fade"), 
 		LOAD_AUTOMATION, 
 		need_undo ? 0 : this);
 
@@ -322,7 +322,7 @@ int APanPatch::handle_event()
 	current->handle_y = get_stick_y();
 	memcpy(current->values, get_values(), sizeof(float) * mwindow->edl->session->audio_channels);
 
-	mwindow->undo->update_undo(_("pan"), LOAD_AUTOMATION, need_undo ? 0 : this);
+	mwindow->undo->update_undo_after(_("pan"), LOAD_AUTOMATION, need_undo ? 0 : this);
 
 	mwindow->sync_parameters(CHANGE_PARAMS);
 

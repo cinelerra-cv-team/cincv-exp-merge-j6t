@@ -859,7 +859,7 @@ int TimeBar::button_release_event()
 	switch(current_operation)
 	{
 		case TIMEBAR_DRAG:
-			mwindow->undo->update_undo(_("select"), LOAD_SESSION, 0, 0);
+			mwindow->undo->update_undo_after(_("select"), LOAD_SESSION, 0, 0);
 			mwindow->gui->canvas->stop_dragscroll();
 			current_operation = TIMEBAR_NONE;
 			result = 1;
@@ -943,7 +943,7 @@ int TimeBar::select_region(double position)
 	mwindow->gui->canvas->flash();
 	mwindow->gui->canvas->activate();
 	mwindow->gui->zoombar->update();
-	mwindow->undo->update_undo(_("select"), LOAD_SESSION, 0, 0);
+	mwindow->undo->update_undo_after(_("select"), LOAD_SESSION, 0, 0);
 	update_highlights();
 	return 0;
 }

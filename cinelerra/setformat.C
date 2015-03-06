@@ -144,7 +144,7 @@ void SetFormatThread::apply_changes()
 	mwindow->edl->resample(old_samplerate, new_samplerate, TRACK_AUDIO);
 	mwindow->edl->resample(old_framerate, new_framerate, TRACK_VIDEO);
 	mwindow->save_backup();
-	mwindow->undo->update_undo(_("set format"), LOAD_ALL);
+	mwindow->undo->update_undo_after(_("set format"), LOAD_ALL);
 
 // Update GUIs
 	mwindow->restart_brender();

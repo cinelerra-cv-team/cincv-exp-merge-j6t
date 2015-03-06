@@ -595,7 +595,7 @@ int CWindowGUI::drag_stop()
 			mwindow->save_backup();
 			mwindow->restart_brender();
 			mwindow->gui->update(1, 1, 1, 1, 0, 1, 0);
-			mwindow->undo->update_undo(_("insert assets"), LOAD_ALL);
+			mwindow->undo->update_undo_after(_("insert assets"), LOAD_ALL);
 			mwindow->gui->unlock_window();
 			mwindow->sync_parameters(LOAD_ALL);
 		}
@@ -1525,7 +1525,7 @@ int CWindowCanvas::do_mask(int &redraw,
 // Delete the template
 			delete point;
 //printf("CWindowGUI::do_mask 1\n");
-			mwindow->undo->update_undo(_("mask point"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("mask point"), LOAD_AUTOMATION);
 //printf("CWindowGUI::do_mask 10\n");
 
 		}
@@ -2689,18 +2689,18 @@ int CWindowCanvas::button_release_event()
 			break;
 
 		case CWINDOW_CAMERA:
-			mwindow->undo->update_undo(_("camera"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("camera"), LOAD_AUTOMATION);
 			break;
 
 		case CWINDOW_PROJECTOR:
-			mwindow->undo->update_undo(_("projector"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("projector"), LOAD_AUTOMATION);
 			break;
 
 		case CWINDOW_MASK:
 		case CWINDOW_MASK_CONTROL_IN:
 		case CWINDOW_MASK_CONTROL_OUT:
 		case CWINDOW_MASK_TRANSLATE:
-			mwindow->undo->update_undo(_("mask point"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("mask"), LOAD_AUTOMATION);
 			break;
 
 	}

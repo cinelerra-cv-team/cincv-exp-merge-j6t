@@ -585,7 +585,7 @@ SET_TRACE
 //printf("Record::run 8\n");
 
 			mwindow->save_backup();
-			mwindow->undo->update_undo(_("record"), LOAD_ALL);
+			mwindow->undo->update_undo_after(_("record"), LOAD_ALL);
 			mwindow->restart_brender();
 			mwindow->update_plugin_guis();
 			mwindow->gui->update(1, 

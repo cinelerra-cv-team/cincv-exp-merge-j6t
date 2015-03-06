@@ -321,7 +321,7 @@ int PatchBay::cursor_motion_event()
 
 								current->value = new_status;
 
-								mwindow->undo->update_undo(_("keyframe"), LOAD_AUTOMATION);
+								mwindow->undo->update_undo_after(_("keyframe"), LOAD_AUTOMATION);
 
 								mwindow->gui->unlock_window();
 								mwindow->restart_brender();

@@ -513,7 +513,7 @@ void MenuEffectThread::run()
 
 
 		mwindow->save_backup();
-		mwindow->undo->update_undo(title, LOAD_ALL);
+		mwindow->undo->update_undo_after(title, LOAD_ALL);
 
 
 

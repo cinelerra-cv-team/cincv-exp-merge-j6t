@@ -897,7 +897,7 @@ printf("Render::render 90\n");
 
 
 		mwindow->save_backup();
-		mwindow->undo->update_undo(_("render"), LOAD_ALL);
+		mwindow->undo->update_undo_after(_("render"), LOAD_ALL);
 		mwindow->update_plugin_guis();
 		mwindow->gui->update(1, 
 			2,
