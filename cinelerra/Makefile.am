@@ -685,6 +685,7 @@ cinelerra_LDADD = \
 	$(FIREWIRE_LDFLAGS) \
 	$(LIBDV_LIBS) \
 	-luuid \
-	$(MJPEG_LIBS)
+	$(MJPEG_LIBS) \
+	$(FLAC_LIBS)
 
 EXTRA_DIST = gen-feather-h
