@@ -27,7 +27,6 @@
 #include "mutex.inc"
 #include "thread.h"
 #include "vframe.inc"
-#include "pluginwindow.h"
 
 class ColorWindow;
 class PaletteWheel;
@@ -67,7 +66,7 @@ private:
 	char *title;
 };
 
-class ColorWindow : public PluginWindow
+class ColorWindow : public BC_Window
 {
 public:
 	ColorWindow(ColorThread *thread, int x, int y, char *title);
