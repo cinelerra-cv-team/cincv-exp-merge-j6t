@@ -327,6 +327,7 @@ void SetFormatWindow::create_objects()
 	BC_TextBox *textbox;
 	BC_Title *title;
 
+	lock_window("SetFormatWindow::create_objects");
 	mwindow->theme->draw_setformat_bg(this);
 
 
@@ -532,6 +533,7 @@ void SetFormatWindow::create_objects()
 		thread));
 	flash();
 	show_window();
+	unlock_window();
 }
 
 const char* SetFormatWindow::get_preset_text()

@@ -39,18 +39,29 @@ public:
 
 	void dump();
 
+// Keyframe updates using rules.
+// If a range is selected, the changed parameter is copied to all 
+// the keyframes.
+// If no range is selected, a keyframe is created based on auto keyframe rules.
+	void update_parameter(MaskAuto *src);
+
+
+	int mask_exists(int64_t position, int direction);
+// Perform interpolation
+	void get_points(ArrayList<MaskPoint*> *points, int submask, int64_t position, int direction);
+	float get_feather(int64_t position, int direction);
+	int get_value(int64_t position, int direction);
+	int total_submasks(int64_t position, int direction);
+// Translates all mask points
+	void translate_masks(float translate_x, float translate_y);
+
+
 	static void avg_points(MaskPoint *output, 
 		MaskPoint *input1, 
 		MaskPoint *input2, 
 		int64_t output_position,
 		int64_t position1, 
 		int64_t position2);
-	int mask_exists(int64_t position, int direction);
-// Perform interpolation
-	void get_points(ArrayList<MaskPoint*> *points, int submask, int64_t position, int direction);
-	int total_submasks(int64_t position, int direction);
-// Translates all mask points
-	void translate_masks(float translate_x, float translate_y);
 };
 
 

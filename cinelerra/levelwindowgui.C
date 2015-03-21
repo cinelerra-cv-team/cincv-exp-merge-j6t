@@ -54,6 +54,7 @@ LevelWindowGUI::~LevelWindowGUI()
 
 void LevelWindowGUI::create_objects()
 {
+	lock_window("LevelWindowGUI::create_objects");
 	mwindow->theme->draw_lwindow_bg(this);
 	panel = new MeterPanel(mwindow, 
 		this, 
@@ -63,6 +64,7 @@ void LevelWindowGUI::create_objects()
 		mwindow->edl->session->audio_channels,
 		1);
 	panel->create_objects();
+	unlock_window();
 }
 
 

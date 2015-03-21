@@ -107,11 +107,11 @@ SET_TRACE
 SET_TRACE
 
 		device->open_output(&config, 
-						record->default_asset->frame_rate, 
-						record->default_asset->width, 
-						record->default_asset->height,
-						window->canvas,
-						0);
+			record->default_asset->frame_rate, 
+			record->default_asset->width, 
+			record->default_asset->height,
+			window->canvas,
+			0);
 SET_TRACE
 
 		thread = new RecordMonitorThread(mwindow, record, this);
@@ -234,6 +234,7 @@ RecordMonitorGUI::RecordMonitorGUI(MWindow *mwindow,
 
 RecordMonitorGUI::~RecordMonitorGUI()
 {
+	lock_window("RecordMonitorGUI::~RecordMonitorGUI");
 	delete canvas;
 	if(bitmap) delete bitmap;
 	if(channel_picker) delete channel_picker;
@@ -251,11 +252,13 @@ RecordMonitorGUI::~RecordMonitorGUI()
 	if(avc1394transport_title)
 		delete avc1394transport_title;
 #endif
+	unlock_window();
 }
 
 void RecordMonitorGUI::create_objects()
 {
 // y offset for video canvas if we have the transport controls
+	lock_window("RecordMonitorGUI::create_objects");
 	int do_channel = (mwindow->edl->session->vconfig_in->driver == VIDEO4LINUX ||
 			mwindow->edl->session->vconfig_in->driver == CAPTURE_BUZ ||
 			mwindow->edl->session->vconfig_in->driver == VIDEO4LINUX2 ||
@@ -389,6 +392,7 @@ void RecordMonitorGUI::create_objects()
 			1);
 		meters->create_objects();
 	}
+	unlock_window();
 }
 
 int RecordMonitorGUI::button_press_event()
@@ -447,6 +451,7 @@ SET_TRACE
 int RecordMonitorGUI::keypress_event()
 {
 	int result = 0;
+
 	switch(get_keypress())
 	{
 		case LEFT:
@@ -500,14 +505,16 @@ int RecordMonitorGUI::keypress_event()
 		case 'w':
 			close_event();
 			break;
+
 		default:
-			result = canvas->keypress_event(this);
+			if(canvas) result = canvas->keypress_event(this);
 #ifdef HAVE_FIREWIRE
 			if(!result && avc1394_transport)
 				result = avc1394_transport->keypress_event(get_keypress());
 #endif
 			break;
 	}
+
 	return result;
 }
 

@@ -98,6 +98,10 @@ EditPanel::EditPanel(MWindow *mwindow,
 	keyframe = 0;
 	fit = 0;
 	fit_autos = 0;
+	prevlabel = 0;
+	nextlabel = 0;
+	prevedit = 0;
+	nextedit = 0;
 	locklabels = 0;
 }
 
@@ -151,6 +155,8 @@ void EditPanel::delete_buttons()
 		delete labelbutton;
 		delete prevlabel;
 		delete nextlabel;
+		delete prevedit;
+		delete nextedit;
 	}
 
 	if(use_fit) 
@@ -163,6 +169,11 @@ void EditPanel::delete_buttons()
 		delete undo;
 		delete redo;
 	}
+	
+	prevlabel = 0;
+	nextlabel = 0;
+	prevedit = 0; 
+	nextedit = 0;
 }
 
 void EditPanel::create_buttons()
@@ -274,6 +285,23 @@ SET_TRACE
 		x1 += nextlabel->get_w();
 	}
 
+// all windows except VWindow since it's only implemented in MWindow.
+	if(use_cut)
+	{
+		subwindow->add_subwindow(prevedit = new EditPrevEdit(mwindow, 
+			this, 
+			x1, 
+			y1,
+			is_mwindow));
+		x1 += prevedit->get_w();
+		subwindow->add_subwindow(nextedit = new EditNextEdit(mwindow, 
+			this, 
+			x1, 
+			y1,
+			is_mwindow));
+		x1 += nextedit->get_w();
+	}
+
 	if(use_fit)
 	{
 		subwindow->add_subwindow(fit = new EditFit(mwindow, this, x1, y1));
@@ -347,6 +375,57 @@ void EditPanel::next_label()
 	if(!is_mwindow)
 		mwindow->gui->unlock_window();
 }
+
+
+
+void EditPanel::prev_edit()
+{
+	int shift_down = subwindow->shift_down();
+	if(is_mwindow)
+	{
+		mwindow->gui->unlock_window();
+	}
+	else
+		subwindow->unlock_window();
+
+	mwindow->gui->mbuttons->transport->handle_transport(STOP, 1, 0, 0);
+
+	if(!is_mwindow)
+		subwindow->lock_window("EditPanel::prev_edit 1");
+
+	mwindow->gui->lock_window("EditPanel::prev_edit 2");
+
+	mwindow->prev_edit_handle(shift_down);
+
+	if(!is_mwindow)
+		mwindow->gui->unlock_window();
+}
+
+void EditPanel::next_edit()
+{
+	int shift_down = subwindow->shift_down();
+	if(is_mwindow)
+	{
+		mwindow->gui->unlock_window();
+	}
+	else
+		subwindow->unlock_window();
+
+	mwindow->gui->mbuttons->transport->handle_transport(STOP, 1, 0, 0);
+
+	if(!is_mwindow)
+		subwindow->lock_window("EditPanel::next_edit 1");
+
+	mwindow->gui->lock_window("EditPanel::next_edit 2");
+
+	mwindow->next_edit_handle(shift_down);
+
+	if(!is_mwindow)
+		mwindow->gui->unlock_window();
+}
+
+
+
 
 
 
@@ -440,6 +519,18 @@ void EditPanel::reposition_buttons(int x, int y)
 		x1 += prevlabel->get_w();
 		nextlabel->reposition_window(x1, y1);
 		x1 += nextlabel->get_w();
+	}
+
+	if(prevedit) 
+	{
+		prevedit->reposition_window(x1, y1);
+		x1 += prevedit->get_w();
+	}
+	
+	if(nextedit)
+	{
+		nextedit->reposition_window(x1, y1);
+		x1 += nextedit->get_w();
 	}
 
 	if(use_fit)
@@ -618,6 +709,64 @@ int EditPrevLabel::handle_event()
 	panel->prev_label();
 	return 1;
 }
+
+
+
+EditNextEdit::EditNextEdit(MWindow *mwindow, 
+	EditPanel *panel, 
+	int x, 
+	int y,
+	int is_mwindow)
+ : BC_Button(x, y, mwindow->theme->get_image_set("nextedit"))
+{
+	this->mwindow = mwindow;
+	this->panel = panel;
+	this->is_mwindow = is_mwindow;
+	set_tooltip(_("Next edit ( alt -> )"));
+}
+EditNextEdit::~EditNextEdit()
+{
+}
+int EditNextEdit::keypress_event()
+{
+	if(get_keypress() == RIGHT && alt_down())
+		return handle_event();
+	return 0;
+}
+int EditNextEdit::handle_event()
+{
+	panel->next_edit();
+	return 1;
+}
+
+EditPrevEdit::EditPrevEdit(MWindow *mwindow, 
+	EditPanel *panel, 
+	int x, 
+	int y,
+	int is_mwindow)
+ : BC_Button(x, y, mwindow->theme->get_image_set("prevedit"))
+{
+	this->mwindow = mwindow;
+	this->panel = panel;
+	this->is_mwindow = is_mwindow;
+	set_tooltip(_("Previous edit (alt <- )"));
+}
+EditPrevEdit::~EditPrevEdit()
+{
+}
+int EditPrevEdit::keypress_event()
+{
+	if(get_keypress() == LEFT && alt_down())
+		return handle_event();
+	return 0;
+}
+int EditPrevEdit::handle_event()
+{
+	panel->prev_edit();
+	return 1;
+}
+
+
 
 EditLift::EditLift(MWindow *mwindow, EditPanel *panel, int x, int y)
  : BC_Button(x, y, mwindow->theme->lift_data)

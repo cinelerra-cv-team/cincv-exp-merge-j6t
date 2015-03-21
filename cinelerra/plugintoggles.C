@@ -19,6 +19,7 @@
  * 
  */
 
+#include "language.h"
 #include "mwindow.h"
 #include "plugin.h"
 #include "plugintoggles.h"
@@ -35,6 +36,7 @@ PluginOn::PluginOn(MWindow *mwindow, int x, int y, Plugin *plugin)
 	this->mwindow = mwindow;
 	this->plugin = plugin;
 	in_use = 1;
+	set_tooltip(_("On"));
 }
 
 int PluginOn::calculate_w(MWindow *mwindow)
@@ -72,6 +74,7 @@ PluginShow::PluginShow(MWindow *mwindow, int x, int y, Plugin *plugin)
 	this->mwindow = mwindow;
 	this->plugin = plugin;
 	in_use = 1;
+	set_tooltip(_("Show controls"));
 }
 
 int PluginShow::calculate_w(MWindow *mwindow)

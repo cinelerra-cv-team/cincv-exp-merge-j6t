@@ -35,6 +35,7 @@ public:
 
 	int operator==(MaskPoint& ptr);
 	MaskPoint& operator=(MaskPoint& ptr);
+	void copy_from(MaskPoint &ptr);
 
 	float x, y;
 // Incoming acceleration
@@ -49,7 +50,9 @@ public:
 	SubMask(MaskAuto *keyframe);
 	~SubMask();
 
+// Don't use ==
 	int operator==(SubMask& ptr);
+	int equivalent(SubMask& ptr);
 	void copy_from(SubMask& ptr);
 	void load(FileXML *file);
 	void copy(FileXML *file);
@@ -73,6 +76,15 @@ public:
 	void copy_from(Auto *src);
 	int interpolate_from(Auto *a1, Auto *a2, int64_t position, Auto *templ=0); 
 	void copy_from(MaskAuto *src);
+// Copy data but not position
+	void copy_data(MaskAuto *src);
+	void get_points(ArrayList<MaskPoint*> *points, 
+		int submask);
+	void set_points(ArrayList<MaskPoint*> *points, 
+		int submask);
+
+// Copy parameters to this which differ between ref & src
+	void update_parameter(MaskAuto *ref, MaskAuto *src);
 
 	void dump();
 // Retrieve submask with clamping

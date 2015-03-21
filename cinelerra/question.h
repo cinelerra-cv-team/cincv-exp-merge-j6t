@@ -31,7 +31,7 @@ public:
 	QuestionWindow(MWindow *mwindow);
 	~QuestionWindow();
 
-	int create_objects(char *string, int use_cancel);
+	void create_objects(char *string, int use_cancel);
 	MWindow *mwindow;
 };
 

@@ -44,6 +44,9 @@ public:
 	void start();
 	void run();
 
+// Return if the window is currently running
+	int is_running();
+
 // After the window is closed, this is called
 	virtual void handle_done_event(int result);
 
@@ -52,11 +55,19 @@ public:
 
 // User creates the window and initializes it here.
 	virtual BC_Window* new_gui();
+
+// User can get the GUI here.  Call lock_gui
+// if not the same thread.  get_gui returns 0 if it doesn't exist.
+	void lock_gui(char *location);
+	void unlock_gui();
 	BC_Window* get_gui();
 
 // Called by user to access the gui pointer
 	void lock_window(const char *location);
 	void unlock_window();
+
+// Called by user to close the GUI from outside the thread
+	void close_window();
 
 private:
 	BC_Window *gui;

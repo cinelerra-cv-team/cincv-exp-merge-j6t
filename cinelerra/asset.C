@@ -700,6 +700,7 @@ int Asset::write_index(const char *path, int data_bytes)
 	}
 
 // Force reread of header
+//printf("Asset::write_index\n");
 	index_status = INDEX_NOTTESTED;
 //	index_status = INDEX_READY;
 	index_end = audio_length;

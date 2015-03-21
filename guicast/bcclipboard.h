@@ -22,6 +22,7 @@
 #ifndef BCCLIPBOARD_H
 #define BCCLIPBOARD_H
 
+#include "bcwindowbase.h"
 #include "thread.h"
 
 #include <stdio.h>
@@ -58,6 +59,7 @@ private:
 	Window in_win, out_win;
 	char *data[2];
 	long length[2];
+	char display_name[BCTEXTLEN];
 };
 
 #endif

@@ -669,7 +669,7 @@ void RotateEffect::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("ROTATE");
 	output.tag.set_property("ANGLE", (float)config.angle);
 	output.tag.set_property("PIVOT_X", (float)config.pivot_x);
@@ -687,7 +687,7 @@ void RotateEffect::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 
@@ -852,13 +852,11 @@ int RotateEffect::handle_opengl()
 	{
 		int w = get_output()->get_w();
 		int h = get_output()->get_h();
-		int center_x = (int)(config.pivot_x * w / 100); \
-		int center_y = (int)(config.pivot_y * h / 100); \
+		int center_x = (int)(config.pivot_x * w / 100);
+		int center_y = (int)(config.pivot_y * h / 100);
 		
 		glDisable(GL_TEXTURE_2D);
-		glColor4f(1.0, 1.0, 1.0, 1.0);
-		glLogicOp(GL_XOR);
-		glEnable(GL_COLOR_LOGIC_OP);
+		glColor4f(0.0, 0.0, 0.0, 1.0);
 		glBegin(GL_LINES);
 		glVertex3f(center_x, -h + center_y - CENTER_H / 2, 0.0);
 		glVertex3f(center_x, -h + center_y + CENTER_H / 2, 0.0);
@@ -867,7 +865,15 @@ int RotateEffect::handle_opengl()
 		glVertex3f(center_x - CENTER_W / 2, -h + center_y, 0.0);
 		glVertex3f(center_x + CENTER_W / 2, -h + center_y, 0.0);
 		glEnd();
-		glDisable(GL_COLOR_LOGIC_OP);
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glBegin(GL_LINES);
+		glVertex3f(center_x - 1, -h + center_y - CENTER_H / 2 - 1, 0.0);
+		glVertex3f(center_x - 1, -h + center_y + CENTER_H / 2 - 1, 0.0);
+		glEnd();
+		glBegin(GL_LINES);
+		glVertex3f(center_x - CENTER_W / 2 - 1, -h + center_y - 1, 0.0);
+		glVertex3f(center_x + CENTER_W / 2 - 1, -h + center_y - 1, 0.0);
+		glEnd();
 	}
 #endif
 }

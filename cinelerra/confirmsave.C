@@ -121,6 +121,7 @@ ConfirmSaveWindow::~ConfirmSaveWindow()
 void ConfirmSaveWindow::create_objects()
 {
 	int x = 10, y = 10;
+	lock_window("ConfirmSaveWindow::create_objects");
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
 
@@ -138,6 +139,7 @@ void ConfirmSaveWindow::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	x = get_w() - 100;
 	add_subwindow(new BC_CancelButton(this));
+	unlock_window();
 }
 
 int ConfirmSaveWindow::resize_event(int w, int h)

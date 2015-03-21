@@ -87,27 +87,19 @@ public:
 	~BlurZoomMain();
 
 // required for all realtime plugins
+	PLUGIN_CLASS_MEMBERS(BlurZoomConfig)
 	int process_realtime(VFrame *input_ptr, VFrame *output_ptr);
 	int is_realtime();
-	const char* plugin_title();
 	int start_realtime();
 	int stop_realtime();
-	int show_gui();
-	void raise_window();
-	int set_string();
-	void load_configuration();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	
 	int load_defaults();
 	int save_defaults();
-	VFrame* new_picon();
 
-// a thread for the GUI
-	BlurZoomThread *thread;
 	BlurZoomServer *blurzoom_server;
 	BlurZoomClient *blurzoom_client;
-	BlurZoomConfig config;
 
 	unsigned char *blurzoombuf;
 	int *blurzoomx;
@@ -126,7 +118,6 @@ public:
 
 	int y_threshold;
 
-	BC_Hash *defaults;
 	BlurZoomEngine **engine;
 	VFrame *input_ptr, *output_ptr;
 };

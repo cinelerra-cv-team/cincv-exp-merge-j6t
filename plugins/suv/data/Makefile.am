@@ -279,6 +279,18 @@ PNGS = \
 	listbox_button.png \
 	listbox_dn.png \
 	listbox_up.png \
+	loadmode_cat.png \
+	loadmode_checked.png \
+	loadmode_checkedhi.png \
+	loadmode_dn.png \
+	loadmode_hi.png \
+	loadmode_new.png \
+	loadmode_newcat.png \
+	loadmode_newtracks.png \
+	loadmode_none.png \
+	loadmode_paste.png \
+	loadmode_resource.png \
+	loadmode_up.png \
 	locklabels_dn.png \
 	locklabels_locked.png \
 	locklabels_lockedhi.png \
@@ -346,6 +358,7 @@ PNGS = \
 	new_bigbutton_dn.png \
 	new_bigbutton_hi.png \
 	new_bigbutton_up.png \
+	nextedit.png \
 	nextlabel.png \
 	nextlabel_dn.png \
 	nextlabel_hi.png \
@@ -423,6 +436,7 @@ PNGS = \
 	presentation_dn.png \
 	presentation_hi.png \
 	presentation_up.png \
+	prevedit.png \
 	prevlabel.png \
 	prevlabel_dn.png \
 	prevlabel_hi.png \
@@ -484,6 +498,7 @@ PNGS = \
 	reverse.png \
 	rewind.png \
 	right_justify.png \
+	ruler.png \
 	select_dn.png \
 	select_hi.png \
 	select_up.png \
@@ -608,6 +623,7 @@ EXTRA_DIST = \
 	menu.xcf.bz2 \
 	new.xcf.bz2 \
 	patches.xcf.bz2 \
+	plugin.xcf.bz2 \
 	pot.xcf.bz2 \
 	radial.xcf.bz2 \
 	zoomtumble.xcf.bz2

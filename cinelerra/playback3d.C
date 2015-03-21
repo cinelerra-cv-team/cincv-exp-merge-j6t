@@ -1143,23 +1143,27 @@ void Playback3D::do_mask_sync(Playback3DCommand *command)
 		int w = command->frame->get_w();
 		int h = command->frame->get_h();
 		command->frame->init_screen();
+		int value = command->keyframe_set->get_value(command->start_position_project,
+			PLAY_FORWARD);
+		float feather = command->keyframe_set->get_feather(command->start_position_project,
+			PLAY_FORWARD);
 
 // Clear screen
 		glDisable(GL_TEXTURE_2D);
 		if(command->default_auto->mode == MASK_MULTIPLY_ALPHA)
 		{
 			glClearColor(0.0, 0.0, 0.0, 0.0);
-			glColor4f((float)command->keyframe->value / 100, 
-				(float)command->keyframe->value / 100, 
-				(float)command->keyframe->value / 100, 
+			glColor4f((float)value / 100, 
+				(float)value / 100, 
+				(float)value / 100, 
 				1.0);
 		}
 		else
 		{
 			glClearColor(1.0, 1.0, 1.0, 1.0);
-			glColor4f((float)1.0 - (float)command->keyframe->value / 100, 
-				(float)1.0 - (float)command->keyframe->value / 100, 
-				(float)1.0 - (float)command->keyframe->value / 100, 
+			glColor4f((float)1.0 - (float)value / 100, 
+				(float)1.0 - (float)value / 100, 
+				(float)1.0 - (float)value / 100, 
 				1.0);
 		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1180,7 +1184,7 @@ void Playback3D::do_mask_sync(Playback3DCommand *command)
 		int total_submasks = command->keyframe_set->total_submasks(
 			command->start_position_project, 
 			PLAY_FORWARD);
-		float scale = command->keyframe->feather + 1;
+		float scale = feather + 1;
  		int display_list = glGenLists(1);
  		glNewList(display_list, GL_COMPILE);
 		for(int k = 0; k < total_submasks; k++)

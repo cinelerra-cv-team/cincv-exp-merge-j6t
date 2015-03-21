@@ -64,6 +64,7 @@ MainErrorGUI::~MainErrorGUI()
 
 void MainErrorGUI::create_objects()
 {
+	lock_window("MainErrorGUI::create_objects");
 SET_TRACE
 
 	BC_Button *button;
@@ -90,6 +91,7 @@ SET_TRACE
 SET_TRACE
 	show_window();
 SET_TRACE
+	unlock_window();
 }
 
 int MainErrorGUI::resize_event(int w, int h)

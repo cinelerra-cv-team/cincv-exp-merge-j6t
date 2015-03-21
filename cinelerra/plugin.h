@@ -96,7 +96,7 @@ public:
 		int64_t end, 
 		FileXML *file, 
 		int default_only,
-		int autos_only);
+		int active_only);
 // For editing automation.  
 // Returns the point to restart background rendering at.
 // -1 means nothing changed.
@@ -107,8 +107,8 @@ public:
 // Shift in time
 	void shift(int64_t difference);
 	void dump();
-// Called by PluginClient sequence to get rendering parameters
-	KeyFrame* get_prev_keyframe(int64_t position, int direction);
+	KeyFrame* get_prev_keyframe(int64_t position,
+		int direction);
 	KeyFrame* get_next_keyframe(int64_t position, int direction);
 // If this is a standalone plugin fill its location in the result.
 // If it's shared copy the shared location into the result
@@ -116,12 +116,13 @@ public:
 // Get keyframes for editing with automatic creation if enabled.
 // The direction is always assumed to be forward.
 	virtual KeyFrame* get_keyframe();
+// Called by KeyFrameThread
+	int keyframe_exists(KeyFrame *ptr);
 	int silence();
 // Calculate title given plugin type.  Used by TrackCanvas::draw_plugins
 	void calculate_title(char *string, int use_nudge);
 // Resolve objects pointed to by shared_location
 	Track* get_shared_track();
-//	Plugin* get_shared_plugin();
 
 // Need to resample keyframes
 	void resample(double old_rate, double new_rate);

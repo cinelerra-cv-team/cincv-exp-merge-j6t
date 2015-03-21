@@ -284,7 +284,7 @@ public:
 		ChannelEditWindow *window,
 		ChannelPicker *channel_picker);
 	~ChannelEditEditWindow();
-	int create_objects(Channel *channel);
+	void create_objects(Channel *channel);
 
 	ChannelEditEditThread *thread;
 	ChannelEditWindow *window;

@@ -734,7 +734,7 @@ int VideoDevice::interrupt_playback()
 
 int VideoDevice::write_buffer(VFrame *output, EDL *edl)
 {
-//printf("VideoDevice::write_buffer 1 %p\n", output_base);
+
 	if(output_base) return output_base->write_buffer(output, edl);
 	return 1;
 }

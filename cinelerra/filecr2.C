@@ -52,6 +52,7 @@ FileCR2::FileCR2(Asset *asset, File *file)
 
 FileCR2::~FileCR2()
 {
+//printf("FileCR2::~FileCR2\n");
 	close_file();
 }
 
@@ -68,11 +69,13 @@ int FileCR2::check_sig(Asset *asset)
 
 	strcpy(string, asset->path);
 
-	const char *argv[4];
-	argv[0] = "dcraw";
-	argv[1] = "-i";
-	argv[2] = string;
-	argv[3] = 0;
+	const char *argv[4] =
+	{
+		"dcraw",
+		"-i",
+		string,
+		0
+	};
 
 	int result = dcraw_main(argc, argv);
 
@@ -86,11 +89,12 @@ int FileCR2::open_file(int rd, int wr)
 	cr2_mutex.lock("FileCR2::check_sig");
 
 	int argc = 3;
-	const char *argv[3] = 
+	const char *argv[4] = 
 	{
 		"dcraw",
 		"-i",
-		asset->path
+		asset->path,
+		0
 	};
 
 	int result = dcraw_main(argc, argv);
@@ -118,6 +122,8 @@ void FileCR2::format_to_asset()
 
 int FileCR2::read_frame(VFrame *frame)
 {
+//printf("FileCR2::read_frame\n");
+
 	cr2_mutex.lock("FileCR2::read_frame");
 	if(frame->get_color_model() == BC_RGBA_FLOAT)
 		dcraw_alpha = 1;
@@ -164,6 +170,12 @@ int FileCR2::read_frame(VFrame *frame)
 //Timer timer;
 	int result = dcraw_main(argc, (const char**) argv);
 
+// This was only used by the bayer interpolate plugin, which itself created
+// too much complexity to use effectively.
+// It required bypassing the cache any time a plugin parameter changed 
+// to store the color matrix from dcraw in the frame stack along with the new
+// plugin parameters.  The cache couldn't know if a parameter in the stack came
+// from dcraw or a plugin & replace it.
 	char string[BCTEXTLEN];
 	sprintf(string, 
 		"%f %f %f %f %f %f %f %f %f\n",
@@ -180,7 +192,6 @@ int FileCR2::read_frame(VFrame *frame)
 
 	frame->get_params()->update("DCRAW_MATRIX", string);
 
-// printf("FileCR2::read_frame\n");
 // frame->dump_params();
 
 	cr2_mutex.unlock();

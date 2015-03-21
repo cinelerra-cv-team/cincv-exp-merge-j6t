@@ -83,7 +83,10 @@ public:
 	int block_count;
 	int global_range_w;
 	int global_range_h;
+// Range of angles above and below center rotation angle to search
 	int rotation_range;
+// Center angle of rotation search
+	int rotation_center;
 	int magnitude;
 	int return_speed;
 	int draw_vectors;
@@ -162,32 +165,7 @@ public:
 
 	PLUGIN_CLASS_MEMBERS(MotionConfig)
 
-	int64_t abs_diff(unsigned char *prev_ptr,
-		unsigned char *current_ptr,
-		int row_bytes,
-		int w,
-		int h,
-		int color_model);
-	int64_t abs_diff_sub(unsigned char *prev_ptr,
-		unsigned char *current_ptr,
-		int row_bytes,
-		int w,
-		int h,
-		int color_model,
-		int sub_x,
-		int sub_y);
 
-	static void clamp_scan(int w, 
-		int h, 
-		int *block_x1,
-		int *block_y1,
-		int *block_x2,
-		int *block_y2,
-		int *scan_x1,
-		int *scan_y1,
-		int *scan_x2,
-		int *scan_y2,
-		int use_absolute);
 	static void draw_pixel(VFrame *frame, int x, int y);
 	static void draw_line(VFrame *frame, int x1, int y1, int x2, int y2);
 	void draw_arrow(VFrame *frame, int x1, int y1, int x2, int y2);

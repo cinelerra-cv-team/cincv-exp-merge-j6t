@@ -23,6 +23,7 @@
 #include "auto.h"
 #include "automation.h"
 #include "autos.h"
+#include "bcsignals.h"
 #include "floatauto.h"
 #include "floatautos.h"
 #include "intauto.h"
@@ -128,9 +129,54 @@ int VirtualNode::expand_as_module(int duplicate, int64_t current_position)
 			0,
 			1);
 
+		int circular_reference = 0;
 // Switch off if circular reference.  This happens if a plugin set or a track is deleted.
-		if(plugin == real_plugin) continue;
+		if(plugin == real_plugin) circular_reference = 1;
 
+// Switch off consecutive references to the same plugin
+		if(plugin &&
+			(plugin->plugin_type == PLUGIN_SHAREDPLUGIN ||
+			plugin->plugin_type == PLUGIN_SHAREDMODULE))
+		{
+			int real_module_number = plugin->shared_location.module;
+			int real_plugin_number = plugin->shared_location.plugin;
+
+			for(int j = i - 1; j >= 0; j--)
+			{
+				Plugin *prev_plugin = track->get_current_plugin(current_position, 
+					j, 
+					renderengine->command->get_direction(),
+					0,
+					1);
+				if(prev_plugin && 
+					prev_plugin->plugin_type == PLUGIN_SHAREDPLUGIN &&
+					plugin->plugin_type == PLUGIN_SHAREDPLUGIN)
+				{
+					int prev_module_number = prev_plugin->shared_location.module;
+					int prev_plugin_number = prev_plugin->shared_location.plugin;
+					if(real_module_number == prev_module_number &&
+						real_plugin_number == prev_plugin_number)
+					{
+						circular_reference = 1;
+						break;
+					}
+				}
+				else
+				if(prev_plugin && 
+					prev_plugin->plugin_type == PLUGIN_SHAREDMODULE &&
+					plugin->plugin_type == PLUGIN_SHAREDMODULE)
+				{
+					int prev_module_number = prev_plugin->shared_location.module;
+					if(real_module_number == prev_module_number)
+					{
+						circular_reference = 1;
+						break;
+					}
+				}
+			}
+		}
+
+		if(circular_reference) continue;
 
 		if(plugin && plugin->on)
 		{

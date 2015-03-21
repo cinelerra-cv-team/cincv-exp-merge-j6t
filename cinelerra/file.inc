@@ -30,6 +30,7 @@
 #define FILE_UNRECOGNIZED_CODEC 2
 #define FILE_IS_XML 3
 
+// Numeric codes for each file format
 #define FILE_UNKNOWN    		0
 #define FILE_AIFF       		10
 #define FILE_AMPEG      	  	16    // For encoding only
@@ -40,6 +41,7 @@
 #define FILE_AVI_ARNE2          19    // DV type 2
 #define FILE_AVI_AVIFILE        21
 #define FILE_AVI_LAVTOOLS       12    // MJPEG type 1
+#define FILE_FLAC               32
 #define FILE_GIF  	    		7
 #define FILE_JPEG 	    		5
 #define FILE_JPEG_LIST  		8
@@ -63,7 +65,8 @@
 #define FILE_CR2                28
 #define FILE_YUV		29	// mjpegtools YUV4MPEG (aka YUV4MPEG2)
 #define FILE_VORBIS             31
-#define FILE_RAWDV		32
+#define FILE_FFMPEG             33
+#define FILE_RAWDV		34
 
 // For formats supported by plugins, the format number is the plugin number in the 
 // plugin list ORed with 0x8000.
@@ -78,6 +81,8 @@
 	format == FILE_AVI_ARNE2 ? "AVI_ARNE2" :	\
 	format == FILE_AVI_AVIFILE ? "AVIFILE" :	\
 	format == FILE_AVI_LAVTOOLS ? "AVI_LAVTOOLS" :	\
+	format == FILE_FFMPEG  ? "FFMPEG" :		\
+	format == FILE_FLAC    ? "FLAC" :		\
 	format == FILE_GIF     ? "GIF" :		\
 	format == FILE_JPEG    ? "JPEG" :		\
 	format == FILE_JPEG_LIST ? "JPEG_LIST" :	\
@@ -113,6 +118,8 @@ N_("AVI Arne Type 1")
 N_("AVI DV Type 2")
 N_("AVI Avifile")
 N_("AVI Lavtools")
+N_("FLAC")
+N_("FFMPEG")
 N_("Raw DV")
 N_("JPEG Sequence")
 N_("JPEG")
@@ -161,9 +168,11 @@ N_("OGG Theora/Vorbis")
 #define TIFF_NAME "TIFF"
 #define TIFF_LIST_NAME "TIFF Sequence"
 #define VMPEG_NAME "MPEG Video"    // For encoding only
-#define EXR_NAME "EXR"
 #define CR2_NAME "Raw Camera"
+#define EXR_NAME "EXR"
 #define EXR_LIST_NAME "EXR Sequence"
+#define FLAC_NAME "FLAC"
+#define FFMPEG_NAME "FFMPEG"
 #define YUV_NAME "YUV4MPEG Stream"
 
 

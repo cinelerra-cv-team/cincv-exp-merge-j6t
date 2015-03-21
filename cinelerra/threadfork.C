@@ -74,7 +74,7 @@ void* ThreadFork::entrypoint(void *ptr)
 	threadfork->run();
 }
 
-void ThreadFork::start_command(char *command_line, int pipe_stdin)
+void ThreadFork::start_command(const char *command_line, int pipe_stdin)
 {
 	this->command_line = command_line;
 	this->pipe_stdin = pipe_stdin;

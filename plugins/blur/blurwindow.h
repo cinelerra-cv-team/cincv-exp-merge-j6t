@@ -36,6 +36,7 @@ class BlurWindow;
 class BlurVertical;
 class BlurHorizontal;
 class BlurRadius;
+class BlurRadiusText;
 class BlurA;
 class BlurR;
 class BlurG;
@@ -53,6 +54,7 @@ public:
 	BlurVertical *vertical;
 	BlurHorizontal *horizontal;
 	BlurRadius *radius;
+	BlurRadiusText *radius_text;
 	BlurA *a;
 	BlurR *r;
 	BlurG *g;
@@ -92,11 +94,20 @@ public:
 class BlurRadius : public BC_IPot
 {
 public:
-	BlurRadius(BlurMain *client, int x, int y);
+	BlurRadius(BlurMain *client, BlurWindow *gui, int x, int y);
 	~BlurRadius();
 	int handle_event();
-
 	BlurMain *client;
+	BlurWindow *gui;
+};
+
+class BlurRadiusText : public BC_TextBox
+{
+public:
+	BlurRadiusText(BlurMain *client, BlurWindow *gui, int x, int y, int w);
+	int handle_event();
+	BlurMain *client;
+	BlurWindow *gui;
 };
 
 class BlurVertical : public BC_CheckBox

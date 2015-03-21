@@ -40,7 +40,7 @@ MaskPoint::MaskPoint()
 	control_y2 = 0;
 }
 
-MaskPoint& MaskPoint::operator=(MaskPoint& ptr)
+void MaskPoint::copy_from(MaskPoint &ptr)
 {
 	this->x = ptr.x;
 	this->y = ptr.y;
@@ -48,6 +48,11 @@ MaskPoint& MaskPoint::operator=(MaskPoint& ptr)
 	this->control_y1 = ptr.control_y1;
 	this->control_x2 = ptr.control_x2;
 	this->control_y2 = ptr.control_y2;
+}
+
+MaskPoint& MaskPoint::operator=(MaskPoint& ptr)
+{
+	copy_from(ptr);
 }
 
 int MaskPoint::operator==(MaskPoint& ptr)
@@ -69,17 +74,23 @@ SubMask::~SubMask()
 {
 }
 
-int SubMask::operator==(SubMask& ptr)
+int SubMask::equivalent(SubMask& ptr)
 {
-	if(points.total != ptr.points.total) return 0;
+	if(points.size() != ptr.points.size()) return 0;
 
-	for(int i = 0; i < points.total; i++)
+	for(int i = 0; i < points.size(); i++)
 	{
-		if(!(*points.values[i] == *ptr.points.values[i]))
+		if(!(*points.get(i) == *ptr.points.get(i)))
 			return 0;
 	}
 	
 	return 1;
+}
+
+
+int SubMask::operator==(SubMask& ptr)
+{
+	return equivalent(ptr);
 }
 
 void SubMask::copy_from(SubMask& ptr)
@@ -245,13 +256,37 @@ int MaskAuto::identical(MaskAuto *src)
 	if(value != src->value ||
 		mode != src->mode ||
 		feather != src->feather ||
-		masks.total != src->masks.total ||
+		masks.size() != src->masks.size() ||
 		apply_before_plugins != src->apply_before_plugins) return 0;
 
-	for(int i = 0; i < masks.total; i++)
+	for(int i = 0; i < masks.size(); i++)
 		if(!(*masks.values[i] == *src->masks.values[i])) return 0;
 
 	return 1;
+}
+
+void MaskAuto::update_parameter(MaskAuto *ref, MaskAuto *src)
+{
+	if(src->value != ref->value)
+	{
+		this->value = src->value;
+	}
+
+	if(src->mode != ref->mode)
+	{
+		this->mode = src->mode;
+	}
+
+	if(!EQUIV(src->feather, ref->feather))
+	{
+		this->feather = src->feather;
+	}
+
+	for(int i = 0; i < masks.size(); i++)
+	{
+		if(!src->get_submask(i)->equivalent(*ref->get_submask(i)))
+			this->get_submask(i)->copy_from(*src->get_submask(i));
+	}
 }
 
 void MaskAuto::copy_from(Auto *src)
@@ -262,14 +297,18 @@ void MaskAuto::copy_from(Auto *src)
 void MaskAuto::copy_from(MaskAuto *src)
 {
 	Auto::copy_from(src);
+	copy_data(src);
+}
 
+void MaskAuto::copy_data(MaskAuto *src)
+{
 	mode = src->mode;
 	feather = src->feather;
 	value = src->value;
 	apply_before_plugins = src->apply_before_plugins;
 
 	masks.remove_all_objects();
-	for(int i = 0; i < src->masks.total; i++)
+	for(int i = 0; i < src->masks.size(); i++)
 	{
 		masks.append(new SubMask(this));
 		masks.values[i]->copy_from(*src->masks.values[i]);
@@ -326,9 +365,36 @@ int MaskAuto::interpolate_from(Auto *a1, Auto *a2, int64_t position, Auto *templ
 
 SubMask* MaskAuto::get_submask(int number)
 {
-	CLAMP(number, 0, masks.total - 1);
+	CLAMP(number, 0, masks.size() - 1);
 	return masks.values[number];
 }
+
+void MaskAuto::get_points(ArrayList<MaskPoint*> *points, 
+	int submask)
+{
+	points->remove_all_objects();
+	SubMask *submask_ptr = get_submask(submask);
+	for(int i = 0; i < submask_ptr->points.size(); i++)
+	{
+		MaskPoint *point = new MaskPoint;
+		point->copy_from(*submask_ptr->points.get(i));
+		points->append(point);
+	}
+}
+
+void MaskAuto::set_points(ArrayList<MaskPoint*> *points, 
+	int submask)
+{
+	SubMask *submask_ptr = get_submask(submask);
+	submask_ptr->points.remove_all_objects();
+	for(int i = 0; i < points->size(); i++)
+	{
+		MaskPoint *point = new MaskPoint;
+		point->copy_from(*points->get(i));
+		submask_ptr->points.append(point);
+	}
+}
+
 
 void MaskAuto::load(FileXML *file)
 {
@@ -336,7 +402,7 @@ void MaskAuto::load(FileXML *file)
 	feather = file->tag.get_property("FEATHER", feather);
 	value = file->tag.get_property("VALUE", value);
 	apply_before_plugins = file->tag.get_property("APPLY_BEFORE_PLUGINS", apply_before_plugins);
-	for(int i = 0; i < masks.total; i++)
+	for(int i = 0; i < masks.size(); i++)
 	{
 		delete masks.values[i];
 		masks.values[i] = new SubMask(this);
@@ -377,7 +443,7 @@ void MaskAuto::copy(int64_t start, int64_t end, FileXML *file, int default_auto)
 	file->append_tag();
 	file->append_newline();
 
-	for(int i = 0; i < masks.total; i++)
+	for(int i = 0; i < masks.size(); i++)
 	{
 //printf("MaskAuto::copy 1 %p %d %p\n", this, i, masks.values[i]);
 		masks.values[i]->copy(file);
@@ -393,7 +459,7 @@ void MaskAuto::copy(int64_t start, int64_t end, FileXML *file, int default_auto)
 void MaskAuto::dump()
 {
 	printf("	 mode=%d value=%d\n", mode, value);
-	for(int i = 0; i < masks.total; i++)
+	for(int i = 0; i < masks.size(); i++)
 	{
 		printf("	 submask %d\n", i);
 		masks.values[i]->dump();
@@ -402,7 +468,7 @@ void MaskAuto::dump()
 
 void MaskAuto::translate_submasks(float translate_x, float translate_y)
 {
-	for(int i = 0; i < masks.total; i++)
+	for(int i = 0; i < masks.size(); i++)
 	{
 		SubMask *mask = get_submask(i);
 		for (int j = 0; j < mask->points.total; j++) 

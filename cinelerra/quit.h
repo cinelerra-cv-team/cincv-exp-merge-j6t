@@ -30,7 +30,7 @@ class Quit : public BC_MenuItem, public Thread
 {
 public:
 	Quit(MWindow *mwindow);
-	int create_objects(Save *save);
+	void create_objects(Save *save);
 	int handle_event();
 	void run();
 	

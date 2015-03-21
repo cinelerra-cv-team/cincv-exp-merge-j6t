@@ -43,6 +43,10 @@ public:
 	int set_path(char *path);
 	int set_name(char *name);
 	int reset();
+	const char* get_path();
+	const char* get_name();
+	int get_is_dir();
+
 	char *path;
 	char *name;
 	int is_dir;
@@ -67,7 +71,8 @@ public:
 
 // Complete the path in the string and change to the directory in the string.
 // Does not change new_dir
-	int change_dir(char *new_dir);
+// update - causes the directory to be loaded
+	int change_dir(char *new_dir, int update = 1);
 // Set the current_dir to something without completing the path.
 	int set_current_dir(const char *new_dir);
 

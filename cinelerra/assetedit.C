@@ -196,6 +196,7 @@ void AssetEditWindow::create_objects()
 	BC_ListBox  *listboxw;
 	Interlaceautofix *ilacefixoption_chkboxw;
 
+	lock_window("AssetEditWindow::create_objects");
 	if(allow_edits) 
 		vmargin = 30;
 	else
@@ -541,6 +542,7 @@ void AssetEditWindow::create_objects()
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 	flush();
+	unlock_window();
 }
 
 AssetEditChannels::AssetEditChannels(AssetEditWindow *fwindow, 

@@ -20,6 +20,7 @@
  */
 
 #include "assets.h"
+#include "bcsignals.h"
 #include "bchash.h"
 #include "edl.h"
 #include "errorbox.h"
@@ -60,12 +61,9 @@ void Load::create_objects()
 
 int Load::handle_event() 
 {
-//printf("Load::handle_event 1\n");
-	if(!thread->running())
-	{
-//printf("Load::handle_event 2\n");
-		thread->start();
-	}
+	mwindow->gui->unlock_window();
+	thread->start();
+	mwindow->gui->lock_window("Load::handle_event");
 	return 1;
 }
 
@@ -75,7 +73,7 @@ int Load::handle_event()
 
 
 LoadFileThread::LoadFileThread(MWindow *mwindow, Load *load)
- : Thread()
+ : BC_DialogThread()
 {
 	this->mwindow = mwindow;
 	this->load = load;
@@ -85,59 +83,56 @@ LoadFileThread::~LoadFileThread()
 {
 }
 
-void LoadFileThread::run()
+BC_Window* LoadFileThread::new_gui()
 {
-	int result;
-	ArrayList<BC_ListBoxItem*> *dirlist;
-	FileSystem fs;
-	ArrayList<char*> path_list;
-	path_list.set_array_delete();
 	char default_path[BCTEXTLEN];
-	const char *reel_name = 0;
-	int reel_number = 0;
-	int overwrite_reel = 0;
-	
+
 	sprintf(default_path, "~");
 	mwindow->defaults->get("DEFAULT_LOADPATH", default_path);
 	load_mode = mwindow->defaults->get("LOAD_MODE", LOAD_REPLACE);
 
-	{
-		LoadFileWindow window(mwindow, this, default_path);
-		window.create_objects();
-		result = window.run_window();
+	mwindow->gui->lock_window("LoadFileThread::new_gui");
+	window = new LoadFileWindow(mwindow, this, default_path);
+	mwindow->gui->unlock_window();
+	
+	window->create_objects();
+	return window;
+}
 
-		if ((!result) && (load_mode == LOAD_REPLACE)) {
-			mwindow->set_filename(window.get_path(0));
-		}
-
+void LoadFileThread::handle_done_event(int result)
+{
+	ArrayList<char*> path_list;
+	path_list.set_array_delete();
 // Collect all selected files
-		if(!result)
+	if(!result)
+	{
+		char *in_path, *out_path;
+		int i = 0;
+		window->lock_window("LoadFileThread::handle_done_event");
+		window->hide_window();
+		window->unlock_window();
+
+		while((in_path = window->get_path(i)))
 		{
-			char *in_path, *out_path;
-			int i = 0;
-
-			while((in_path = window.get_path(i)))
+			int j;
+			for(j = 0; j < path_list.total; j++)
 			{
-				int j;
-				for(j = 0; j < path_list.total; j++)
-				{
-					if(!strcmp(in_path, path_list.values[j])) break;
-				}
-				
-				if(j == path_list.total)
-				{
-					path_list.append(out_path = new char[strlen(in_path) + 1]);
-					strcpy(out_path, in_path);
-				}
-				i++;
+				if(!strcmp(in_path, path_list.values[j])) break;
 			}
-		}
 
-		mwindow->defaults->update("DEFAULT_LOADPATH", 
-			window.get_submitted_path());
-		mwindow->defaults->update("LOAD_MODE", 
-			load_mode);
+			if(j == path_list.total)
+			{
+				path_list.append(out_path = new char[strlen(in_path) + 1]);
+				strcpy(out_path, in_path);
+			}
+			i++;
+		}
 	}
+
+	mwindow->defaults->update("DEFAULT_LOADPATH", 
+		window->get_submitted_path());
+	mwindow->defaults->update("LOAD_MODE", 
+		load_mode);
 
 // No file selected
 	if(path_list.total == 0 || result == 1)
@@ -145,24 +140,9 @@ void LoadFileThread::run()
 		return;
 	}
 
-//	{
-//		ReelWindow rwindow(mwindow);
-//		rwindow.create_objects();
-//		result = rwindow.run_window();
-
-//		if(result)
-//		{
-//			return;
-//		}
-		
-//		reel_name = rwindow.reel_name->get_text();
-//		reel_number = atol(rwindow.reel_number->get_text());
-//		overwrite_reel = rwindow.overwrite_reel;
-//	}
-
-	reel_name = "none";
-	reel_number = 0;
-	overwrite_reel = 0;
+	const char *reel_name = "none";
+	int reel_number = 0;
+	int overwrite_reel = 0;
 
 	mwindow->interrupt_indexes();
 	mwindow->gui->lock_window("LoadFileThread::run");
@@ -175,15 +155,15 @@ void LoadFileThread::run()
 	mwindow->save_backup();
 
 	mwindow->restart_brender();
-//	mwindow->undo->update_undo(_("load"), LOAD_ALL);
 
 	if(load_mode == LOAD_REPLACE || load_mode == LOAD_REPLACE_CONCATENATE)
 		mwindow->session->changes_made = 0;
 	else
 		mwindow->session->changes_made = 1;
-
-	return;
 }
+
+
+
 
 
 
@@ -196,7 +176,8 @@ LoadFileWindow::LoadFileWindow(MWindow *mwindow,
 	LoadFileThread *thread,
 	char *init_directory)
  : BC_FileBox(mwindow->gui->get_abs_cursor_x(1),
- 		mwindow->gui->get_abs_cursor_y(1) - BC_WindowBase::get_resources()->filebox_h / 2,
+ 		mwindow->gui->get_abs_cursor_y(1) - 
+			BC_WindowBase::get_resources()->filebox_h / 2,
 		init_directory, 
 		PROGRAM_NAME ": Load",
 		_("Select files to load:"), 
@@ -211,23 +192,31 @@ LoadFileWindow::LoadFileWindow(MWindow *mwindow,
 
 LoadFileWindow::~LoadFileWindow() 
 {
+	lock_window("LoadFileWindow::~LoadFileWindow");
 	delete loadmode;
+	unlock_window();
 }
 
 void LoadFileWindow::create_objects()
 {
+	lock_window("LoadFileWindow::create_objects");
 	BC_FileBox::create_objects();
 
-	int x = get_w() / 2 - 200;
-	int y = get_cancel_button()->get_y() - 50;
+	int x = get_w() / 2 - 
+		LoadMode::calculate_w(this, mwindow->theme, 0) / 2;
+	int y = get_cancel_button()->get_y() - 
+		LoadMode::calculate_h(this, mwindow->theme);
 	loadmode = new LoadMode(mwindow, this, x, y, &thread->load_mode, 0);
 	loadmode->create_objects();
+	unlock_window();
+
 }
 
 int LoadFileWindow::resize_event(int w, int h)
 {
 	int x = w / 2 - 200;
-	int y = get_cancel_button()->get_y() - 50;
+	int y = get_cancel_button()->get_y() - 
+		LoadMode::calculate_h(this, mwindow->theme);
 	draw_background(0, 0, w, h);
 
 	loadmode->reposition_window(x, y);
@@ -240,92 +229,6 @@ int LoadFileWindow::resize_event(int w, int h)
 
 
 
-
-NewTimeline::NewTimeline(int x, int y, LoadFileWindow *window)
- : BC_Radial(x, 
- 	y, 
-	window->thread->load_mode == LOAD_REPLACE,
-	_("Replace current project."))
-{
-	this->window = window;
-}
-int NewTimeline::handle_event()
-{
-	window->newtracks->set_value(0);
-	window->newconcatenate->set_value(0);
-	window->concatenate->set_value(0);
-	window->resourcesonly->set_value(0);
-	return 1;
-}
-
-NewConcatenate::NewConcatenate(int x, int y, LoadFileWindow *window)
- : BC_Radial(x, 
- 	y, 
-	window->thread->load_mode == LOAD_REPLACE_CONCATENATE,
-	_("Replace current project and concatenate tracks."))
-{
-	this->window = window;
-}
-int NewConcatenate::handle_event()
-{
-	window->newtimeline->set_value(0);
-	window->newtracks->set_value(0);
-	window->concatenate->set_value(0);
-	window->resourcesonly->set_value(0);
-	return 1;
-}
-
-AppendNewTracks::AppendNewTracks(int x, int y, LoadFileWindow *window)
- : BC_Radial(x, 
- 	y, 
-	window->thread->load_mode == LOAD_NEW_TRACKS,
-	_("Append in new tracks."))
-{
-	this->window = window;
-}
-int AppendNewTracks::handle_event()
-{
-	window->newtimeline->set_value(0);
-	window->newconcatenate->set_value(0);
-	window->concatenate->set_value(0);
-	window->resourcesonly->set_value(0);
-	return 1;
-}
-
-EndofTracks::EndofTracks(int x, int y, LoadFileWindow *window)
- : BC_Radial(x, 
- 	y, 
-	window->thread->load_mode == LOAD_CONCATENATE,
-	_("Concatenate to existing tracks."))
-{
-	this->window = window;
-}
-int EndofTracks::handle_event()
-{
-	window->newtimeline->set_value(0);
-	window->newconcatenate->set_value(0);
-	window->newtracks->set_value(0);
-	window->resourcesonly->set_value(0);
-	return 1;
-}
-
-ResourcesOnly::ResourcesOnly(int x, int y, LoadFileWindow *window)
- : BC_Radial(x, 
- 	y, 
-	window->thread->load_mode == LOAD_RESOURCESONLY,
-	_("Create new resources only."))
-{
-	this->window = window;
-}
-int ResourcesOnly::handle_event()
-{
-	set_value(1);
-	window->newtimeline->set_value(0);
-	window->newconcatenate->set_value(0);
-	window->newtracks->set_value(0);
-	window->concatenate->set_value(0);
-	return 1;
-}
 
 
 
@@ -378,7 +281,7 @@ int LoadPrevious::handle_event()
 
 
 	mwindow->defaults->update("LOAD_MODE", load_mode);
-	mwindow->undo->update_undo_after(_("load previous"), LOAD_ALL);
+//	mwindow->undo->update_undo_after(_("load previous"), LOAD_ALL);
 	mwindow->save_backup();
 	mwindow->session->changes_made = 0;
 	return 1;
@@ -432,7 +335,7 @@ int LoadBackup::handle_event()
 // path of the project.
 	mwindow->set_filename(mwindow->edl->project_path);
 	path_list.remove_all_objects();
-	mwindow->undo->update_undo_after(_("load backup"), LOAD_ALL, 0, 0);
+//	mwindow->undo->update_undo_after(_("load backup"), LOAD_ALL, 0);
 	mwindow->save_backup();
 // We deliberately mark the project changed, because the backup is most likely
 // not identical to the project file that it refers to.

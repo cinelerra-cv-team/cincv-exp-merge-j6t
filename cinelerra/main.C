@@ -41,10 +41,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <locale.h>
-
 #define PACKAGE "cinelerra"
-#define LOCALEDIR "/usr/share/locale"
+#define LOCALEDIR "/locale/"
 
 
 enum
@@ -59,6 +57,24 @@ enum
 
 #include "thread.h"
 
+void get_exe_path(char *result)
+{
+// Get executable path
+	pid_t pid = getpid();
+	char proc_path[BCTEXTLEN];
+	int len = 0;
+	result[0] = 0;
+	sprintf(proc_path, "/proc/%d/exe", pid);
+	if((len = readlink(proc_path, result, BCTEXTLEN)) >= 0)
+	{
+		result[len] = 0;
+//printf("Preferences::Preferences %d %s\n", __LINE__, result);
+		char *ptr = strrchr(result, '/');
+		if(ptr) *ptr = 0;
+	}
+
+}
+
 int main(int argc, char *argv[])
 {
 // handle command line arguments first
@@ -66,11 +82,14 @@ int main(int argc, char *argv[])
 	ArrayList<char*> filenames;
 	FileSystem fs;
 
+
 	int operation = DO_GUI;
 	int deamon_port = DEAMON_PORT;
 	char deamon_path[BCTEXTLEN];
 	char config_path[BCTEXTLEN];
 	char batch_path[BCTEXTLEN];
+	char locale_path[BCTEXTLEN];
+	char exe_path[BCTEXTLEN];
 	int nice_value = 20;
 	config_path[0] = 0;
 	batch_path[0] = 0;
@@ -78,6 +97,9 @@ int main(int argc, char *argv[])
 	Garbage::garbage = new Garbage;
 	EDL::id_lock = new Mutex("EDL::id_lock");
 
+
+	get_exe_path(exe_path);
+	sprintf(locale_path, "%s%s", exe_path, LOCALEDIR);
 // detect an UTF-8 locale and try to use a non-Unicode locale instead
 // <---Beginning of dirty hack
 // This hack will be removed as soon as Cinelerra is UTF-8 compliant
@@ -100,13 +122,17 @@ int main(int argc, char *argv[])
     }
 // End of dirty hack --->
 
-
-
-
-	bindtextdomain (PACKAGE, LOCALEDIR);
+	bindtextdomain (PACKAGE, locale_path);
 	textdomain (PACKAGE);
 	setlocale (LC_MESSAGES, "");
 	setlocale (LC_CTYPE, "");
+
+
+
+
+
+
+
 
 	for(int i = 1; i < argc; i++)
 	{
@@ -181,7 +207,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			char *new_filename;
-			new_filename = new char[1024];
+			new_filename = new char[BCTEXTLEN];
 			strcpy(new_filename, argv[i]);
             fs.complete_path(new_filename);
 
@@ -286,20 +312,28 @@ PROGRAM_NAME " is free software, covered by the GNU General Public License,\n"
 			mwindow.create_objects(1, 
 				!filenames.total,
 				config_path);
+//SET_TRACE
 
 // load the initial files on seperate tracks
 			if(filenames.total)
 			{
+//SET_TRACE
 				mwindow.gui->lock_window("main");
+//SET_TRACE
 				mwindow.load_filenames(&filenames, LOAD_REPLACE);
+//SET_TRACE
 				if(filenames.total == 1)
 					mwindow.gui->mainmenu->add_load(filenames.values[0]);
 				mwindow.gui->unlock_window();
+//SET_TRACE
 			}
 
 // run the program
+//SET_TRACE
 			mwindow.start();
+//SET_TRACE
 			mwindow.save_defaults();
+//SET_TRACE
 DISABLE_BUFFER
 			break;
 		}

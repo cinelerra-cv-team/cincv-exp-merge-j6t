@@ -22,10 +22,12 @@
 #ifndef TRANSITIONPOPUP_H
 #define TRANSITIONPOPUP_H
 
+#include "bcdialog.h"
 #include "guicast.h"
 #include "mwindowgui.inc"
 #include "plugin.inc"
 #include "transition.inc"
+#include "transitionpopup.inc"
 
 class TransitionPopupOn;
 class TransitionPopupShow;
@@ -34,31 +36,41 @@ class TransitionPopupDetach;
 class TransitionPopupLength;
 class TransitionLengthText;
 
-class TransitionLengthThread : public Thread
+class TransitionLengthThread : public BC_DialogThread
 {
 public:
-	TransitionLengthThread(MWindow *mwindow, TransitionPopup *popup);
+	TransitionLengthThread(MWindow *mwindow);
 	~TransitionLengthThread();
 
-	void run();
-	
+	void start(Transition *transition, 
+		double length);
+	BC_Window* new_gui();
+	void handle_close_event(int result);
+
 	MWindow *mwindow;
-	TransitionPopup *popup;
+
+	Transition *transition;
+	double length;
+	double orig_length;
 };
 
 
 class TransitionLengthDialog : public BC_Window
 {
 public:
-	TransitionLengthDialog(MWindow *mwindow, Transition *transition);
+	TransitionLengthDialog(MWindow *mwindow, 
+		TransitionLengthThread *thread, 
+		int x, 
+		int y);
 	~TransitionLengthDialog();
 	
 	void create_objects();
 	int close_event();
 	
 	MWindow *mwindow;
-	Transition *transition;
+	TransitionLengthThread *thread;
 	TransitionLengthText *text;
+	double length;
 };
 
 class TransitionLengthText : public BC_TumbleTextBox
@@ -84,7 +96,9 @@ public:
 	int update(Transition *transition);
 
 // Acquired through the update command as the plugin currently being operated on
+// Can't be dereferenced.
 	Transition *transition;
+	double length;
 
 // Set when the user clicks a transition.
 	MWindow *mwindow;
@@ -95,7 +109,7 @@ public:
 	TransitionPopupShow *show;
 	TransitionPopupAttach *attach;
 	TransitionPopupDetach *detach;
-	TransitionPopupLength *length;
+	TransitionPopupLength *length_item;
 	TransitionLengthThread *length_thread;
 };
 

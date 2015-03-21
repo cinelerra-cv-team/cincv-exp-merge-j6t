@@ -89,9 +89,10 @@ MenuEffectPacket::~MenuEffectPacket()
 
 
 
-MenuEffectThread::MenuEffectThread(MWindow *mwindow)
+MenuEffectThread::MenuEffectThread(MWindow *mwindow, MenuEffects *menu_item)
 {
 	this->mwindow = mwindow;
+	this->menu_item = menu_item;
 	sprintf(title, "");
 }
 
@@ -539,6 +540,9 @@ void MenuEffectThread::run()
 
 
 
+
+
+
 MenuEffectItem::MenuEffectItem(MenuEffects *menueffect, char *string)
  : BC_MenuItem(string)
 {
@@ -580,11 +584,16 @@ MenuEffectWindow::MenuEffectWindow(MWindow *mwindow,
 	this->plugin_list = plugin_list; 
 	this->asset = asset;
 	this->mwindow = mwindow;
+	file_title = 0;
+	format_tools = 0;
+	loadmode = 0;
 }
 
 MenuEffectWindow::~MenuEffectWindow()
 {
+	lock_window("MenuEffectWindow::~MenuEffectWindow");
 	delete format_tools;
+	unlock_window();
 }
 
 
@@ -595,6 +604,7 @@ void MenuEffectWindow::create_objects()
 	result = -1;
 	mwindow->theme->get_menueffect_sizes(plugin_list ? 1 : 0);
 
+	lock_window("MenuEffectWindow::create_objects");
 // only add the list if needed
 	if(plugin_list)
 	{
@@ -609,7 +619,8 @@ void MenuEffectWindow::create_objects()
 			plugin_list));
 	}
 
-	add_subwindow(file_title = new BC_Title(mwindow->theme->menueffect_file_x, 
+	add_subwindow(file_title = new BC_Title(
+		mwindow->theme->menueffect_file_x, 
 		mwindow->theme->menueffect_file_y, 
 		(char*)((menueffects->strategy == FILE_PER_LABEL  || menueffects->strategy == FILE_PER_LABEL_FARM) ? 
 			_("Select the first file to render to:") : 
@@ -645,6 +656,7 @@ void MenuEffectWindow::create_objects()
 	add_subwindow(new MenuEffectWindowCancel(this));
 	show_window();
 	flush();
+	unlock_window();
 }
 
 int MenuEffectWindow::resize_event(int w, int h)
@@ -663,12 +675,12 @@ int MenuEffectWindow::resize_event(int w, int h)
 			mwindow->theme->menueffect_list_h - list_title->get_h() - 5);
 	}
 
-	file_title->reposition_window(mwindow->theme->menueffect_file_x, 
+	if(file_title) file_title->reposition_window(mwindow->theme->menueffect_file_x, 
 		mwindow->theme->menueffect_file_y);
 	int x = mwindow->theme->menueffect_tools_x;
 	int y = mwindow->theme->menueffect_tools_y;
-	format_tools->reposition_window(x, y);
-	loadmode->reposition_window(x, y);
+	if(format_tools) format_tools->reposition_window(x, y);
+	if(loadmode) loadmode->reposition_window(x, y);
 }
 
 

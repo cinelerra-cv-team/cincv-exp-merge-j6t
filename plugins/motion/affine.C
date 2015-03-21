@@ -483,6 +483,9 @@ void AffineUnit::process_package(LoadPackage *package)
 //printf("AffineUnit::process_package 2 %d ty1=%d %d ty2=%d %f %f\n", tx1, ty1, tx2, ty2, out_x4, out_y4);
 
 
+
+
+
 		if(server->use_opengl)
 		{
 #ifdef HAVE_GL

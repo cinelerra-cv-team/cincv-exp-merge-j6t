@@ -31,6 +31,7 @@
 #ifdef HAVE_GL
 #include <GL/gl.h>
 #endif
+#include <string.h>
 #include <unistd.h>
 
 #include <string.h>

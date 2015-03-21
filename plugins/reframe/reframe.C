@@ -44,19 +44,16 @@ REGISTER_PLUGIN(ReFrame)
 ReFrame::ReFrame(PluginServer *server)
  : PluginVClient(server)
 {
-	load_defaults();
 	current_position = 0;
 }
 
 ReFrame::~ReFrame()
 {
-	save_defaults();
-	delete defaults;
 }
 
 const char* ReFrame::plugin_title() { return N_("Reframe"); }
 
-NEW_PICON_MACRO(ReFrame) 
+//NEW_PICON_MACRO(ReFrame) 
 
 
 int ReFrame::load_defaults()

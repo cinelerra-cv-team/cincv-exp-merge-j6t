@@ -125,9 +125,9 @@ public:
 // Tip of the day
 	int use_tipwindow;
 
+
 // ====================================== Plugin Set ==============================
-	char global_plugin_dir[BCTEXTLEN];
-	char local_plugin_dir[BCTEXTLEN];
+	char plugin_dir[BCTEXTLEN];
 
 // Required when updating renderfarm rates
 	Mutex *preferences_lock;

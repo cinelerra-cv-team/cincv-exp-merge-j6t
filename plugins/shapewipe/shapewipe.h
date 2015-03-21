@@ -53,32 +53,69 @@ public:
 	ShapeWipeWindow *window;
 };
 
-class ShapeWipeFilename : public BC_TextBox
+// class ShapeWipeFilename : public BC_TextBox
+// {
+// public:
+// 	ShapeWipeFilename(ShapeWipeMain *plugin,
+// 		ShapeWipeWindow *window,
+// 		char *value,
+// 		int x,
+// 		int y);
+// 	int handle_event();
+// 	ShapeWipeMain *plugin;
+// 	ShapeWipeWindow *window;
+// 	char *value;
+// };
+// 
+// class ShapeWipeBrowseButton : public BC_GenericButton
+// {
+// public:
+// 	ShapeWipeBrowseButton(ShapeWipeMain *plugin,
+// 		ShapeWipeWindow *window,
+// 		ShapeWipeFilename *filename,
+// 		int x,
+// 		int y);
+// 	int handle_event();
+// 	ShapeWipeMain *plugin;
+// 	ShapeWipeWindow *window;
+// 	ShapeWipeFilename *filename;
+// };
+// 
+// class ShapeWipeLoad : public BC_FileBox
+// {
+// public:
+// 	ShapeWipeLoad(ShapeWipeFilename *filename,
+// 		char *init_directory);
+// 	ShapeWipeFilename *filename;
+// };
+
+class ShapeWipeTumble : public BC_Tumbler
 {
 public:
-	ShapeWipeFilename(ShapeWipeMain *plugin,
-		ShapeWipeWindow *window,
-		char *value,
-		int x,
+	ShapeWipeTumble(ShapeWipeMain *client, 
+		ShapeWipeWindow *window, 
+		int x, 
 		int y);
-	int handle_event();
-	ShapeWipeMain *plugin;
+	
+	int handle_up_event();
+	int handle_down_event();
+	
+	ShapeWipeMain *client;
 	ShapeWipeWindow *window;
-	char *value;
 };
 
-class ShapeWipeBrowseButton : public BC_GenericButton
+class ShapeWipeShape : public BC_PopupTextBox
 {
 public:
-	ShapeWipeBrowseButton(ShapeWipeMain *plugin,
-		ShapeWipeWindow *window,
-		ShapeWipeFilename *filename,
-		int x,
-		int y);
+	ShapeWipeShape(ShapeWipeMain *client, 
+		ShapeWipeWindow *window, 
+		int x, 
+		int y, 
+		int text_w,
+		int list_h);
 	int handle_event();
-	ShapeWipeMain *plugin;
+	ShapeWipeMain *client;
 	ShapeWipeWindow *window;
-	ShapeWipeFilename *filename;
 };
 
 class ShapeWipeAntiAlias : public BC_CheckBox
@@ -107,24 +144,22 @@ public:
 };
 
 
-class ShapeWipeLoad : public BC_FileBox
-{
-public:
-	ShapeWipeLoad(ShapeWipeFilename *filename,
-		const char *init_directory);
-	ShapeWipeFilename *filename;
-};
-
 class ShapeWipeWindow : public PluginClientWindow
 {
 public:
 	ShapeWipeWindow(ShapeWipeMain *plugin);
+	~ShapeWipeWindow();
 	void create_objects();
-	void reset_pattern_image();
+	void next_shape();
+	void prev_shape();
+	
 	ShapeWipeMain *plugin;
 	ShapeWipeW2B *left;
 	ShapeWipeB2W *right;
-	ShapeWipeFilename *filename_widget;
+//	ShapeWipeFilename *filename_widget;
+	ShapeWipeTumble *shape_tumbler;
+	ShapeWipeShape *shape_text;
+	ArrayList<BC_ListBoxItem*> shapes;
 };
 
 class ShapeWipeMain : public PluginVClient
@@ -143,16 +178,21 @@ public:
 	PluginClientWindow* new_window();
 	int uses_gui();
 	int is_transition();
-	int is_video();
 	const char* plugin_title();
-	int set_string();
 	VFrame* new_picon();
 	int read_pattern_image(int new_frame_width, int new_frame_height);
 	void reset_pattern_image();
+	void init_shapes();
 
+	ArrayList<char*> shape_paths;
+	ArrayList<char*> shape_titles;
+
+	int shapes_initialized;
 	int direction;
 	char filename[BCTEXTLEN];
 	char last_read_filename[BCTEXTLEN];
+	char shape_name[BCTEXTLEN];
+	char current_name[BCTEXTLEN];
 	unsigned char **pattern_image;
 	unsigned char min_value;
 	unsigned char max_value;

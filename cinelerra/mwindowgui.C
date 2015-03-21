@@ -197,7 +197,6 @@ SET_TRACE
 	cursor = 0;
 	add_subwindow(mainmenu = new MainMenu(mwindow, this));
 SET_TRACE
-
 	mwindow->theme->get_mwindow_sizes(this, get_w(), get_h());
 SET_TRACE
 	mwindow->theme->draw_mwindow_bg(this);
@@ -362,7 +361,8 @@ int MWindowGUI::visible(int64_t x1, int64_t x2, int64_t view_x1, int64_t view_x2
 
 int MWindowGUI::show_message(char *message, int color)
 {
-//printf("MWindowGUI::show_message %s %d\n", message, color);
+// printf("MWindowGUI::show_message %d: %s 0x%08x 0x%08x\n", 
+// __LINE__, message, color, mwindow->theme->message_normal);
 	if(color < 0) color = mwindow->theme->message_normal;
 	statusbar->status_text->set_color(color);
 	statusbar->status_text->update(message);

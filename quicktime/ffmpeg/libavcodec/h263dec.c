@@ -287,7 +287,7 @@ static int decode_slice(MpegEncContext *s){
 
 
 // CINELERRA 
-s->workaround_bugs = FF_BUG_NO_PADDING;
+//s->workaround_bugs = FF_BUG_NO_PADDING;
 
     // handle formats which don't have unique end markers
     if(s->msmpeg4_version || (s->workaround_bugs&FF_BUG_NO_PADDING)){ //FIXME perhaps solve this more cleanly

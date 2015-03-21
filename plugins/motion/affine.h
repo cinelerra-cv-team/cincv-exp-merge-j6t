@@ -88,7 +88,6 @@ public:
 	AffineEngine(int total_clients, 
 		int total_packages);
 
-// Temp is only used for STRETCH oversampling
 // Range of coords is 0 to 100 for coordinates in the image.
 // The coordinate locations are clockwise around the image.
 	void process(VFrame *output,

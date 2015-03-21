@@ -56,6 +56,7 @@ extern "C" {
 
 /* Jpeg Photo */
 #define QUICKTIME_JPEG "jpeg"
+#define QUICKTIME_MJPG "MJPG"
 
 /* Concatenated png images.  Allows alpha */
 #define QUICKTIME_PNG "png "
@@ -127,6 +128,7 @@ extern "C" {
 #define QUICKTIME_MP3 ".mp3"
 
 #define QUICKTIME_MP4A "mp4a"
+#define QUICKTIME_QDM2 "QDM2"
 
 /* Mike Row Soft */
 /* AVI decode only */

@@ -40,15 +40,10 @@ public:
 	~PolarMain();
 
 // required for all realtime plugins
+	PLUGIN_CLASS_MEMBERS(PolarConfig)
 	int process_realtime(long size, VFrame **input_ptr, VFrame **output_ptr);
 	int plugin_is_realtime();
 	int plugin_is_multi_channel();
-	const char* plugin_title();
-	int start_gui();
-	int stop_gui();
-	int show_gui();
-	int hide_gui();
-	int set_string();
 	int load_defaults();
 	int save_defaults();
 	int save_data(char *text);
@@ -65,11 +60,8 @@ public:
 	int reconfigure_flag;
 	VFrame *temp_frame;
 
-// a thread for the GUI
-	PolarThread *thread;
 
 private:
-	BC_Hash *defaults;
 	PolarEngine **engine;
 };
 

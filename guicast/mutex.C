@@ -92,6 +92,7 @@ int Mutex::lock(const char *location)
 
 int Mutex::unlock()
 {
+	int result;
 // Remove from recursive status
 	if(recursive)
 	{
@@ -116,7 +117,8 @@ int Mutex::unlock()
 	UNSET_LOCK(this);
 #endif
 
-	if(pthread_mutex_unlock(&mutex)) perror("Mutex::unlock");
+	if((result = pthread_mutex_unlock(&mutex))) 
+		printf("Mutex::unlock error: this=%p result=%d %s\n", this, result, title);
 	return 0;
 }
 

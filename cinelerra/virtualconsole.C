@@ -22,6 +22,7 @@
 #include "auto.h"
 #include "automation.h"
 #include "autos.h"
+#include "bcsignals.h"
 #include "commonrender.h"
 #include "condition.h"
 #include "edl.h"

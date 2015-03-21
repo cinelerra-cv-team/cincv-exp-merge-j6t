@@ -225,7 +225,7 @@ int VFadePatch::handle_event()
 
 	float change = update_edl();
 
-	if(patch->track->gang) 
+	if(patch->track->gang && patch->track->record) 
 		patch->patchbay->synchronize_faders(change, TRACK_VIDEO, patch->track);
 
 	patch->change_source = 0;

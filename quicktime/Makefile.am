@@ -47,6 +47,7 @@ libquicktimehv_la_SOURCES = \
 	edts.c \
 	elst.c \
 	esds.c \
+	frma.c \
 	graphics.c \
 	hdlr.c \
 													ima4.c interlacemodes.c jpeg.c libdv.c libmjpeg.c matrix.c mdat.c mdhd.c mdia.c \
@@ -55,6 +56,8 @@ libquicktimehv_la_SOURCES = \
 	mp4a.c \
 	mvhd.c \
 	plugin.c \
+	qdm2.c \
+	qtasf.c \
 	qtcache.c \
 	qtdv.c \
 	qtffmpeg.c \
@@ -98,6 +101,9 @@ noinst_HEADERS = cmodel_permutation.h \
 	mmx.h \
 	mp4a.h \
 	mpeg4.h \
+	qdm2.h \
+	qtasf.h \
+	qtasf_codes.h \
 	qtdv.h \
 	qtffmpeg.h \
 	qth264.h \

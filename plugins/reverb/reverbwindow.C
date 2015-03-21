@@ -22,16 +22,13 @@
 #include "bcdisplayinfo.h"
 #include "bchash.h"
 #include "filesystem.h"
+#include "language.h"
 #include "reverb.h"
 #include "reverbwindow.h"
 
 #include <string.h>
 
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 ReverbWindow::ReverbWindow(Reverb *reverb)
  : PluginClientWindow(reverb, 
@@ -236,7 +233,7 @@ ReverbMenu::~ReverbMenu()
 	delete prev_load_thread;
 }
 
-int ReverbMenu::create_objects(BC_Hash *defaults)
+void ReverbMenu::create_objects(BC_Hash *defaults)
 {
 	add_menu(filemenu = new BC_Menu(_("File")));
 	filemenu->add_item(load = new ReverbLoad(reverb, this));
@@ -244,7 +241,6 @@ int ReverbMenu::create_objects(BC_Hash *defaults)
 	//filemenu->add_item(set_default = new ReverbSetDefault);
 	load_defaults(defaults);
 	prev_load_thread = new ReverbLoadPrevThread(reverb, this);
-	return 0;
 }
 
 int ReverbMenu::load_defaults(BC_Hash *defaults)

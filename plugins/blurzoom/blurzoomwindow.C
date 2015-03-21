@@ -21,58 +21,22 @@
 
 #include "bcdisplayinfo.h"
 #include "blurzoomwindow.h"
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
-
-
-BlurZoomThread::BlurZoomThread(BlurZoomMain *client)
- : Thread()
-{
-	this->client = client;
-	set_synchronous(0);
-	gui_started.lock();
-	completion.lock();
-}
-
-BlurZoomThread::~BlurZoomThread()
-{
-// Window always deleted here
-	delete window;
-}
-	
-void BlurZoomThread::run()
-{
-	BC_DisplayInfo info;
-	window = new BlurZoomWindow(client, 
-		info.get_abs_cursor_x() - 105, 
-		info.get_abs_cursor_y() - 100);
-	window->create_objects();
-	gui_started.unlock();
-	int result = window->run_window();
-	completion.unlock();
-// Last command executed in thread
-	if(result) client->client_side_close();
-}
+#include "language.h"
 
 
 
 
 
 
-BlurZoomWindow::BlurZoomWindow(BlurZoomMain *client, int x, int y)
- : BC_Window(client->gui_string, 
-	x,
-	y,
+
+
+BlurZoomWindow::BlurZoomWindow(BlurZoomMain *client)
+ : PluginClientWindow(client,
 	300, 
 	170, 
 	300, 
 	170, 
-	0, 
-	0,
-	1)
+	0)
 { 
 	this->client = client; 
 }
@@ -93,11 +57,6 @@ void BlurZoomWindow::create_objects()
 	flush();
 }
 
-int BlurZoomWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
+
 
 

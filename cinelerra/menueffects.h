@@ -67,7 +67,7 @@ public:
 class MenuEffectThread : public Thread
 {
 public:
-	MenuEffectThread(MWindow *mwindow);
+	MenuEffectThread(MWindow *mwindow, MenuEffects *menu_item);
 	virtual ~MenuEffectThread();
 
 	void run();
@@ -81,8 +81,9 @@ public:
 	int test_existence(Asset *asset);
 
 	MWindow *mwindow;
-	char title[1024];
-	int dither, realtime, load_mode;
+	MenuEffects *menu_item;
+	char title[BCTEXTLEN];
+	int realtime, load_mode;
 	int strategy;
 };
 

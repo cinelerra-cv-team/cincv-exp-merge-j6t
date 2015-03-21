@@ -79,7 +79,7 @@ VWindowGUI::~VWindowGUI()
 	delete transport;
 }
 
-void VWindowGUI::change_source(EDL *edl, char *title)
+void VWindowGUI::change_source(EDL *edl, const char *title)
 {
 	update_sources(title);
 	char string[BCTEXTLEN];
@@ -97,7 +97,7 @@ void VWindowGUI::change_source(EDL *edl, char *title)
 
 
 // Get source list from master EDL
-void VWindowGUI::update_sources(char *title)
+void VWindowGUI::update_sources(const char *title)
 {
 	lock_window("VWindowGUI::update_sources");
 
@@ -163,6 +163,7 @@ void VWindowGUI::create_objects()
 {
 	in_point = 0;
 	out_point = 0;
+	lock_window("VWindowGUI::create_objects");
 	set_icon(mwindow->theme->get_image("vwindow_icon"));
 
 //printf("VWindowGUI::create_objects 1\n");
@@ -233,6 +234,7 @@ void VWindowGUI::create_objects()
 //printf("VWindowGUI::create_objects 2\n");
 	deactivate();
 	slider->activate();
+	unlock_window();
 }
 
 int VWindowGUI::resize_event(int w, int h)

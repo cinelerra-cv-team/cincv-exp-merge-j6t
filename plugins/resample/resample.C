@@ -21,6 +21,7 @@
 
 #include "bcdisplayinfo.h"
 #include "bchash.h"
+#include "bcsignals.h"
 #include "mainprogress.h"
 #include "picon_png.h"
 #include "../../cinelerra/resample.h"
@@ -94,13 +95,10 @@ ResampleEffect::ResampleEffect(PluginServer *server)
  : PluginAClient(server)
 {
 	reset();
-	load_defaults();
 }
 
 ResampleEffect::~ResampleEffect()
 {
-	save_defaults();
-	delete defaults;
 }
 
 const char* ResampleEffect::plugin_title() { return N_("Resample"); }
@@ -181,30 +179,37 @@ int ResampleEffect::process_loop(double *buffer, int64_t &write_length)
 	int result = 0;
 
 // Length to read based on desired output size
+SET_TRACE
 	int64_t size = (int64_t)((double)PluginAClient::in_buffer_size * scale);
+SET_TRACE
 	int64_t predicted_total = (int64_t)((double)(PluginClient::end - PluginClient::start) / scale + 0.5);
+SET_TRACE
 
 	double *input = new double[size];
-
+SET_TRACE
 	read_samples(input, 0, current_position, size);
 	current_position += size;
 
+SET_TRACE
 	resample->resample_chunk(input, 
 		size, 
 		1000000, 
 		(int)(1000000.0 / scale), 
 		0);
 
+SET_TRACE
 
 	if(resample->get_output_size(0))
 	{
 		int64_t output_size = resample->get_output_size(0);
 
+SET_TRACE
 		if(output_size)
 		{
 			total_written += output_size;
 		}
 
+SET_TRACE
 // Trim output to predicted length of stretched selection.
 		if(total_written > predicted_total)
 		{
@@ -212,16 +217,20 @@ int ResampleEffect::process_loop(double *buffer, int64_t &write_length)
 			result = 1;
 		}
 
+SET_TRACE
 		resample->read_output(buffer, 0, output_size);
 
+SET_TRACE
 		write_length = output_size;
 	}
 
+SET_TRACE
 	if(PluginClient::interactive) result = progress->update(total_written);
 //printf("TimeStretch::process_loop 1\n");
 
+SET_TRACE
 	delete [] input;
-//printf("TimeStretch::process_loop 2\n");
+SET_TRACE
 	return result;
 }
 

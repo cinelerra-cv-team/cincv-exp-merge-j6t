@@ -349,13 +349,13 @@ void ResourceThread::do_video(VResourceThreadItem *item)
 	}
 	else
 	{
-
 		File *source = mwindow->video_cache->check_out(item->asset,
 			mwindow->edl);
 		if(!source) 
 		{
 			return;
 		}
+
 		source->set_layer(item->layer);
 		source->set_video_position(item->position, 
 			item->frame_rate);

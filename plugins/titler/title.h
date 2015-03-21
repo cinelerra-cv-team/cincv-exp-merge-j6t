@@ -47,6 +47,7 @@
 
 class TitleMain;
 class TitleEngine;
+class TitleOutlineEngine;
 class GlyphEngine;
 class TitleTranslate;
 
@@ -105,6 +106,9 @@ public:
 	int64_t style;
 	int size;
 	int color;
+	int outline_color;
+	int alpha;
+	int outline_alpha;
 // Motion of title across frame
 	int motion_strategy;
 // Loop motion path
@@ -119,6 +123,7 @@ public:
 	float x, y;
 // Pixels down and right of dropshadow
 	int dropshadow;
+	int outline_size;
 // Calculated during every frame for motion strategy
 	int64_t prev_keyframe_position;
 	int64_t next_keyframe_position;
@@ -234,6 +239,7 @@ public:
 	void process_package(LoadPackage *package);
 	void draw_glyph(VFrame *output, TitleGlyph *glyph, int x, int y);
 	TitleMain *plugin;
+	TitleEngine *engine;
 };
 
 class TitleEngine : public LoadServer
@@ -244,8 +250,42 @@ public:
 	LoadClient* new_client();
 	LoadPackage* new_package();
 	TitleMain *plugin;
+	int do_dropshadow;
 };
 
+
+
+
+
+// Create outline
+class TitleOutlinePackage : public LoadPackage
+{
+public:
+	TitleOutlinePackage();
+	int y1, y2;
+};
+
+
+class TitleOutlineUnit : public LoadClient
+{
+public:
+	TitleOutlineUnit(TitleMain *plugin, TitleOutlineEngine *server);
+	void process_package(LoadPackage *package);
+	TitleMain *plugin;
+	TitleOutlineEngine *engine;
+};
+
+class TitleOutlineEngine : public LoadServer
+{
+public:
+	TitleOutlineEngine(TitleMain *plugin, int cpus);
+	void init_packages();
+	void do_outline();
+	LoadClient* new_client();
+	LoadPackage* new_package();
+	TitleMain *plugin;
+	int pass;
+};
 
 
 
@@ -354,12 +394,13 @@ public:
 	int load_freetype_face(FT_Library &freetype_library,
 		FT_Face &freetype_face,
 		char *path);
+	void get_color_components(int *r, int *g, int *b, int *a, int is_outline);
 
 
 
 
 
-	static char* motion_to_text(int motion);
+	static const char* motion_to_text(int motion);
 	static int text_to_motion(char *text);
 // Size of window
 	int window_w, window_h;
@@ -371,9 +412,11 @@ public:
 
 // Stage 1 parameters must be compared to redraw the text mask
 	VFrame *text_mask;
+	VFrame *outline_mask;
 	GlyphEngine *glyph_engine;
 	TitleEngine *title_engine;
 	TitleTranslate *translate;
+	TitleOutlineEngine *outline_engine;
 
 // Necessary to get character width
 	FT_Library freetype_library;      	// Freetype library
@@ -390,7 +433,6 @@ public:
 	float text_y1;
 	float text_y2;
 	float text_x1;
-	float text_x2;
 // relative position of visible part of text to output
 	float mask_y1;
 	float mask_y2;

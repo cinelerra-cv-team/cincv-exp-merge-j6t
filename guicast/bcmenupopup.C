@@ -293,6 +293,7 @@ int BC_MenuPopup::activate_menu(int x,
 					0);
 //		popup->set_background(top_level->get_resources()->menu_bg);
 	}
+
 	draw_items();
 	popup->show_window();
 	return 0;

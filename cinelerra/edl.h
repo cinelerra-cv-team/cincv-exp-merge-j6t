@@ -121,7 +121,7 @@ public:
 // If they're completely equivalent, -1 is returned;
 // This is used by BRender.
 	double equivalent_output(EDL *edl);
-// Set project path for saving a backup
+// Set project path for filename prefixes in the assets
 	void set_project_path(char *path);
 // Set points and labels
 	void set_inpoint(double position);
@@ -192,8 +192,14 @@ public:
 // Add a copy of EDL* to the clip array.  Returns the copy.
 	EDL* add_clip(EDL *edl);
 
-	void get_shared_plugins(Track *source, ArrayList<SharedLocation*> *plugin_locations);
-	void get_shared_tracks(Track *track, ArrayList<SharedLocation*> *module_locations);
+	void get_shared_plugins(Track *source, 
+		ArrayList<SharedLocation*> *plugin_locations,
+		int omit_recordable,
+		int data_type);
+	void get_shared_tracks(Track *track, 
+		ArrayList<SharedLocation*> *module_locations,
+		int omit_recordable,
+		int data_type);
 
 
     int get_tracks_height(Theme *theme);

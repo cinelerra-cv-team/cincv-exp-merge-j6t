@@ -40,7 +40,7 @@ class Save : public BC_MenuItem
 public:
 	Save(MWindow *mwindow);
 	int handle_event();
-	int create_objects(SaveAs *saveas);
+	void create_objects(SaveAs *saveas);
 	int save_before_quit();
 	
 	int quit_now;

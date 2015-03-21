@@ -24,39 +24,24 @@
 
 #include "guicast.h"
 
-class WhirlThread;
 class WhirlWindow;
 
 #include "filexml.h"
 #include "mutex.h"
 #include "whirl.h"
 
-class WhirlThread : public Thread
-{
-public:
-	WhirlThread(WhirlMain *client);
-	~WhirlThread();
-
-	void run();
-
-	Mutex gui_started; // prevent loading data until the GUI is started
-	WhirlMain *client;
-	WhirlWindow *window;
-};
-
 class AngleSlider;
 class PinchSlider;
 class RadiusSlider;
 class AutomatedFn;
 
-class WhirlWindow : public BC_Window
+class WhirlWindow : public PluginClientWindow
 {
 public:
 	WhirlWindow(WhirlMain *client);
 	~WhirlWindow();
 	
 	void create_objects();
-	int close_event();
 	
 	WhirlMain *client;
 	AngleSlider *angle_slider;

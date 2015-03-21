@@ -167,7 +167,7 @@ JPEGConfigVideo::~JPEGConfigVideo()
 void JPEGConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
-
+	lock_window("JPEGConfigVideo::create_objects");
 	add_subwindow(new BC_Title(x, y, _("Quality:")));
 	add_subwindow(new BC_ISlider(x + 80, 
 		y,
@@ -182,6 +182,7 @@ void JPEGConfigVideo::create_objects()
 		&asset->quality));
 
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 int JPEGConfigVideo::close_event()

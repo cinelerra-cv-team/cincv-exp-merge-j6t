@@ -46,13 +46,10 @@ REGISTER_PLUGIN(NormalizeMain)
 NormalizeMain::NormalizeMain(PluginServer *server)
  : PluginAClient(server)
 {
-	load_defaults();
 }
 
 NormalizeMain::~NormalizeMain()
 {
-	save_defaults();
-	delete defaults;
 }
 
 const char* NormalizeMain::plugin_title() { return N_("Normalize"); }

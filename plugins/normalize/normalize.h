@@ -56,7 +56,6 @@ public:
 	int load_defaults();  
 	int save_defaults();  
 
-	BC_Hash *defaults;
 	MainProgressBar *progress;
 
 // Current state of process_loop

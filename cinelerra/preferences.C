@@ -34,7 +34,10 @@
 #include "theme.h"
 #include "videoconfig.h"
 #include "videodevice.inc"
+
 #include <string.h>
+#include <unistd.h>
+
 
 //#define CLAMP(x, y, z) (x) = ((x) < (y) ? (y) : ((x) > (z) ? (z) : (x)))
 
@@ -150,7 +153,7 @@ void Preferences::copy_from(Preferences *that)
 	index_size = that->index_size;
 	index_count = that->index_count;
 	use_thumbnails = that->use_thumbnails;
-	strcpy(global_plugin_dir, that->global_plugin_dir);
+	strcpy(plugin_dir, that->plugin_dir);
 	strcpy(theme, that->theme);
 
 	use_tipwindow = that->use_tipwindow;
@@ -192,12 +195,12 @@ void Preferences::copy_from(Preferences *that)
 		fs.add_end_slash(index_directory);
 	}
 	
-	if(strlen(global_plugin_dir))
-	{
-		fs.complete_path(global_plugin_dir);
-		fs.add_end_slash(global_plugin_dir);
-	}
-
+// 	if(strlen(global_plugin_dir))
+// 	{
+// 		fs.complete_path(global_plugin_dir);
+// 		fs.add_end_slash(global_plugin_dir);
+// 	}
+// 
 	boundaries();
 }
 
@@ -263,12 +266,12 @@ int Preferences::load_defaults(BC_Hash *defaults)
 	index_count = defaults->get("INDEX_COUNT", index_count);
 	use_thumbnails = defaults->get("USE_THUMBNAILS", use_thumbnails);
 
-	sprintf(global_plugin_dir, PLUGIN_DIR);
+	sprintf(plugin_dir, PLUGIN_DIR);
 //	defaults->get("GLOBAL_PLUGIN_DIR", global_plugin_dir);
-	if(getenv("GLOBAL_PLUGIN_DIR"))
-	{
-		strcpy(global_plugin_dir, getenv("GLOBAL_PLUGIN_DIR"));
-	}
+//	if(getenv("GLOBAL_PLUGIN_DIR"))
+//	{
+//		strcpy(global_plugin_dir, getenv("GLOBAL_PLUGIN_DIR"));
+//	}
 
 	strcpy(theme, DEFAULT_THEME);
 	defaults->get("THEME", theme);

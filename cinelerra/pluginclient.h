@@ -265,6 +265,8 @@ public:
 // Used by themes
 // Used by plugins which need to know where they are.
 	char* get_path();
+// Get the directory for plugins
+	char* get_plugin_dir();
 
 // Return keyframe objects.  The position in the resulting object 
 // is relative to the EDL rate.  This is the only way to avoid copying the

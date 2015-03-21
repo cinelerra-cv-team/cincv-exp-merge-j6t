@@ -40,7 +40,7 @@
 #define NEAREST_NEIGHBOR 0        // Nearest for enlargement and reduction
 #define CUBIC_CUBIC      1        // Bicubic enlargement and reduction
 #define CUBIC_LINEAR     2        // Bicubic enlargement and linear reduction
-#define LINEAR_LINEAR    3        // Not explicitely called but used for user
+#define LINEAR_LINEAR    3        // Not explicitely called but provided for user
 
 class OverlayFrame;
 

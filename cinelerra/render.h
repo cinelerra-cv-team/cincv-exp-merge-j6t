@@ -249,7 +249,11 @@ public:
 class RenderWindow : public BC_Window
 {
 public:
-	RenderWindow(MWindow *mwindow, Render *render, Asset *asset);
+	RenderWindow(MWindow *mwindow, 
+		Render *render, 
+		Asset *asset,
+		int x,
+		int y);
 	~RenderWindow();
 
 	void create_objects();

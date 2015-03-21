@@ -68,6 +68,9 @@ public:
 	virtual int increase_value_big() { return 0; };
 	virtual int decrease_value_big() { return 0; };
 	virtual char* get_caption() { return caption; };
+	void enable();
+	void disable();
+
 
 private:
 

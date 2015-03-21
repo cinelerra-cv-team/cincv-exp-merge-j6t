@@ -25,6 +25,7 @@
 #include "bcnewfolder.h"
 #include "bcpixmap.h"
 #include "bcresources.h"
+#include "bcsignals.h"
 #include "bctitle.h"
 #include "clip.h"
 #include "condition.h"
@@ -496,14 +497,19 @@ BC_FileBox::BC_FileBox(int x,
 
 
 
-// Test directory
-	if(fs->update(directory))
+// Test if current directory exists
+	if(!fs->is_dir(directory))
 	{
 		sprintf(this->current_path, "~");
 		fs->complete_path(this->current_path);
-		fs->update(this->current_path);
+		fs->set_current_dir(this->current_path);
+//		fs->update(this->current_path);
 		strcpy(directory, fs->get_current_dir());
 		sprintf(filename, "");
+	}
+	else
+	{
+		fs->change_dir(directory, 0);
 	}
 
 
@@ -554,7 +560,7 @@ void BC_FileBox::create_objects()
 		fs->set_filter(get_resources()->filebox_filter);
 	}
 
-	fs->update(directory);
+//	fs->update(directory);
 	create_icons();
 	create_tables();
 
@@ -913,8 +919,8 @@ int BC_FileBox::refresh()
 		column_titles, 
 		column_width,
 		columns, 
-		0, 
-		0,
+		listbox->get_xposition(), 
+		listbox->get_yposition(),
 		-1, 
 		1);
 
@@ -924,7 +930,7 @@ int BC_FileBox::refresh()
 int BC_FileBox::update_filter(const char *filter)
 {
 	fs->set_filter(filter);
-	fs->update(0);
+//	fs->update(0);
 	refresh();
 	strcpy(get_resources()->filebox_filter, filter);
 
@@ -994,7 +1000,7 @@ int BC_FileBox::submit_dir(char *dir)
 	strcpy(directory, dir);
 	fs->join_names(current_path, directory, filename);
 	strcpy(submitted_path, current_path);
-	fs->change_dir(dir);
+	fs->change_dir(dir, 0);
 	refresh();
 	directory_title->update(fs->get_current_dir());
 	if(want_directory)
@@ -1026,7 +1032,7 @@ int BC_FileBox::submit_file(char *path, int use_this)
 // is a directory, change directories
 	if(fs->is_dir(path) && !use_this)
 	{
-		fs->change_dir(path);
+		fs->change_dir(path, 0);
 		refresh();
 		directory_title->update(fs->get_current_dir());
 		strcpy(this->current_path, fs->get_current_dir());
@@ -1074,37 +1080,103 @@ void BC_FileBox::update_history()
 // Look for path already in history
 	BC_Resources *resources = get_resources();
 	int new_slot = FILEBOX_HISTORY_SIZE - 1;
+
 	for(int i = FILEBOX_HISTORY_SIZE - 1; i >= 0; i--)
 	{
-		if(!strcmp(resources->filebox_history[i], directory))
+		if(resources->filebox_history[i].path[0] &&
+			!strcmp(resources->filebox_history[i].path, directory))
 		{
-// Shift down from this point
-			while(i > 0)
-			{
-				strcpy(resources->filebox_history[i], 
-					resources->filebox_history[i - 1]);
-				if(resources->filebox_history[i][0]) new_slot--;
-				i--;
-			}
-			break;
+// Got matching path.
+// Update ID.
+			resources->filebox_history[i].id = resources->get_filebox_id();
+			return;
 		}
-		else
-			if(resources->filebox_history[i][0])
-				new_slot--;
-		else
-			break;
+// // Shift down from this point.
+// 			while(i > 0)
+// 			{
+// 				strcpy(resources->filebox_history[i], 
+// 					resources->filebox_history[i - 1]);
+// 				if(resources->filebox_history[i][0]) new_slot--;
+// 				i--;
+// 			}
+// 			break;
+// 		}
+// 		else
+// 			if(resources->filebox_history[i][0])
+// 				new_slot--;
+// 		else
+// 			break;
 	}
 
-	if(new_slot < 0)
+// Remove oldest entry if full
+	if(resources->filebox_history[FILEBOX_HISTORY_SIZE - 1].path[0])
 	{
-		for(int i = FILEBOX_HISTORY_SIZE - 1; i > 0; i--)
+		int oldest_id = 0x7fffffff;
+		int oldest = 0;
+		for(int i = 0; i < FILEBOX_HISTORY_SIZE; i++)
 		{
-			strcpy(resources->filebox_history[i], 
-					resources->filebox_history[i - 1]);
+			if(resources->filebox_history[i].path[0] &&
+				resources->filebox_history[i].id < oldest_id)
+			{
+				oldest_id = resources->filebox_history[i].id;
+				oldest = i;
+			}
 		}
-		new_slot = 0;
+
+		for(int i = oldest; i < FILEBOX_HISTORY_SIZE - 1; i++)
+		{
+			strcpy(resources->filebox_history[i].path,
+				resources->filebox_history[i + 1].path);
+			resources->filebox_history[i].id = 
+				resources->filebox_history[i + 1].id;
+		}
 	}
-	strcpy(resources->filebox_history[new_slot], directory);
+
+// Create new entry
+	strcpy(resources->filebox_history[FILEBOX_HISTORY_SIZE - 1].path,
+		directory);
+	resources->filebox_history[FILEBOX_HISTORY_SIZE - 1].id = resources->get_filebox_id();
+
+// Alphabetize
+	int done = 0;
+	while(!done)
+	{
+		done = 1;
+		for(int i = 1; i < FILEBOX_HISTORY_SIZE; i++)
+		{
+			if((resources->filebox_history[i - 1].path[0] &&
+				resources->filebox_history[i].path[0] &&
+				strcasecmp(resources->filebox_history[i - 1].path,
+					resources->filebox_history[i].path) > 0) ||
+				resources->filebox_history[i - 1].path[0] == 0 &&
+				resources->filebox_history[i].path[0])
+			{
+				done = 0;
+				char temp[BCTEXTLEN];
+				int id_temp;
+				strcpy(temp, resources->filebox_history[i - 1].path);
+				id_temp = resources->filebox_history[i - 1].id;
+				strcpy(resources->filebox_history[i - 1].path,
+					resources->filebox_history[i].path);
+				resources->filebox_history[i - 1].id = 
+					resources->filebox_history[i].id;
+				strcpy(resources->filebox_history[i].path, temp);
+				resources->filebox_history[i].id = id_temp;
+			}
+		}
+	}
+
+// 	if(new_slot < 0)
+// 	{
+// 		for(int i = FILEBOX_HISTORY_SIZE - 1; i > 0; i--)
+// 		{
+// 			strcpy(resources->filebox_history[i], 
+// 					resources->filebox_history[i - 1]);
+// 		}
+// 		new_slot = 0;
+// 	}
+// 
+// 	strcpy(resources->filebox_history[new_slot], directory);
 
 	create_history();
 	recent_popup->update(&recent_dirs,
@@ -1119,9 +1191,9 @@ void BC_FileBox::create_history()
 	recent_dirs.remove_all_objects();
 	for(int i = 0; i < FILEBOX_HISTORY_SIZE; i++)
 	{
-		if(resources->filebox_history[i][0])
+		if(resources->filebox_history[i].path[0])
 		{
-			recent_dirs.append(new BC_ListBoxItem(resources->filebox_history[i]));
+			recent_dirs.append(new BC_ListBoxItem(resources->filebox_history[i].path));
 		}
 	}
 }

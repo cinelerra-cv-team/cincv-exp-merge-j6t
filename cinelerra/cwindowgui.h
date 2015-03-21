@@ -116,8 +116,10 @@ public:
 	FloatAuto *affected_x;
 	FloatAuto *affected_y;
 	FloatAuto *affected_z;
-// Keyfrom not affecting transformation being affected
-	Auto *affected_keyframe;
+// Pointer to mask keyframe being modified in the EDL
+	MaskAuto *mask_keyframe;
+// Copy of original value of mask keyframe for keyframe spanning
+	MaskAuto *orig_mask_keyframe;
 // Mask point being modified
 	int affected_point;
 // Scrollbar offsets during last button press relative to output
@@ -134,6 +136,10 @@ public:
 // Origin of all 4 crop points during last button press
 	float crop_origin_x1, crop_origin_y1;
 	float crop_origin_x2, crop_origin_y2;
+
+	float ruler_origin_x, ruler_origin_y;
+	int ruler_handle;
+	int ruler_translate;
 
 // Origin for camera and projector operations during last button press
 	float center_x, center_y, center_z;
@@ -265,6 +271,7 @@ public:
 		int &redraw_canvas, 
 		int &rerender,
 		int do_camera);
+	int do_ruler(int draw, int motion, int button_press, int button_release);
 	int test_zoom(int &redraw);
 	void reset_camera();
 	void reset_projector();

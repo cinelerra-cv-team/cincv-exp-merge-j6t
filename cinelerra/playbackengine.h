@@ -92,6 +92,8 @@ public:
 	Timer tracking_timer;
 // Lock access to tracking data
 	Mutex *tracking_lock;
+// Lock access to renderengine between interrupt and deletion
+	Mutex *renderengine_lock;
 // Block returns until tracking loop is finished
 	Condition *tracking_done;
 // Pause the main loop for the PAUSE command

@@ -21,6 +21,7 @@
 
 #include "edl.h"
 #include "filexml.h"
+#include "language.h"
 #include "plugin.h"
 #include "sharedlocation.h"
 #include "track.h"
@@ -32,10 +33,6 @@
 
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 SharedLocation::SharedLocation()
@@ -81,6 +78,7 @@ int SharedLocation::get_type()
 
 int SharedLocation::operator==(const SharedLocation &that)
 {
+//printf("SharedLocation::operator== called\n");
 	if(
 		module == that.module &&
 		plugin == that.plugin
@@ -89,12 +87,31 @@ int SharedLocation::operator==(const SharedLocation &that)
 	return 0;
 }
 
+int SharedLocation::equivalent(SharedLocation *that)
+{
+	if(
+		module == that->module &&
+		plugin == that->plugin
+	) return 1;
+	else
+	return 0;
+	
+}
+
 SharedLocation& SharedLocation::operator=(const SharedLocation &that)
 {
+//printf("SharedLocation::operator= called\n");
 	this->plugin = that.plugin;
 	this->module = that.module;
 	return *this;
 }
+
+void SharedLocation::copy_from(SharedLocation *that)
+{
+	this->plugin = that->plugin;
+	this->module = that->module;
+}
+
 
 void SharedLocation::calculate_title(char *string, 
 	EDL *edl, 

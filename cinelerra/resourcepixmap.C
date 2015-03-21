@@ -457,6 +457,7 @@ void ResourcePixmap::draw_audio_resource(Edit *edit, int x, int w)
 		mwindow->edl->session->sample_rate;
 
 // Develop strategy for drawing
+//	printf("ResourcePixmap::draw_audio_resource %d %d\n", __LINE__, edit->asset->index_status);
 	switch(edit->asset->index_status)
 	{
 		case INDEX_NOTTESTED:

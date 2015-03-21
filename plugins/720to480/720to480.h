@@ -37,8 +37,8 @@ public:
 	
 	void create_objects();
 	int close_event();
-	int set_first_field(int first_field);
-	int set_direction(int direction);
+	void set_first_field(int first_field);
+	void set_direction(int direction);
 
 	_720to480Main *client;
 	_720to480Order *odd_first;

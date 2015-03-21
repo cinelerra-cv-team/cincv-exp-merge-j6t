@@ -62,11 +62,8 @@ public:
 	int automated_function;
 	int reconfigure_flag;
 
-// a thread for the GUI
-	YUVThread *thread;
 
 private:
-	BC_Hash *defaults;
 	YUVEngine **engine;
 };
 

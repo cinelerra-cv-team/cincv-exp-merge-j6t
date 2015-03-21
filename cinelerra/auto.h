@@ -48,7 +48,10 @@ public:
 	/* create an interpolation using a1 and a2, (defaulting to previous and next)  */
 	/* if not possible, just fill from a1 (or from template if given) and return 0  */ 	
 	virtual int interpolate_from(Auto *a1, Auto *a2, int64_t new_position, Auto *templ=0);
-	virtual void copy(int64_t start, int64_t end, FileXML *file, int default_only);
+	virtual void copy(int64_t start, 
+		int64_t end, 
+		FileXML *file, 
+		int default_only);
 
 	virtual void load(FileXML *file);
 
@@ -62,6 +65,13 @@ public:
 // Units native to the track
 	int is_default;
 	int64_t position;
+// Calculation to use for floats
+	int mode;
+	enum
+	{
+		BEZIER,
+		LINEAR
+	}; 
 
 private:
 	virtual int value_to_str(char *string, float value) {};

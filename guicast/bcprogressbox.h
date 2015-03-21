@@ -47,7 +47,6 @@ public:
 
 private:
 	BC_ProgressWindow *pwindow;
-	char *display;
 	const char *text;
 	int cancelled;
 	int64_t length;

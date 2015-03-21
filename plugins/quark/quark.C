@@ -185,7 +185,7 @@ void SharpenMain::load_configuration()
 	prev_keyframe = get_prev_keyframe(-1);
 	next_keyframe = get_next_keyframe(-1);
 // Must also switch between interpolation between keyframes and using first keyframe
-//printf("BlurMain::load_configuration %s\n", prev_keyframe->data);
+//printf("BlurMain::load_configuration %s\n", prev_keyframe->get_data());
 	read_data(prev_keyframe);
 }
 
@@ -214,7 +214,7 @@ void SharpenMain::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("SHARPNESS");
 	output.tag.set_property("VALUE", sharpness);
 	output.append_tag();
@@ -245,7 +245,7 @@ void SharpenMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 	int new_interlace = 0;

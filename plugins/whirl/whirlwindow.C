@@ -19,34 +19,11 @@
  * 
  */
 
+#include "language.h"
 #include "whirlwindow.h"
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
-WhirlThread::WhirlThread(WhirlMain *client)
- : Thread()
-{
-	this->client = client;
-	synchronous = 1; // make thread wait for join
-	gui_started.lock();
-}
-
-WhirlThread::~WhirlThread()
-{
-}
-	
-void WhirlThread::run()
-{
-	window = new WhirlWindow(client);
-	window->create_objects();
-	gui_started.unlock();
-	window->run_window();
-	delete window;
-}
 
 
 
@@ -54,7 +31,7 @@ void WhirlThread::run()
 
 
 WhirlWindow::WhirlWindow(WhirlMain *client)
- : BC_Window("", MEGREY, client->gui_string, 210, 170, 200, 170, 0, !client->show_initially)
+ : PluginClientWindow("client, 210, 170, 200, 170, 0)
 { this->client = client; }
 
 WhirlWindow::~WhirlWindow()
@@ -86,12 +63,6 @@ void WhirlWindow::create_objects()
 	add_tool(radius_slider = new RadiusSlider(client, x, y));
 }
 
-int WhirlWindow::close_event()
-{
-	client->save_defaults();
-	hide_window();
-	client->send_hide_gui();
-}
 
 AngleSlider::AngleSlider(WhirlMain *client, int x, int y)
  : BC_ISlider(x, y, 190, 30, 200, client->angle, -MAXANGLE, MAXANGLE, DKGREY, BLACK, 1)

@@ -23,21 +23,22 @@
 #define KEYFRAMEPOPUP_H
 
 #include "guicast.h"
+#include "keyframegui.inc"
 #include "mwindow.inc"
 #include "mwindowgui.inc"
 #include "plugin.inc"
 #include "plugindialog.inc"
 #include "keyframe.inc"
-#include "automation.h" 
+#include "automation.inc" 
 #include "floatauto.h"
 
 
 class KeyframePopupDelete;
-class KeyframePopupShow;
+class KeyframePopupHide;
 class KeyframePopupCopy;
 class KeyframePopupTangentMode;
- 
- 
+class KeyframePopupEdit;
+
 class KeyframePopup : public BC_PopupMenu
 {
 public:
@@ -51,7 +52,6 @@ public:
 	MWindow *mwindow;
 	MWindowGUI *gui;
 // Acquired through the update command as the plugin currently being operated on
-	
 	Plugin *keyframe_plugin;
 	Autos *keyframe_autos;
 	Automation *keyframe_automation;
@@ -61,8 +61,9 @@ public:
 
 private:	
 	KeyframePopupDelete *key_delete;
-	KeyframePopupShow *key_show;
+	KeyframePopupHide *key_hide;
 	KeyframePopupCopy *key_copy;
+	KeyframePopupEdit *edit;
 	KeyframePopupTangentMode *tan_smooth, *tan_linear, *tan_free_t, *tan_free;
 	BC_MenuItem * __hline__;
 	
@@ -80,11 +81,10 @@ public:
 	KeyframePopup *popup;
 };
 
-class KeyframePopupShow : public BC_MenuItem
+class KeyframePopupHide : public BC_MenuItem
 {
 public:
-	KeyframePopupShow(MWindow *mwindow, KeyframePopup *popup);
-	~KeyframePopupShow();
+	KeyframePopupHide(MWindow *mwindow, KeyframePopup *popup);
 	int handle_event();
 	
 	MWindow *mwindow;
@@ -95,12 +95,23 @@ class KeyframePopupCopy : public BC_MenuItem
 {
 public:
 	KeyframePopupCopy(MWindow *mwindow, KeyframePopup *popup);
-	~KeyframePopupCopy();
 	int handle_event();
 	
 	MWindow *mwindow;
 	KeyframePopup *popup;
 };
+
+
+class KeyframePopupEdit : public BC_MenuItem
+{
+public:
+	KeyframePopupEdit(MWindow *mwindow, KeyframePopup *popup);
+	int handle_event();
+	
+	MWindow *mwindow;
+	KeyframePopup *popup;
+};
+
 
 class KeyframePopupTangentMode : public BC_MenuItem
 {
@@ -118,5 +129,6 @@ private:
     
 friend class KeyframePopup;
 };
+
 
  #endif

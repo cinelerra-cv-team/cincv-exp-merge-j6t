@@ -43,6 +43,7 @@ public:
 
 	virtual int handle_event() { return 0; };
 	int get_value();
+	void set_radial(int value);
 	int set_value(int value, int draw = 1);
 	void set_select_drag(int value);
 	int update(int value, int draw = 1);
@@ -72,7 +73,7 @@ public:
 // In select drag mode these 3 need to be overridden and called back to.
 	virtual int button_press_event();
 	virtual int button_release_event();
-	int cursor_motion_event();
+	virtual int cursor_motion_event();
 	int repeat_event(int64_t repeat_id);
 	int draw_face();
 

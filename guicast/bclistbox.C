@@ -416,6 +416,7 @@ BC_ListBox::BC_ListBox(int x,
 		printf("BC_ListBox::BC_ListBox either column_titles or column_widths == NULL but not both.\n");
 	}
 //printf("BC_ListBox::BC_ListBox 2 %p %p\n", column_titles, column_width);
+
 	set_columns(column_titles, 
 		column_width, 
 		columns);
@@ -1595,7 +1596,7 @@ int BC_ListBox::select_previous(int skip,
 	int done = 0;
 
 // Scan backwards to item pointer.  Then count visible items to get 
-// destination.  Repeat to get wraparound.
+// destination.  No wraparound.
 	do
 	{
 		for(int i = data[master_column].total - 1; i >= 0; i--)
@@ -1639,8 +1640,19 @@ int BC_ListBox::select_previous(int skip,
 			}
 		}
 
-// Hit bottom of top level without finding a selected item.
-		if(top_level && !(*got_first)) (*got_first) = 1;
+// Hit top of top level without finding a selected item.
+		if(top_level)
+		{
+// Select first item in top level and quit
+			BC_ListBoxItem *current_item;
+			(*got_first) = 1;
+			current_item = data[master_column].values[0];
+
+			for(int j = 0; j < columns; j++)
+				data[j].values[0]->selected = 1;
+			(*got_second) = 1;
+			return item_to_index(this->data, current_item);
+		}
 	}while(top_level && data[master_column].total);
 	return -1;
 }
@@ -1671,13 +1683,16 @@ int BC_ListBox::select_next(int skip,
 		data = this->data;
 	int done = 0;
 
-// Scan backwards to item pointer.  Then count visible items to get 
-// destination.  Repeat to get wraparound.
+// Scan forwards to currently selected item pointer.  
+// Then count visible items to get destination.  No wraparound.
 	do
 	{
 		for(int i = 0; i < data[master_column].total; i++)
 		{
 			BC_ListBoxItem *current_item = data[master_column].values[i];
+
+// Select next item once the number items after the currently selected item
+// have been passed.
 			if(*got_first)
 			{
 				(*counter)++;
@@ -1691,6 +1706,7 @@ int BC_ListBox::select_next(int skip,
 			}
 			else
 			{
+// Got currently selected item.  Deselect it.
 				if(current_item->selected)
 				{
 					for(int j = 0; j < columns; j++)
@@ -1700,6 +1716,7 @@ int BC_ListBox::select_next(int skip,
 				}
 			}
 
+// Descend into expanded level
 			if(current_item->get_sublist() &&
 				current_item->get_expand())
 			{
@@ -1716,9 +1733,36 @@ int BC_ListBox::select_next(int skip,
 			}
 		}
 
-// Hit bottom of top level without finding a selected item.
-		if(top_level && !(*got_first)) (*got_first) = 1;
+// Hit bottom of top level without finding the next item.
+		if(top_level)
+		{
+			BC_ListBoxItem *current_item;
+// Select first item in top level and quit
+			if(!(*got_first))
+			{
+				(*got_first) = 1;
+				current_item = data[master_column].values[0];
+
+				for(int j = 0; j < columns; j++)
+					data[j].values[0]->selected = 1;
+				(*got_second) = 1;
+			}
+			else
+			{
+// Select last item in top level and quit
+				(*got_first) = 1;
+				int current_row = data[master_column].total - 1;
+				current_item = data[master_column].values[current_row];
+
+				for(int j = 0; j < columns; j++)
+					data[j].values[current_row]->selected = 1;
+				(*got_second) = 1;
+			}
+
+			return item_to_index(this->data, current_item);
+		}
 	}while(top_level && data[master_column].total);
+
 	return -1;
 }
 
@@ -3899,9 +3943,10 @@ int BC_ListBox::activate()
 int BC_ListBox::keypress_event()
 {
 	if(!active) return 0;
-	
+
+
 	int result = 0, redraw = 0, done, view_items = view_h / get_text_height(MEDIUMFONT);
-	int new_item = -1, new_selection = 0;
+	int new_item = -1, new_selection = -1;
 
 	switch(top_level->get_keypress())
 	{
@@ -4004,7 +4049,6 @@ int BC_ListBox::keypress_event()
 	{
 		selection_changed();
 	}
-
 	return result;
 }
 

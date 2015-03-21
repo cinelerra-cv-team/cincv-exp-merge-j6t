@@ -49,8 +49,13 @@ public:
 	virtual void copy_from(Edits *edits);
 	virtual Edits& operator=(Edits& edits);
 // Editing
-	void insert_edits(Edits *edits, int64_t position);
-	void insert_asset(Asset *asset, int64_t length, int64_t sample, int track_number);
+	void insert_edits(Edits *edits, 
+		int64_t position,
+		int64_t min_length);
+	void insert_asset(Asset *asset, 
+		int64_t length, 
+		int64_t sample, 
+		int track_number);
 // Split edit containing position.
 // Return the second edit in the split.
 	Edit* split_edit(int64_t position);

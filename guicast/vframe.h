@@ -95,6 +95,8 @@ public:
 	int equals(VFrame *frame);
 // Test if frame already matches parameters
 	int params_match(int w, int h, int color_model);
+// Test if data values in the frame match
+	int data_matches(VFrame *frame);
 
 	long set_shm_offset(long offset);
 	long get_shm_offset();

@@ -50,6 +50,8 @@ public:
 // Get keyframe for editing in the CWindow.
 // create - if 0 forces automatic creation to be off
 //          if 1 uses automatic creation option to create
+// created - set to 1 if an auto was created
+// redraw - redraw MWindow overlays if 1
 	Auto* calculate_affected_auto(Autos *autos, 
 		int create = 1,
 		int *created = 0,

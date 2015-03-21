@@ -43,10 +43,6 @@ class FrameFieldWindow;
 
 
 
-// 601 to RGB expansion is provided as a convenience for OpenGL users since
-// frame bobbing is normally done during playback together with 601 to RGB expansion.
-// It's not optimized for software.
-
 
 class FrameFieldConfig
 {
@@ -612,7 +608,7 @@ void FrameField::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("FRAME_FIELD");
 	output.tag.set_property("DOMINANCE", config.field_dominance);
 	output.append_tag();
@@ -625,7 +621,7 @@ void FrameField::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 

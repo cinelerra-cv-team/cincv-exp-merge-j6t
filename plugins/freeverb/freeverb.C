@@ -24,6 +24,7 @@
 #include "bchash.h"
 #include "guicast.h"
 #include "filexml.h"
+#include "language.h"
 #include "picon_png.h"
 #include "pluginaclient.h"
 #include "revmodel.hpp"
@@ -33,10 +34,6 @@
 #include <math.h>
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 
@@ -471,7 +468,7 @@ int FreeverbEffect::is_multichannel() { return 1; }
 void FreeverbEffect::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 	while(!result)
@@ -497,7 +494,7 @@ void FreeverbEffect::read_data(KeyFrame *keyframe)
 void FreeverbEffect::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("FREEVERB");
 	output.tag.set_property("GAIN", config.gain);
@@ -567,7 +564,9 @@ void FreeverbEffect::update_gui()
 	}
 }
 
-int FreeverbEffect::process_realtime(int64_t size, double **input_ptr, double **output_ptr)
+int FreeverbEffect::process_realtime(int64_t size, 
+	double **input_ptr, 
+	double **output_ptr)
 {
 	load_configuration();
 	if(!engine) engine = new revmodel;
@@ -578,6 +577,15 @@ int FreeverbEffect::process_realtime(int64_t size, double **input_ptr, double **
 	engine->setdry(DB::fromdb(config.dry));
 	engine->setwidth(DB::fromdb(config.width));
 	engine->setmode(config.mode);
+
+// printf("FreeverbEffect::process_realtime %d %f %f %f %f %f %d\n",
+// __LINE__,
+// DB::fromdb(config.roomsize),
+// DB::fromdb(config.damp),
+// DB::fromdb(config.wet),
+// DB::fromdb(config.dry),
+// DB::fromdb(config.width),
+// (int)config.mode);
 
 	float gain_f = DB::fromdb(config.gain);
 
@@ -596,6 +604,7 @@ int FreeverbEffect::process_realtime(int64_t size, double **input_ptr, double **
 		temp = 0;
 		temp_out = 0;
 	}
+
 	if(!temp)
 	{
 		temp_allocated = size * 2;
@@ -629,6 +638,7 @@ int FreeverbEffect::process_realtime(int64_t size, double **input_ptr, double **
 	}
 	else
 	{
+// 2 channels max
 		engine->processreplace(temp[0], 
 			temp[1], 
 			temp_out[0], 

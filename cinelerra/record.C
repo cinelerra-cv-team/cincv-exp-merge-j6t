@@ -159,6 +159,7 @@ Record::~Record()
 
 int Record::load_defaults()
 {
+
 	char string[BCTEXTLEN];
 	BC_Hash *defaults = mwindow->defaults;
 

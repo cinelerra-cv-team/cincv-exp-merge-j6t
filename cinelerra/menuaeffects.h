@@ -39,7 +39,7 @@ public:
 class MenuAEffectThread : public MenuEffectThread
 {
 public:
-	MenuAEffectThread(MWindow *mwindow);
+	MenuAEffectThread(MWindow *mwindow, MenuAEffects *menu_item);
 	~MenuAEffectThread();
 
 	int get_recordable_tracks(Asset *asset);

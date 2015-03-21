@@ -314,6 +314,42 @@ public:
 	int is_mwindow;
 };
 
+class EditPrevEdit : public BC_Button
+{
+public:
+	EditPrevEdit(MWindow *mwindow, 
+		EditPanel *panel, 
+		int x, 
+		int y,
+		int is_mwindow);
+	~EditPrevEdit();
+
+	int keypress_event();
+	int handle_event();
+
+	MWindow *mwindow;
+	EditPanel *panel;
+	int is_mwindow;
+};
+
+class EditNextEdit : public BC_Button
+{
+public:
+	EditNextEdit(MWindow *mwindow, 
+		EditPanel *panel, 
+		int x, 
+		int y,
+		int is_mwindow);
+	~EditNextEdit();
+
+	int keypress_event();
+	int handle_event();
+
+	MWindow *mwindow;
+	EditPanel *panel;
+	int is_mwindow;
+};
+
 
 class ArrowButton : public BC_Toggle
 {
@@ -394,6 +430,8 @@ public:
 	virtual void toggle_label();
 	virtual void prev_label();
 	virtual void next_label();
+	virtual void prev_edit();
+	virtual void next_edit();
 
 	MWindow *mwindow;
 	BC_WindowBase *subwindow;
@@ -436,6 +474,8 @@ public:
 	EditLabelbutton *labelbutton;
 	EditPrevLabel *prevlabel;
 	EditNextLabel *nextlabel;
+	EditPrevEdit *prevedit;
+	EditNextEdit *nextedit;
 	EditUndo *undo;
 	EditRedo *redo;
 	MeterShow *meters;

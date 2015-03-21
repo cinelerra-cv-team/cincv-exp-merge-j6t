@@ -51,7 +51,7 @@ public:
 				Asset *asset);
 	virtual ~FormatTools();
 
-	int create_objects(int &init_x, 
+	void create_objects(int &init_x, 
 						int &init_y, 
 						int do_audio,    // Include tools for audio
 						int do_video,   // Include tools for video
@@ -81,6 +81,7 @@ public:
 
 	int set_audio_options();
 	int set_video_options();
+	void set_w(int w);
 	int get_w();
 
 	BC_WindowBase *window;
@@ -175,9 +176,11 @@ public:
 	~FormatAThread();
 	
 	void run();
+	void start();
 
 	FormatTools *format;
 	File *file;
+	int joined;
 };
 
 class FormatVThread : public Thread
@@ -187,9 +190,11 @@ public:
 	~FormatVThread();
 	
 	void run();
+	void start();
 
 	FormatTools *format;
 	File *file;
+	int joined;
 };
 
 class FormatAudio : public BC_CheckBox

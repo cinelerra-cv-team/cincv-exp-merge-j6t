@@ -145,6 +145,8 @@ ColorWindow::ColorWindow(ColorThread *thread, int x, int y, char *title)
 void ColorWindow::create_objects()
 {
 	int x = 10, init_x = 10, y = 10, init_y = 10;
+	
+	lock_window("ColorWindow::create_objects");
 	change_values();
 	
 	
@@ -213,8 +215,10 @@ void ColorWindow::create_objects()
 		add_tool(alpha = new PaletteAlpha(this, x, y));
 	}
 
+	update_display();
 	show_window();
 	flush();
+	unlock_window();
 	return;
 }
 

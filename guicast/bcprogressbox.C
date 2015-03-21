@@ -92,7 +92,9 @@ int BC_ProgressBox::is_cancelled()
 
 int BC_ProgressBox::stop_progress()
 {
+	pwindow->lock_window("BC_ProgressBox::stop_progress");
 	pwindow->set_done(0);
+	pwindow->unlock_window();
 	Thread::join();
 	return 0;
 }
@@ -129,6 +131,7 @@ int BC_ProgressWindow::create_objects(const char *text, int64_t length)
 {
 	int x = 10, y = 10;
 
+	lock_window("BC_ProgressWindow::create_objects");
 // Recalculate width based on text
 	if(text)
 	{
@@ -147,6 +150,11 @@ int BC_ProgressWindow::create_objects(const char *text, int64_t length)
 	y += caption->get_h() + 20;
 	add_tool(bar = new BC_ProgressBar(x, y, get_w() - 20, length));
 	add_tool(new BC_CancelButton(this));
+	unlock_window();
 
 	return 0;
 }
+
+
+
+

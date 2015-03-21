@@ -75,6 +75,7 @@ RecordGUI::RecordGUI(MWindow *mwindow, Record *record)
 RecordGUI::~RecordGUI()
 {
 TRACE("RecordGUI::~RecordGUI 1");
+	lock_window("RecordGUI::~RecordGUI");
 	delete status_thread;
 	delete batch_source;
 	delete batch_mode;
@@ -83,6 +84,7 @@ TRACE("RecordGUI::~RecordGUI 1");
 	delete batch_start;
 	delete batch_duration;
 	delete load_mode;
+	unlock_window();
 TRACE("RecordGUI::~RecordGUI 2");
 }
 
@@ -135,6 +137,7 @@ void RecordGUI::create_objects()
 	char string[BCTEXTLEN];
 	flash_color = RED;
 
+	lock_window("RecordGUI::create_objects");
 	status_thread = new RecordStatusThread(mwindow, this);
 	status_thread->start();
 	set_icon(mwindow->theme->get_image("record_icon"));
@@ -401,7 +404,7 @@ void RecordGUI::create_objects()
 	if(monitor_audio) y += monitor_audio->get_h();
 
 	int bottom_margin = MAX(BC_OKButton::calculate_h(), 
-		LoadMode::calculate_h(this)) + 5;
+		LoadMode::calculate_h(this, mwindow->theme)) + 5;
 
 
 	add_subwindow(batch_list = new RecordGUIBatches(record, 
@@ -413,9 +416,10 @@ void RecordGUI::create_objects()
 	y += batch_list->get_h() + 5;
 
 // Controls
+	int loadmode_w = LoadMode::calculate_w(this, mwindow->theme, 1);
 	load_mode = new LoadMode(mwindow,
 		this, 
-		get_w() / 2 - mwindow->theme->loadmode_w / 2, 
+		get_w() / 2 - loadmode_w / 2, 
 		y, 
 		&record->load_mode, 
 		1);
@@ -430,6 +434,7 @@ void RecordGUI::create_objects()
 
 	startover_thread = new RecordStartoverThread(record, this);
 
+	unlock_window();
 }
 
 void RecordGUI::flash_batch()
@@ -561,7 +566,6 @@ int RecordGUI::resize_event(int w, int h)
 
 	int new_h = mwindow->session->rwindow_h - bottom_margin - batch_list->get_y();
 	if(new_h < 10) new_h = 10;
-printf("RecordGUI::resize_event 1 %d\n", mwindow->session->rwindow_h - bottom_margin - batch_list->get_y());
 	batch_list->reposition_window(batch_list->get_x(), 
 		batch_list->get_y(),
 		mwindow->session->rwindow_w - 20,

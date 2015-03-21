@@ -21,6 +21,7 @@
 
 #include "awindow.h"
 #include "awindowgui.h"
+#include "bcsignals.h"
 #include "clipedit.h"
 #include "edl.h"
 #include "fonts.h"
@@ -36,7 +37,7 @@
 
 
 ClipEdit::ClipEdit(MWindow *mwindow, AWindow *awindow, VWindow *vwindow)
- : Thread()
+ : BC_DialogThread()
 {
 	this->mwindow = mwindow;
 	this->awindow = awindow;
@@ -49,90 +50,91 @@ ClipEdit::~ClipEdit()
 {
 }
 
+// After the window is closed and deleted, this is called.
+void ClipEdit::handle_close_event(int result)
+{
+	if(!result)
+	{
+		EDL *new_edl = 0;
+// Add to EDL
+		if(create_it)
+			new_edl = mwindow->edl->add_clip(clip);
+
+// Copy clip to existing clip in EDL
+		if(!create_it)
+			original->copy_session(clip);
+
+
+//			mwindow->vwindow->gui->update_sources(mwindow->vwindow->gui->source->get_text());
+
+
+		mwindow->awindow->gui->async_update_assets();
+
+// Change VWindow to it if vwindow was called
+// But this doesn't let you easily create a lot of clips.
+		if(vwindow && create_it)
+		{
+//				vwindow->change_source(new_edl);
+		}
+	}
+	else
+	{
+		mwindow->session->clip_number--;
+	}
+
+
+
+// For creating new clips, the original was copied in add_clip.
+// For editing old clips, the original was transferred to another variable.
+	if(!create_it) delete clip;
+	original = 0;
+	clip = 0;
+	create_it = 0;
+}
+
+
+// User creates the window and initializes it here.
+BC_Window* ClipEdit::new_gui()
+{
+	original = clip;
+
+	if(!create_it)
+	{
+		this->clip = new EDL(mwindow->edl);
+		clip->create_objects();
+		clip->copy_all(original);
+	}
+
+
+	window = new ClipEditWindow(mwindow, this);
+	window->create_objects();
+	return window;
+}
+
+
+
 void ClipEdit::edit_clip(EDL *clip)
 {
 // Allow more than one window so we don't have to delete the clip in handle_event
-	if(clip)
+	if(!this->clip)
 	{
 		this->clip = clip;
 		this->create_it = 0;
-		Thread::start();
+		start();
 	}
 }
 
 void ClipEdit::create_clip(EDL *clip)
 {
 // Allow more than one window so we don't have to delete the clip in handle_event
-	if(clip)
+	if(!this->clip)
 	{
 		this->clip = clip;
 		this->create_it = 1;
-		Thread::start();
+		start();
 	}
 }
 
-void ClipEdit::run()
-{
-	if(clip)
-	{
-		EDL *original = clip;
-		if(!create_it)
-		{
-			clip = new EDL(mwindow->edl);
-			clip->create_objects();
-			clip->copy_all(original);
-		}
-
-
-
-
-
-
-
-
-		ClipEditWindow *window = new ClipEditWindow(mwindow, this);
-		window->create_objects();
-		int result = window->run_window();
-		
-		if(!result)
-		{
-			EDL *new_edl = 0;
-// Add to EDL
-			if(create_it)
-				new_edl = mwindow->edl->add_clip(window->clip);
-
-// Copy clip to existing clip in EDL
-			if(!create_it)
-				original->copy_session(clip);
-
-
-//			mwindow->vwindow->gui->update_sources(mwindow->vwindow->gui->source->get_text());
-
-
-			mwindow->awindow->gui->async_update_assets();
-
-// Change VWindow to it if vwindow was called
-// But this doesn't let you easily create a lot of clips.
-			if(vwindow && create_it)
-			{
-//				vwindow->change_source(new_edl);
-			}
-		}
-		else
-		{
-			mwindow->session->clip_number--;
-		}
-		
-
-
-// For creating new clips, the original was copied in add_clip.
-// For editing old clips, the original was transferred to another variable.
-		delete window->clip;
-		delete window;
-		clip = 0;
-		create_it = 0;
-	}
-}
 
 
 
@@ -163,7 +165,7 @@ ClipEditWindow::~ClipEditWindow()
 	
 void ClipEditWindow::create_objects()
 {
-	this->clip = thread->clip;
+	lock_window("ClipEditWindow::create_objects");
 	this->create_it = thread->create_it;
 
 	int x = 10, y = 10;
@@ -195,6 +197,7 @@ void ClipEditWindow::create_objects()
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 	titlebox->activate();
+	unlock_window();
 }
 
 
@@ -202,14 +205,14 @@ void ClipEditWindow::create_objects()
 
 
 ClipEditTitle::ClipEditTitle(ClipEditWindow *window, int x, int y, int w)
- : BC_TextBox(x, y, w, 1, window->clip->local_session->clip_title)
+ : BC_TextBox(x, y, w, 1, window->thread->clip->local_session->clip_title)
 {
 	this->window = window;
 }
 
 int ClipEditTitle::handle_event()
 {
-	strcpy(window->clip->local_session->clip_title, get_text());
+	strcpy(window->thread->clip->local_session->clip_title, get_text());
 	return 1;
 }
 
@@ -218,13 +221,13 @@ int ClipEditTitle::handle_event()
 
 
 ClipEditComments::ClipEditComments(ClipEditWindow *window, int x, int y, int w, int rows)
- : BC_TextBox(x, y, w, rows, window->clip->local_session->clip_notes)
+ : BC_TextBox(x, y, w, rows, window->thread->clip->local_session->clip_notes)
 {
 	this->window = window;
 }
 
 int ClipEditComments::handle_event()
 {
-	strcpy(window->clip->local_session->clip_notes, get_text());
+	strcpy(window->thread->clip->local_session->clip_notes, get_text());
 	return 1;
 }

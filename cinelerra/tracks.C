@@ -668,3 +668,25 @@ int Tracks::total_playable_vtracks()
 	}
 	return result;
 }
+
+int Tracks::plugin_exists(Plugin *plugin)
+{
+	for(Track *track = first; track; track = track->next)
+	{
+		if(track->plugin_exists(plugin)) return 1;
+	}
+	return 0;
+}
+
+int Tracks::track_exists(Track *track)
+{
+	for(Track *current = first; current; current = NEXT)
+	{
+		if(current == track) return 1;
+	}
+	return 0;
+}
+
+
+
+

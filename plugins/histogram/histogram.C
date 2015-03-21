@@ -115,7 +115,6 @@ void HistogramMain::render_gui(void *data)
 {
 	if(thread)
 	{
-SET_TRACE
 // Process just the RGB values to determine the automatic points or
 // all the points if manual
 		if(!config.automatic)
@@ -131,14 +130,11 @@ SET_TRACE
 
 		calculate_histogram((VFrame*)data, !config.automatic);
 
-SET_TRACE
 
 		if(config.automatic)
 		{
-SET_TRACE
 			calculate_automatic((VFrame*)data);
 
-SET_TRACE
 // Generate curves for value histogram
 // Lock out changes to curves
 			((HistogramWindow*)thread->window)->lock_window("HistogramMain::render_gui 1");
@@ -147,13 +143,10 @@ SET_TRACE
 			tabulate_curve(HISTOGRAM_BLUE, 0);
 			((HistogramWindow*)thread->window)->unlock_window();
 
-SET_TRACE
 // Need a second pass to get the luminance values.
 			calculate_histogram((VFrame*)data, 1);
-SET_TRACE
 		}
 
-SET_TRACE
 		((HistogramWindow*)thread->window)->lock_window("HistogramMain::render_gui 2");
 		((HistogramWindow*)thread->window)->update_canvas();
 		if(config.automatic)
@@ -161,7 +154,6 @@ SET_TRACE
 			((HistogramWindow*)thread->window)->update_input();
 		}
 		((HistogramWindow*)thread->window)->unlock_window();
-SET_TRACE
 	}
 }
 
@@ -281,7 +273,7 @@ void HistogramMain::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("HISTOGRAM");
 
 	char string[BCTEXTLEN];
@@ -345,7 +337,7 @@ void HistogramMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 	int current_input_mode = 0;
@@ -638,11 +630,9 @@ int HistogramMain::process_buffer(VFrame *frame,
 	int64_t start_position,
 	double frame_rate)
 {
-SET_TRACE
 	int need_reconfigure = load_configuration();
+//printf("HistogramMain::process_buffer 1 %d\n", need_reconfigure);
 
-
-SET_TRACE
 	int use_opengl = calculate_use_opengl();
 
 //printf("%d\n", use_opengl);
@@ -664,7 +654,6 @@ SET_TRACE
 // Always plot to set the curves if automatic
 	if(config.plot || config.automatic) send_render_gui(frame);
 
-SET_TRACE
 // Generate tables here.  The same table is used by many packages to render
 // each horizontal stripe.  Need to cover the entire output range in  each
 // table to avoid green borders
@@ -674,18 +663,15 @@ SET_TRACE
 		!linear[0] || 
 		config.automatic)
 	{
-SET_TRACE
 // Calculate new curves
 		if(config.automatic)
 		{
 			calculate_automatic(input);
 		}
-SET_TRACE
 
 // Generate transfer tables with value function for integer colormodels.
 		for(int i = 0; i < 3; i++)
 			tabulate_curve(i, 1);
-SET_TRACE
 	}
 
 
@@ -693,7 +679,6 @@ SET_TRACE
 // Apply histogram
 	engine->process_packages(HistogramEngine::APPLY, input, 0);
 
-SET_TRACE
 
 	return 0;
 }
@@ -964,12 +949,12 @@ int HistogramMain::handle_opengl()
 		shader_stack[15],
 		0);
 
-printf("HistogramMain::handle_opengl %d %d %d %d shader=%d\n", 
-aggregate_interpolation, 
-aggregate_gamma,
-aggregate_colorbalance,
-current_shader,
-shader);
+// printf("HistogramMain::handle_opengl %d %d %d %d shader=%d\n", 
+// aggregate_interpolation, 
+// aggregate_gamma,
+// aggregate_colorbalance,
+// current_shader,
+// shader);
 
 	float input_min_r[2] = { 0, 0 };
 	float input_min_g[2] = { 0, 0 };

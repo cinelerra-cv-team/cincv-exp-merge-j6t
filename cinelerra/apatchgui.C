@@ -264,7 +264,7 @@ int AFadePatch::handle_event()
 
 	patch->change_source = 1;
 	float change = update_edl();
-	if(patch->track->gang) 
+	if(patch->track->gang && patch->track->record) 
 		patch->patchbay->synchronize_faders(change, TRACK_AUDIO, patch->track);
 	patch->change_source = 0;
 

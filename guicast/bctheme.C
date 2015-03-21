@@ -63,6 +63,7 @@ VFrame* BC_Theme::new_image(const char *title, const char *path)
 	VFrame *existing_image = title[0] ? get_image(title, 0) : 0;
 	if(existing_image) return existing_image;
 
+//printf("BC_Theme::new_image %d added %s\n", __LINE__, title);
 	BC_ThemeSet *result = new BC_ThemeSet(1, 0, title);
 	result->data[0] = new VFrame(get_image_data(path));
 	image_sets.append(result);
@@ -140,7 +141,6 @@ VFrame* BC_Theme::get_image(const char *title, int use_default)
 			return image_sets.values[i]->data[0];
 		}
 	}
-
 
 
 // Return the first image it can find.  This should always work.
@@ -368,7 +368,7 @@ void BC_Theme::overlay(VFrame *dst, VFrame *src, int in_x1, int in_x2, int shift
 						for(int j = shift; j < w; j++)
 						{
 							int opacity = in_row[3];
-							int transparency = 0xff - opacity;
+							int transparency = out_row[3] * (0xff - opacity) / 0xff;
 
 							out_row[0] = (in_row[0] * opacity + out_row[0] * transparency) / 0xff;
 							out_row[1] = (in_row[1] * opacity + out_row[1] * transparency) / 0xff;

@@ -68,7 +68,7 @@ public:
 	void unlock_canvas();
 	int is_locked();
 
-	int create_objects(EDL *edl);
+	void create_objects(EDL *edl);
 	void set_cursor(int cursor);
 // Start video playback
 	void start_video();

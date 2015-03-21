@@ -26,17 +26,13 @@
 #include "bcdisplayinfo.h"
 #include "clip.h"
 #include "bchash.h"
+#include "downsampleengine.h"
 #include "filexml.h"
 #include "keyframe.h"
-#include "loadbalance.h"
+#include "language.h"
 #include "picon_png.h"
 #include "pluginvclient.h"
 #include "vframe.h"
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 class DownSampleMain;
@@ -120,49 +116,22 @@ public:
 	DownSampleMain(PluginServer *server);
 	~DownSampleMain();
 
-	int process_realtime(VFrame *input_ptr, VFrame *output_ptr);
+	int process_buffer(VFrame *frame,
+		int64_t start_position,
+		double frame_rate);
 	int is_realtime();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
+	int handle_opengl();
 
 	PLUGIN_CLASS_MEMBERS(DownSampleConfig)
 
 	VFrame *input, *output;
 	DownSampleServer *engine;
 };
-
-class DownSamplePackage : public LoadPackage
-{
-public:
-	DownSamplePackage();
-	int y1, y2;
-};
-
-class DownSampleUnit : public LoadClient
-{
-public:
-	DownSampleUnit(DownSampleServer *server, DownSampleMain *plugin);
-	void process_package(LoadPackage *package);
-	DownSampleServer *server;
-	DownSampleMain *plugin;
-};
-
-class DownSampleServer : public LoadServer
-{
-public:
-	DownSampleServer(DownSampleMain *plugin, 
-		int total_clients, 
-		int total_packages);
-	void init_packages();
-	LoadClient* new_client();
-	LoadPackage* new_package();
-	DownSampleMain *plugin;
-};
-
-
 
 
 
@@ -417,23 +386,44 @@ NEW_WINDOW_MACRO(DownSampleMain, DownSampleWindow)
 LOAD_CONFIGURATION_MACRO(DownSampleMain, DownSampleConfig)
 
 
-int DownSampleMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
+int DownSampleMain::process_buffer(VFrame *frame,
+	int64_t start_position,
+	double frame_rate)
 {
-	this->input = input_ptr;
-	this->output = output_ptr;
+	this->input = frame;
+	this->output = frame;
 	load_configuration();
 
-// Copy to destination
-	if(output->get_rows()[0] != input->get_rows()[0])
-	{
-		output->copy_from(input);
-	}
+// This can't be done efficiently in a shader because every output pixel
+// requires summing a large, arbitrary block of the input pixels.
+// Scaling down a texture wouldn't average every pixel.
+	read_frame(frame, 
+		0, 
+		start_position, 
+		frame_rate,
+		0);
+//		get_use_opengl());
+
+// Use hardware
+// 	if(get_use_opengl())
+// 	{
+// 		run_opengl();
+// 		return 0;
+// 	}
 
 // Process in destination
-	if(!engine) engine = new DownSampleServer(this,
-		get_project_smp() + 1,
+	if(!engine) engine = new DownSampleServer(get_project_smp() + 1,
 		get_project_smp() + 1);
-	engine->process_packages();
+	engine->process_frame(output, 
+		output, 
+		config.r, 
+		config.g, 
+		config.b, 
+		config.a,
+		config.vertical,
+		config.horizontal,
+		config.vertical_y,
+		config.horizontal_x);
 
 	return 0;
 }
@@ -501,7 +491,7 @@ void DownSampleMain::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("DOWNSAMPLE");
 
 	output.tag.set_property("HORIZONTAL", config.horizontal);
@@ -522,7 +512,7 @@ void DownSampleMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 
@@ -548,181 +538,16 @@ void DownSampleMain::read_data(KeyFrame *keyframe)
 }
 
 
-
-
-
-
-DownSamplePackage::DownSamplePackage()
- : LoadPackage()
+int DownSampleMain::handle_opengl()
 {
+#ifdef HAVE_GL
+	static char *downsample_frag = 
+		"uniform sampler2D tex;\n"
+		"uniform float w;\n"
+		"uniform float h;\n"
+		"uniform float x_offset;\n"
+		"uniform float y_offset;\n";
+#endif
 }
-
-
-
-
-DownSampleUnit::DownSampleUnit(DownSampleServer *server, 
-	DownSampleMain *plugin)
- : LoadClient(server)
-{
-	this->plugin = plugin;
-	this->server = server;
-}
-
-#define SQR(x) ((x) * (x))
-
-
-#define DOWNSAMPLE(type, temp_type, components, max) \
-{ \
-	temp_type r; \
-	temp_type g; \
-	temp_type b; \
-	temp_type a; \
-	int do_r = plugin->config.r; \
-	int do_g = plugin->config.g; \
-	int do_b = plugin->config.b; \
-	int do_a = plugin->config.a; \
-	type **rows = (type**)plugin->output->get_rows(); \
- \
-	for(int i = pkg->y1; i < pkg->y2; i += plugin->config.vertical) \
-	{ \
-		int y1 = MAX(i, 0); \
-		int y2 = MIN(i + plugin->config.vertical, h); \
- \
- \
-		for(int j = plugin->config.horizontal_x - plugin->config.horizontal; \
-			j < w; \
-			j += plugin->config.horizontal) \
-		{ \
-			int x1 = MAX(j, 0); \
-			int x2 = MIN(j + plugin->config.horizontal, w); \
- \
-			temp_type scale = (x2 - x1) * (y2 - y1); \
-			if(x2 > x1 && y2 > y1) \
-			{ \
- \
-/* Read in values */ \
-				r = 0; \
-				g = 0; \
-				b = 0; \
-				if(components == 4) a = 0; \
- \
-				for(int k = y1; k < y2; k++) \
-				{ \
-					type *row = rows[k] + x1 * components; \
-					for(int l = x1; l < x2; l++) \
-					{ \
-						if(do_r) r += *row++; else row++; \
-						if(do_g) g += *row++; else row++;  \
-						if(do_b) b += *row++; else row++;  \
-						if(components == 4) if(do_a) a += *row++; else row++;  \
-					} \
-				} \
- \
-/* Write average */ \
-				r /= scale; \
-				g /= scale; \
-				b /= scale; \
-				if(components == 4) a /= scale; \
-				for(int k = y1; k < y2; k++) \
-				{ \
-					type *row = rows[k] + x1 * components; \
-					for(int l = x1; l < x2; l++) \
-					{ \
-						if(do_r) *row++ = r; else row++; \
-						if(do_g) *row++ = g; else row++; \
-						if(do_b) *row++ = b; else row++; \
-						if(components == 4) if(do_a) *row++ = a; else row++; \
-					} \
-				} \
-			} \
-		} \
-/*printf("DOWNSAMPLE 3 %d\n", i);*/ \
-	} \
-}
-
-void DownSampleUnit::process_package(LoadPackage *package)
-{
-	DownSamplePackage *pkg = (DownSamplePackage*)package;
-	int h = plugin->output->get_h();
-	int w = plugin->output->get_w();
-
-
-	switch(plugin->input->get_color_model())
-	{
-		case BC_RGB888:
-			DOWNSAMPLE(uint8_t, int64_t, 3, 0xff)
-			break;
-		case BC_RGB_FLOAT:
-			DOWNSAMPLE(float, float, 3, 1.0)
-			break;
-		case BC_RGBA8888:
-			DOWNSAMPLE(uint8_t, int64_t, 4, 0xff)
-			break;
-		case BC_RGBA_FLOAT:
-			DOWNSAMPLE(float, float, 4, 1.0)
-			break;
-		case BC_RGB161616:
-			DOWNSAMPLE(uint16_t, int64_t, 3, 0xffff)
-			break;
-		case BC_RGBA16161616:
-			DOWNSAMPLE(uint16_t, int64_t, 4, 0xffff)
-			break;
-		case BC_YUV888:
-			DOWNSAMPLE(uint8_t, int64_t, 3, 0xff)
-			break;
-		case BC_YUVA8888:
-			DOWNSAMPLE(uint8_t, int64_t, 4, 0xff)
-			break;
-		case BC_YUV161616:
-			DOWNSAMPLE(uint16_t, int64_t, 3, 0xffff)
-			break;
-		case BC_YUVA16161616:
-			DOWNSAMPLE(uint16_t, int64_t, 4, 0xffff)
-			break;
-	}
-}
-
-
-
-
-
-
-DownSampleServer::DownSampleServer(DownSampleMain *plugin, 
-	int total_clients, 
-	int total_packages)
- : LoadServer(total_clients, total_packages)
-{
-	this->plugin = plugin;
-}
-
-void DownSampleServer::init_packages()
-{
-	int y1 = plugin->config.vertical_y - plugin->config.vertical;
-	int total_strips = (int)((float)plugin->output->get_h() / plugin->config.vertical + 1);
-	int strips_per_package = (int)((float)total_strips / get_total_packages() + 1);
-
-	for(int i = 0; i < get_total_packages(); i++)
-	{
-		DownSamplePackage *package = (DownSamplePackage*)get_package(i);
-		package->y1 = y1;
-		package->y2 = y1 + strips_per_package * plugin->config.vertical;
-		package->y1 = MIN(plugin->output->get_h(), package->y1);
-		package->y2 = MIN(plugin->output->get_h(), package->y2);
-		y1 = package->y2;
-	}
-}
-
-LoadClient* DownSampleServer::new_client()
-{
-	return new DownSampleUnit(this, plugin);
-}
-
-LoadPackage* DownSampleServer::new_package()
-{
-	return new DownSamplePackage;
-}
-
-
-
 
 

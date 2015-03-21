@@ -72,8 +72,10 @@ void MainProgressBar::stop_progress()
 	else
 	if(progress_bar)
 	{
+		mwindow->gui->lock_window("MainProgressBar::stop_progress");
 		progress_bar->update(0);
 		mwindow->gui->statusbar->default_message();
+		mwindow->gui->unlock_window();
 	}
 }
 

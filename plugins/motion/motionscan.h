@@ -24,6 +24,7 @@
 
 
 #include "arraylist.h"
+#include "../downsample/downsampleengine.inc"
 #include "loadbalance.h"
 #include "vframe.inc"
 #include <stdint.h>
@@ -39,7 +40,9 @@ public:
 	MotionScanPackage();
 
 // For multiple blocks
+// Position of stationary block
 	int block_x1, block_y1, block_x2, block_y2;
+// Range of positions to scan
 	int scan_x1, scan_y1, scan_x2, scan_y2;
 	int dx;
 	int dy;
@@ -49,9 +52,15 @@ public:
 	int is_border;
 	int valid;
 // For single block
-	int pixel;
+	int step;
 	int64_t difference1;
 	int64_t difference2;
+// Search position to nearest pixel
+	int search_x;
+	int search_y;
+// Subpixel of search position
+	int sub_x;
+	int sub_y;
 };
 
 class MotionScanCache
@@ -65,7 +74,7 @@ public:
 class MotionScanUnit : public LoadClient
 {
 public:
-	MotionScanUnit(MotionScan *server, MotionMain *plugin);
+	MotionScanUnit(MotionScan *server);
 	~MotionScanUnit();
 
 	void process_package(LoadPackage *package);
@@ -73,7 +82,6 @@ public:
 	void put_cache(int x, int y, int64_t difference);
 
 	MotionScan *server;
-	MotionMain *plugin;
 
 	ArrayList<MotionScanCache*> cache;
 	Mutex *cache_lock;
@@ -82,8 +90,7 @@ public:
 class MotionScan : public LoadServer
 {
 public:
-	MotionScan(MotionMain *plugin, 
-		int total_clients, 
+	MotionScan(int total_clients, 
 		int total_packages);
 	~MotionScan();
 
@@ -97,9 +104,54 @@ public:
 // Frame before motion
 	void scan_frame(VFrame *previous_frame,
 // Frame after motion
-		VFrame *current_frame);
+		VFrame *current_frame,
+		int global_range_w,
+		int global_range_h,
+		int global_block_w,
+		int global_block_h,
+		double block_x,
+		double block_y,
+		int frame_type,
+		int tracking_type,
+		int action_type,
+		int horizontal_only,
+		int vertical_only,
+		int source_position,
+		int total_steps,
+		int total_dx,
+		int total_dy,
+		int global_origin_x,
+		int global_origin_y);
 	int64_t get_cache(int x, int y);
 	void put_cache(int x, int y, int64_t difference);
+
+	static int64_t abs_diff(unsigned char *prev_ptr,
+		unsigned char *current_ptr,
+		int row_bytes,
+		int w,
+		int h,
+		int color_model);
+	static int64_t abs_diff_sub(unsigned char *prev_ptr,
+		unsigned char *current_ptr,
+		int row_bytes,
+		int w,
+		int h,
+		int color_model,
+		int sub_x,
+		int sub_y);
+
+
+	static void clamp_scan(int w, 
+		int h, 
+		int *block_x1,
+		int *block_y1,
+		int *block_x2,
+		int *block_y2,
+		int *scan_x1,
+		int *scan_y1,
+		int *scan_x2,
+		int *scan_y2,
+		int use_absolute);
 
 // Change between previous frame and current frame multiplied by 
 // OVERSAMPLE
@@ -107,10 +159,16 @@ public:
 	int dy_result;
 
 private:
+// Pointer to downsampled frame before motion
 	VFrame *previous_frame;
-// Frame after motion
+// Pointer to downsampled frame after motion
 	VFrame *current_frame;
-	MotionMain *plugin;
+// Frames passed from user
+	VFrame *previous_frame_arg;
+	VFrame *current_frame_arg;
+// Downsampled frames
+	VFrame *downsampled_previous;
+	VFrame *downsampled_current;
 	int skip;
 // For single block
 	int block_x1;
@@ -123,11 +181,18 @@ private:
 	int scan_y2;
 	int total_pixels;
 	int total_steps;
+	int edge_steps;
+	int y_steps;
+	int x_steps;
 	int subpixel;
-
+	int horizontal_only;
+	int vertical_only;
+	int global_origin_x;
+	int global_origin_y;
 
 	ArrayList<MotionScanCache*> cache;
 	Mutex *cache_lock;
+	DownSampleServer *downsample;
 };
 
 

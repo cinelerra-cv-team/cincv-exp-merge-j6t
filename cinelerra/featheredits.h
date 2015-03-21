@@ -49,7 +49,7 @@ public:
 	FeatherEditsWindow(MWindow *mwindow, long feather_samples);
 	~FeatherEditsWindow();
 	
-	int create_objects(int audio, int video);
+	void create_objects(int audio, int video);
 
 	long feather_samples;
 	FeatherEditsTextBox  *text;

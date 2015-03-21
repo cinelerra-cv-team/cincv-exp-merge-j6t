@@ -45,6 +45,7 @@ public:
 	int64_t position;
 	int layer;
 	VFrame *frame;
+	int valid;
 };
 
 class FileThread : public Thread

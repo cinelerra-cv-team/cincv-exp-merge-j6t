@@ -115,7 +115,6 @@ private:
 	int reset_parameters_derived();
 	int quicktime_atracks;
 	int quicktime_vtracks;
-// current positions for when the file descriptor doesn't have the right position
 	quicktime_t *fd;
 	int depth;        // Depth in bits per pixel
 	int64_t frames_correction;  // Correction after 32bit overflow

@@ -34,6 +34,8 @@
 #include "filebase.h"
 #include "filecr2.h"
 #include "fileexr.h"
+#include "fileffmpeg.h"
+#include "fileflac.h"
 #include "fileogg.h"
 #include "filexml.h"
 #include "filejpeg.h"
@@ -64,7 +66,7 @@ File::File()
 {
 	cpus = 1;
 	asset = new Asset;
-	format_completion = new Mutex("File::format_completion");
+	format_completion = new Condition(1, "File::format_completion");
 	write_lock = new Condition(1, "File::write_lock");
 	frame_cache = new FrameCache;
 	reset_parameters();
@@ -72,6 +74,7 @@ File::File()
 
 File::~File()
 {
+
 	if(getting_options)
 	{
 		if(format_window) format_window->set_done(0);
@@ -79,13 +82,20 @@ File::~File()
 		format_completion->unlock();
 	}
 
+
 	if(temp_frame) delete temp_frame;
 
+
 	close_file(0);
+
 	Garbage::delete_object(asset);
+
 	delete format_completion;
+
 	delete write_lock;
+
 	if(frame_cache) delete frame_cache;
+
 }
 
 void File::reset_parameters()
@@ -219,6 +229,13 @@ int File::get_options(FormatTools *format,
 				audio_options, 
 				video_options);
 			break;
+		case FILE_FLAC:
+			FileFLAC::get_parameters(parent_window, 
+				asset, 
+				format_window, 
+				audio_options, 
+				video_options);
+			break;
 	        case FILE_YUV:
 			FileYUV::get_parameters(parent_window,
 				asset,
@@ -317,7 +334,8 @@ void File::set_white_balance_raw(int value)
 
 void File::set_cache_frames(int value)
 {
-	use_cache = value;
+	if(!video_thread)
+		use_cache = value;
 }
 
 int File::purge_cache()
@@ -346,6 +364,8 @@ int File::open_file(Preferences *preferences,
 	this->asset->copy_from(asset, 1);
 	file = 0;
 
+// printf("File::open_file %d\n", __LINE__);
+// sleep(1);
 
 	switch(this->asset->format)
 	{
@@ -397,6 +417,13 @@ int File::open_file(Preferences *preferences,
 				file = new FileEXR(this->asset, this);
 			}
 			else
+			if(FileFLAC::check_sig(this->asset, test))
+			{
+// FLAC file
+				fclose(stream);
+				file = new FileFLAC(this->asset, this);
+			}
+			else
 			if(FileYUV::check_sig(this->asset))
 			{
 // YUV file
@@ -406,7 +433,7 @@ int File::open_file(Preferences *preferences,
 			else
 			if(FileCR2::check_sig(this->asset))
 			{
-// JPEG file
+// CR2 file
 				fclose(stream);
 				file = new FileCR2(this->asset, this);
 			}
@@ -470,6 +497,12 @@ int File::open_file(Preferences *preferences,
 				file = new FileMOV(this->asset, this);
 			}
 			else
+			if(FileFFMPEG::check_sig(this->asset))
+			{
+				fclose(stream);
+				file = new FileFFMPEG(this->asset, this);
+			}
+			else
 			{
 // PCM file
 				fclose(stream);
@@ -480,6 +513,10 @@ int File::open_file(Preferences *preferences,
 // format already determined
 		case FILE_AC3:
 			file = new FileAC3(this->asset, this);
+			break;
+
+		case FILE_FFMPEG:
+			file = new FileFFMPEG(this->asset, this);
 			break;
 
 		case FILE_PCM:
@@ -504,6 +541,10 @@ int File::open_file(Preferences *preferences,
 		case FILE_EXR:
 		case FILE_EXR_LIST:
 			file = new FileEXR(this->asset, this);
+			break;
+
+		case FILE_FLAC:
+			file = new FileFLAC(this->asset, this);
 			break;
 
 		case FILE_YUV:
@@ -563,12 +604,14 @@ int File::open_file(Preferences *preferences,
 			break;
 	}
 
+
 // Reopen file with correct parser and get header.
 	if(file->open_file(rd, wr))
 	{
 		delete file;
 		file = 0;
 	}
+
 
 
 // Set extra writing parameters to mandatory settings.
@@ -578,11 +621,16 @@ int File::open_file(Preferences *preferences,
 	}
 
 
+
 // Synchronize header parameters
 	if(file)
 	{
 		asset->copy_from(this->asset, 1);
+//asset->dump();
 	}
+
+// printf("File::open_file file=%p %d\n", file, __LINE__);
+// sleep(1);
 
 	if(file)
 		return FILE_OK;
@@ -592,11 +640,18 @@ int File::open_file(Preferences *preferences,
 
 int File::close_file(int ignore_thread)
 {
+// printf("File::close_file file=%p %d\n", file, __LINE__);
+// sleep(1);
+
 	if(!ignore_thread)
 	{
+
 		stop_audio_thread();
+
 		stop_video_thread();
+
 	}
+
 
 	if(file) 
 	{
@@ -607,14 +662,21 @@ int File::close_file(int ignore_thread)
 			asset->audio_length = current_sample;
 			asset->video_length = current_frame;
 		}
+
 		file->close_file();
+
 		delete file;
+
 	}
 
 	if(resample) delete resample;
 	if(resample_float) delete resample_float;
 
+
 	reset_parameters();
+// printf("File::close_file file=%p %d\n", file, __LINE__);
+// sleep(1);
+
 	return 0;
 }
 
@@ -661,10 +723,11 @@ int File::start_video_decode_thread()
 {
 // Currently, CR2 is the only one which won't work asynchronously, so
 // we're not using a virtual function yet.
-	if(!video_thread && asset->format != FILE_CR2)
+	if(!video_thread /* && asset->format != FILE_CR2 */)
 	{
 		video_thread = new FileThread(this, 0, 1);
 		video_thread->start_reading();
+		use_cache = 0;
 	}
 }
 
@@ -840,7 +903,9 @@ int File::set_audio_position(int64_t position, float base_samplerate)
 	return result;
 }
 
-int File::set_video_position(int64_t position, float base_framerate, int is_thread) 
+int File::set_video_position(int64_t position, 
+	float base_framerate, 
+	int is_thread) 
 {
 	int result = 0;
 	if(!file) return 0;
@@ -1067,12 +1132,14 @@ int File::read_frame(VFrame *frame, int is_thread)
 		int advance_position = 1;
 
 // Test cache
+//printf("File::read_frame %d use_cache=%d\n", __LINE__, use_cache);
 		if(use_cache &&
 			frame_cache->get_frame(frame,
 				current_frame,
 				current_layer,
 				asset->frame_rate))
 		{
+//printf("File::read_frame %d\n", __LINE__);
 // Can't advance position if cache used.
 			advance_position = 0;
 		}
@@ -1083,6 +1150,7 @@ int File::read_frame(VFrame *frame, int is_thread)
 			frame->get_w() != asset->width ||
 			frame->get_h() != asset->height))
 		{
+//printf("File::read_frame %d\n", __LINE__);
 
 // Can't advance position here because it needs to be added to cache
 			if(temp_frame)
@@ -1104,14 +1172,16 @@ int File::read_frame(VFrame *frame, int is_thread)
 
 			temp_frame->copy_stacks(frame);
 			file->read_frame(temp_frame);
+//for(int i = 0; i < 1000 * 1000; i++) ((float*)temp_frame->get_rows()[0])[i] = 1.0;
+//printf("File::read_frame %d %d\n", temp_frame->get_color_model(), frame->get_color_model());
 			cmodel_transfer(frame->get_rows(), 
 				temp_frame->get_rows(),
-				temp_frame->get_y(),
-				temp_frame->get_u(),
-				temp_frame->get_v(),
 				frame->get_y(),
 				frame->get_u(),
 				frame->get_v(),
+				temp_frame->get_y(),
+				temp_frame->get_u(),
+				temp_frame->get_v(),
 				0, 
 				0, 
 				temp_frame->get_w(), 
@@ -1132,12 +1202,12 @@ int File::read_frame(VFrame *frame, int is_thread)
 			file->read_frame(frame);
 		}
 
+//printf("File::read_frame %d use_cache=%d\n", __LINE__, use_cache);
 		if(use_cache) frame_cache->put_frame(frame,
 			current_frame,
 			current_layer,
 			asset->frame_rate,
 			1);
-// printf("File::read_frame\n");
 // frame->dump_params();
 
 		if(advance_position) current_frame++;
@@ -1197,6 +1267,8 @@ int File::strtoformat(ArrayList<PluginServer*> *plugindb, char *format)
 	else
 	if(!strcasecmp(format, _(EXR_LIST_NAME))) return FILE_EXR_LIST;
 	else
+	if(!strcasecmp(format, _(FLAC_NAME))) return FILE_FLAC;
+	else
 	if(!strcasecmp(format, _(YUV_NAME))) return FILE_YUV;
 	else
 	if(!strcasecmp(format, _(CR2_NAME))) return FILE_CR2;
@@ -1226,6 +1298,8 @@ int File::strtoformat(ArrayList<PluginServer*> *plugindb, char *format)
 	if(!strcasecmp(format, _(OGG_NAME))) return FILE_OGG;
 	else
 	if(!strcasecmp(format, _(VORBIS_NAME))) return FILE_VORBIS;
+	else
+	if(!strcasecmp(format, _(FFMPEG_NAME))) return FILE_FFMPEG;
 	else
 	if(!strcasecmp(format, _(RAWDV_NAME))) return FILE_RAWDV;
 	return 0;
@@ -1275,6 +1349,9 @@ const char* File::formattostr(ArrayList<PluginServer*> *plugindb, int format)
 			break;
 		case FILE_EXR:
 			return _(EXR_NAME);
+			break;
+		case FILE_FLAC:
+			return _(FLAC_NAME);
 			break;
 		case FILE_EXR_LIST:
 			return _(EXR_LIST_NAME);
@@ -1326,6 +1403,9 @@ const char* File::formattostr(ArrayList<PluginServer*> *plugindb, int format)
 			break;
 		case FILE_VORBIS:
 			return _(VORBIS_NAME);
+			break;
+		case FILE_FFMPEG:
+			return _(FFMPEG_NAME);
 			break;
 		case FILE_RAWDV:
 			return _(RAWDV_NAME);
@@ -1564,6 +1644,7 @@ int File::supports_audio(int format)
 	switch(format)
 	{
 		case FILE_AC3:
+		case FILE_FLAC:
 		case FILE_PCM:
 		case FILE_WAV:
 		case FILE_MOV:
@@ -1599,6 +1680,7 @@ const char* File::get_tag(int format)
 		case FILE_RAWDV:        return "dv";
 		case FILE_EXR:          return "exr";
 		case FILE_EXR_LIST:     return "exr";
+		case FILE_FLAC:         return "flac";
 		case FILE_JPEG:         return "jpg";
 		case FILE_JPEG_LIST:    return "jpg";
 		case FILE_MOV:          return "mov";

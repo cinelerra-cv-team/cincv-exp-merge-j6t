@@ -240,8 +240,17 @@ int MainSession::load_defaults(BC_Hash *defaults)
 
 	plugindialog_w = defaults->get("PLUGINDIALOG_W", 510);
 	plugindialog_h = defaults->get("PLUGINDIALOG_H", 415);
+	presetdialog_w = defaults->get("PRESETDIALOG_W", 510);
+	presetdialog_h = defaults->get("PRESETDIALOG_H", 415);
+	keyframedialog_w = defaults->get("KEYFRAMEDIALOG_W", 510);
+	keyframedialog_h = defaults->get("KEYFRAMEDIALOG_H", 415);
+	keyframedialog_column1 = defaults->get("KEYFRAMEDIALOG_COLUMN1", 150);
+	keyframedialog_column2 = defaults->get("KEYFRAMEDIALOG_COLUMN2", 100);
+	keyframedialog_all = defaults->get("KEYFRAMEDIALOG_ALL", 0);
 	menueffect_w = defaults->get("MENUEFFECT_W", 580);
 	menueffect_h = defaults->get("MENUEFFECT_H", 350);
+	transitiondialog_w = defaults->get("TRANSITIONDIALOG_W", 320);
+	transitiondialog_h = defaults->get("TRANSITIONDIALOG_H", 512);
 
 	current_tip = defaults->get("CURRENT_TIP", current_tip);
 
@@ -314,9 +323,19 @@ int MainSession::save_defaults(BC_Hash *defaults)
 
 	defaults->update("PLUGINDIALOG_W", plugindialog_w);
 	defaults->update("PLUGINDIALOG_H", plugindialog_h);
+	defaults->update("PRESETDIALOG_W", presetdialog_w);
+	defaults->update("PRESETDIALOG_H", presetdialog_h);
+	defaults->update("KEYFRAMEDIALOG_W", keyframedialog_w);
+	defaults->update("KEYFRAMEDIALOG_H", keyframedialog_h);
+	defaults->update("KEYFRAMEDIALOG_COLUMN1", keyframedialog_column1);
+	defaults->update("KEYFRAMEDIALOG_COLUMN2", keyframedialog_column2);
+	defaults->update("KEYFRAMEDIALOG_ALL", keyframedialog_all);
 
 	defaults->update("MENUEFFECT_W", menueffect_w);
 	defaults->update("MENUEFFECT_H", menueffect_h);
+
+	defaults->update("TRANSITIONDIALOG_W", transitiondialog_w);
+	defaults->update("TRANSITIONDIALOG_H", transitiondialog_h);
 
 	defaults->update("CURRENT_TIP", current_tip);
 

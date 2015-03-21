@@ -174,7 +174,7 @@ void RenderFarmClient::main_loop()
     		}
 			else
 			{
-//printf("RenderFarmClient::main_loop: Session started from %s\n", inet_ntoa(clientname.sin_addr));
+printf("RenderFarmClient::main_loop: Session started from %s\n", inet_ntoa(clientname.sin_addr));
 				RenderFarmClientThread *thread = 
 					new RenderFarmClientThread(this);
 				thread->main_loop(new_socket_fd);
@@ -193,7 +193,7 @@ void RenderFarmClient::main_loop()
     		}
 			else
 			{
-//printf("RenderFarmClient::main_loop: Session started from %s\n", clientname.sun_path);
+printf("RenderFarmClient::main_loop: Session started from %s\n", clientname.sun_path);
 				RenderFarmClientThread *thread = 
 					new RenderFarmClientThread(this);
 				thread->main_loop(new_socket_fd);
@@ -264,13 +264,17 @@ int RenderFarmClientThread::send_request_header(int request,
 
 int RenderFarmClientThread::write_socket(char *data, int len)
 {
-	return write(socket_fd, data, len);
+//printf("RenderFarmClientThread::write_socket 1\n");
+	int result = write(socket_fd, data, len);
+//printf("RenderFarmClientThread::write_socket 10\n");
+	return result;
 }
 
 int RenderFarmClientThread::read_socket(char *data, int len)
 {
 	int bytes_read = 0;
 	int offset = 0;
+//printf("RenderFarmClientThread::read_socket 1\n");
 	watchdog->begin_request();
 	while(len > 0 && bytes_read >= 0)
 	{
@@ -287,6 +291,7 @@ int RenderFarmClientThread::read_socket(char *data, int len)
 		}
 	}
 	watchdog->end_request();
+//printf("RenderFarmClientThread::read_socket 10\n");
 
 	return offset;
 }
@@ -577,16 +582,12 @@ void RenderFarmClientThread::run()
 
 // Get command to run
 	int command;
-SET_TRACE
 	lock("RenderFarmClientThread::run");
-SET_TRACE
 	get_command(socket_fd, &command);
-SET_TRACE
 	unlock();
 
 //printf("RenderFarmClientThread::run command=%d\n", command);
 
-SET_TRACE
 	switch(command)
 	{
 		case RENDERFARM_TUNER:
@@ -643,20 +644,19 @@ void RenderFarmClientThread::do_packages(int socket_fd)
 	edl = new EDL;
 	edl->create_objects();
 
+
+
+
+
+
 //printf("RenderFarmClientThread::run 3\n");
-
-
-
-
-
-
-
 	read_preferences(socket_fd, preferences);
-//printf("RenderFarmClientThread::run 3\n");
+//printf("RenderFarmClientThread::run 4\n");
 	read_asset(socket_fd, default_asset);
-//printf("RenderFarmClientThread::run 3\n");
+//printf("RenderFarmClientThread::run 5\n");
 	read_edl(socket_fd, edl, preferences);
 //edl->dump();
+//printf("RenderFarmClientThread::run 6\n");
 
 
 
@@ -664,18 +664,17 @@ void RenderFarmClientThread::do_packages(int socket_fd)
 
 
 
-//printf("RenderFarmClientThread::run 4\n");
 
 	package_renderer.initialize(0,
 			edl, 
 			preferences, 
 			default_asset,
 			client->plugindb);
-//printf("RenderFarmClientThread::run 5\n");
 
 // Read packages
 	while(1)
 	{
+//printf("RenderFarmClientThread::run 5\n");
 		result = read_package(socket_fd, package);
 //printf("RenderFarmClientThread::run 6 %d\n", result);
 
@@ -742,7 +741,6 @@ RenderFarmKeepalive::~RenderFarmKeepalive()
 	join();
 }
 
-
 void RenderFarmKeepalive::run()
 {
 	while(!done)
@@ -752,8 +750,10 @@ void RenderFarmKeepalive::run()
 		disable_cancel();
 		if(!done)
 		{
+//printf("RenderFarmKeepalive::run 1\n");
 // watchdog thread kills this if it gets stuck
 			client_thread->ping_server();
+//printf("RenderFarmKeepalive::run 10\n");
 		}
 	}
 }

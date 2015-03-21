@@ -30,7 +30,7 @@ public:
 	NormalizeWindow(int x, int y);
 	~NormalizeWindow();
 	
-	int create_objects(float *db_over, int *seperate_tracks);
+	void create_objects(float *db_over, int *seperate_tracks);
 	int close_event();
 	
 	float *db_over;

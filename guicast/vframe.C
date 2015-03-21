@@ -142,6 +142,24 @@ int VFrame::equivalent(VFrame *src, int test_stacks)
 		(!test_stacks || equal_stacks(src)));
 }
 
+int VFrame::data_matches(VFrame *frame)
+{
+	if(data && frame->get_data() &&
+		frame->params_match(get_w(), get_h(), get_color_model()) &&
+		get_data_size() == frame->get_data_size())
+	{
+		int data_size = get_data_size();
+		unsigned char *ptr1 = get_data();
+		unsigned char *ptr2 = frame->get_data();
+		for(int i = 0; i < data_size; i++)
+		{
+			if(*ptr1++ != *ptr2++) return 0;
+		}
+		return 1;
+	}
+	return 0;
+}
+
 long VFrame::set_shm_offset(long offset)
 {
 	shm_offset = offset;
@@ -216,9 +234,8 @@ int VFrame::clear_objects(int do_opengl)
 	{
 
 // Memory check
-//int size = calculate_data_size(this->w, this->h, this->bytes_per_line, this->color_model);
-//if(size > 2560 * 1920)
-UNBUFFER(data);
+// if(this->w * this->h > 1500 * 1100)
+// printf("VFrame::clear_objects 2 this=%p data=%p\n", this, data);   
 		if(data) delete [] data;
 		data = 0;
 	}
@@ -363,11 +380,12 @@ int VFrame::allocate_data(unsigned char *data,
 		this->data = new unsigned char[size];
 
 // Memory check
-//if(size >= 720 * 480 * 3)
-//BUFFER2(this->data, "VFrame::allocate_data");
+// if(this->w * this->h > 1500 * 1100)
+// printf("VFrame::allocate_data 2 this=%p w=%d h=%d this->data=%p\n", 
+// this, this->w, this->h, this->data);   
 
-if(!this->data)
-printf("VFrame::allocate_data %dx%d: memory exhausted.\n", this->w, this->h);
+		if(!this->data)
+		printf("VFrame::allocate_data %dx%d: memory exhausted.\n", this->w, this->h);
 
 //printf("VFrame::allocate_data %p %d %d\n", this, this->w, this->h);
 //if(size > 1000000) printf("VFrame::allocate_data %d\n", size);
@@ -456,85 +474,149 @@ UNBUFFER(data);
 
 int VFrame::read_png(unsigned char *data)
 {
-	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
-	png_infop info_ptr = png_create_info_struct(png_ptr);
-	int new_color_model;
-        int have_alpha = 0;
-
-	image_offset = 0;
-	image = data + 4;
-	image_size = (((unsigned long)data[0]) << 24) | 
-		(((unsigned long)data[1]) << 16) | 
-		(((unsigned long)data[2]) << 8) | 
-		(unsigned char)data[3];
-	png_set_read_fn(png_ptr, this, PngReadFunction::png_read_function);
-	png_read_info(png_ptr, info_ptr);
-
-	w = png_get_image_width(png_ptr, info_ptr);
-	h = png_get_image_height(png_ptr, info_ptr);
-
-	int src_color_model = png_get_color_type(png_ptr, info_ptr);
-
-	/* tell libpng to strip 16 bit/color files down to 8 bits/color */
-	png_set_strip_16(png_ptr);
-
-	/* extract multiple pixels with bit depths of 1, 2, and 4 from a single
-	 * byte into separate bytes (useful for paletted and grayscale images).
-	 */
-	png_set_packing(png_ptr);
-
-	/* expand paletted colors into true RGB triplets */
-	if (src_color_model == PNG_COLOR_TYPE_PALETTE)
-		png_set_expand(png_ptr);
-
-	/* expand grayscale images to the full 8 bits from 1, 2, or 4 bits/pixel */
-	if (src_color_model == PNG_COLOR_TYPE_GRAY && png_get_bit_depth(png_ptr, info_ptr) < 8)
-		png_set_expand(png_ptr);
-
-	if (src_color_model == PNG_COLOR_TYPE_GRAY ||
-	    src_color_model == PNG_COLOR_TYPE_GRAY_ALPHA)
-		png_set_gray_to_rgb(png_ptr);
-
-	/* expand paletted or RGB images with transparency to full alpha channels
-	 * so the data will be available as RGBA quartets */
-	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)){
-		have_alpha = 1;
-		png_set_expand(png_ptr);
-	}
-
-	switch(src_color_model)
+// Test for RAW format
+	if(data[4] == 'R' && 
+		data[5] == 'A' &&
+		data[6] == 'W' &&
+		data[7] == ' ')
 	{
-		case PNG_COLOR_TYPE_GRAY:
-		case PNG_COLOR_TYPE_RGB:
+		int new_color_model;
+		w = (data[8]) |
+			(data[9] << 8) |
+			(data[10] << 16) |
+			(data[11] << 24);
+		h = (data[12]) |
+			(data[13] << 8) |
+			(data[14] << 16) |
+			(data[15] << 24);
+		int components = data[16];
+		if(components == 3)
+		{
 			new_color_model = BC_RGB888;
-			break;
-
-		case PNG_COLOR_TYPE_GRAY_ALPHA:
-		case PNG_COLOR_TYPE_RGB_ALPHA:
-		default:
+		}
+		else
+		if(components == 4)
+		{
 			new_color_model = BC_RGBA8888;
-			break;
+		}
 
-		case PNG_COLOR_TYPE_PALETTE:
-			if(have_alpha)
-				new_color_model = BC_RGBA8888;
-			else
-				new_color_model = BC_RGB888;
+// This shares the data directly
+// 		reallocate(data + 20, 
+// 			0, 
+// 			0, 
+// 			0, 
+// 			w, 
+// 			h, 
+// 			new_color_model,
+// 			-1);
+
+// Can't use shared data for theme since button constructions overlay the
+// images directly.
+		reallocate(NULL, 
+			0, 
+			0, 
+			0, 
+			w, 
+			h, 
+			new_color_model,
+			-1);
+		memcpy(get_data(), data + 20, w * h * components);
 	}
+	else
+	if(data[4] == 0x89 &&
+		data[5] == 'P' &&
+		data[6] == 'N' &&
+		data[7] == 'G')
+	{
+		png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+		png_infop info_ptr = png_create_info_struct(png_ptr);
+		int new_color_model;
+		int have_alpha = 0;
 
-	reallocate(NULL, 
-		0, 
-		0, 
-		0, 
-		w, 
-		h, 
-		new_color_model,
-		-1);
+		image_offset = 0;
+		image = data + 4;
+		image_size = (((unsigned long)data[0]) << 24) | 
+			(((unsigned long)data[1]) << 16) | 
+			(((unsigned long)data[2]) << 8) | 
+			(unsigned char)data[3];
+		png_set_read_fn(png_ptr, this, PngReadFunction::png_read_function);
+		png_read_info(png_ptr, info_ptr);
 
-	png_read_image(png_ptr, get_rows());
+		w = png_get_image_width(png_ptr, info_ptr);
+		h = png_get_image_height(png_ptr, info_ptr);
+
+		int src_color_model = png_get_color_type(png_ptr, info_ptr);
+
+		/* tell libpng to strip 16 bit/color files down to 8 bits/color */
+		png_set_strip_16(png_ptr);
+
+		/* extract multiple pixels with bit depths of 1, 2, and 4 from a single
+		* byte into separate bytes (useful for paletted and grayscale images).
+		*/
+		png_set_packing(png_ptr);
+
+		/* expand paletted colors into true RGB triplets */
+		if (src_color_model == PNG_COLOR_TYPE_PALETTE)
+			png_set_expand(png_ptr);
+
+		/* expand grayscale images to the full 8 bits from 1, 2, or 4 bits/pixel */
+		if (src_color_model == PNG_COLOR_TYPE_GRAY && png_get_bit_depth(png_ptr, info_ptr) < 8)
+			png_set_expand(png_ptr);
+
+		if (src_color_model == PNG_COLOR_TYPE_GRAY ||
+		src_color_model == PNG_COLOR_TYPE_GRAY_ALPHA)
+			png_set_gray_to_rgb(png_ptr);
+
+		/* expand paletted or RGB images with transparency to full alpha channels
+		* so the data will be available as RGBA quartets */
+		if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)){
+			have_alpha = 1;
+			png_set_expand(png_ptr);
+		}
+
+		switch(src_color_model)
+		{
+			case PNG_COLOR_TYPE_GRAY:
+			case PNG_COLOR_TYPE_RGB:
+				new_color_model = BC_RGB888;
+				break;
+
+			case PNG_COLOR_TYPE_GRAY_ALPHA:
+			case PNG_COLOR_TYPE_RGB_ALPHA:
+			default:
+				new_color_model = BC_RGBA8888;
+				break;
+
+			case PNG_COLOR_TYPE_PALETTE:
+				if(have_alpha)
+					new_color_model = BC_RGBA8888;
+				else
+					new_color_model = BC_RGB888;
+		}
+
+		reallocate(NULL, 
+			0, 
+			0, 
+			0, 
+			w, 
+			h, 
+			new_color_model,
+			-1);
+
+		png_read_image(png_ptr, get_rows());
 
 
-	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+	}
+	else
+	{
+		printf("VFrame::read_png %d: unknown file format 0x%02x 0x%02x 0x%02x 0x%02x\n", 
+			__LINE__,
+			data[4],
+			data[5],
+			data[6],
+			data[7]);
+	}
 	return 0;
 }
 
@@ -761,7 +843,7 @@ int VFrame::copy_from(VFrame *frame)
 				if(j + out_x1 >= 0 && j + out_x1 < w) \
 				{ \
 					int opacity = src_row[3]; \
-					int transparency = max - src_row[3]; \
+					int transparency = dst_row[3] * (max - src_row[3]) / max; \
 					dst_row[0] = (transparency * dst_row[0] + opacity * src_row[0]) / max; \
 					dst_row[1] = (transparency * dst_row[1] + opacity * src_row[1]) / max; \
 					dst_row[2] = (transparency * dst_row[2] + opacity * src_row[2]) / max; \
@@ -964,10 +1046,12 @@ int VFrame::equal_stacks(VFrame *src)
 	{
 		if(strcmp(src->next_effects.values[i], next_effects.values[i])) return 0;
 	}
+
 	for(int i = 0; i < src->prev_effects.total && i < prev_effects.total; i++)
 	{
 		if(strcmp(src->prev_effects.values[i], prev_effects.values[i])) return 0;
 	}
+
 	if(!params->equivalent(src->params)) return 0;
 	return 1;
 }

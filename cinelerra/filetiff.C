@@ -602,6 +602,7 @@ void TIFFConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
 
+	lock_window("TIFFConfigVideo::create_objects");
 	add_subwindow(new BC_Title(x, y, "Colorspace:"));
 	TIFFColorspace *menu1;
 	add_subwindow(menu1 = new TIFFColorspace(this, x + 150, y, 200));
@@ -613,6 +614,7 @@ void TIFFConfigVideo::create_objects()
 	menu2->create_objects();
 
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 int TIFFConfigVideo::close_event()

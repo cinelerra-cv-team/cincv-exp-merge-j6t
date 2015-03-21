@@ -61,7 +61,6 @@ public:
 
 
 	const char* plugin_title();
-	VFrame* new_picon();
 	int get_parameters();
 	int load_defaults();  
 	int save_defaults();  
@@ -72,7 +71,6 @@ public:
 
 	double scale;
 
-	BC_Hash *defaults;
 	MainProgressBar *progress;
 	int64_t current_position;
 };

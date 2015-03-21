@@ -38,6 +38,20 @@ public:
 	KeyFrames(EDL *edl, Track *track);
 	~KeyFrames();
 
+// Get keyframes for editing with automatic creation if enabled.
+// The direction is always assumed to be forward.
+	virtual KeyFrame* get_keyframe();
+// Get the previous, first, or default keyframe depending on how many keyframes
+// exist.
+	KeyFrame* get_prev_keyframe(int64_t position,
+		int direction);
+
+// Keyframe updates using rules.
+// If a range is selected, the changed parameter is copied to all 
+// the keyframes.
+// If no range is selected, a keyframe is created based on auto keyframe rules.
+	void update_parameter(KeyFrame *src);
+
 	Auto* new_auto();
 	void dump();
 };

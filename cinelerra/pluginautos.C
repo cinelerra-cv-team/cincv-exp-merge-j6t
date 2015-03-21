@@ -19,11 +19,13 @@
  * 
  */
 
+#if 0
 #include "pluginautos.h"
 
 PluginAutos::PluginAutos(EDL *edl, Track *track)
  : Autos(edl, track)
 {
+printf("PluginAutos::PluginAutos\n");
 }
 
 PluginAutos::~PluginAutos()
@@ -32,3 +34,4 @@ PluginAutos::~PluginAutos()
 
 
 
+#endif

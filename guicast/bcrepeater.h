@@ -22,6 +22,8 @@
 #ifndef BCREPEATER_H
 #define BCREPEATER_H
 
+
+#include "arraylist.h"
 #include "bcrepeater.inc"
 #include "bcwindowbase.inc"
 #include "condition.inc"
@@ -31,11 +33,14 @@
 class BC_Repeater : public Thread
 {
 public:
-	BC_Repeater(BC_WindowBase *top_level, long delay);
+	BC_Repeater(BC_WindowBase *window, long delay);
 	~BC_Repeater();
 
 	void initialize();
 	int start_repeating();
+	int start_repeating(BC_WindowBase *window);
+	int stop_repeating(BC_WindowBase *window);
+	int stop_all_repeating(BC_WindowBase *window);
 	int stop_repeating();
 	void run();
 
@@ -48,7 +53,7 @@ public:
 
 private:
 	Timer timer;
-	BC_WindowBase *top_level;
+	ArrayList<BC_WindowBase*> windows;
 // Delay corrected for the time the last repeat took
 	long next_delay;
 	Condition *pause_lock;

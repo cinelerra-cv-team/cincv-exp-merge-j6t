@@ -65,11 +65,8 @@ public:
 	int use_intensity;
     int redo_buffers;
 
-// a thread for the GUI
-	OilThread *thread;
 
 private:
-	BC_Hash *defaults;
 	VFrame *temp_frame;
 };
 

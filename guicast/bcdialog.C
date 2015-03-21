@@ -20,6 +20,7 @@
  */
 
 #include "bcdialog.h"
+#include "bcsignals.h"
 #include "condition.h"
 #include "mutex.h"
 
@@ -59,6 +60,11 @@ void BC_DialogThread::lock_window(const char *location)
 void BC_DialogThread::unlock_window()
 {
 	window_lock->unlock();
+}
+
+int BC_DialogThread::is_running()
+{
+	return Thread::running();
 }
 
 void BC_DialogThread::start()
@@ -101,6 +107,17 @@ void BC_DialogThread::run()
 	handle_close_event(result);
 }
 
+void BC_DialogThread::lock_gui(char *location)
+{
+	window_lock->lock(location);
+}
+
+void BC_DialogThread::unlock_gui()
+{
+	window_lock->unlock();
+}
+
+
 BC_Window* BC_DialogThread::new_gui()
 {
 	printf("BC_DialogThread::new_gui called\n");
@@ -118,6 +135,18 @@ void BC_DialogThread::handle_done_event(int result)
 
 void BC_DialogThread::handle_close_event(int result)
 {
+}
+
+void BC_DialogThread::close_window()
+{
+	lock_window("BC_DialogThread::close_window");
+	if(gui)
+	{
+		gui->lock_window("BC_DialogThread::close_window");
+		gui->set_done(1);
+		gui->unlock_window();
+	}
+	unlock_window();
 }
 
 

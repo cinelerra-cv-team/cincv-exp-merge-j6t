@@ -231,7 +231,7 @@ OverlayFrame::~OverlayFrame()
 	temp_type output4 = output[3]; \
  \
 	pixel_opacity = opacity * input4; \
-	pixel_transparency = (temp_type)max * max - pixel_opacity; \
+	pixel_transparency = output4 * ((temp_type)max * max - pixel_opacity) / max; \
  \
 	switch(mode) \
 	{ \
@@ -385,7 +385,6 @@ int OverlayFrame::overlay(VFrame *output,
 {
 	float w_scale = (out_x2 - out_x1) / (in_x2 - in_x1);
 	float h_scale = (out_y2 - out_y1) / (in_y2 - in_y1);
-
 
 
 
@@ -2557,7 +2556,7 @@ ScaleTranslatePackage::ScaleTranslatePackage()
 		{ \
 			temp_type pixel_opacity, pixel_transparency; \
 			pixel_opacity = opacity * in_row[3]; \
-			pixel_transparency = (temp_type)max_squared - pixel_opacity; \
+			pixel_transparency = output[3] * ((temp_type)max_squared - pixel_opacity) / max; \
 		 \
 		 \
 		 	temp_type r,g,b; \
@@ -2706,9 +2705,9 @@ void BlendUnit::process_package(LoadPackage *package)
 					{
 						float pixel_opacity, pixel_transparency;
 						pixel_opacity = opacity * in_row[3];
-						pixel_transparency = 1.0 - pixel_opacity;
-					
-					
+						pixel_transparency = output[3] * (1.0 - pixel_opacity);
+
+
 						output[0] = in_row[0] * pixel_opacity +
 							output[0] * pixel_transparency;
 						output[1] = in_row[1] * pixel_opacity +

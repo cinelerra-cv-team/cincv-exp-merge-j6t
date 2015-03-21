@@ -19,9 +19,10 @@
  * 
  */
 
+#include "bchash.h"
+#include "bcsignals.h"
 #include "cache.h"
 #include "condition.h"
-#include "bchash.h"
 #include "edl.h"
 #include "edlsession.h"
 #include "localsession.h"
@@ -53,6 +54,7 @@ PlaybackEngine::PlaybackEngine(MWindow *mwindow, Canvas *output)
 	video_cache = 0;
 	last_command = STOP;
 	tracking_lock = new Mutex("PlaybackEngine::tracking_lock");
+	renderengine_lock = new Mutex("PlaybackEngine::renderengine_lock");
 	tracking_done = new Condition(1, "PlaybackEngine::tracking_done");
 	pause_lock = new Condition(0, "PlaybackEngine::pause_lock");
 	start_lock = new Condition(0, "PlaybackEngine::start_lock");
@@ -80,6 +82,7 @@ PlaybackEngine::~PlaybackEngine()
 	delete tracking_done;
 	delete pause_lock;
 	delete start_lock;
+	delete renderengine_lock;
 }
 
 void PlaybackEngine::create_objects()
@@ -132,8 +135,10 @@ int PlaybackEngine::create_render_engine()
 
 void PlaybackEngine::delete_render_engine()
 {
+	renderengine_lock->lock("PlaybackEngine::delete_render_engine");
 	delete render_engine;
 	render_engine = 0;
+	renderengine_lock->unlock();
 }
 
 void PlaybackEngine::arm_render_engine()
@@ -198,8 +203,10 @@ void PlaybackEngine::sync_parameters(EDL *edl)
 
 void PlaybackEngine::interrupt_playback(int wait_tracking)
 {
+	renderengine_lock->lock("PlaybackEngine::interrupt_playback");
 	if(render_engine)
 		render_engine->interrupt_playback();
+	renderengine_lock->unlock();
 
 // Stop pausing
 	pause_lock->unlock();

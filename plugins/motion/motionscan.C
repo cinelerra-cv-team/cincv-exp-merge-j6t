@@ -20,6 +20,7 @@
  */
 
 #include "clip.h"
+#include "../downsample/downsampleengine.h"
 #include "motion.h"
 #include "motionscan.h"
 #include "mutex.h"
@@ -38,11 +39,9 @@ MotionScanPackage::MotionScanPackage()
 
 
 
-MotionScanUnit::MotionScanUnit(MotionScan *server, 
-	MotionMain *plugin)
+MotionScanUnit::MotionScanUnit(MotionScan *server)
  : LoadClient(server)
 {
-	this->plugin = plugin;
 	this->server = server;
 	cache_lock = new Mutex("MotionScanUnit::cache_lock");
 }
@@ -77,31 +76,31 @@ void MotionScanUnit::process_package(LoadPackage *package)
 // Single pixel
 	if(!server->subpixel)
 	{
-		int search_x = pkg->scan_x1 + (pkg->pixel % (pkg->scan_x2 - pkg->scan_x1));
-		int search_y = pkg->scan_y1 + (pkg->pixel / (pkg->scan_x2 - pkg->scan_x1));
-
 // Try cache
-		pkg->difference1 = server->get_cache(search_x, search_y);
+		pkg->difference1 = server->get_cache(pkg->search_x, pkg->search_y);
 		if(pkg->difference1 < 0)
 		{
-//printf("MotionScanUnit::process_package 1 %d %d\n", 
-//search_x, search_y, pkg->block_x2 - pkg->block_x1, pkg->block_y2 - pkg->block_y1);
+//printf("MotionScanUnit::process_package 1 search_x=%d search_y=%d scan_x1=%d scan_y1=%d scan_x2=%d scan_y2=%d x_steps=%d y_steps=%d\n", 
+//pkg->search_x, pkg->search_y, pkg->scan_x1, pkg->scan_y1, pkg->scan_x2, pkg->scan_y2, server->x_steps, server->y_steps);
 // Pointers to first pixel in each block
 			unsigned char *prev_ptr = server->previous_frame->get_rows()[
-				search_y] +	
-				search_x * pixel_size;
+				pkg->search_y] +	
+				pkg->search_x * pixel_size;
 			unsigned char *current_ptr = server->current_frame->get_rows()[
 				pkg->block_y1] +
 				pkg->block_x1 * pixel_size;
+
 // Scan block
-			pkg->difference1 = plugin->abs_diff(prev_ptr,
+			pkg->difference1 = MotionScan::abs_diff(prev_ptr,
 				current_ptr,
 				row_bytes,
 				pkg->block_x2 - pkg->block_x1,
 				pkg->block_y2 - pkg->block_y1,
 				color_model);
-//printf("MotionScanUnit::process_package 2\n");
-			server->put_cache(search_x, search_y, pkg->difference1);
+
+// printf("MotionScanUnit::process_package %d search_x=%d search_y=%d diff=%lld\n",
+// __LINE__, server->block_x1 - pkg->search_x, server->block_y1 - pkg->search_y, pkg->difference1);
+			server->put_cache(pkg->search_x, pkg->search_y, pkg->difference1);
 		}
 	}
 
@@ -122,50 +121,31 @@ void MotionScanUnit::process_package(LoadPackage *package)
 
 // Sub pixel
 	{
-		int sub_x = pkg->pixel % (OVERSAMPLE * 2 - 1) + 1;
-		int sub_y = pkg->pixel / (OVERSAMPLE * 2 - 1) + 1;
-
-		if(plugin->config.horizontal_only)
-		{
-			sub_y = 0;
-		}
-
-		if(plugin->config.vertical_only)
-		{
-			sub_x = 0;
-		}
-
-		int search_x = pkg->scan_x1 + sub_x / OVERSAMPLE;
-		int search_y = pkg->scan_y1 + sub_y / OVERSAMPLE;
-		sub_x %= OVERSAMPLE;
-		sub_y %= OVERSAMPLE;
-
-
 		unsigned char *prev_ptr = server->previous_frame->get_rows()[
-			search_y] +
-			search_x * pixel_size;
+			pkg->search_y] +
+			pkg->search_x * pixel_size;
 		unsigned char *current_ptr = server->current_frame->get_rows()[
 			pkg->block_y1] +
 			pkg->block_x1 * pixel_size;
 
 // With subpixel, there are two ways to compare each position, one by shifting
 // the previous frame and two by shifting the current frame.
-		pkg->difference1 = plugin->abs_diff_sub(prev_ptr,
+		pkg->difference1 = MotionScan::abs_diff_sub(prev_ptr,
 			current_ptr,
 			row_bytes,
 			pkg->block_x2 - pkg->block_x1,
 			pkg->block_y2 - pkg->block_y1,
 			color_model,
-			sub_x,
-			sub_y);
-		pkg->difference2 = plugin->abs_diff_sub(current_ptr,
+			pkg->sub_x,
+			pkg->sub_y);
+		pkg->difference2 = MotionScan::abs_diff_sub(current_ptr,
 			prev_ptr,
 			row_bytes,
 			pkg->block_x2 - pkg->block_x1,
 			pkg->block_y2 - pkg->block_y1,
 			color_model,
-			sub_x,
-			sub_y);
+			pkg->sub_x,
+			pkg->sub_y);
 // printf("MotionScanUnit::process_package sub_x=%d sub_y=%d search_x=%d search_y=%d diff1=%lld diff2=%lld\n",
 // sub_x,
 // sub_y,
@@ -224,27 +204,32 @@ void MotionScanUnit::put_cache(int x, int y, int64_t difference)
 
 
 
-MotionScan::MotionScan(MotionMain *plugin, 
-	int total_clients,
+MotionScan::MotionScan(int total_clients,
 	int total_packages)
  : LoadServer(
 //1, 1 
 total_clients, total_packages 
 )
 {
-	this->plugin = plugin;
 	cache_lock = new Mutex("MotionScan::cache_lock");
+	downsampled_previous = 0;
+	downsampled_current = 0;
+	downsample = 0;
 }
 
 MotionScan::~MotionScan()
 {
 	delete cache_lock;
+	delete downsampled_previous;
+	delete downsampled_current;
+	delete downsample;
 }
 
 
 void MotionScan::init_packages()
 {
 // Set package coords
+//printf("MotionScan::init_packages %d %d\n", __LINE__, get_total_packages());
 	for(int i = 0; i < get_total_packages(); i++)
 	{
 		MotionScanPackage *pkg = (MotionScanPackage*)get_package(i);
@@ -257,18 +242,67 @@ void MotionScan::init_packages()
 		pkg->scan_x2 = scan_x2;
 		pkg->scan_y1 = scan_y1;
 		pkg->scan_y2 = scan_y2;
-		pkg->pixel = (int64_t)i * (int64_t)total_pixels / (int64_t)total_steps;
+		pkg->step = i;
 		pkg->difference1 = 0;
 		pkg->difference2 = 0;
 		pkg->dx = 0;
 		pkg->dy = 0;
 		pkg->valid = 1;
+		
+		if(!subpixel)
+		{
+			pkg->search_x = pkg->scan_x1 + (pkg->step % x_steps) *
+				(scan_x2 - scan_x1) / x_steps;
+			pkg->search_y = pkg->scan_y1 + (pkg->step / x_steps) *
+				(scan_y2 - scan_y1) / y_steps;
+			pkg->sub_x = 0;
+			pkg->sub_y = 0;
+		}
+		else
+		{
+			pkg->sub_x = pkg->step % (OVERSAMPLE * 2);
+			pkg->sub_y = pkg->step / (OVERSAMPLE * 2);
+
+			if(horizontal_only)
+			{
+				pkg->sub_y = 0;
+			}
+
+			if(vertical_only)
+			{
+				pkg->sub_x = 0;
+			}
+
+			pkg->search_x = pkg->scan_x1 + pkg->sub_x / OVERSAMPLE + 1;
+			pkg->search_y = pkg->scan_y1 + pkg->sub_y / OVERSAMPLE + 1;
+			pkg->sub_x %= OVERSAMPLE;
+			pkg->sub_y %= OVERSAMPLE;
+
+
+
+// printf("MotionScan::init_packages %d i=%d search_x=%d search_y=%d sub_x=%d sub_y=%d\n", 
+// __LINE__,
+// i,
+// pkg->search_x,
+// pkg->search_y,
+// pkg->sub_x,
+// pkg->sub_y);
+		}
+
+// printf("MotionScan::init_packages %d %d,%d %d,%d %d,%d\n",
+// __LINE__,
+// scan_x1,
+// scan_x2,
+// scan_y1,
+// scan_y2,
+// pkg->search_x,
+// pkg->search_y);
 	}
 }
 
 LoadClient* MotionScan::new_client()
 {
-	return new MotionScanUnit(this, plugin);
+	return new MotionScanUnit(this);
 }
 
 LoadPackage* MotionScan::new_package()
@@ -278,44 +312,66 @@ LoadPackage* MotionScan::new_package()
 
 
 void MotionScan::scan_frame(VFrame *previous_frame,
-	VFrame *current_frame)
+	VFrame *current_frame,
+	int global_range_w,
+	int global_range_h,
+	int global_block_w,
+	int global_block_h,
+	double block_x,
+	double block_y,
+	int frame_type,
+	int tracking_type,
+	int action_type,
+	int horizontal_only,
+	int vertical_only,
+	int source_position,
+	int total_steps,
+	int total_dx,
+	int total_dy,
+	int global_origin_x,
+	int global_origin_y)
 {
-	this->previous_frame = previous_frame;
-	this->current_frame = current_frame;
+	this->previous_frame_arg = previous_frame;
+	this->current_frame_arg = current_frame;
+	this->horizontal_only = horizontal_only;
+	this->vertical_only = vertical_only;
+	this->previous_frame = previous_frame_arg;
+	this->current_frame = current_frame_arg;
+	this->global_origin_x = global_origin_x;
+	this->global_origin_y = global_origin_y;
 	subpixel = 0;
 
 	cache.remove_all_objects();
-
 
 // Single macroblock
 	int w = current_frame->get_w();
 	int h = current_frame->get_h();
 
 // Initial search parameters
-	int scan_w = w * plugin->config.global_range_w / 100;
-	int scan_h = h * plugin->config.global_range_h / 100;
-	int block_w = w * plugin->config.global_block_w / 100;
-	int block_h = h * plugin->config.global_block_h / 100;
+	int scan_w = w * global_range_w / 100;
+	int scan_h = h * global_range_h / 100;
+	int block_w = w * global_block_w / 100;
+	int block_h = h * global_block_h / 100;
 
 // Location of block in previous frame
-	block_x1 = (int)(w * plugin->config.block_x / 100 - block_w / 2);
-	block_y1 = (int)(h * plugin->config.block_y / 100 - block_h / 2);
-	block_x2 = (int)(w * plugin->config.block_x / 100 + block_w / 2);
-	block_y2 = (int)(h * plugin->config.block_y / 100 + block_h / 2);
+	block_x1 = (int)(w * block_x / 100 - block_w / 2);
+	block_y1 = (int)(h * block_y / 100 - block_h / 2);
+	block_x2 = (int)(w * block_x / 100 + block_w / 2);
+	block_y2 = (int)(h * block_y / 100 + block_h / 2);
 
 // Offset to location of previous block.  This offset needn't be very accurate
 // since it's the offset of the previous image and current image we want.
-	if(plugin->config.mode3 == MotionConfig::TRACK_PREVIOUS)
+	if(frame_type == MotionConfig::TRACK_PREVIOUS)
 	{
-		block_x1 += plugin->total_dx / OVERSAMPLE;
-		block_y1 += plugin->total_dy / OVERSAMPLE;
-		block_x2 += plugin->total_dx / OVERSAMPLE;
-		block_y2 += plugin->total_dy / OVERSAMPLE;
+		block_x1 += total_dx / OVERSAMPLE;
+		block_y1 += total_dy / OVERSAMPLE;
+		block_x2 += total_dx / OVERSAMPLE;
+		block_y2 += total_dy / OVERSAMPLE;
 	}
 
 	skip = 0;
 
-	switch(plugin->config.mode2)
+	switch(tracking_type)
 	{
 // Don't calculate
 		case MotionConfig::NO_CALCULATE:
@@ -328,7 +384,9 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 		{
 // Load result from disk
 			char string[BCTEXTLEN];
-			sprintf(string, "%s%06d", MOTION_FILE, plugin->get_source_position());
+			sprintf(string, "%s%06d", 
+				MOTION_FILE, 
+				source_position);
 			FILE *input = fopen(string, "r");
 			if(input)
 			{
@@ -348,12 +406,25 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 			break;
 	}
 
+// 	if(!skip)
+// 	{
+// 		if(previous_frame->data_matches(current_frame))
+// 		{
+// printf("MotionScan::scan_frame: data matches. skipping.\n");
+// 			dx_result = 0;
+// 			dy_result = 0;
+// 			skip = 1;
+// 		}
+// 	}
+
 // Perform scan
 	if(!skip)
 	{
 // Location of block in current frame
-		int x_result = block_x1;
-		int y_result = block_y1;
+		int origin_offset_x = this->global_origin_x * w / 100;
+		int origin_offset_y = this->global_origin_y * h / 100;
+		int x_result = block_x1 + origin_offset_x;
+		int y_result = block_y1 + origin_offset_y;
 
 // printf("MotionScan::scan_frame 1 %d %d %d %d %d %d %d %d\n",
 // block_x1 + block_w / 2,
@@ -367,6 +438,10 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 
 		while(1)
 		{
+// Cache needs to be cleared if downsampling is used because the sums of 
+// different downsamplings can't be compared.
+// Subpixel never uses the cache.
+//			cache.remove_all_objects();
 			scan_x1 = x_result - scan_w / 2;
 			scan_y1 = y_result - scan_h / 2;
 			scan_x2 = x_result + scan_w / 2;
@@ -375,12 +450,12 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 
 
 // Zero out requested values
-			if(plugin->config.horizontal_only)
+			if(horizontal_only)
 			{
 				scan_y1 = block_y1;
 				scan_y2 = block_y1 + 1;
 			}
-			if(plugin->config.vertical_only)
+			if(vertical_only)
 			{
 				scan_x1 = block_x1;
 				scan_x2 = block_x1 + 1;
@@ -396,7 +471,7 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 // scan_x2,
 // scan_y2);
 // Clamp the block coords before the scan so we get useful scan coords.
-			MotionMain::clamp_scan(w, 
+			clamp_scan(w, 
 				h, 
 				&block_x1,
 				&block_y1,
@@ -407,7 +482,8 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 				&scan_x2,
 				&scan_y2,
 				0);
-// printf("MotionScan::scan_frame 1\n    block_x1=%d block_y1=%d block_x2=%d block_y2=%d\n    scan_x1=%d scan_y1=%d scan_x2=%d scan_y2=%d\n    x_result=%d y_result=%d\n", 
+// printf("MotionScan::scan_frame 1 %d block_x1=%d block_y1=%d block_x2=%d block_y2=%d\n    scan_x1=%d scan_y1=%d scan_x2=%d scan_y2=%d\n    x_result=%d y_result=%d\n", 
+// __LINE__,
 // block_x1,
 // block_y1,
 // block_x2,
@@ -430,19 +506,17 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 // For subpixel, the top row and left column are skipped
 			if(subpixel)
 			{
-				if(plugin->config.horizontal_only ||
-					plugin->config.vertical_only)
-				{
-					total_pixels = 4 * OVERSAMPLE * OVERSAMPLE - 4 * OVERSAMPLE;
-				}
-				else
-				{
-					total_pixels = 4 * OVERSAMPLE;
-				}
 
-				total_steps = total_pixels;
+//printf("MotionScan::scan_frame %d %d %d\n", __LINE__, x_result, y_result);
+// Scan every subpixel in a 2 pixel * 2 pixel square
+				total_pixels = (2 * OVERSAMPLE) * (2 * OVERSAMPLE);
 
-				set_package_count(total_steps);
+				this->total_steps = total_pixels;
+// These aren't used in subpixel
+				this->x_steps = OVERSAMPLE * 2;
+				this->y_steps = OVERSAMPLE * 2;
+
+				set_package_count(this->total_steps);
 				process_packages();
 
 // Get least difference
@@ -450,58 +524,121 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 				for(int i = 0; i < get_total_packages(); i++)
 				{
 					MotionScanPackage *pkg = (MotionScanPackage*)get_package(i);
+//printf("MotionScan::scan_frame %d search_x=%d search_y=%d sub_x=%d sub_y=%d diff1=%lld diff2=%lld\n", 
+//__LINE__, pkg->search_x, pkg->search_y, pkg->sub_x, pkg->sub_y, pkg->difference1, pkg->difference2);
 					if(pkg->difference1 < min_difference || min_difference == -1)
 					{
 						min_difference = pkg->difference1;
 
-						if(plugin->config.vertical_only)
-							x_result = scan_x1 * OVERSAMPLE;
-						else
-							x_result = scan_x1 * OVERSAMPLE + 
-								(pkg->pixel % (OVERSAMPLE * 2 - 1)) + 1;
-						
-						if(plugin->config.horizontal_only)
-							y_result = scan_y1 * OVERSAMPLE;
-						else
-							y_result = scan_y1 * OVERSAMPLE + 
-								(pkg->pixel / (OVERSAMPLE * 2 - 1)) + 1;
+// The sub coords are 1 pixel up & left of the block coords
+						x_result = pkg->search_x * OVERSAMPLE + pkg->sub_x;
+						y_result = pkg->search_y * OVERSAMPLE + pkg->sub_y;
 
 
 // Fill in results
 						dx_result = block_x1 * OVERSAMPLE - x_result;
 						dy_result = block_y1 * OVERSAMPLE - y_result;
+//printf("MotionScan::scan_frame %d dx_result=%d dy_result=%d diff=%lld\n", 
+//__LINE__, dx_result, dy_result, min_difference);
 					}
 
 					if(pkg->difference2 < min_difference)
 					{
 						min_difference = pkg->difference2;
 
-						if(plugin->config.vertical_only)
-							x_result = scan_x1 * OVERSAMPLE;
-						else
-							x_result = scan_x2 * OVERSAMPLE -
-								((pkg->pixel % (OVERSAMPLE * 2 - 1)) + 1);
-
-						if(plugin->config.horizontal_only)
-							y_result = scan_y1 * OVERSAMPLE;
-						else
-							y_result = scan_y2 * OVERSAMPLE -
-								((pkg->pixel / (OVERSAMPLE * 2 - 1)) + 1);
+						x_result = pkg->search_x * OVERSAMPLE - pkg->sub_x;
+						y_result = pkg->search_y * OVERSAMPLE - pkg->sub_y;
 
 						dx_result = block_x1 * OVERSAMPLE - x_result;
 						dy_result = block_y1 * OVERSAMPLE - y_result;
+//printf("MotionScan::scan_frame %d dx_result=%d dy_result=%d diff=%lld\n", 
+//__LINE__, dx_result, dy_result, min_difference);
 					}
 				}
 
-//printf("MotionScan::scan_frame 1 %d %d %d %d\n", block_x1, block_y1, x_result, y_result);
 				break;
 			}
 			else
+// Single pixel
 			{
 				total_pixels = (scan_x2 - scan_x1) * (scan_y2 - scan_y1);
-				total_steps = MIN(plugin->config.global_positions, total_pixels);
+				this->total_steps = MIN(total_steps, total_pixels);
 
-				set_package_count(total_steps);
+				if(this->total_steps == total_pixels)
+				{
+					x_steps = scan_x2 - scan_x1;
+					y_steps = scan_y2 - scan_y1;
+				}
+				else
+				{
+					x_steps = (int)sqrt(this->total_steps);
+					y_steps = (int)sqrt(this->total_steps);
+				}
+
+// Use downsampled images
+// 				if(scan_x2 - scan_x1 > x_steps * 4 ||
+// 					scan_y2 - scan_y1 > y_steps * 4)
+// 				{
+// printf("MotionScan::scan_frame %d total_pixels=%d total_steps=%d x_steps=%d y_steps=%d x y steps=%d\n",
+// __LINE__,
+// total_pixels,
+// total_steps,
+// x_steps,
+// y_steps,
+// x_steps * y_steps);
+// 
+// 					if(!downsampled_previous ||
+// 						!downsampled_previous->equivalent(previous_frame_arg))
+// 					{
+// 						delete downsampled_previous;
+// 						downsampled_previous = new VFrame(*previous_frame_arg);
+// 					}
+// 
+// 					if(!downsampled_current ||
+// 						!downsampled_current->equivalent(current_frame_arg))
+// 					{
+// 						delete downsampled_current;
+// 						downsampled_current = new VFrame(*current_frame_arg);
+// 					}
+// 
+// 
+// 					if(!downsample)
+// 						downsample = new DownSampleServer(get_total_clients(), 
+// 							get_total_clients());
+// 					downsample->process_frame(downsampled_previous, 
+// 						previous_frame_arg, 
+// 						1, 
+// 						1, 
+// 						1, 
+// 						1,
+// 						(scan_y2 - scan_y1) / y_steps,
+// 						(scan_x2 - scan_x1) / x_steps,
+// 						0,
+// 						0);
+// 					downsample->process_frame(downsampled_current, 
+// 						current_frame_arg, 
+// 						1, 
+// 						1, 
+// 						1, 
+// 						1,
+// 						(scan_y2 - scan_y1) / y_steps,
+// 						(scan_x2 - scan_x1) / x_steps,
+// 						0,
+// 						0);
+// 					this->previous_frame = downsampled_previous;
+// 					this->current_frame = downsampled_current;
+// 				}
+
+
+
+
+
+// printf("MotionScan::scan_frame %d this->total_steps=%d\n", 
+// __LINE__, 
+// this->total_steps);
+
+
+				set_package_count(this->total_steps);
 				process_packages();
 
 // Get least difference
@@ -509,46 +646,30 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 				for(int i = 0; i < get_total_packages(); i++)
 				{
 					MotionScanPackage *pkg = (MotionScanPackage*)get_package(i);
+//printf("MotionScan::scan_frame %d search_x=%d search_y=%d sub_x=%d sub_y=%d diff1=%lld diff2=%lld\n", 
+//__LINE__, pkg->search_x, pkg->search_y, pkg->sub_x, pkg->sub_y, pkg->difference1, pkg->difference2);
 					if(pkg->difference1 < min_difference || min_difference == -1)
 					{
 						min_difference = pkg->difference1;
-						x_result = scan_x1 + (pkg->pixel % (scan_x2 - scan_x1));
-						y_result = scan_y1 + (pkg->pixel / (scan_x2 - scan_x1));
+						x_result = pkg->search_x;
+						y_result = pkg->search_y;
 						x_result *= OVERSAMPLE;
 						y_result *= OVERSAMPLE;
+//printf("MotionScan::scan_frame %d x_result=%d y_result=%d diff=%lld\n", 
+//__LINE__, block_x1 * OVERSAMPLE - x_result, block_y1 * OVERSAMPLE - y_result, pkg->difference1);
 					}
 				}
 
-// printf("MotionScan::scan_frame 10 total_steps=%d total_pixels=%d subpixel=%d\n",
-// total_steps, 
-// total_pixels,
-// subpixel);
-// 
-// printf("	scan w=%d h=%d scan x1=%d y1=%d x2=%d y2=%d\n",
-// scan_w,
-// scan_h, 
-// scan_x1,
-// scan_y1,
-// scan_x2,
-// scan_y2);
-// 
-// printf("MotionScan::scan_frame 2 block x1=%d y1=%d x2=%d y2=%d result x=%.2f y=%.2f\n", 
-// block_x1, 
-// block_y1, 
-// block_x2,
-// block_y2,
-// (float)x_result / 4, 
-// (float)y_result / 4);
-
 
 // If a new search is required, rescale results back to pixels.
-				if(total_steps >= total_pixels)
+				if(this->total_steps >= total_pixels)
 				{
 // Single pixel accuracy reached.  Now do exhaustive subpixel search.
-					if(plugin->config.mode1 == MotionConfig::STABILIZE ||
-						plugin->config.mode1 == MotionConfig::TRACK ||
-						plugin->config.mode1 == MotionConfig::NOTHING)
+					if(action_type == MotionConfig::STABILIZE ||
+						action_type == MotionConfig::TRACK ||
+						action_type == MotionConfig::NOTHING)
 					{
+//printf("MotionScan::scan_frame %d %d %d\n", __LINE__, x_result, y_result);
 						x_result /= OVERSAMPLE;
 						y_result /= OVERSAMPLE;
 						scan_w = 2;
@@ -560,6 +681,7 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 // Fill in results and quit
 						dx_result = block_x1 * OVERSAMPLE - x_result;
 						dy_result = block_y1 * OVERSAMPLE - y_result;
+//printf("MotionScan::scan_frame %d %d %d\n", __LINE__, dx_result, dy_result);
 						break;
 					}
 				}
@@ -576,25 +698,6 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 
 		dx_result *= -1;
 		dy_result *= -1;
-
-		// Add offsets from the "tracked single frame"
-		if (plugin->config.addtrackedframeoffset) {
-		  int tf_dx_result, tf_dy_result;
-		  char string[BCTEXTLEN];
-		  sprintf(string, "%s%06d", MOTION_FILE, plugin->config.track_frame);
-		  FILE *input = fopen(string, "r");
-		  if(input)
-		    {
-		      fscanf(input, 
-			     "%d %d", 
-			     &tf_dx_result,
-			     &tf_dy_result);
-		      dx_result += tf_dx_result;
-		      dy_result += tf_dy_result;
-		      fclose(input);
-		    }
-		}
-
 	}
 
 
@@ -603,13 +706,13 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 
 
 // Write results
-	if(plugin->config.mode2 == MotionConfig::SAVE)
+	if(tracking_type == MotionConfig::SAVE)
 	{
 		char string[BCTEXTLEN];
 		sprintf(string, 
 			"%s%06d", 
 			MOTION_FILE, 
-			plugin->get_source_position());
+			source_position);
 		FILE *output = fopen(string, "w");
 		if(output)
 		{
@@ -621,15 +724,14 @@ void MotionScan::scan_frame(VFrame *previous_frame,
 		}
 		else
 		{
-			perror("MotionScan::scan_frame SAVE 1");
+			printf("MotionScan::scan_frame %d: save coordinate failed", __LINE__);
 		}
 	}
 
-#ifdef DEBUG
-printf("MotionScan::scan_frame 10 dx=%.2f dy=%.2f\n", 
+printf("MotionScan::scan_frame %d dx=%.2f dy=%.2f\n", 
+__LINE__,
 (float)this->dx_result / OVERSAMPLE,
 (float)this->dy_result / OVERSAMPLE);
-#endif
 }
 
 
@@ -675,6 +777,174 @@ void MotionScan::put_cache(int x, int y, int64_t difference)
 
 
 
+#define ABS_DIFF(type, temp_type, multiplier, components) \
+{ \
+	temp_type result_temp = 0; \
+	for(int i = 0; i < h; i++) \
+	{ \
+		type *prev_row = (type*)prev_ptr; \
+		type *current_row = (type*)current_ptr; \
+		for(int j = 0; j < w; j++) \
+		{ \
+			for(int k = 0; k < 3; k++) \
+			{ \
+				temp_type difference; \
+				difference = *prev_row++ - *current_row++; \
+				if(difference < 0) \
+					result_temp -= difference; \
+				else \
+					result_temp += difference; \
+			} \
+			if(components == 4) \
+			{ \
+				prev_row++; \
+				current_row++; \
+			} \
+		} \
+		prev_ptr += row_bytes; \
+		current_ptr += row_bytes; \
+	} \
+	result = (int64_t)(result_temp * multiplier); \
+}
+
+int64_t MotionScan::abs_diff(unsigned char *prev_ptr,
+	unsigned char *current_ptr,
+	int row_bytes,
+	int w,
+	int h,
+	int color_model)
+{
+	int64_t result = 0;
+	switch(color_model)
+	{
+		case BC_RGB888:
+			ABS_DIFF(unsigned char, int64_t, 1, 3)
+			break;
+		case BC_RGBA8888:
+			ABS_DIFF(unsigned char, int64_t, 1, 4)
+			break;
+		case BC_RGB_FLOAT:
+			ABS_DIFF(float, double, 0x10000, 3)
+			break;
+		case BC_RGBA_FLOAT:
+			ABS_DIFF(float, double, 0x10000, 4)
+			break;
+		case BC_YUV888:
+			ABS_DIFF(unsigned char, int64_t, 1, 3)
+			break;
+		case BC_YUVA8888:
+			ABS_DIFF(unsigned char, int64_t, 1, 4)
+			break;
+		case BC_YUV161616:
+			ABS_DIFF(uint16_t, int64_t, 1, 3)
+			break;
+		case BC_YUVA16161616:
+			ABS_DIFF(uint16_t, int64_t, 1, 4)
+			break;
+	}
+	return result;
+}
+
+
+
+#define ABS_DIFF_SUB(type, temp_type, multiplier, components) \
+{ \
+	temp_type result_temp = 0; \
+	temp_type y2_fraction = sub_y * 0x100 / OVERSAMPLE; \
+	temp_type y1_fraction = 0x100 - y2_fraction; \
+	temp_type x2_fraction = sub_x * 0x100 / OVERSAMPLE; \
+	temp_type x1_fraction = 0x100 - x2_fraction; \
+	for(int i = 0; i < h_sub; i++) \
+	{ \
+		type *prev_row1 = (type*)prev_ptr; \
+		type *prev_row2 = (type*)prev_ptr + components; \
+		type *prev_row3 = (type*)(prev_ptr + row_bytes); \
+		type *prev_row4 = (type*)(prev_ptr + row_bytes) + components; \
+		type *current_row = (type*)current_ptr; \
+		for(int j = 0; j < w_sub; j++) \
+		{ \
+/* Scan each component */ \
+			for(int k = 0; k < 3; k++) \
+			{ \
+				temp_type difference; \
+				temp_type prev_value = \
+					(*prev_row1++ * x1_fraction * y1_fraction + \
+					*prev_row2++ * x2_fraction * y1_fraction + \
+					*prev_row3++ * x1_fraction * y2_fraction + \
+					*prev_row4++ * x2_fraction * y2_fraction) / \
+					0x100 / 0x100; \
+				temp_type current_value = *current_row++; \
+				difference = prev_value - current_value; \
+				if(difference < 0) \
+					result_temp -= difference; \
+				else \
+					result_temp += difference; \
+			} \
+ \
+/* skip alpha */ \
+			if(components == 4) \
+			{ \
+				prev_row1++; \
+				prev_row2++; \
+				prev_row3++; \
+				prev_row4++; \
+				current_row++; \
+			} \
+		} \
+		prev_ptr += row_bytes; \
+		current_ptr += row_bytes; \
+	} \
+	result = (int64_t)(result_temp * multiplier); \
+}
+
+
+
+
+int64_t MotionScan::abs_diff_sub(unsigned char *prev_ptr,
+	unsigned char *current_ptr,
+	int row_bytes,
+	int w,
+	int h,
+	int color_model,
+	int sub_x,
+	int sub_y)
+{
+	int h_sub = h - 1;
+	int w_sub = w - 1;
+	int64_t result = 0;
+
+	switch(color_model)
+	{
+		case BC_RGB888:
+			ABS_DIFF_SUB(unsigned char, int64_t, 1, 3)
+			break;
+		case BC_RGBA8888:
+			ABS_DIFF_SUB(unsigned char, int64_t, 1, 4)
+			break;
+		case BC_RGB_FLOAT:
+			ABS_DIFF_SUB(float, double, 0x10000, 3)
+			break;
+		case BC_RGBA_FLOAT:
+			ABS_DIFF_SUB(float, double, 0x10000, 4)
+			break;
+		case BC_YUV888:
+			ABS_DIFF_SUB(unsigned char, int64_t, 1, 3)
+			break;
+		case BC_YUVA8888:
+			ABS_DIFF_SUB(unsigned char, int64_t, 1, 4)
+			break;
+		case BC_YUV161616:
+			ABS_DIFF_SUB(uint16_t, int64_t, 1, 3)
+			break;
+		case BC_YUVA16161616:
+			ABS_DIFF_SUB(uint16_t, int64_t, 1, 4)
+			break;
+	}
+	return result;
+}
+
+
+
 
 
 MotionScanCache::MotionScanCache(int x, int y, int64_t difference)
@@ -682,6 +952,126 @@ MotionScanCache::MotionScanCache(int x, int y, int64_t difference)
 	this->x = x;
 	this->y = y;
 	this->difference = difference;
+}
+
+
+
+void MotionScan::clamp_scan(int w, 
+	int h, 
+	int *block_x1,
+	int *block_y1,
+	int *block_x2,
+	int *block_y2,
+	int *scan_x1,
+	int *scan_y1,
+	int *scan_x2,
+	int *scan_y2,
+	int use_absolute)
+{
+// printf("MotionMain::clamp_scan 1 w=%d h=%d block=%d %d %d %d scan=%d %d %d %d absolute=%d\n",
+// w,
+// h,
+// *block_x1,
+// *block_y1,
+// *block_x2,
+// *block_y2,
+// *scan_x1,
+// *scan_y1,
+// *scan_x2,
+// *scan_y2,
+// use_absolute);
+
+	if(use_absolute)
+	{
+// scan is always out of range before block.
+		if(*scan_x1 < 0)
+		{
+			int difference = -*scan_x1;
+			*block_x1 += difference;
+			*scan_x1 = 0;
+		}
+
+		if(*scan_y1 < 0)
+		{
+			int difference = -*scan_y1;
+			*block_y1 += difference;
+			*scan_y1 = 0;
+		}
+
+		if(*scan_x2 > w)
+		{
+			int difference = *scan_x2 - w;
+			*block_x2 -= difference;
+			*scan_x2 -= difference;
+		}
+
+		if(*scan_y2 > h)
+		{
+			int difference = *scan_y2 - h;
+			*block_y2 -= difference;
+			*scan_y2 -= difference;
+		}
+
+		CLAMP(*scan_x1, 0, w);
+		CLAMP(*scan_y1, 0, h);
+		CLAMP(*scan_x2, 0, w);
+		CLAMP(*scan_y2, 0, h);
+	}
+	else
+	{
+		if(*scan_x1 < 0)
+		{
+			int difference = -*scan_x1;
+			*block_x1 += difference;
+			*scan_x2 += difference;
+			*scan_x1 = 0;
+		}
+
+		if(*scan_y1 < 0)
+		{
+			int difference = -*scan_y1;
+			*block_y1 += difference;
+			*scan_y2 += difference;
+			*scan_y1 = 0;
+		}
+
+		if(*scan_x2 - *block_x1 + *block_x2 > w)
+		{
+			int difference = *scan_x2 - *block_x1 + *block_x2 - w;
+			*block_x2 -= difference;
+		}
+
+		if(*scan_y2 - *block_y1 + *block_y2 > h)
+		{
+			int difference = *scan_y2 - *block_y1 + *block_y2 - h;
+			*block_y2 -= difference;
+		}
+
+// 		CLAMP(*scan_x1, 0, w - (*block_x2 - *block_x1));
+// 		CLAMP(*scan_y1, 0, h - (*block_y2 - *block_y1));
+// 		CLAMP(*scan_x2, 0, w - (*block_x2 - *block_x1));
+// 		CLAMP(*scan_y2, 0, h - (*block_y2 - *block_y1));
+	}
+
+// Sanity checks which break the calculation but should never happen if the
+// center of the block is inside the frame.
+	CLAMP(*block_x1, 0, w);
+	CLAMP(*block_x2, 0, w);
+	CLAMP(*block_y1, 0, h);
+	CLAMP(*block_y2, 0, h);
+
+// printf("MotionMain::clamp_scan 2 w=%d h=%d block=%d %d %d %d scan=%d %d %d %d absolute=%d\n",
+// w,
+// h,
+// *block_x1,
+// *block_y1,
+// *block_x2,
+// *block_y2,
+// *scan_x1,
+// *scan_y1,
+// *scan_x2,
+// *scan_y2,
+// use_absolute);
 }
 
 

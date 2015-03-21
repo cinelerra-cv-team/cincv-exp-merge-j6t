@@ -55,13 +55,13 @@ public:
 	void copy_keyframes(int64_t start, 
 		int64_t end, 
 		FileXML *file, 
-		int default_only,
-		int autos_only);
-	static void paste_keyframes(int64_t start, 
+		int use_default,
+		int active_only);
+	void paste_keyframes(int64_t start, 
 		int64_t length, 
 		FileXML *file, 
-		int default_only,
-		Track *track);
+		int use_default,
+		int active_only);
 // Return the nearest boundary of any kind in the plugin edits
 	int64_t plugin_change_duration(int64_t input_position, 
 		int64_t input_length, 

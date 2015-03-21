@@ -296,8 +296,10 @@ int PluginClient::show_gui()
 	thread = new PluginClientThread(this);
 	thread->start();
 	thread->init_complete->lock("PluginClient::show_gui");
+// Must wait before sending any hide_gui
 	if(thread->window)
 	{
+		thread->window->init_wait();
 	}
 	else
 	{
@@ -434,6 +436,11 @@ char* PluginClient::get_path()
 	return server->path;
 }
 
+char* PluginClient::get_plugin_dir()
+{
+	return server->preferences->plugin_dir;
+}
+
 int PluginClient::set_string_client(char *string)
 {
 	strcpy(gui_string, string);
@@ -549,8 +556,21 @@ int PluginClient::send_hide_gui()
 
 int PluginClient::send_configure_change()
 {
+#ifdef USE_KEYFRAME_SPANNING
+	KeyFrame keyframe;
+
+	save_data(&keyframe);
+	server->apply_keyframe(&keyframe);
+
+#else
 	KeyFrame* keyframe = server->get_keyframe();
+
+// Call save routine in plugin
 	save_data(keyframe);
+
+#endif
+
+
 	if(server->mwindow)
 		server->mwindow->undo->update_undo_after("tweak", LOAD_AUTOMATION, this);
 	server->sync_parameters();

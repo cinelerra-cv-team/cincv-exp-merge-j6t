@@ -43,7 +43,7 @@ FloatAutos::~FloatAutos()
 {
 }
 
-void FloatAutos::straighten(int64_t start, int64_t end)
+void FloatAutos::set_automation_mode(int64_t start, int64_t end, int mode)
 {
 	FloatAuto *current = (FloatAuto*)first;
 	while(current)
@@ -54,6 +54,7 @@ void FloatAutos::straighten(int64_t start, int64_t end)
 // Is current auto in range?		
 		if(current->position >= start && current->position < end)
 		{
+			current->mode = mode;
 			float current_value = current->get_value();
 
 // Determine whether to set the control in point.
@@ -82,16 +83,6 @@ int FloatAutos::draw_joining_line(BC_SubWindow *canvas, int vertical, int center
 		canvas->draw_line(x1, center_pixel + y1, x2, center_pixel + y2);
 }
 
-Auto* FloatAutos::add_auto(int64_t position, float value)
-{
-	FloatAuto* current = (FloatAuto*)autoof(position);
-	FloatAuto* result;
-	
-	insert_before(current, result = (FloatAuto*)new_auto());
-	result->adjust_to_new_coordinates(position,value);
-	
-	return result;
-}
 
 Auto* FloatAutos::new_auto()
 {
@@ -197,11 +188,15 @@ int FloatAutos::automation_is_constant(int64_t start,
 			FloatAuto *float_next = (FloatAuto*)current->next;
 
 // Change occurs between keyframes
-			if(!EQUIV(float_current->get_value(), float_next->get_value()) ||
-				!EQUIV(float_current->get_control_out_value(), 0) ||
-				!EQUIV(float_next->get_control_in_value(), 0))
+			if(!EQUIV(float_current->get_value(), float_next->get_value()))
 			{
-				return 0;
+				if((float_current->mode != Auto::LINEAR ||
+					float_next->mode != Auto::LINEAR) &&
+					(!EQUIV(float_current->get_control_out_value(), 0) ||
+						!EQUIV(float_next->get_control_in_value(), 0)))
+				{
+					return 0;
+				}
 			}
 		}
 
@@ -210,10 +205,13 @@ int FloatAutos::automation_is_constant(int64_t start,
 			FloatAuto *float_previous = (FloatAuto*)current->previous;
 
 // Change occurs between keyframes
-			if(!EQUIV(float_current->get_value(), float_previous->get_value()) ||
-				!EQUIV(float_current->get_control_in_value(), 0) ||
-				!EQUIV(float_previous->get_control_out_value(), 0))
+			if(!EQUIV(float_current->get_value(), float_previous->get_value()))
 			{
+				if((float_current->mode != Auto::LINEAR ||
+					float_previous->mode != Auto::LINEAR) &&
+					(!EQUIV(float_current->get_control_out_value(), 0) ||
+						!EQUIV(float_previous->get_control_in_value(), 0)))
+				{
 // printf("FloatAutos::automation_is_constant %d %d %d %f %f %f %f\n", 
 // start, 
 // float_previous->position, 
@@ -222,7 +220,8 @@ int FloatAutos::automation_is_constant(int64_t start,
 // float_current->value, 
 // float_previous->control_out_value, 
 // float_current->control_in_value);
-				return 0;
+					return 0;
+				}
 			}
 		}
 	}

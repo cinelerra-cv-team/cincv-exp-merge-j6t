@@ -116,13 +116,14 @@ int BC_Resources::x_error_handler(Display *display, XErrorEvent *event)
 BC_Resources::BC_Resources()
 {
 	synchronous = 0;
-	display_info = new BC_DisplayInfo("", 0);
+	display_info = new BC_DisplayInfo((char*)"", 0);
 	id_lock = new Mutex("BC_Resources::id_lock");
 	create_window_lock = new Mutex("BC_Resources::create_window_lock", 1);
 	id = 0;
+	filebox_id = 0;
 
 	for(int i = 0; i < FILEBOX_HISTORY_SIZE; i++)
-		filebox_history[i][0] = 0;
+		filebox_history[i].path[0] = 0;
 
 #ifdef HAVE_XFT
 	XftInitFtLibrary();
@@ -655,6 +656,14 @@ int BC_Resources::get_id()
 {
 	id_lock->lock("BC_Resources::get_id");
 	int result = id++;
+	id_lock->unlock();
+	return result;
+}
+
+int BC_Resources::get_filebox_id()
+{
+	id_lock->lock("BC_Resources::get_filebox_id");
+	int result = filebox_id++;
 	id_lock->unlock();
 	return result;
 }

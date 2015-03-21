@@ -62,7 +62,7 @@ void Labels::insert_labels(Labels *labels, double start, double length, int past
 	Label *old_label;
 
 
-//printf("Labels::insert_labels 1 %f\n", start);
+//printf("Labels::insert_labels 1 %d %d\n", __LINE__, paste_silence);
 
 // Insert silence in old labels
 	if(paste_silence)

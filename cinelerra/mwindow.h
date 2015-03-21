@@ -44,6 +44,7 @@
 #include "filexml.inc"
 #include "framecache.inc"
 #include "gwindow.inc"
+#include "keyframegui.inc"
 #include "levelwindow.inc"
 #include "loadmode.inc"
 #include "mainerror.inc"
@@ -236,9 +237,10 @@ public:
 	void show_plugin(Plugin *plugin);
 	void hide_plugin(Plugin *plugin, int lock);
 	void hide_plugins();
+	void delete_plugin(PluginServer *plugin);
 // Update plugins with configuration changes.
 // Called by TrackCanvas::cursor_motion_event.
-	void update_plugin_guis();
+	void update_plugin_guis(int do_keyframe_guis = 1);
 	void update_plugin_states();
 	void update_plugin_titles();
 // Called by Attachmentpoint during playback.
@@ -250,6 +252,11 @@ public:
 // Returns 1 if a GUI for the plugin is open so OpenGL routines can determine if
 // they can run.
 	int plugin_gui_open(Plugin *plugin);
+
+	void show_keyframe_gui(Plugin *plugin);
+	void hide_keyframe_guis();
+	void hide_keyframe_gui(Plugin *plugin);
+	void update_keyframe_guis();
 
 
 // ============================= editing commands ========================
@@ -294,7 +301,6 @@ public:
 	void delete_track();
 	void delete_track(Track *track);
 	void delete_tracks();
-	void detach_transition(Transition *transition);
 	int feather_edits(int64_t feather_samples, int audio, int video);
 	int64_t get_feather(int audio, int video);
 	float get_aspect_ratio();
@@ -312,6 +318,15 @@ public:
 // CWindow calls this to insert multiple effects from 
 // the drag_pluginservers array.
 	void insert_effects_cwindow(Track *dest_track);
+
+// Attach new effect to all recordable tracks
+// single_standalone - attach 1 standalone on the first track and share it with
+// other tracks
+	void insert_effect(char *title, 
+		SharedLocation *shared_location, 
+		int data_type,
+		int plugin_type,
+		int single_standalone);
 
 // This is called multiple times by the above functions.
 // It can't sync parameters.
@@ -361,10 +376,24 @@ public:
 				RecordLabels *new_labels);
 	void paste_silence();
 
+// Detach single transition
+	void detach_transition(Transition *transition);
+// Detach all transitions in selection
+	void detach_transitions();
+// Attach dragged transition
 	void paste_transition();
+// Attach transition to all edits in selection
+	void paste_transitions(int track_type, char *title);
+// Attach transition dragged onto CWindow
 	void paste_transition_cwindow(Track *dest_track);
+// Attach default transition to single edit
 	void paste_audio_transition();
 	void paste_video_transition();
+// Set length of single transition
+	void set_transition_length(Transition *transition, double length);
+// Set length in seconds of all transitions in active range
+	void set_transition_length(double length);
+	
 	void rebuild_indices();
 // Asset removal from caches
 	void reset_caches();
@@ -372,6 +401,9 @@ public:
 	void remove_assets_from_project(int push_undo = 0);
 	void remove_assets_from_disk();
 	void resize_track(Track *track, int w, int h);
+	
+	void set_automation_mode(int mode);
+	void set_keyframe_type(int mode);
 	void set_auto_keyframes(int value);
 	void set_labels_follow_edits(int value);
 
@@ -396,7 +428,6 @@ public:
 	int copy_automation();
 	int paste_automation();
 	void clear_automation();
-	void straighten_automation();
 	int cut_default_keyframe();
 	int copy_default_keyframe();
 // Use paste_automation to paste the default keyframe in other position.
@@ -466,6 +497,10 @@ public:
 	ArrayList<PluginServer*> *plugindb;
 // Currently visible plugins
 	ArrayList<PluginServer*> *plugin_guis;
+// GUI Plugins to delete
+	ArrayList<PluginServer*> *dead_plugins;
+// Keyframe editors
+	ArrayList<KeyFrameThread*> *keyframe_threads;
 
 
 // Adjust sample position to line up with frames.
@@ -498,6 +533,8 @@ public:
 	LevelWindow *lwindow;
 // Lock during creation and destruction of GUI
 	Mutex *plugin_gui_lock;
+	Mutex *dead_plugin_lock;
+	Mutex *keyframe_gui_lock;
 // Lock during creation and destruction of brender so playback doesn't use it.
 	Mutex *brender_lock;
 

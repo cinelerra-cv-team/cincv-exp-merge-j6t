@@ -514,6 +514,8 @@ int HistogramCanvas::cursor_motion_event()
 	{
 		HistogramPoint *current = plugin->config.points[plugin->mode].first;
 		int done = 0;
+// Only change cursor in the points so the user doesn't miss and create
+// new points.
 		while(current && !done)
 		{
 			int x1;
@@ -574,6 +576,13 @@ int HistogramCanvas::button_release_event()
 	}
 	return 0;
 }
+
+
+
+
+
+
+
 
 
 

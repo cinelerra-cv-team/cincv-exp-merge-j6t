@@ -142,7 +142,6 @@ int AModule::render(double *buffer,
 		input_position += track->nudge * 
 			sample_rate /
 			edl_rate;
-
 	AEdit *playable_edit;
 	int64_t start_project = input_position;
 	int64_t end_project = input_position + input_len;

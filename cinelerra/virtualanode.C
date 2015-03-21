@@ -25,6 +25,7 @@
 #include "arender.h"
 #include "atrack.h"
 #include "automation.h"
+#include "bcsignals.h"
 #include "edits.h"
 #include "edl.h"
 #include "edlsession.h"
@@ -228,6 +229,7 @@ int VirtualANode::render_as_module(double **audio_out,
 			start_position,
 			len,
 			sample_rate);
+
 	}
 	else
 // Read data from previous entity

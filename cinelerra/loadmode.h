@@ -25,6 +25,7 @@
 #include "guicast.h"
 #include "loadmode.inc"
 #include "mwindow.inc"
+#include "theme.inc"
 
 class LoadModeListBox;
 
@@ -34,6 +35,22 @@ public:
 	LoadModeItem(char *text, int value);
 	int value;
 };
+
+class LoadModeToggle : public BC_Toggle
+{
+public:
+	LoadModeToggle(int x, 
+		int y, 
+		LoadMode *window, 
+		int value, 
+		const char *images,
+		const char *tooltip);
+	int handle_event();
+	LoadMode *window;
+	int value;
+};
+
+
 
 class LoadMode
 {
@@ -48,23 +65,26 @@ public:
 	
 	void create_objects();
 	int reposition_window(int x, int y);
-	static int calculate_h(BC_WindowBase *gui);
+	static int calculate_h(BC_WindowBase *gui, Theme *theme);
+	static int calculate_w(BC_WindowBase *gui, Theme *theme, int use_none);
 	int get_h();
 	int get_x();
 	int get_y();
 
 	char* mode_to_text();
+	void update();
 
 	BC_Title *title;
-	BC_TextBox *textbox;
-	LoadModeListBox *listbox;
 	MWindow *mwindow;
 	BC_WindowBase *window;
 	int x;
 	int y;
 	int *output;
 	int use_nothing;
-	ArrayList<LoadModeItem*> load_modes;
+	LoadModeToggle *mode[TOTAL_LOADMODES];
+//	BC_TextBox *textbox;
+//	ArrayList<LoadModeItem*> load_modes;
+//	LoadModeListBox *listbox;
 };
 
 class LoadModeListBox : public BC_ListBox

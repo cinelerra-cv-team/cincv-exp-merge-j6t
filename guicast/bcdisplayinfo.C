@@ -19,7 +19,9 @@
  * 
  */
 
+#include "bcdisplay.h"
 #include "bcdisplayinfo.h"
+#include "bcwindowbase.h"
 #include "clip.h"
 
 #include <X11/X.h>
@@ -45,7 +47,9 @@ BC_DisplayInfo::BC_DisplayInfo(const char *display_name, int show_error)
 
 BC_DisplayInfo::~BC_DisplayInfo()
 {
+#ifndef SINGLE_THREAD
 	XCloseDisplay(display);
+#endif
 }
 
 
@@ -61,6 +65,10 @@ void BC_DisplayInfo::test_window(int &x_out,
 	int x_in, 
 	int y_in)
 {
+#ifdef SINGLE_THREAD
+	BC_Display::lock_display("BC_DisplayInfo::test_window");
+#endif
+
 	unsigned long mask = CWEventMask | CWWinGravity;
 	XSetWindowAttributes attr;
 	XSizeHints size_hints;
@@ -169,6 +177,9 @@ void BC_DisplayInfo::test_window(int &x_out,
 	x_out = MIN(x_out, 30);
 	y_out = MIN(y_out, 30);
 //printf("BC_DisplayInfo::test_window 2\n");
+#ifdef SINGLE_THREAD
+	BC_Display::unlock_display();
+#endif
 }
 
 void BC_DisplayInfo::init_borders()
@@ -220,6 +231,10 @@ int BC_DisplayInfo::get_bottom_border()
 void BC_DisplayInfo::init_window(const char *display_name, int show_error)
 {
 	if(display_name && display_name[0] == 0) display_name = NULL;
+
+#ifdef SINGLE_THREAD
+	display = BC_Display::get_display(display_name);
+#else
 	
 // This function must be the first Xlib
 // function a multi-threaded program calls
@@ -236,24 +251,45 @@ void BC_DisplayInfo::init_window(const char *display_name, int show_error)
 		}
 		return;
  	}
-	
+#endif // SINGLE_THREAD
+
+#ifdef SINGLE_THREAD
+	BC_Display::lock_display("BC_DisplayInfo::init_window");
+#endif
 	screen = DefaultScreen(display);
 	rootwin = RootWindow(display, screen);
 	vis = DefaultVisual(display, screen);
 	default_depth = DefaultDepth(display, screen);
+#ifdef SINGLE_THREAD
+	BC_Display::unlock_display();
+#endif // SINGLE_THREAD
 }
 
 
 int BC_DisplayInfo::get_root_w()
 {
+#ifdef SINGLE_THREAD
+	BC_Display::lock_display("BC_DisplayInfo::get_root_w");
+#endif
 	Screen *screen_ptr = XDefaultScreenOfDisplay(display);
-	return WidthOfScreen(screen_ptr);
+	int result = WidthOfScreen(screen_ptr);
+#ifdef SINGLE_THREAD
+	BC_Display::unlock_display();
+#endif
+	return result;
 }
 
 int BC_DisplayInfo::get_root_h()
 {
+#ifdef SINGLE_THREAD
+	BC_Display::lock_display("BC_DisplayInfo::get_root_h");
+#endif
 	Screen *screen_ptr = XDefaultScreenOfDisplay(display);
-	return HeightOfScreen(screen_ptr);
+	int result = HeightOfScreen(screen_ptr);
+#ifdef SINGLE_THREAD
+	BC_Display::unlock_display();
+#endif
+	return result;
 }
 
 int BC_DisplayInfo::get_abs_cursor_x()
@@ -262,6 +298,9 @@ int BC_DisplayInfo::get_abs_cursor_x()
 	unsigned int temp_mask;
 	Window temp_win;
 
+#ifdef SINGLE_THREAD
+	BC_Display::lock_display("BC_DisplayInfo::get_abs_cursor_x");
+#endif
 	XQueryPointer(display, 
 	   rootwin, 
 	   &temp_win, 
@@ -271,6 +310,9 @@ int BC_DisplayInfo::get_abs_cursor_x()
 	   &win_x, 
 	   &win_y, 
 	   &temp_mask);
+#ifdef SINGLE_THREAD
+	BC_Display::unlock_display();
+#endif
 	return abs_x;
 }
 
@@ -280,6 +322,9 @@ int BC_DisplayInfo::get_abs_cursor_y()
 	unsigned int temp_mask;
 	Window temp_win;
 
+#ifdef SINGLE_THREAD
+	BC_Display::lock_display("BC_DisplayInfo::get_abs_cursor_y");
+#endif
 	XQueryPointer(display, 
 	   rootwin, 
 	   &temp_win, 
@@ -289,5 +334,12 @@ int BC_DisplayInfo::get_abs_cursor_y()
 	   &win_x, 
 	   &win_y, 
 	   &temp_mask);
+#ifdef SINGLE_THREAD
+	BC_Display::unlock_display();
+#endif
 	return abs_y;
 }
+
+
+
+

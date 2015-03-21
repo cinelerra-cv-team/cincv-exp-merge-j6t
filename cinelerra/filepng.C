@@ -454,8 +454,10 @@ PNGConfigVideo::~PNGConfigVideo()
 void PNGConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
+	lock_window("PNGConfigVideo::create_objects");
 	add_subwindow(new PNGUseAlpha(this, x, y));
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 int PNGConfigVideo::close_event()

@@ -23,6 +23,7 @@
 #define NEW_H
 
 #include "assets.inc"
+#include "bcdialog.h"
 #include "edl.inc"
 #include "file.inc"
 #include "filexml.inc"
@@ -30,7 +31,6 @@
 #include "bchash.inc"
 #include "formatpresets.h"
 #include "mwindow.inc"
-#include "thread.h"
 
 class NewThread;
 class NewWindow;
@@ -47,23 +47,24 @@ public:
 	int handle_event();
 	int run_script(FileXML *script);
 	int create_new_project();
+	void create_new_edl();
 
 	MWindow *mwindow;
 	NewThread *thread;
 	EDL *new_edl;
 
 private:
-	void create_new_edl();
 	FileXML *script;
 };
 
-class NewThread : public Thread
+class NewThread : public BC_DialogThread
 {
 public:
 	NewThread(MWindow *mwindow, New *new_project);
 	~NewThread();
 	
-	void run();
+	BC_Window* new_gui();
+	void handle_close_event(int result);
 
 	int load_defaults();
 	int save_defaults();
@@ -73,7 +74,6 @@ public:
 	NewWindow *nwindow;
 	MWindow *mwindow;
 	New *new_project;
-	Mutex *window_lock;
 };
 
 class NewWindow : public BC_Window

@@ -96,6 +96,9 @@ public:
 	int interlace_mode;
 // Coords for cropping operation
 	int crop_x1, crop_x2, crop_y1, crop_y2;
+	float ruler_x1, ruler_y1;
+	float ruler_x2, ruler_y2;
+// Ruler points relative to the output frame.
 // Current folder in resource window
 	char current_folder[BCTEXTLEN];
 // align cursor on frame boundaries
@@ -141,6 +144,9 @@ public:
 	int labels_follow_edits;
 	int mpeg4_deblock;
 	int plugins_follow_edits;
+// For main menu plugin attaching, 
+// attach 1 standalone on the first track and share it with other tracks
+	int single_standalone;
 	int meter_format;
 	int min_meter_db;
 	int max_meter_db;

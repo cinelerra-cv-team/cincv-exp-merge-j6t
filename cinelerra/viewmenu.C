@@ -154,7 +154,6 @@ int PluginAutomation::handle_event()
 	mwindow->edl->session->auto_conf->plugins = get_checked();
 	mwindow->gui->canvas->draw_overlays();
 	mwindow->gui->canvas->flash();
-//	mwindow->gui->mainmenu->draw_items();
 	mwindow->gui->unlock_window();
 	mwindow->gwindow->gui->update_toggles(1);
 	mwindow->gui->lock_window("PluginAutomation::handle_event");

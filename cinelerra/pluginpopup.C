@@ -26,6 +26,8 @@
 #include "plugin.h"
 #include "plugindialog.h"
 #include "pluginpopup.h"
+#include "presets.h"
+#include "presetsgui.h"
 #include "track.h"
 
 
@@ -39,6 +41,9 @@ PluginPopup::PluginPopup(MWindow *mwindow, MWindowGUI *gui)
 {
 	this->mwindow = mwindow;
 	this->gui = gui;
+#if 0
+	thread = new PresetsThread(mwindow);
+#endif
 }
 
 PluginPopup::~PluginPopup()
@@ -49,21 +54,26 @@ void PluginPopup::create_objects()
 {
 	add_item(change = new PluginPopupChange(mwindow, this));
 	add_item(detach = new PluginPopupDetach(mwindow, this));
-//	add_item(in = new PluginPopupIn(mwindow, this));
-//	add_item(out = new PluginPopupOut(mwindow, this));
-	add_item(show = new PluginPopupShow(mwindow, this));
-	add_item(on = new PluginPopupOn(mwindow, this));
 	add_item(new PluginPopupUp(mwindow, this));
 	add_item(new PluginPopupDown(mwindow, this));
+	add_item(on = new PluginPopupOn(mwindow, this));
 }
 
 int PluginPopup::update(Plugin *plugin)
 {
-//printf("PluginPopup::update %p\n", plugin);
+	if(show) remove_item(show);
+	if(presets) remove_item(presets);
+	show = 0;
+	presets = 0;
+
+	if(plugin->plugin_type == PLUGIN_STANDALONE)
+	{
+		add_item(show = new PluginPopupShow(mwindow, this));
+		add_item(presets = new PluginPresets(mwindow, this));
+		show->set_checked(plugin->show);
+	}
+
 	on->set_checked(plugin->on);
-//	in->set_checked(plugin->in);
-//	out->set_checked(plugin->out);
-	show->set_checked(plugin->show);
 	this->plugin = plugin;
 	return 0;
 }
@@ -76,8 +86,7 @@ int PluginPopup::update(Plugin *plugin)
 
 
 
-PluginPopupChange::PluginPopupChange(MWindow *mwindow, PluginPopup
-*popup)
+PluginPopupChange::PluginPopupChange(MWindow *mwindow, PluginPopup *popup)
  : BC_MenuItem(_("Change..."))
 {
 	this->mwindow = mwindow;
@@ -94,7 +103,9 @@ int PluginPopupChange::handle_event()
 {
 	dialog_thread->start_window(popup->plugin->track,
 		popup->plugin,
-		PROGRAM_NAME ": Change Effect");
+		PROGRAM_NAME ": Change Effect",
+		0,
+		popup->plugin->track->data_type);
 }
 
 
@@ -118,6 +129,7 @@ PluginPopupDetach::~PluginPopupDetach()
 int PluginPopupDetach::handle_event()
 {
 	mwindow->hide_plugin(popup->plugin, 1);
+	mwindow->hide_keyframe_gui(popup->plugin);
 	popup->plugin->track->detach_effect(popup->plugin);
 	mwindow->save_backup();
 	mwindow->undo->update_undo_after(_("detach effect"), LOAD_ALL);
@@ -197,6 +209,7 @@ PluginPopupShow::~PluginPopupShow()
 int PluginPopupShow::handle_event()
 {
 	mwindow->show_plugin(popup->plugin);
+	mwindow->gui->update(0, 1, 0, 0, 0, 0, 0);
 	return 1;
 }
 
@@ -249,6 +262,24 @@ PluginPopupDown::PluginPopupDown(MWindow *mwindow, PluginPopup *popup)
 int PluginPopupDown::handle_event()
 {
 	mwindow->move_plugins_down(popup->plugin->plugin_set);
+	return 1;
+}
+
+
+
+PluginPresets::PluginPresets(MWindow *mwindow, PluginPopup *popup)
+ : BC_MenuItem(_("Presets..."))
+{
+	this->mwindow = mwindow;
+	this->popup = popup;
+}
+
+int PluginPresets::handle_event()
+{
+	mwindow->show_keyframe_gui(popup->plugin);
+#if 0
+	popup->thread->start_window(popup->plugin);
+#endif
 	return 1;
 }
 

@@ -67,7 +67,7 @@ public:
 		int64_t end, 
 		FileXML *xml, 
 		int default_only,
-		int autos_only);
+		int active_only);
 	virtual void dump();
 	virtual int direct_copy_possible(int64_t start, int direction);
 	virtual int direct_copy_possible_derived(int64_t start, int direction) { return 1; };
@@ -77,6 +77,7 @@ public:
 		double scale,
 		FileXML *file, 
 		int default_only,
+		int active_only,
 		AutoConf *autoconf);
 
 // Get projector coordinates if this is video automation
@@ -98,12 +99,14 @@ public:
 		int64_t end, 
 		AutoConf *autoconf, 
 		int shift_autos);
-	void straighten(int64_t start, 
-		int64_t end, 
+	void set_automation_mode(int64_t start, 
+		int64_t end,
+		int mode, 
 		AutoConf *autoconf);
 	void paste_silence(int64_t start, int64_t end);
 	void insert_track(Automation *automation, 
 		int64_t start_unit, 
+// Pad keyframes to this length.
 		int64_t length_units,
 		int replace_default);
 	void resample(double old_rate, double new_rate);

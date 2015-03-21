@@ -368,6 +368,9 @@ int64_t quicktime_samples_to_bytes(quicktime_trak_t *track, long samples)
 	char *compressor = track->mdia.minf.stbl.stsd.table[0].format;
 	int channels = track->mdia.minf.stbl.stsd.table[0].channels;
 
+	if(quicktime_match_32(compressor, QUICKTIME_DV))
+		return (int64_t)samples * track->mdia.minf.stbl.stsz.sample_size;
+
 	if(quicktime_match_32(compressor, QUICKTIME_IMA4)) 
 		return samples * channels;
 

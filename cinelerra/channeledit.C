@@ -501,6 +501,7 @@ int ChannelEditWindow::change_channel_from_list(int channel_number)
 ChannelEditSelect::ChannelEditSelect(ChannelEditWindow *window, int x, int y)
  : BC_GenericButton(x, y, _("Select"))
 {
+	this->window = window;
 }
 ChannelEditSelect::~ChannelEditSelect()
 {
@@ -1007,7 +1008,7 @@ ChannelEditEditWindow::ChannelEditEditWindow(ChannelEditEditThread *thread,
 ChannelEditEditWindow::~ChannelEditEditWindow()
 {
 }
-int ChannelEditEditWindow::create_objects(Channel *channel)
+void ChannelEditEditWindow::create_objects(Channel *channel)
 {
 	this->new_channel = channel;
 	Channel *channel_usage = channel_picker->get_channel_usage();
@@ -1091,7 +1092,6 @@ SET_TRACE
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 SET_TRACE
-	return 0;
 }
 
 ChannelEditEditTitle::ChannelEditEditTitle(int x, 

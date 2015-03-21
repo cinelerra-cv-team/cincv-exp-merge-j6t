@@ -29,6 +29,7 @@
 // lock up for no reason.
 
 
+#include "bcdisplay.inc"
 #include "bcwindowbase.inc"
 #include "thread.h"
 
@@ -37,11 +38,13 @@
 class BC_WindowEvents : public Thread
 {
 public:
+	BC_WindowEvents(BC_Display *display);
 	BC_WindowEvents(BC_WindowBase *window);
 	~BC_WindowEvents();
 	void start();
 	void run();
 	BC_WindowBase *window;
+	BC_Display *display;
 	int done;
 };
 

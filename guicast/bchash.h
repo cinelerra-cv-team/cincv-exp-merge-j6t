@@ -66,6 +66,9 @@ public:
 
 	void dump();
 
+	int size();
+	char* get_key(int number);
+	char* get_value(int number);
 
 private:
 // Reallocate table so at least total entries exist

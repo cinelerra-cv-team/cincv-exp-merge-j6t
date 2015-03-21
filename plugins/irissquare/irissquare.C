@@ -179,7 +179,7 @@ int IrisSquareMain::save_defaults()
 void IrisSquareMain::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("IRISSQUARE");
 	output.tag.set_property("DIRECTION", direction);
 	output.append_tag();
@@ -192,7 +192,7 @@ void IrisSquareMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	while(!input.read_tag())
 	{

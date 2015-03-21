@@ -24,15 +24,12 @@
 #include "bchash.h"
 #include "delayaudio.h"
 #include "filexml.h"
+#include "language.h"
 #include "picon_png.h"
 #include "vframe.h"
 #include <algorithm>
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 PluginClient* new_plugin(PluginServer *server)
@@ -44,13 +41,11 @@ PluginClient* new_plugin(PluginServer *server)
 DelayAudio::DelayAudio(PluginServer *server)
  : PluginAClient(server)
 {
-	load_defaults();
 }
 
 DelayAudio::~DelayAudio()
 {
 
-	save_defaults();
 }
 
 
@@ -71,15 +66,7 @@ int DelayAudio::load_configuration()
 	KeyFrame *prev_keyframe;
 	prev_keyframe = get_prev_keyframe(get_source_position());
 	
-	DelayAudioConfig old_config;
-	old_config.copy_from(config);
  	read_data(prev_keyframe);
-
- 	if(!old_config.equivalent(config))
- 	{
-// Reconfigure
-		return 1;
-	}
 	return 0;
 }
 
@@ -106,7 +93,7 @@ int DelayAudio::save_defaults()
 void DelayAudio::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 	while(!result)
@@ -127,7 +114,7 @@ void DelayAudio::read_data(KeyFrame *keyframe)
 void DelayAudio::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("DELAYAUDIO");
 	output.tag.set_property("LENGTH", (double)config.length);
@@ -140,6 +127,7 @@ void DelayAudio::save_data(KeyFrame *keyframe)
 
 int DelayAudio::process_realtime(int64_t size, double *input_ptr, double *output_ptr)
 {
+
 	load_configuration();
 	int64_t num_delayed = int64_t(config.length * PluginAClient::project_sample_rate + 0.5);
 

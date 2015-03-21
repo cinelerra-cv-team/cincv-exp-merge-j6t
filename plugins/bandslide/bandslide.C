@@ -220,7 +220,7 @@ int BandSlideMain::save_defaults()
 void BandSlideMain::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("BANDSLIDE");
 	output.tag.set_property("BANDS", bands);
 	output.tag.set_property("DIRECTION", direction);
@@ -234,7 +234,7 @@ void BandSlideMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	while(!input.read_tag())
 	{

@@ -130,6 +130,7 @@ void GWindowGUI::calculate_extents(BC_WindowBase *gui, int *w, int *h)
 void GWindowGUI::create_objects()
 {
 	int x = 10, y = 10;
+	lock_window("GWindowGUI::create_objects 1");
 
 
 	for(int i = 0; i < NONAUTOTOGGLES_COUNT + AUTOMATION_TOTAL; i++)
@@ -141,6 +142,7 @@ void GWindowGUI::create_objects()
 			toggle_order[i]));
 		y += toggles[i]->get_h() + 5;
 	}
+	unlock_window();
 }
 
 void GWindowGUI::update_mwindow()

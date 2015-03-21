@@ -26,6 +26,7 @@
 #include "cwindowgui.inc"
 #include "guicast.h"
 #include "maskauto.inc"
+#include "maskautos.inc"
 #include "mwindow.inc"
 
 
@@ -51,6 +52,7 @@ public:
 
 	void run();
 	void update_show_window();
+	void raise_window();
 	void update_values();
 
 	MWindow *mwindow;
@@ -216,6 +218,7 @@ public:
 	void update();
 	void handle_event();
 	void get_keyframe(Track* &track, 
+		MaskAutos* &autos,
 		MaskAuto* &keyframe, 
 		SubMask* &mask, 
 		MaskPoint* &point,
@@ -391,6 +394,26 @@ public:
 	int handle_event();
 	MWindow *mwindow;
 	CWindowProjectorGUI *gui;
+};
+
+
+
+
+class CWindowRulerGUI : public CWindowToolGUI
+{
+public:
+	CWindowRulerGUI(MWindow *mwindow, CWindowTool *thread);
+	~CWindowRulerGUI();
+	void create_objects();
+	void update();
+// Update the gui
+	void handle_event();
+	
+	BC_Title *current;
+	BC_Title *point1;
+	BC_Title *point2;
+	BC_Title *distance;
+	BC_Title *angle;
 };
 
 

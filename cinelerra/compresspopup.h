@@ -32,7 +32,7 @@ public:
 	CompressPopup(int x, int y, int use_dv, char *output);
 	~CompressPopup();
 
-	int create_objects();
+	void create_objects();
 
 	int add_items();         // add initial items
 	char format[256];           // current setting 

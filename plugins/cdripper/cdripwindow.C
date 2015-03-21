@@ -20,23 +20,19 @@
  */
 
 #include "cdripwindow.h"
+#include "language.h"
 #include "mwindow.inc"
 
 #include <string.h>
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 CDRipWindow::CDRipWindow(CDRipMain *cdripper, int x, int y)
  : BC_Window(PROGRAM_NAME ": CD Ripper", 
  	x,
 	y,
  	450, 
-	192, 
+	230, 
 	450, 
-	192,
+	230,
 	0,
 	0,
 	1)

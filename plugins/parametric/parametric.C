@@ -325,6 +325,7 @@ void ParametricBandGUI::update_gui()
 	freq->update(plugin->config.band[band].freq);
 	quality->update(plugin->config.band[band].quality);
 	magnitude->update(plugin->config.band[band].magnitude);
+	mode->set_text(ParametricMode::mode_to_text(plugin->config.band[band].mode));
 }
 
 
@@ -523,22 +524,22 @@ void ParametricWindow::update_canvas()
 		if(freq < niquist)
 		{
 			double magnitude = plugin->envelope[index];
-				int y2 = canvas->get_h() * 3 / 4;
+			int y2 = canvas->get_h() * 3 / 4;
 
-				if(magnitude > 1)
+			if(magnitude > 1)
 			{
-					y2 -= (int)(DB::todb(magnitude) * 
+				y2 -= (int)(DB::todb(magnitude) * 
 					canvas->get_h() * 
 					3 / 
 					4 / 
 					15);
-				}
+			}
 			else
 			{
-					y2 += (int)((1 - magnitude) * canvas->get_h() / 4);
-				}
-				if(i > 0) canvas->draw_line(i - 1, y1, i, y2);
-				y1 = y2;
+				y2 += (int)((1 - magnitude) * canvas->get_h() / 4);
+			}
+			if(i > 0) canvas->draw_line(i - 1, y1, i, y2);
+			y1 = y2;
 		}
 		else
 		{
@@ -644,7 +645,7 @@ int ParametricEQ::is_realtime() { return 1; }
 void ParametricEQ::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 	while(!result)
@@ -673,7 +674,7 @@ void ParametricEQ::read_data(KeyFrame *keyframe)
 void ParametricEQ::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("PARAMETRICEQ");
 	output.tag.set_property("WETNESS", config.wetness);
@@ -774,15 +775,24 @@ double ParametricEQ::calculate_envelope()
 							(1.0 - config.band[band].quality) :
 							0.01;
 						sigma /= 4;
-						double a = (double)config.band[band].freq / niquist;
+						double center = (double)Freq::fromfreq(config.band[band].freq) / 
+							TOTALFREQS;
 						double normalize = gauss(sigma, 0, 0);
 						if(config.band[band].magnitude <= -MAXMAGNITUDE) 
 							magnitude = -1;
 
 						for(int i = 0; i < WINDOW_SIZE / 2; i++)
+						{
+							int freq = i * niquist / (WINDOW_SIZE / 2);
+							int current_slot = Freq::fromfreq(freq);
 							envelope[i] += magnitude * 
-								gauss(sigma, a, (double)i / (WINDOW_SIZE / 2)) / 
+								gauss(sigma, center, (double)current_slot / TOTALFREQS) / 
 								normalize;
+// printf("freq=%d magnitude=%f envelope[i]=%f\n",
+// freq,
+// magnitude,
+// envelope[i]);
+						}
 					}
 					break;
 			}
@@ -791,13 +801,13 @@ double ParametricEQ::calculate_envelope()
 	return 0;
 }
 
-double ParametricEQ::gauss(double sigma, double a, double x)
+double ParametricEQ::gauss(double sigma, double center, double x)
 {
 	if(EQUIV(sigma, 0)) sigma = 0.01;
 
 	return 1.0 / 
 		sqrt(2 * M_PI * sigma * sigma) * 
-		exp(-(x - a) * (x - a) / 
+		exp(-(x - center) * (x - center) / 
 			(2 * sigma * sigma));
 }
 
@@ -813,6 +823,9 @@ int ParametricEQ::process_buffer(int64_t size,
 	
 	
 	fft->process_buffer(start_position, size, buffer, get_direction());
+
+
+
 	return 0;
 }
 

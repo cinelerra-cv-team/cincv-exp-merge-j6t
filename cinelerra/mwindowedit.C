@@ -35,6 +35,7 @@
 #include "edl.h"
 #include "edlsession.h"
 #include "filexml.h"
+#include "floatauto.h"
 #include "gwindow.h"
 #include "gwindowgui.h"
 #include "keyframe.h"
@@ -243,13 +244,18 @@ void MWindow::clear(int clear_handle)
 	}
 }
 
-void MWindow::straighten_automation()
+void MWindow::set_automation_mode(int mode)
 {
-	edl->tracks->straighten_automation(
+	edl->tracks->set_automation_mode(
 		edl->local_session->get_selectionstart(), 
-		edl->local_session->get_selectionend()); 
+		edl->local_session->get_selectionend(),
+		mode); 
 	save_backup();
-	undo->update_undo_after(_("straighten curves"), LOAD_AUTOMATION); 
+
+	if(mode == Auto::LINEAR)
+		undo->update_undo_after(_("set linear"), LOAD_AUTOMATION); 
+	else
+		undo->update_undo_after(_("set bezier"), LOAD_AUTOMATION); 
 
 	restart_brender();
 	update_plugin_guis();
@@ -365,7 +371,7 @@ int MWindow::copy_automation()
 		edl->local_session->get_selectionend(),
 		&file,
 		0,
-		0); 
+		1);
 	gui->get_clipboard()->to_clipboard(file.string, 
 		strlen(file.string), 
 		SECONDARY_SELECTION);
@@ -375,7 +381,11 @@ int MWindow::copy_automation()
 int MWindow::copy_default_keyframe()
 {
 	FileXML file;
-	edl->tracks->copy_default_keyframe(&file);
+	edl->tracks->copy_automation(edl->local_session->get_selectionstart(), 
+		edl->local_session->get_selectionend(),
+		&file,
+		1,
+		0);
 	gui->get_clipboard()->to_clipboard(file.string,
 		strlen(file.string),
 		SECONDARY_SELECTION);
@@ -551,25 +561,6 @@ void MWindow::delete_track(Track *track)
 	save_backup();
 }
 
-void MWindow::detach_transition(Transition *transition)
-{
-	hide_plugin(transition, 1);
-	int is_video = (transition->edit->track->data_type == TRACK_VIDEO);
-	transition->edit->detach_transition();
-	save_backup();
-	undo->update_undo_after(_("detach transition"), LOAD_ALL);
-
-	if(is_video) restart_brender();
-	gui->update(0,
-		1,
-		0,
-		0,
-		0, 
-		0,
-		0);
-	sync_parameters(CHANGE_EDL);
-}
-
 
 
 
@@ -602,7 +593,7 @@ void MWindow::insert(double position,
 	edl.load_xml(plugindb, file, load_flags);
 
 
-
+//printf("MWindow::insert %f\n", edl.local_session->clipboard_length);
 
 
 
@@ -691,6 +682,42 @@ void MWindow::insert_effects_cwindow(Track *dest_track)
 		0);
 }
 
+void MWindow::insert_effect(char *title, 
+	SharedLocation *shared_location, 
+	int data_type,
+	int plugin_type,
+	int single_standalone)
+{
+	Track *current = edl->tracks->first;
+	SharedLocation shared_location_local;
+	shared_location_local.copy_from(shared_location);
+	int first_track = 1;
+	for( ; current; current = NEXT)
+	{
+		if(current->data_type == data_type &&
+			current->record)
+		{
+			insert_effect(title, 
+				&shared_location_local,
+				current,
+				0,
+				0,
+				0,
+				plugin_type);
+
+			if(first_track)
+			{
+				if(plugin_type == PLUGIN_STANDALONE && single_standalone)
+				{
+					plugin_type = PLUGIN_SHAREDPLUGIN;
+					shared_location_local.module = edl->tracks->number_of(current);
+					shared_location_local.plugin = current->plugin_set.total - 1;
+				}
+				first_track = 0;
+			}
+		}
+	}
+}
 
 
 void MWindow::insert_effect(char *title, 
@@ -1064,10 +1091,9 @@ int MWindow::paste(double start,
 	return 0;
 }
 
-// For editing use insertion point position
+// For editing using insertion point
 void MWindow::paste()
 {
-
 	double start = edl->local_session->get_selectionstart();
 	double end = edl->local_session->get_selectionend();
 	int64_t len = gui->get_clipboard()->clipboard_len(SECONDARY_SELECTION);
@@ -1229,7 +1255,8 @@ int MWindow::paste_automation()
 			edl->local_session->get_selectionend()); 
 		edl->tracks->paste_automation(edl->local_session->get_selectionstart(), 
 			&file,
-			0); 
+			0,
+			1); 
 		save_backup();
 		undo->update_undo_after(_("paste keyframes"), LOAD_AUTOMATION);
 		delete [] string;
@@ -1259,7 +1286,11 @@ int MWindow::paste_default_keyframe()
 			SECONDARY_SELECTION);
 		FileXML file;
 		file.read_from_string(string);
-		edl->tracks->paste_default_keyframe(&file); 
+		edl->tracks->paste_automation(edl->local_session->get_selectionstart(), 
+			&file, 
+			1, 
+			0); 
+//		edl->tracks->paste_default_keyframe(&file); 
 		undo->update_undo_after(_("paste default keyframe"), LOAD_AUTOMATION);
 
 
@@ -1427,7 +1458,9 @@ SET_TRACE
 		double edl_length = new_edl->local_session->clipboard_length ?
 			new_edl->local_session->clipboard_length :
 			new_edl->tracks->total_length();
-// printf("MWindow::paste_edls 2\n");
+// printf("MWindow::paste_edls 2 %f %f\n", 
+// new_edl->local_session->clipboard_length, 
+// new_edl->tracks->total_length());
 // new_edl->dump();
 
 SET_TRACE
@@ -1570,7 +1603,8 @@ SET_TRACE
 					track->insert_track(new_track, 
 						current_position, 
 						replace_default,
-						edit_plugins);
+						edit_plugins,
+						edl_length);
 				}
 
 // Get next destination track
@@ -1658,6 +1692,41 @@ void MWindow::paste_silence()
 							1);
 }
 
+void MWindow::detach_transition(Transition *transition)
+{
+	hide_plugin(transition, 1);
+	int is_video = (transition->edit->track->data_type == TRACK_VIDEO);
+	transition->edit->detach_transition();
+	save_backup();
+	undo->update_undo_after(_("detach transition"), LOAD_ALL);
+
+	if(is_video) restart_brender();
+	gui->update(0,
+		1,
+		0,
+		0,
+		0, 
+		0,
+		0);
+	sync_parameters(CHANGE_EDL);
+}
+
+void MWindow::detach_transitions()
+{
+	gui->lock_window("MWindow::detach_transitions 1");
+
+	double start = edl->local_session->get_selectionstart();
+	double end = edl->local_session->get_selectionend();
+	edl->tracks->clear_transitions(start, end);
+
+	save_backup();
+	undo->update_undo_after(_("detach transitions"), LOAD_EDITS);
+
+	sync_parameters(CHANGE_EDL);
+	gui->update(0, 1, 0, 0, 0, 0, 0);
+	gui->unlock_window();
+}
+
 void MWindow::paste_transition()
 {
 // Only the first transition gets dropped.
@@ -1673,6 +1742,22 @@ void MWindow::paste_transition()
 
 	if(server->video) restart_brender();
 	sync_parameters(CHANGE_ALL);
+}
+
+void MWindow::paste_transitions(int track_type, char *title)
+{
+	gui->lock_window("MWindow::detach_transitions 1");
+
+	double start = edl->local_session->get_selectionstart();
+	double end = edl->local_session->get_selectionend();
+	edl->tracks->paste_transitions(start, end, track_type, title);
+
+	save_backup();
+	undo->update_undo_after(_("attach transitions"), LOAD_EDITS);
+
+	sync_parameters(CHANGE_EDL);
+	gui->update(0, 1, 0, 0, 0, 0, 0);
+	gui->unlock_window();
 }
 
 void MWindow::paste_transition_cwindow(Track *dest_track)
@@ -1702,7 +1787,7 @@ void MWindow::paste_audio_transition()
 	save_backup();
 	undo->update_undo_after(_("transition"), LOAD_EDITS);
 
-	sync_parameters(CHANGE_ALL);
+	sync_parameters(CHANGE_EDL);
 	gui->update(0, 1, 0, 0, 0, 0, 0);
 }
 
@@ -1723,9 +1808,46 @@ void MWindow::paste_video_transition()
 	save_backup();
 	undo->update_undo_after(_("transition"), LOAD_EDITS);
 
-	sync_parameters(CHANGE_ALL);
+	sync_parameters(CHANGE_EDL);
 	restart_brender();
 	gui->update(0, 1, 0, 0, 0, 0, 0);
+}
+
+
+void MWindow::set_transition_length(Transition *transition, double length)
+{
+	gui->lock_window("MWindow::detach_transitions 1");
+
+	double start = edl->local_session->get_selectionstart();
+	double end = edl->local_session->get_selectionend();
+
+	edl->tracks->set_transition_length(transition, length);
+
+	save_backup();
+	undo->update_undo_after(_("transition length"), LOAD_EDITS);
+
+	edl->session->default_transition_length = length;
+	sync_parameters(CHANGE_PARAMS);
+	gui->update(0, 1, 0, 0, 0, 0, 0);
+	gui->unlock_window();
+}
+
+void MWindow::set_transition_length(double length)
+{
+	gui->lock_window("MWindow::detach_transitions 1");
+
+	double start = edl->local_session->get_selectionstart();
+	double end = edl->local_session->get_selectionend();
+
+	edl->tracks->set_transition_length(start, end, length);
+
+	save_backup();
+	undo->update_undo_after(_("transition length"), LOAD_EDITS);
+
+	edl->session->default_transition_length = length;
+	sync_parameters(CHANGE_PARAMS);
+	gui->update(0, 1, 0, 0, 0, 0, 0);
+	gui->unlock_window();
 }
 
 
@@ -2015,7 +2137,9 @@ void MWindow::to_clip()
 	new_edl->local_session->set_selectionstart(0);
 	new_edl->local_session->set_selectionend(0);
 
+	gui->unlock_window();
 	awindow->clip_edit->create_clip(new_edl);
+	gui->lock_window("MWindow::to_clip");
 	save_backup();
 }
 
@@ -2126,10 +2250,6 @@ void MWindow::trim_selection()
 
 void MWindow::undo_entry(BC_WindowBase *calling_window_gui)
 {
-//	if(is_mwindow)
-//		gui->unlock_window();
-//	else
-//		cwindow->gui->unlock_window();
 	calling_window_gui->unlock_window();
 
 	cwindow->playback_engine->que->send_command(STOP,
@@ -2153,19 +2273,21 @@ void MWindow::undo_entry(BC_WindowBase *calling_window_gui)
 	restart_brender();
 	update_plugin_states();
 	update_plugin_guis();
+
+
+
 	gui->update(1, 2, 1, 1, 1, 1, 1);
+	
+	
+	
 	cwindow->update(1, 1, 1, 1, 1);
 
-//	if(is_mwindow)
-//		cwindow->gui->unlock_window();
-//	else
-//		gui->unlock_window();
 	if (calling_window_gui != cwindow->gui) 
 		cwindow->gui->unlock_window();
-	if (calling_window_gui != gui)
-		gui->unlock_window();
 	if (calling_window_gui != vwindow->gui)
 		vwindow->gui->unlock_window();
+	if (calling_window_gui != gui)
+		gui->unlock_window();
 	
 
 	awindow->gui->async_update_assets();
@@ -2196,6 +2318,8 @@ void MWindow::select_point(double position)
 
 // Que the CWindow
 	cwindow->update(1, 0, 0, 0, 1);
+
+
 	update_plugin_guis();
 	gui->patchbay->update();
 	gui->cursor->hide(0);
@@ -2272,7 +2396,7 @@ void MWindow::map_audio(int pattern)
 				current_channel = 0;
 		}
 	}
-	undo->update_undo_after(_("map 1:1"), LOAD_AUTOMATION, 0);
+	undo->update_undo_after(_("map 1:1"), LOAD_AUTOMATION);
 	sync_parameters(CHANGE_PARAMS);
 	gui->update(0,
 		1,

@@ -20,6 +20,7 @@
  */
 
 #include "aattachmentpoint.h"
+#include "bcsignals.h"
 #include "datatype.h"
 #include "edl.h"
 #include "edlsession.h"
@@ -140,7 +141,6 @@ void AAttachmentPoint::render(double *output,
 // Process plugin
 		double *output_temp[1];
 		output_temp[0] = output;
-//printf("AAttachmentPoint::render 1\n");
 		plugin_servers.values[buffer_number]->process_buffer(output_temp,
 			start_position,
 			len,
@@ -149,7 +149,6 @@ void AAttachmentPoint::render(double *output,
 				sample_rate /
 				renderengine->edl->session->sample_rate,
 			renderengine->command->get_direction());
-//printf("AAttachmentPoint::render 10\n");
 	}
 }
 

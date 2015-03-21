@@ -47,11 +47,7 @@ public:
 	const char* plugin_title();
 	int start_realtime();
 	int stop_realtime();
-	int start_gui();
-	int stop_gui();
-	int show_gui();
-	int hide_gui();
-	int set_string();
+	PluginClientWindow* new_window();
 	int load_defaults();
 	int save_defaults();
 	int save_data(char *text);
@@ -66,11 +62,8 @@ public:
 	int reconfigure_flag;
 	VFrame *temp_frame;
 
-// a thread for the GUI
-	WhirlThread *thread;
 
 private:
-	BC_Hash *defaults;
 	WhirlEngine **engine;
 };
 

@@ -148,9 +148,9 @@ void GammaWindow::update_histogram()
 
 	histogram->set_color(GREEN);
 	int y1 = histogram->get_h();
-	float scale = 1.0 / client->config.max;
+	float max = client->config.max * client->config.gamma;
+	float scale = 1.0 / max;
 	float gamma = client->config.gamma - 1.0;
-	float max = client->config.max;
 	for(int i = 1; i < histogram->get_w(); i++)
 	{
 		float in = (float)i / histogram->get_w();

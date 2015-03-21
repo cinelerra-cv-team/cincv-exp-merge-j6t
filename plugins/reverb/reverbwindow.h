@@ -152,7 +152,7 @@ public:
 	ReverbMenu(Reverb *reverb, ReverbWindow *window);
 	~ReverbMenu();
 	
-	int create_objects(BC_Hash *defaults);
+	void create_objects(BC_Hash *defaults);
 	int load_defaults(BC_Hash *defaults);
 	int save_defaults(BC_Hash *defaults);
 // most recent loads
