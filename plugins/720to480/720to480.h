@@ -24,7 +24,6 @@
 
 
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 class _720to480Main;
 class _720to480Order;

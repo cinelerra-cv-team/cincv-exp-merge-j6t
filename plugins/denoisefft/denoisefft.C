@@ -30,7 +30,6 @@
 #include "fourier.h"
 #include "picon_png.h"
 #include "pluginaclient.h"
-#include "pluginwindow.h"
 #include "transportque.inc"
 #include "units.h"
 #include "vframe.h"

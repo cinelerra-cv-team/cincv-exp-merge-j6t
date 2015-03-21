@@ -31,7 +31,6 @@
 #include "loadbalance.h"
 #include "picon_png.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "vframe.h"
 
 class PerspectiveMain;

@@ -27,7 +27,6 @@
 #include "guicast.h"
 #include "mainprogress.inc"
 #include "pluginaclient.h"
-#include "pluginwindow.h"
 #include "resample.inc"
 #include "timestretchengine.inc"
 #include "vframe.inc"

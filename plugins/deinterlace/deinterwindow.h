@@ -30,7 +30,6 @@ class DeInterlaceWindow;
 #include "mutex.h"
 #include "deinterlace.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(DeInterlaceMain, DeInterlaceThread, DeInterlaceWindow);
 

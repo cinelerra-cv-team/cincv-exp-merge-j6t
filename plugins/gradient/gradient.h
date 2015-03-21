@@ -39,7 +39,6 @@ class GradientServer;
 #include "overlayframe.inc"
 #include "plugincolors.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "thread.h"
 #include "vframe.inc"
 

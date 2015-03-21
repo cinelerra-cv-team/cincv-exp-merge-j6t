@@ -27,7 +27,6 @@
 #include "histogram.inc"
 #include "histogramwindow.inc"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 
 class HistogramSlider : public BC_SubWindow

@@ -21,7 +21,6 @@
 
 #include "guicast.h"
 #include "motion.inc"
-#include "pluginwindow.h"
 
 class MasterLayer : public BC_PopupMenu
 {

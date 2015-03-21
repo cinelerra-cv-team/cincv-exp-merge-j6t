@@ -34,7 +34,6 @@ class TimeAvgNoSubtract;
 #include "guicast.h"
 #include "mutex.h"
 #include "timeavg.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(TimeAvgMain, TimeAvgThread, TimeAvgWindow)
 

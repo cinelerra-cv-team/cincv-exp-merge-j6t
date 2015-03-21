@@ -36,7 +36,6 @@
 #include "picon_png.h"
 #include "picture.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "recordconfig.h"
 #include "transportque.inc"
 #include "vframe.h"

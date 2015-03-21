@@ -23,7 +23,6 @@
 #define UNSHARPWINDOW_H
 
 #include "guicast.h"
-#include "pluginwindow.h"
 #include "unsharp.inc"
 #include "unsharpwindow.inc"
 

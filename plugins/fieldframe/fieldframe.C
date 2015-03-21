@@ -29,7 +29,6 @@
 #include "mainprogress.h"
 #include "picon_png.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "transportque.inc"
 #include "vframe.h"
 

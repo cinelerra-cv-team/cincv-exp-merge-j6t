@@ -31,7 +31,6 @@ class SharpenInterlace;
 #include "filexml.h"
 #include "mutex.h"
 #include "sharpen.h"
-#include "pluginwindow.h"
 
 
 

@@ -26,7 +26,6 @@
 #include "filexml.h"
 #include "mutex.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 #include "svg.h"
 #include "thread.h"
 

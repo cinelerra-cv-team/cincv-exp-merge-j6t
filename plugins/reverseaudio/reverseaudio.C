@@ -25,7 +25,6 @@
 #include "guicast.h"
 #include "language.h"
 #include "pluginaclient.h"
-#include "pluginwindow.h"
 #include "transportque.h"
 
 #include <string.h>

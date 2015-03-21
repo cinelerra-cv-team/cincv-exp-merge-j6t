@@ -25,7 +25,6 @@
 
 #include "guicast.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 
 class ReFrame;

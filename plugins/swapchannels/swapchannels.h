@@ -26,7 +26,6 @@
 #include "guicast.h"
 #include "mutex.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "vframe.inc"
 
 

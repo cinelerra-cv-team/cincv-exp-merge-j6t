@@ -30,7 +30,6 @@ class ReverbWindow;
 #include "guicast.h"
 #include "mutex.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 #include "reverb.inc"
 
 

@@ -29,7 +29,6 @@
 #include "picon_png.h"
 #include "plugincolors.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "fonts.h"
 #include "vframe.h"
 

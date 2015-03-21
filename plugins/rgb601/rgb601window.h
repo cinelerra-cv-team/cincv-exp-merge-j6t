@@ -30,7 +30,6 @@ class RGB601Window;
 #include "filexml.h"
 #include "mutex.h"
 #include "rgb601.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(RGB601Main, RGB601Thread, RGB601Window)
 

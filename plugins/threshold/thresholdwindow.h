@@ -25,7 +25,6 @@
 #include "colorpicker.h"
 #include "guicast.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "threshold.inc"
 #include "thresholdwindow.inc"
 

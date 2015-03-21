@@ -28,7 +28,6 @@ class CDRipTextValue;
 class CDRipWindowDevice;
 
 #include "guicast.h"
-#include "pluginwindow.h"
 #include "cdripper.h"
 
 class CDRipWindow : public PluginWindow

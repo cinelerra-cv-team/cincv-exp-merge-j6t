@@ -31,7 +31,6 @@ class SharpenInterlace;
 #include "filexml.h"
 #include "mutex.h"
 #include "quark.h"
-#include "pluginwindow.h"
 
 class SharpenThread : public Thread
 {

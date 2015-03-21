@@ -23,7 +23,6 @@
 
 #include "plugincolors.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "pluginserver.h"
 #include "mwindow.h"
 

@@ -32,7 +32,6 @@ class GainWindow;
 #include "guicast.h"
 #include "mutex.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(Gain, GainThread, GainWindow)
 

@@ -36,7 +36,6 @@ class ColorBalanceReset;
 #include "mutex.h"
 #include "colorbalance.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 
 
 PLUGIN_THREAD_HEADER(ColorBalanceMain, ColorBalanceThread, ColorBalanceWindow)

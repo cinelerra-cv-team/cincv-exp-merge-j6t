@@ -30,7 +30,6 @@ class AgingWindow;
 #include "filexml.h"
 #include "mutex.h"
 #include "aging.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(AgingMain, AgingThread, AgingWindow)
 

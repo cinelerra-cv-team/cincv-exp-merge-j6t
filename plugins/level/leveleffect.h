@@ -24,7 +24,6 @@
 
 #include "guicast.h"
 #include "pluginaclient.h"
-#include "pluginwindow.h"
 
 
 class SoundLevelEffect;

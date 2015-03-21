@@ -29,7 +29,6 @@
 #include "guicast.h"
 #include "loadbalance.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 class ChromaKeyHSV;
 class ChromaKeyHSV;

@@ -29,7 +29,6 @@
 #include "revmodel.hpp"
 #include "units.h"
 #include "vframe.h"
-#include "pluginwindow.h"
 
 #include <math.h>
 #include <string.h>

@@ -25,7 +25,6 @@
 
 #include "overlayframe.inc"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 class _1080to540Main;
 class _1080to540Option;

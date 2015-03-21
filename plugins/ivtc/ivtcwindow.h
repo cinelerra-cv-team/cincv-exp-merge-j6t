@@ -30,7 +30,6 @@ class IVTCWindow;
 #include "filexml.h"
 #include "mutex.h"
 #include "ivtc.h"
-#include "pluginwindow.h"
 
 #define TOTAL_PATTERNS 3
 

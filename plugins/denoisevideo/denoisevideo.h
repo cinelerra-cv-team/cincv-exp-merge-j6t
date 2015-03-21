@@ -28,7 +28,6 @@ class DenoiseVideoWindow;
 #include "bcdisplayinfo.h"
 #include "bchash.inc"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "vframe.inc"
 
 

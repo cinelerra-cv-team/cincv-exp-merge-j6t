@@ -37,7 +37,6 @@ class ScaleWin;
 #include "scalewin.h"
 #include "overlayframe.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 class ScaleConfig
 {

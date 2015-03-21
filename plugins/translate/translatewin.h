@@ -30,7 +30,6 @@ class TranslateWin;
 #include "filexml.h"
 #include "mutex.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 #include "translate.h"
 
 

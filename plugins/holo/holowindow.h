@@ -31,7 +31,6 @@ class HoloWindow;
 #include "holo.h"
 #include "mutex.h"
 #include "pluginclient.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(HoloMain, HoloThread, HoloWindow)
 

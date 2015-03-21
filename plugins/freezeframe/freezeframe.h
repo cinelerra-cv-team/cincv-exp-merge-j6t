@@ -28,7 +28,6 @@
 #include "filexml.inc"
 #include "mutex.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 
 class FreezeFrameWindow;

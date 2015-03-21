@@ -25,7 +25,6 @@
 #include "language.h"
 #include "picon_png.h"
 #include "pluginaclient.h"
-#include "pluginwindow.h"
 #include <string.h>
 
 

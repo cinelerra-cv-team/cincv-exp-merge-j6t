@@ -32,7 +32,6 @@ class TitleInterlace;
 #include "filexml.h"
 #include "mutex.h"
 #include "title.h"
-#include "pluginwindow.h"
 
 
 PLUGIN_THREAD_HEADER(TitleMain, TitleThread, TitleWindow)

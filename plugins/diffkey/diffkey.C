@@ -31,7 +31,6 @@
 #include "loadbalance.h"
 #include "plugincolors.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 #include <string.h>
 

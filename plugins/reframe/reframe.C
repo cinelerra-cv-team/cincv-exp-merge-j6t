@@ -25,7 +25,6 @@
 #include "mainprogress.h"
 #include "picon_png.h"
 #include "reframe.h"
-#include "pluginwindow.h"
 
 
 

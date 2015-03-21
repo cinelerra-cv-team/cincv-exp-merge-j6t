@@ -229,29 +229,12 @@ int plugin_class::load_configuration() \
 
 
 
-class PluginClientWindow : public BC_Window
+class PluginWindow : public BC_Window
 {
 public:
-	PluginClientWindow(PluginClient *client, 
-		int w,
-		int h,
-		int min_w,
-		int min_h,
-		int allow_resize);
-	PluginClientWindow(const char *title, 
-		int x,
-		int y,
-		int w,
-		int h,
-		int min_w,
-		int min_h,
-		int allow_resize);
-	virtual ~PluginClientWindow();
-	
-	virtual int translation_event();
-	virtual int close_event();
-	
-	PluginClient *client;
+	PluginWindow(const char *title, int x, int y, int w, int h) :
+		BC_Window(title, x, y, w, h, w, h,
+			0, 0, 1, -1, 0, 1, WINDOW_UTF8) { };
 };
 
 

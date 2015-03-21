@@ -30,7 +30,6 @@ class InterpolatePixelsMain;
 #include "loadbalance.h"
 #include "mutex.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include <sys/types.h>
 
 class InterpolatePixelsConfig

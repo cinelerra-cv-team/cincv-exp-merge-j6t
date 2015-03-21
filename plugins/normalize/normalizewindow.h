@@ -24,7 +24,6 @@
 
 #include "guicast.h"
 #include "normalize.h"
-#include "pluginwindow.h"
 
 class NormalizeWindow : public PluginWindow
 {

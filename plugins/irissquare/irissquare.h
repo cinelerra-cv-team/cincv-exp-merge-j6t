@@ -28,7 +28,6 @@ class IrisSquareWindow;
 
 #include "overlayframe.inc"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "vframe.inc"
 
 

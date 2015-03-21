@@ -44,7 +44,6 @@ class SelTempAvgGainValue;
 #include "guicast.h"
 #include "mutex.h"
 #include "seltempavg.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(SelTempAvgMain, SelTempAvgThread, SelTempAvgWindow)
 

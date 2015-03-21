@@ -30,7 +30,6 @@ class BurnWindow;
 #include "filexml.h"
 #include "mutex.h"
 #include "burn.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(BurnMain, BurnThread, BurnWindow)
 

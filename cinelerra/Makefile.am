@@ -562,7 +562,6 @@ noinst_HEADERS = aattachmentpoint.h \
 		 plugintclient.h \
 		 plugintoggles.h \
 		 pluginvclient.h \
-		 pluginwindow.h \
 		 preferences.h \
 		 preferencesthread.h \
 		 question.h \

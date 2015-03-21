@@ -30,7 +30,6 @@
 #include "plugincolors.h"
 #include "playback3d.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 #include "vframe.h"
 
 #include <stdint.h>

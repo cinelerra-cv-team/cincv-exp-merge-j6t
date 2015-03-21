@@ -30,7 +30,6 @@ class FlipWindow;
 #include "flip.h"
 #include "mutex.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
 PLUGIN_THREAD_HEADER(FlipMain, FlipThread, FlipWindow)
 
