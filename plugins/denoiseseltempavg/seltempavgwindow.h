@@ -67,7 +67,7 @@ enum {
 };
 
 
-class SelTempAvgWindow : public PluginWindow
+class SelTempAvgWindow : public PluginClientWindow
 {
 public:
 	SelTempAvgWindow(SelTempAvgMain *client, int x, int y);

@@ -200,7 +200,7 @@ public:
 
 
 
-class ChromaKeyWindow : public PluginWindow
+class ChromaKeyWindow : public PluginClientWindow
 {
 public:
 	ChromaKeyWindow(ChromaKeyHSV *plugin, int x, int y);

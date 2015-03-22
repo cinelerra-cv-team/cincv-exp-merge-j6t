@@ -60,7 +60,7 @@ public:
 
 
 
-class WipeWindow : public PluginWindow
+class WipeWindow : public PluginClientWindow
 {
 public:
 	WipeWindow(WipeMain *plugin, int x, int y);

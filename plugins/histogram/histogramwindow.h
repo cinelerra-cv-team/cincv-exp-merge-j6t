@@ -158,7 +158,7 @@ public:
 	HistogramWindow *gui;
 };
 
-class HistogramWindow : public PluginWindow
+class HistogramWindow : public PluginClientWindow
 {
 public:
 	HistogramWindow(HistogramMain *plugin, int x, int y);

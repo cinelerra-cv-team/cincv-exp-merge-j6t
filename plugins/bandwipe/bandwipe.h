@@ -72,7 +72,7 @@ public:
 
 
 
-class BandWipeWindow : public PluginWindow
+class BandWipeWindow : public PluginClientWindow
 {
 public:
 	BandWipeWindow(BandWipeMain *plugin, int x, int y);

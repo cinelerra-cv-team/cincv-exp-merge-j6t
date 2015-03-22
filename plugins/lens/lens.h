@@ -163,7 +163,7 @@ public:
 	LensGUI *gui;
 };
 
-class LensGUI : public PluginWindow
+class LensGUI : public PluginClientWindow
 {
 public:
 	LensGUI(LensMain *client, int x, int y);

@@ -37,7 +37,7 @@ PLUGIN_THREAD_OBJECT(SharpenMain, SharpenThread, SharpenWindow)
 
 
 SharpenWindow::SharpenWindow(SharpenMain *client, int x, int y)
- : PluginWindow(client->gui_string,
+ : PluginClientWindow(client->gui_string,
 	x,
 	y,
 	210, 

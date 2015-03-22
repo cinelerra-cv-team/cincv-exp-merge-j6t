@@ -34,7 +34,7 @@ class HoloWindow;
 
 PLUGIN_THREAD_HEADER(HoloMain, HoloThread, HoloWindow)
 
-class HoloWindow : public PluginWindow
+class HoloWindow : public PluginClientWindow
 {
 public:
 	HoloWindow(HoloMain *client, int x, int y);

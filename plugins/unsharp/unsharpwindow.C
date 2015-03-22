@@ -34,7 +34,7 @@ PLUGIN_THREAD_OBJECT(UnsharpMain, UnsharpThread, UnsharpWindow)
 
 
 UnsharpWindow::UnsharpWindow(UnsharpMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	200, 

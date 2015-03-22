@@ -63,7 +63,7 @@ public:
 	int *output;
 };
 
-class InvertVideoWindow : public PluginWindow
+class InvertVideoWindow : public PluginClientWindow
 {
 public:
 	InvertVideoWindow(InvertVideoEffect *plugin, int x, int y);
@@ -171,7 +171,7 @@ int InvertVideoEnable::handle_event()
 
 
 InvertVideoWindow::InvertVideoWindow(InvertVideoEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	260, 

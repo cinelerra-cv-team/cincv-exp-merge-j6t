@@ -50,7 +50,7 @@ public:
 	LoopVideo *plugin;
 };
 
-class LoopVideoWindow : public PluginWindow
+class LoopVideoWindow : public PluginClientWindow
 {
 public:
 	LoopVideoWindow(LoopVideo *plugin, int x, int y);
@@ -103,7 +103,7 @@ LoopVideoConfig::LoopVideoConfig()
 
 
 LoopVideoWindow::LoopVideoWindow(LoopVideo *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

@@ -96,7 +96,7 @@ public:
 // 	FieldFrameWindow *gui;
 // };
 
-class FieldFrameWindow : public PluginWindow
+class FieldFrameWindow : public PluginClientWindow
 {
 public:
 	FieldFrameWindow(FieldFrame *plugin, int x, int y);
@@ -168,7 +168,7 @@ int FieldFrameConfig::equivalent(FieldFrameConfig &src)
 
 
 FieldFrameWindow::FieldFrameWindow(FieldFrame *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	230, 

@@ -93,7 +93,7 @@ public:
 	char string[BCTEXTLEN];
 };
 
-class HueWindow : public PluginWindow
+class HueWindow : public PluginClientWindow
 {
 public:
 	HueWindow(HueEffect *plugin, int x, int y);
@@ -311,7 +311,7 @@ char* ValueSlider::get_caption()
 
 
 HueWindow::HueWindow(HueEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
 			x,
 			y,
 			310, 

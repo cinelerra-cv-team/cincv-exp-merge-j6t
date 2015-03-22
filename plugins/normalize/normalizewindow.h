@@ -25,7 +25,7 @@
 #include "guicast.h"
 #include "normalize.h"
 
-class NormalizeWindow : public PluginWindow
+class NormalizeWindow : public PluginClientWindow
 {
 public:
 	NormalizeWindow(NormalizeMain *plugin, int x, int y);

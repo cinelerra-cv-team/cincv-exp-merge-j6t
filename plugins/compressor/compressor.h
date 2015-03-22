@@ -129,7 +129,7 @@ public:
 
 
 
-class CompressorWindow : public PluginWindow
+class CompressorWindow : public PluginClientWindow
 {
 public:
 	CompressorWindow(CompressorEffect *plugin, int x, int y);

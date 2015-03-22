@@ -64,7 +64,7 @@ public:
 	int *output;
 };
 
-class InterpolatePixelsWindow : public PluginWindow
+class InterpolatePixelsWindow : public PluginClientWindow
 {
 public:
 	InterpolatePixelsWindow(InterpolatePixelsMain *client, int x, int y);

@@ -104,7 +104,7 @@ public:
 };
 
 
-class OverlayWindow : public PluginWindow
+class OverlayWindow : public PluginClientWindow
 {
 public:
 	OverlayWindow(Overlay *plugin, int x, int y);
@@ -241,7 +241,7 @@ const char* OverlayConfig::output_to_text(int output_layer)
 
 
 OverlayWindow::OverlayWindow(Overlay *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	300, 

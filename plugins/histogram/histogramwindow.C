@@ -36,7 +36,7 @@ PLUGIN_THREAD_OBJECT(HistogramMain, HistogramThread, HistogramWindow)
 
 
 HistogramWindow::HistogramWindow(HistogramMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	440, 

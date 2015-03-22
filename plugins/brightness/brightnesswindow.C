@@ -31,7 +31,7 @@ PLUGIN_THREAD_OBJECT(BrightnessMain, BrightnessThread, BrightnessWindow)
 
 
 BrightnessWindow::BrightnessWindow(BrightnessMain *client, int x, int y)
- : PluginWindow(client->gui_string, x,
+ : PluginClientWindow(client->gui_string, x,
  	y,
 	330, 
 	160)

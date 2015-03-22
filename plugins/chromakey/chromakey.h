@@ -112,7 +112,7 @@ public:
 };
 
 
-class ChromaKeyWindow : public PluginWindow
+class ChromaKeyWindow : public PluginClientWindow
 {
 public:
 	ChromaKeyWindow(ChromaKey *plugin, int x, int y);

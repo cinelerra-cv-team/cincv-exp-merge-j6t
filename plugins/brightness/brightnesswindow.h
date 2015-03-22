@@ -36,7 +36,7 @@ class BrightnessLuma;
 
 PLUGIN_THREAD_HEADER(BrightnessMain, BrightnessThread, BrightnessWindow)
 
-class BrightnessWindow : public PluginWindow
+class BrightnessWindow : public PluginClientWindow
 {
 public:
 	BrightnessWindow(BrightnessMain *client, int x, int y);

@@ -106,7 +106,7 @@ public:
 	FrameFieldWindow *gui;
 };
 
-class FrameFieldWindow : public PluginWindow
+class FrameFieldWindow : public PluginClientWindow
 {
 public:
 	FrameFieldWindow(FrameField *plugin, int x, int y);
@@ -195,7 +195,7 @@ int FrameFieldConfig::equivalent(FrameFieldConfig &src)
 
 
 FrameFieldWindow::FrameFieldWindow(FrameField *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

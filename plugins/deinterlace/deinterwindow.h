@@ -40,7 +40,7 @@ class DeInterlaceDominanceBottom;
 class DeInterlaceAdaptive;
 class DeInterlaceThreshold;
 
-class DeInterlaceWindow : public PluginWindow
+class DeInterlaceWindow : public PluginClientWindow
 {
 public:
 	DeInterlaceWindow(DeInterlaceMain *client, int x, int y);

@@ -60,7 +60,7 @@ public:
 
 
 
-class IrisSquareWindow : public PluginWindow
+class IrisSquareWindow : public PluginClientWindow
 {
 public:
 	IrisSquareWindow(IrisSquareMain *plugin, int x, int y);

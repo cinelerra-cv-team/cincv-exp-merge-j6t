@@ -68,7 +68,7 @@ public:
 };
 
 
-class DelayVideoWindow : public PluginWindow
+class DelayVideoWindow : public PluginClientWindow
 {
 public:
 	DelayVideoWindow(DelayVideo *plugin, int x, int y);

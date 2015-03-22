@@ -39,7 +39,7 @@ class NewSvgButton;
 class NewSvgWindow;
 class EditSvgButton;
 
-class SvgWin : public PluginWindow
+class SvgWin : public PluginClientWindow
 {
 public:
 	SvgWin(SvgMain *client, int x, int y);

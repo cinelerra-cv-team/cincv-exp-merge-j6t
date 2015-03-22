@@ -29,7 +29,7 @@
 WINDOW_CLOSE_EVENT(FindObjectWindow)
 
 FindObjectWindow::FindObjectWindow(FindObjectMain *plugin, int x, int y)
- : PluginWindow(plugin->get_gui_string(),
+ : PluginClientWindow(plugin->get_gui_string(),
 	x,
 	y,
  	300, 

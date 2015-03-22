@@ -94,7 +94,7 @@ public:
 	InterpolateVideo *plugin;
 };
 
-class InterpolateVideoWindow : public PluginWindow
+class InterpolateVideoWindow : public PluginClientWindow
 {
 public:
 	InterpolateVideoWindow(InterpolateVideo *plugin, int x, int y);
@@ -191,7 +191,7 @@ int InterpolateVideoConfig::equivalent(InterpolateVideoConfig *config)
 
 
 InterpolateVideoWindow::InterpolateVideoWindow(InterpolateVideo *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

@@ -48,7 +48,7 @@ public:
 	TimeStretch *plugin;
 };
 
-class TimeStretchWindow : public PluginWindow
+class TimeStretchWindow : public PluginClientWindow
 {
 public:
 	TimeStretchWindow(TimeStretch *plugin, int x, int y);

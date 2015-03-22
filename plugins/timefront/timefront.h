@@ -198,7 +198,7 @@ public:
 };
 
 
-class TimeFrontWindow : public PluginWindow
+class TimeFrontWindow : public PluginClientWindow
 {
 public:
 	TimeFrontWindow(TimeFrontMain *plugin, int x, int y);

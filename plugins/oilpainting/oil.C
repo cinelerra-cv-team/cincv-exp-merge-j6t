@@ -80,7 +80,7 @@ public:
 	OilEffect *plugin;
 };
 
-class OilWindow : public PluginWindow
+class OilWindow : public PluginClientWindow
 {
 public:
 	OilWindow(OilEffect *plugin, int x, int y);
@@ -259,7 +259,7 @@ int OilIntensity::handle_event()
 
 
 OilWindow::OilWindow(OilEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	300, 

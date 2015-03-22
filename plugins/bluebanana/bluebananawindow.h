@@ -133,7 +133,7 @@ class BB_Tumble : public BC_TextBox {
   float prev;
 };
 
-class BluebananaWindow : public PluginWindow {
+class BluebananaWindow : public PluginClientWindow {
 public:
 	BluebananaWindow(BluebananaMain *plugin, int x, int y);
 	~BluebananaWindow();

@@ -364,7 +364,7 @@ int DenoiseMJPEGDelay::handle_event()
 
 
 DenoiseMJPEGWindow::DenoiseMJPEGWindow(DenoiseMJPEG *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	250, 

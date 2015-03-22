@@ -97,7 +97,7 @@ public:
 	float *boxValue;
 };
 
-class C41Window : public PluginWindow
+class C41Window : public PluginClientWindow
 {
 public:
 	C41Window(C41Effect *plugin, int x, int y);
@@ -270,7 +270,7 @@ int C41Button::handle_event()
 
 // C41Window
 C41Window::C41Window(C41Effect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string, x, y, 270, 620)
+ : PluginClientWindow(plugin->gui_string, x, y, 270, 620)
 {
 	this->plugin = plugin;
 }

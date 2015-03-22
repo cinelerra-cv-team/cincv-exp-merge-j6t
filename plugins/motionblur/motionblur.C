@@ -80,7 +80,7 @@ public:
 };
 
 
-class MotionBlurWindow : public PluginWindow
+class MotionBlurWindow : public PluginClientWindow
 {
 public:
 	MotionBlurWindow(MotionBlurMain *plugin, int x, int y);
@@ -233,7 +233,7 @@ PLUGIN_THREAD_OBJECT(MotionBlurMain, MotionBlurThread, MotionBlurWindow)
 
 
 MotionBlurWindow::MotionBlurWindow(MotionBlurMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	260, 

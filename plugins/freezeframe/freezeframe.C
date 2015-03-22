@@ -75,7 +75,7 @@ void FreezeFrameConfig::interpolate(FreezeFrameConfig &prev,
 
 
 FreezeFrameWindow::FreezeFrameWindow(FreezeFrameMain *client, int x, int y)
- : PluginWindow(client->get_gui_string(),
+ : PluginClientWindow(client->get_gui_string(),
  	x,
 	y,
 	200,

@@ -49,7 +49,7 @@ public:
 	ReverseVideo *plugin;
 };
 
-class ReverseVideoWindow : public PluginWindow
+class ReverseVideoWindow : public PluginClientWindow
 {
 public:
 	ReverseVideoWindow(ReverseVideo *plugin, int x, int y);
@@ -103,7 +103,7 @@ ReverseVideoConfig::ReverseVideoConfig()
 
 
 ReverseVideoWindow::ReverseVideoWindow(ReverseVideo *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

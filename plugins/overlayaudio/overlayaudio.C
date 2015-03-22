@@ -61,7 +61,7 @@ public:
 	OverlayAudio *plugin;
 };
 
-class OverlayAudioWindow : public PluginWindow
+class OverlayAudioWindow : public PluginClientWindow
 {
 public:
 	OverlayAudioWindow(OverlayAudio *plugin, int x, int y);
@@ -145,7 +145,7 @@ const char* OverlayAudioConfig::output_to_text(int output_layer)
 
 
 OverlayAudioWindow::OverlayAudioWindow(OverlayAudio *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	400, 

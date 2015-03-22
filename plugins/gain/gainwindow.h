@@ -37,7 +37,7 @@ PLUGIN_THREAD_HEADER(Gain, GainThread, GainWindow)
 
 class GainLevel;
 
-class GainWindow : public PluginWindow
+class GainWindow : public PluginClientWindow
 {
 public:
 	GainWindow(Gain *gain, int x, int y);

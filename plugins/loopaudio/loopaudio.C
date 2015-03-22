@@ -50,7 +50,7 @@ public:
 	LoopAudio *plugin;
 };
 
-class LoopAudioWindow : public PluginWindow
+class LoopAudioWindow : public PluginClientWindow
 {
 public:
 	LoopAudioWindow(LoopAudio *plugin, int x, int y);
@@ -104,7 +104,7 @@ LoopAudioConfig::LoopAudioConfig()
 
 
 LoopAudioWindow::LoopAudioWindow(LoopAudio *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

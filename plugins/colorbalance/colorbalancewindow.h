@@ -40,7 +40,7 @@ class ColorBalanceReset;
 
 PLUGIN_THREAD_HEADER(ColorBalanceMain, ColorBalanceThread, ColorBalanceWindow)
 
-class ColorBalanceWindow : public PluginWindow
+class ColorBalanceWindow : public PluginClientWindow
 {
 public:
 	ColorBalanceWindow(ColorBalanceMain *client, int x, int y);

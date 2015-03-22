@@ -192,7 +192,7 @@ public:
 
 
 
-class GradientWindow : public PluginWindow
+class GradientWindow : public PluginClientWindow
 {
 public:
 	GradientWindow(GradientMain *plugin, int x, int y);

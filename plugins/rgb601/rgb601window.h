@@ -45,7 +45,7 @@ public:
 	int true_value;
 };
 
-class RGB601Window : public PluginWindow
+class RGB601Window : public PluginClientWindow
 {
 public:
 	RGB601Window(RGB601Main *client, int x, int y);

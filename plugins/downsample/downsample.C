@@ -97,7 +97,7 @@ public:
 	int *output;
 };
 
-class DownSampleWindow : public PluginWindow
+class DownSampleWindow : public PluginClientWindow
 {
 public:
 	DownSampleWindow(DownSampleMain *plugin, int x, int y);
@@ -252,7 +252,7 @@ PLUGIN_THREAD_OBJECT(DownSampleMain, DownSampleThread, DownSampleWindow)
 
 
 DownSampleWindow::DownSampleWindow(DownSampleMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	230, 

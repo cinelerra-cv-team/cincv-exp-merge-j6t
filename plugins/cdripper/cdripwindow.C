@@ -30,7 +30,7 @@
 #define N_(String) gettext_noop (String)
 
 CDRipWindow::CDRipWindow(CDRipMain *cdripper, int x, int y)
- : PluginWindow(cdripper->gui_string,
+ : PluginClientWindow(cdripper->gui_string,
  	x,
 	y,
  	450, 

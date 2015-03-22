@@ -49,7 +49,7 @@ public:
 	ReverseAudio *plugin;
 };
 
-class ReverseAudioWindow : public PluginWindow
+class ReverseAudioWindow : public PluginClientWindow
 {
 public:
 	ReverseAudioWindow(ReverseAudio *plugin, int x, int y);
@@ -105,7 +105,7 @@ ReverseAudioConfig::ReverseAudioConfig()
 
 
 ReverseAudioWindow::ReverseAudioWindow(ReverseAudio *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

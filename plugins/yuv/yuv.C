@@ -62,7 +62,7 @@ public:
 	float *output;
 };
 
-class YUVWindow : public PluginWindow
+class YUVWindow : public PluginClientWindow
 {
 public:
 	YUVWindow(YUVEffect *plugin, int x, int y);
@@ -173,7 +173,7 @@ int YUVLevel::handle_event()
 
 
 YUVWindow::YUVWindow(YUVEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	260, 

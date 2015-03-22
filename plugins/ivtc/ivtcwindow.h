@@ -42,7 +42,7 @@ class IVTCAuto;
 class IVTCAutoThreshold;
 class IVTCPattern;
 
-class IVTCWindow : public PluginWindow
+class IVTCWindow : public PluginClientWindow
 {
 public:
 	IVTCWindow(IVTCMain *client, int x, int y);

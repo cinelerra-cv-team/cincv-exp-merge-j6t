@@ -229,10 +229,10 @@ int plugin_class::load_configuration() \
 
 
 
-class PluginWindow : public BC_Window
+class PluginClientWindow : public BC_Window
 {
 public:
-	PluginWindow(const char *title, int x, int y, int w, int h) :
+	PluginClientWindow(const char *title, int x, int y, int w, int h) :
 		BC_Window(title, x, y, w, h, w, h,
 			0, 0, 1, -1, 0, 1, WINDOW_UTF8) { };
 };

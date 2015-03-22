@@ -41,7 +41,7 @@ class SharpenSlider;
 class SharpenHorizontal;
 class SharpenLuminance;
 
-class SharpenWindow : public PluginWindow
+class SharpenWindow : public PluginClientWindow
 {
 public:
 	SharpenWindow(SharpenMain *client, int x, int y);

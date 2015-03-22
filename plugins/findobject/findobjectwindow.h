@@ -194,7 +194,7 @@ public:
 };
 
 
-class FindObjectWindow : public PluginWindow
+class FindObjectWindow : public PluginClientWindow
 {
 public:
 	FindObjectWindow(FindObjectMain *plugin, int x, int y);

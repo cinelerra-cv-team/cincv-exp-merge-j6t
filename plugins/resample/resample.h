@@ -43,7 +43,7 @@ public:
 
 
 
-class ResampleWindow : public PluginWindow
+class ResampleWindow : public PluginClientWindow
 {
 public:
 	ResampleWindow(ResampleEffect *plugin, int x, int y);

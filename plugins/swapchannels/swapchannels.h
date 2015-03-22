@@ -83,7 +83,7 @@ public:
 	SwapMenu *menu;
 };
 
-class SwapWindow : public PluginWindow
+class SwapWindow : public PluginClientWindow
 {
 public:
 	SwapWindow(SwapMain *plugin, int x, int y);

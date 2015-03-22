@@ -53,7 +53,7 @@ public:
 
 
 
-class LiveAudioWindow : public PluginWindow
+class LiveAudioWindow : public PluginClientWindow
 {
 public:
 	LiveAudioWindow(LiveAudio *plugin, int x, int y);
@@ -124,7 +124,7 @@ LiveAudioConfig::LiveAudioConfig()
 
 
 LiveAudioWindow::LiveAudioWindow(LiveAudio *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	300, 

@@ -301,7 +301,7 @@ public:
 
 
 
-class MotionWindow : public PluginWindow
+class MotionWindow : public PluginClientWindow
 {
 public:
 	MotionWindow(MotionMain *plugin, int x, int y);

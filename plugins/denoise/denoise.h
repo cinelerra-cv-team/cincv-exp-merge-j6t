@@ -41,7 +41,7 @@ public:
 	DenoiseEffect *plugin;
 };
 
-class DenoiseWindow : public PluginWindow
+class DenoiseWindow : public PluginClientWindow
 {
 public:
 	DenoiseWindow(DenoiseEffect *plugin, int x, int y);

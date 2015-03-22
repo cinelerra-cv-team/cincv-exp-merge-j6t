@@ -96,7 +96,7 @@ public:
 	int *output;
 };
 
-class ZoomBlurWindow : public PluginWindow
+class ZoomBlurWindow : public PluginClientWindow
 {
 public:
 	ZoomBlurWindow(ZoomBlurMain *plugin, int x, int y);
@@ -273,7 +273,7 @@ PLUGIN_THREAD_OBJECT(ZoomBlurMain, ZoomBlurThread, ZoomBlurWindow)
 
 
 ZoomBlurWindow::ZoomBlurWindow(ZoomBlurMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	230, 

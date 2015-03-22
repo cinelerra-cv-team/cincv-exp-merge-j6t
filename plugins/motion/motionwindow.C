@@ -35,7 +35,7 @@ PLUGIN_THREAD_OBJECT(MotionMain, MotionThread, MotionWindow)
 
 
 MotionWindow::MotionWindow(MotionMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	610, 

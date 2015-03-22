@@ -104,7 +104,7 @@ public:
 };
 
 
-class DecimateWindow : public PluginWindow
+class DecimateWindow : public PluginClientWindow
 {
 public:
 	DecimateWindow(Decimate *plugin, int x, int y);
@@ -221,7 +221,7 @@ int DecimateConfig::equivalent(DecimateConfig *config)
 
 
 DecimateWindow::DecimateWindow(Decimate *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

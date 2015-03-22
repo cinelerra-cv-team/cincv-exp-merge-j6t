@@ -115,7 +115,7 @@ public:
 	ShapeWipeFilename *filename;
 };
 
-class ShapeWipeWindow : public PluginWindow
+class ShapeWipeWindow : public PluginClientWindow
 {
 public:
 	ShapeWipeWindow(ShapeWipeMain *plugin, int x, int y);

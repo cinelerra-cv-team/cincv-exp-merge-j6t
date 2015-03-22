@@ -149,7 +149,7 @@ ChromaKeyConfig::get_color ()
 
 
 
-ChromaKeyWindow::ChromaKeyWindow (ChromaKeyHSV * plugin, int x, int y):PluginWindow (plugin->gui_string,
+ChromaKeyWindow::ChromaKeyWindow (ChromaKeyHSV * plugin, int x, int y):PluginClientWindow (plugin->gui_string,
 	   x,
 	   y, 
 	   400, 

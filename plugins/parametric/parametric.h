@@ -194,7 +194,7 @@ public:
 };
 
 
-class ParametricWindow : public PluginWindow
+class ParametricWindow : public PluginClientWindow
 {
 public:
 	ParametricWindow(ParametricEQ *plugin, int x, int y);

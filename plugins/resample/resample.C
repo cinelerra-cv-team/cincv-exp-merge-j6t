@@ -57,7 +57,7 @@ int ResampleFraction::handle_event()
 
 
 ResampleWindow::ResampleWindow(ResampleEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  				x - 160,
 				y - 75,
  				320, 

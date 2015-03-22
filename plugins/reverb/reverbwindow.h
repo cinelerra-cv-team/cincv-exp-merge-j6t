@@ -47,7 +47,7 @@ class ReverbLowPass1;
 class ReverbLowPass2;
 class ReverbMenu;
 
-class ReverbWindow : public PluginWindow
+class ReverbWindow : public PluginClientWindow
 {
 public:
 	ReverbWindow(Reverb *reverb, int x, int y);

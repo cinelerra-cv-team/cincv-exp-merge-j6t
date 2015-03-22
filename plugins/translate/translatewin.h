@@ -37,7 +37,7 @@ PLUGIN_THREAD_HEADER(TranslateMain, TranslateThread, TranslateWin)
 
 class TranslateCoord;
 
-class TranslateWin : public PluginWindow
+class TranslateWin : public PluginClientWindow
 {
 public:
 	TranslateWin(TranslateMain *client, int x, int y);

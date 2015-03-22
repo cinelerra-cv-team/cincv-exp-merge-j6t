@@ -153,7 +153,7 @@ public:
     RotateWindow *window;
 };
 
-class RotateWindow : public PluginWindow
+class RotateWindow : public PluginClientWindow
 {
 public:
 	RotateWindow(RotateEffect *plugin, int x, int y);
@@ -450,7 +450,7 @@ int RotateY::handle_event()
 
 
 RotateWindow::RotateWindow(RotateEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
 	x,
 	y,
 	250, 

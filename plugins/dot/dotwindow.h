@@ -33,7 +33,7 @@ class DotWindow;
 
 PLUGIN_THREAD_HEADER(DotMain, DotThread, DotWindow)
 
-class DotWindow : public PluginWindow
+class DotWindow : public PluginClientWindow
 {
 public:
 	DotWindow(DotMain *client, int x, int y);

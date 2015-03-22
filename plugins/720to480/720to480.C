@@ -51,7 +51,7 @@ _720to480Config::_720to480Config()
 
 
 _720to480Window::_720to480Window(_720to480Main *client, int x, int y)
- : PluginWindow(client->gui_string,
+ : PluginClientWindow(client->gui_string,
  	x, 
 	y, 
 	230, 

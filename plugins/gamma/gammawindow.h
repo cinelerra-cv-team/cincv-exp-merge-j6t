@@ -41,7 +41,7 @@ class GammaColorPicker;
 
 PLUGIN_THREAD_HEADER(GammaMain, GammaThread, GammaWindow)
 
-class GammaWindow : public PluginWindow
+class GammaWindow : public PluginClientWindow
 {
 public:
 	GammaWindow(GammaMain *client, int x, int y);

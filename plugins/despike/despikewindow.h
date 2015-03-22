@@ -35,7 +35,7 @@ PLUGIN_THREAD_HEADER(Despike, DespikeThread, DespikeWindow)
 class DespikeLevel;
 class DespikeSlope;
 
-class DespikeWindow : public PluginWindow
+class DespikeWindow : public PluginClientWindow
 {
 public:
 	DespikeWindow(Despike *despike, int x, int y);

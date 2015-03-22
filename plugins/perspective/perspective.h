@@ -139,7 +139,7 @@ public:
 	int value;
 };
 
-class PerspectiveWindow : public PluginWindow
+class PerspectiveWindow : public PluginClientWindow
 {
 public:
 	PerspectiveWindow(PerspectiveMain *plugin, int x, int y);

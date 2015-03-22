@@ -54,7 +54,7 @@ public:
 	SoundLevelEffect *plugin;
 };
 
-class SoundLevelWindow : public PluginWindow
+class SoundLevelWindow : public PluginClientWindow
 {
 public:
 	SoundLevelWindow(SoundLevelEffect *plugin, int x, int y);

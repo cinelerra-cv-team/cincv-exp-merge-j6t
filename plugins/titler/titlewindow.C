@@ -51,7 +51,7 @@ PLUGIN_THREAD_OBJECT(TitleMain, TitleThread, TitleWindow)
 
 
 TitleWindow::TitleWindow(TitleMain *client, int x, int y)
- : PluginWindow(client->gui_string,
+ : PluginClientWindow(client->gui_string,
 	x,
 	y,
 	770,

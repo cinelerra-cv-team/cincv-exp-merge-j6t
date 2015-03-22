@@ -40,7 +40,7 @@ public:
 
 
 
-class ReFrameWindow : public PluginWindow
+class ReFrameWindow : public PluginClientWindow
 {
 public:
 	ReFrameWindow(ReFrame *plugin, int x, int y);

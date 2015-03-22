@@ -39,7 +39,7 @@ PLUGIN_THREAD_HEADER(TimeAvgMain, TimeAvgThread, TimeAvgWindow)
 
 class TimeAvgSlider;
 
-class TimeAvgWindow : public PluginWindow
+class TimeAvgWindow : public PluginClientWindow
 {
 public:
 	TimeAvgWindow(TimeAvgMain *client, int x, int y);

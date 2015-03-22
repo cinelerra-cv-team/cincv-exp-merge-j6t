@@ -92,7 +92,7 @@ public:
 };
 
 
-class RerouteWindow : public PluginWindow
+class RerouteWindow : public PluginClientWindow
 {
 public:
 	RerouteWindow(Reroute *plugin, int x, int y);
@@ -181,7 +181,7 @@ const char* RerouteConfig::output_to_text(int output_track)
 
 
 RerouteWindow::RerouteWindow(Reroute *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	300, 

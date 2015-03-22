@@ -50,7 +50,7 @@ public:
 	UnsharpMain *plugin;
 };
 
-class UnsharpWindow : public PluginWindow
+class UnsharpWindow : public PluginClientWindow
 {
 public:
 	UnsharpWindow(UnsharpMain *plugin, int x, int y);

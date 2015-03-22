@@ -192,7 +192,7 @@ public:
 };
 
 
-class Color3WayWindow : public PluginWindow
+class Color3WayWindow : public PluginClientWindow
 {
 public:
 	Color3WayWindow(Color3WayMain *plugin, int x, int y);

@@ -35,7 +35,7 @@ PLUGIN_THREAD_HEADER(FlipMain, FlipThread, FlipWindow)
 
 class FlipToggle;
 
-class FlipWindow : public PluginWindow
+class FlipWindow : public PluginClientWindow
 {
 public:
 	FlipWindow(FlipMain *client, int x, int y);

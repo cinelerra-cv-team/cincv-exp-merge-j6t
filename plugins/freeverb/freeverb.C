@@ -128,7 +128,7 @@ public:
 
 
 
-class FreeverbWindow : public PluginWindow
+class FreeverbWindow : public PluginClientWindow
 {
 public:
 	FreeverbWindow(FreeverbEffect *plugin, int x, int y);
@@ -307,7 +307,7 @@ int FreeverbMode::handle_event()
 
 
 FreeverbWindow::FreeverbWindow(FreeverbEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	180, 

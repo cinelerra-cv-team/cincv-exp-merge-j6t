@@ -38,7 +38,7 @@ WINDOW_CLOSE_EVENT(Color3WayWindow)
 
 
 Color3WayWindow::Color3WayWindow(Color3WayMain *plugin, int x, int y)
- : PluginWindow(plugin->get_gui_string(),
+ : PluginClientWindow(plugin->get_gui_string(),
 	x,
 	y,
 	500,

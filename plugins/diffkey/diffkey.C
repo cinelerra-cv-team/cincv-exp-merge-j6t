@@ -85,7 +85,7 @@ public:
 
 
 
-class DiffKeyGUI : public PluginWindow
+class DiffKeyGUI : public PluginClientWindow
 {
 public:
 	DiffKeyGUI(DiffKey *plugin, int x, int y);
@@ -275,7 +275,7 @@ int DiffKeyDoValue::handle_event()
 
 
 DiffKeyGUI::DiffKeyGUI(DiffKey *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	320,

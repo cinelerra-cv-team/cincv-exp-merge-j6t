@@ -199,7 +199,7 @@ public:
 	VideoScopeEffect *plugin;
 };
 
-class VideoScopeWindow : public PluginWindow
+class VideoScopeWindow : public PluginClientWindow
 {
 public:
 	VideoScopeWindow(VideoScopeEffect *plugin, int x, int y);
@@ -350,7 +350,7 @@ VideoScopeVectorscope::VideoScopeVectorscope(VideoScopeEffect *plugin,
 VideoScopeWindow::VideoScopeWindow(VideoScopeEffect *plugin, 
 	int x, 
 	int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	640,

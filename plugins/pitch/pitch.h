@@ -42,7 +42,7 @@ public:
 	PitchEffect *plugin;
 };
 
-class PitchWindow : public PluginWindow
+class PitchWindow : public PluginClientWindow
 {
 public:
 	PitchWindow(PitchEffect *plugin, int x, int y);

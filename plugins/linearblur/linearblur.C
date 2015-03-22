@@ -94,7 +94,7 @@ public:
 	int *output;
 };
 
-class LinearBlurWindow : public PluginWindow
+class LinearBlurWindow : public PluginClientWindow
 {
 public:
 	LinearBlurWindow(LinearBlurMain *plugin, int x, int y);
@@ -267,7 +267,7 @@ PLUGIN_THREAD_OBJECT(LinearBlurMain, LinearBlurThread, LinearBlurWindow)
 
 
 LinearBlurWindow::LinearBlurWindow(LinearBlurMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	230, 

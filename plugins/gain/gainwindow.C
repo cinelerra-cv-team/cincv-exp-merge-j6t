@@ -36,7 +36,7 @@ PLUGIN_THREAD_OBJECT(Gain, GainThread, GainWindow)
 
 
 GainWindow::GainWindow(Gain *gain, int x, int y)
- : PluginWindow(gain->gui_string,
+ : PluginClientWindow(gain->gui_string,
  	x, 
 	y, 
 	230, 

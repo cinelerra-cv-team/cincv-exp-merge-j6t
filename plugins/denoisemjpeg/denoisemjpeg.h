@@ -150,7 +150,7 @@ public:
 };
 
 
-class DenoiseMJPEGWindow : public PluginWindow
+class DenoiseMJPEGWindow : public PluginClientWindow
 {
 public:
 	DenoiseMJPEGWindow(DenoiseMJPEG *plugin, int x, int y);

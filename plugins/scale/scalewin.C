@@ -38,7 +38,7 @@ PLUGIN_THREAD_OBJECT(ScaleMain, ScaleThread, ScaleWin)
 
 
 ScaleWin::ScaleWin(ScaleMain *client, int x, int y)
- : PluginWindow(client->gui_string,
+ : PluginClientWindow(client->gui_string,
  	x,
 	y,
 	150, 

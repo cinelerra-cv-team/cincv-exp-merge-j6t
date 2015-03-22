@@ -55,7 +55,7 @@ class SynthScroll;
 class SynthSubWindow;
 class SynthWetness;
 
-class SynthWindow : public PluginWindow
+class SynthWindow : public PluginClientWindow
 {
 public:
 	SynthWindow(Synth *synth, int x, int y);

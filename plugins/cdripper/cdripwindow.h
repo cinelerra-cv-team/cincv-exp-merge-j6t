@@ -30,7 +30,7 @@ class CDRipWindowDevice;
 #include "guicast.h"
 #include "cdripper.h"
 
-class CDRipWindow : public PluginWindow
+class CDRipWindow : public PluginClientWindow
 {
 public:
 	CDRipWindow(CDRipMain *cdripper, int x, int y);

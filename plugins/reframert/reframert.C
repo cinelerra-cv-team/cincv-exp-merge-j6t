@@ -98,7 +98,7 @@ public:
 	ReframeRTWindow *gui;
 };
 
-class ReframeRTWindow : public PluginWindow
+class ReframeRTWindow : public PluginClientWindow
 {
 public:
 	ReframeRTWindow(ReframeRT *plugin, int x, int y);
@@ -199,7 +199,7 @@ void ReframeRTConfig::boundaries()
 
 
 ReframeRTWindow::ReframeRTWindow(ReframeRT *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	210, 

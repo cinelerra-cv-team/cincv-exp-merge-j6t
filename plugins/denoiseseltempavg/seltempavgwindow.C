@@ -30,7 +30,7 @@ PLUGIN_THREAD_OBJECT(SelTempAvgMain, SelTempAvgThread, SelTempAvgWindow)
 
 
 SelTempAvgWindow::SelTempAvgWindow(SelTempAvgMain *client, int x, int y)
- : PluginWindow(client->gui_string,
+ : PluginClientWindow(client->gui_string,
 	x,
 	y,
 	310,

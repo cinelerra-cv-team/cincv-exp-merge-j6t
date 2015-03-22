@@ -42,7 +42,7 @@ class BlurR;
 class BlurG;
 class BlurB;
 
-class BlurWindow : public PluginWindow
+class BlurWindow : public PluginClientWindow
 {
 public:
 	BlurWindow(BlurMain *client, int x, int y);

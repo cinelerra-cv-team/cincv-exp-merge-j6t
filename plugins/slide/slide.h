@@ -85,7 +85,7 @@ public:
 
 
 
-class SlideWindow : public PluginWindow
+class SlideWindow : public PluginClientWindow
 {
 public:
 	SlideWindow(SlideMain *plugin, int x, int y);

@@ -45,7 +45,7 @@ public:
 	BlurZoomWindow *window;
 };
 
-class BlurZoomWindow : public PluginWindow
+class BlurZoomWindow : public PluginClientWindow
 {
 public:
 	BlurZoomWindow(BlurZoomMain *client, int x, int y);

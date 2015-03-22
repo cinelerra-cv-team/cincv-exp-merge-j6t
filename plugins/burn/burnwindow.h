@@ -35,7 +35,7 @@ PLUGIN_THREAD_HEADER(BurnMain, BurnThread, BurnWindow)
 
 
 
-class BurnWindow : public PluginWindow
+class BurnWindow : public PluginClientWindow
 {
 public:
 	BurnWindow(BurnMain *client, int x, int y);

@@ -41,7 +41,7 @@ class AgingPitCount;
 class AgingDust;
 class AgingDustCount;
 
-class AgingWindow : public PluginWindow
+class AgingWindow : public PluginClientWindow
 {
 public:
 	AgingWindow(AgingMain *client, int x, int y);

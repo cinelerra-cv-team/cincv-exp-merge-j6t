@@ -78,7 +78,7 @@ public:
 	DenoiseFFTEffect *plugin;
 };
 
-class DenoiseFFTWindow : public PluginWindow
+class DenoiseFFTWindow : public PluginClientWindow
 {
 public:
 	DenoiseFFTWindow(DenoiseFFTEffect *plugin, int x, int y);
@@ -231,7 +231,7 @@ int DenoiseFFTSamples::handle_event()
 
 
 DenoiseFFTWindow::DenoiseFFTWindow(DenoiseFFTEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	300, 

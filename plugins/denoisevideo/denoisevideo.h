@@ -85,7 +85,7 @@ public:
 };
 
 
-class DenoiseVideoWindow : public PluginWindow
+class DenoiseVideoWindow : public PluginClientWindow
 {
 public:
 	DenoiseVideoWindow(DenoiseVideo *plugin, int x, int y);

@@ -155,7 +155,7 @@ PLUGIN_THREAD_OBJECT(GradientMain, GradientThread, GradientWindow)
 #define COLOR_H 30
 
 GradientWindow::GradientWindow(GradientMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	350, 

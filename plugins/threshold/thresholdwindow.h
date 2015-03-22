@@ -145,7 +145,7 @@ public:
 	int center_x;
 };
 
-class ThresholdWindow : public PluginWindow
+class ThresholdWindow : public PluginClientWindow
 {
 public:
 	ThresholdWindow(ThresholdMain *plugin, int x, int y);

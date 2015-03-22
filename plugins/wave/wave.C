@@ -124,7 +124,7 @@ public:
 
 
 
-class WaveWindow : public PluginWindow
+class WaveWindow : public PluginClientWindow
 {
 public:
 	WaveWindow(WaveEffect *plugin, int x, int y);
@@ -389,7 +389,7 @@ int WaveLength::handle_event()
 
 
 WaveWindow::WaveWindow(WaveEffect *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	320, 

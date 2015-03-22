@@ -29,7 +29,7 @@
 class _1080to540Main;
 class _1080to540Option;
 
-class _1080to540Window : public PluginWindow
+class _1080to540Window : public PluginClientWindow
 {
 public:
 	_1080to540Window(_1080to540Main *client, int x, int y);

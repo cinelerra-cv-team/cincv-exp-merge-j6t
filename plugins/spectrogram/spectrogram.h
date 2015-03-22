@@ -50,7 +50,7 @@ public:
 };
 
 
-class SpectrogramWindow : public PluginWindow
+class SpectrogramWindow : public PluginClientWindow
 {
 public:
 	SpectrogramWindow(Spectrogram *plugin, int x, int y);

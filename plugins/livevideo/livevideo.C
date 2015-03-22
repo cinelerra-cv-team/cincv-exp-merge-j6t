@@ -95,7 +95,7 @@ public:
 };
 
 
-class LiveVideoWindow : public PluginWindow
+class LiveVideoWindow : public PluginClientWindow
 {
 public:
 	LiveVideoWindow(LiveVideo *plugin, int x, int y);
@@ -196,7 +196,7 @@ void LiveVideoConfig::interpolate(LiveVideoConfig &prev,
 
 
 LiveVideoWindow::LiveVideoWindow(LiveVideo *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x, 
 	y, 
 	plugin->w, 

@@ -77,7 +77,7 @@ int InterpolatePixelsOffset::handle_event()
 
 
 InterpolatePixelsWindow::InterpolatePixelsWindow(InterpolatePixelsMain *client, int x, int y)
- : PluginWindow(client->gui_string,
+ : PluginClientWindow(client->gui_string,
 	x,
 	y,
 	200, 

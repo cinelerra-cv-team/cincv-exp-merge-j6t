@@ -65,7 +65,7 @@ public:
 
 
 
-class DelayAudioWindow : public PluginWindow
+class DelayAudioWindow : public PluginClientWindow
 {
 public:
 	DelayAudioWindow(DelayAudio *plugin, int x, int y);

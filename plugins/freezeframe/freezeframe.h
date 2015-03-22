@@ -63,7 +63,7 @@ public:
 	int *value;
 };
 
-class FreezeFrameWindow : public PluginWindow
+class FreezeFrameWindow : public PluginClientWindow
 {
 public:
 	FreezeFrameWindow(FreezeFrameMain *client, int x, int y);

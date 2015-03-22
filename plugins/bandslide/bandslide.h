@@ -72,7 +72,7 @@ public:
 
 
 
-class BandSlideWindow : public PluginWindow
+class BandSlideWindow : public PluginClientWindow
 {
 public:
 	BandSlideWindow(BandSlideMain *plugin, int x, int y);

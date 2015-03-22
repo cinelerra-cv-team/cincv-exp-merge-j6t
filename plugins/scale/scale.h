@@ -88,7 +88,7 @@ public:
 	ScaleMain *client;
 };
 
-class ScaleWin : public PluginWindow
+class ScaleWin : public PluginClientWindow
 {
 public:
 	ScaleWin(ScaleMain *client, int x, int y);

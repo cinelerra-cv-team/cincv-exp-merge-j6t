@@ -96,7 +96,7 @@ public:
 	int *output;
 };
 
-class RadialBlurWindow : public PluginWindow
+class RadialBlurWindow : public PluginClientWindow
 {
 public:
 	RadialBlurWindow(RadialBlurMain *plugin, int x, int y);
@@ -258,7 +258,7 @@ PLUGIN_THREAD_OBJECT(RadialBlurMain, RadialBlurThread, RadialBlurWindow)
 
 
 RadialBlurWindow::RadialBlurWindow(RadialBlurMain *plugin, int x, int y)
- : PluginWindow(plugin->gui_string,
+ : PluginClientWindow(plugin->gui_string,
  	x,
 	y,
 	230, 
