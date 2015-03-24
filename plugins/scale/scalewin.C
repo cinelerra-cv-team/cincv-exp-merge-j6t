@@ -51,7 +51,7 @@ ScaleWin::~ScaleWin()
 {
 }
 
-int ScaleWin::create_objects()
+void ScaleWin::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -68,7 +68,6 @@ int ScaleWin::create_objects()
 	add_tool(constrain = new ScaleConstrain(client, x, y));
 	show_window();
 	flush();
-	return 0;
 }
 
 int ScaleWin::close_event()

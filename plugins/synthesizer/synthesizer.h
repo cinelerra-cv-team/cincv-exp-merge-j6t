@@ -61,7 +61,7 @@ public:
 	SynthWindow(Synth *synth, int x, int y);
 	~SynthWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_gui();
 	int waveform_to_text(char *text, int waveform);
@@ -199,7 +199,7 @@ public:
 	SynthWaveForm(Synth *synth, int x, int y, char *text);
 	~SynthWaveForm();
 
-	int create_objects();
+	void create_objects();
 	Synth *synth;
 };
 

@@ -70,9 +70,8 @@ Batch::~Batch()
 	if(edl) delete edl;
 }
 
-int Batch::create_objects()
+void Batch::create_objects()
 {
-	return 0;
 }
 
 void Batch::start_over()

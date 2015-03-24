@@ -75,9 +75,8 @@ Track::~Track()
 	plugin_set.remove_all_objects();
 }
 
-int Track::create_objects()
+void Track::create_objects()
 {
-	return 0;
 }
 
 

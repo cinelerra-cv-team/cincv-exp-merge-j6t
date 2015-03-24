@@ -79,7 +79,7 @@ void VWindow::load_defaults()
 {
 }
 
-int VWindow::create_objects()
+void VWindow::create_objects()
 {
 //printf("VWindow::create_objects 1\n");
 	gui = new VWindowGUI(mwindow, this);
@@ -101,7 +101,6 @@ int VWindow::create_objects()
 //printf("VWindow::create_objects 2\n");
 
 	clip_edit = new ClipEdit(mwindow, 0, this);
-	return 0;
 }
 
 void VWindow::run()

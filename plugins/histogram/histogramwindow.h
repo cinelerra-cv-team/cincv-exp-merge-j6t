@@ -164,7 +164,7 @@ public:
 	HistogramWindow(HistogramMain *plugin, int x, int y);
 	~HistogramWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update(int do_input);
 	void update_mode();

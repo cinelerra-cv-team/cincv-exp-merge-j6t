@@ -149,7 +149,7 @@ int PatchBay::delete_all_patches()
     return 0;
 }
 
-int PatchBay::create_objects()
+void PatchBay::create_objects()
 {
 	draw_top_background(get_parent(), 0, 0, get_w(), get_h());
 	flash();
@@ -180,7 +180,6 @@ int PatchBay::create_objects()
 	add_subwindow(nudge_popup = new NudgePopup(mwindow, this));
 	nudge_popup->create_objects();
 
-	return 0;
 }
 
 BC_Pixmap* PatchBay::mode_to_icon(int mode)

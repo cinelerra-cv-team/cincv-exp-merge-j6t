@@ -39,7 +39,7 @@ public:
 	PerformancePrefs(MWindow *mwindow, PreferencesWindow *pwindow);
 	~PerformancePrefs();
 
-	int create_objects();
+	void create_objects();
 
 	void generate_node_list();
 	void update_node_list();

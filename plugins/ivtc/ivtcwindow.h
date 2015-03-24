@@ -48,7 +48,7 @@ public:
 	IVTCWindow(IVTCMain *client, int x, int y);
 	~IVTCWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	IVTCMain *client;

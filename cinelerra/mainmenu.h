@@ -62,7 +62,7 @@ class MainMenu : public BC_MenuBar
 public:
 	MainMenu(MWindow *mwindow, MWindowGUI *gui);
 	~MainMenu();
-	int create_objects();
+	void create_objects();
 	int load_defaults(BC_Hash *defaults);
 	int save_defaults(BC_Hash *defaults);
 

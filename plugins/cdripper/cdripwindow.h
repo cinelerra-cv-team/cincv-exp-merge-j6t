@@ -36,7 +36,7 @@ public:
 	CDRipWindow(CDRipMain *cdripper, int x, int y);
 	~CDRipWindow();
 
-	int create_objects();
+	void create_objects();
 
 	int *output_rate;
 	CDRipWindowOK *ok;

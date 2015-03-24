@@ -157,7 +157,7 @@ void ZoomPanel::set_tumbler_images(VFrame **data)
 	this->tumbler_images = data;
 }
 
-int ZoomPanel::create_objects()
+void ZoomPanel::create_objects()
 {
 	subwindow->add_subwindow(zoom_text = new ZoomPopup(mwindow, 
 		this, 
@@ -169,7 +169,6 @@ int ZoomPanel::create_objects()
 		x, 
 		y));
 	calculate_menu();
-	return 0;
 }
 
 void ZoomPanel::reposition_window(int x, int y)

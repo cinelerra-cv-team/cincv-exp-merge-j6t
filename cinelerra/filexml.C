@@ -603,7 +603,7 @@ int XMLTag::test_property(char *property, char *value)
 	return 0;
 }
 
-char* XMLTag::get_property(const char *property, char *value)
+const char* XMLTag::get_property(const char *property, char *value)
 {
 	int i, result;
 	for(i = 0, result = 0; i < total_properties && !result; i++)

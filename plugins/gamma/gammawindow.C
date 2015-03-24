@@ -43,7 +43,7 @@ GammaWindow::GammaWindow(GammaMain *client, int x, int y)
 	this->client = client; 
 }
 
-int GammaWindow::create_objects()
+void GammaWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(histogram = new BC_SubWindow(x, 
@@ -95,7 +95,6 @@ int GammaWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 void GammaWindow::update()

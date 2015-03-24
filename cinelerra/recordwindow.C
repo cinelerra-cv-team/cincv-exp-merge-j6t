@@ -51,7 +51,7 @@ RecordWindow::~RecordWindow()
 
 
 
-int RecordWindow::create_objects()
+void RecordWindow::create_objects()
 {
 //printf("RecordWindow::create_objects 1\n");
 	add_subwindow(new BC_Title(5, 5, _("Select a file to record to:")));
@@ -87,8 +87,6 @@ int RecordWindow::create_objects()
 	add_subwindow(new BC_CancelButton(this));
 //printf("RecordWindow::create_objects 1\n");
 	show_window();
-//printf("RecordWindow::create_objects 2\n");
-	return 0;
 }
 
 

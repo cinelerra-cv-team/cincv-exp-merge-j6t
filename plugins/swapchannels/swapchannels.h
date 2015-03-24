@@ -66,7 +66,7 @@ public:
 
 
 	int handle_event();
-	int create_objects();
+	void create_objects();
 
 	SwapMain *client;
 	int *output;
@@ -142,7 +142,7 @@ public:
 
 // parameters needed for processor
 	const char* output_to_text(int value);
-	int text_to_output(char *text);
+	int text_to_output(const char *text);
 
 	VFrame *temp;
 	SwapConfig config;

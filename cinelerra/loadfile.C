@@ -53,10 +53,9 @@ Load::~Load()
 	delete thread;
 }
 
-int Load::create_objects()
+void Load::create_objects()
 {
 	thread = new LoadFileThread(mwindow, this);
-	return 0;
 }
 
 int Load::handle_event() 
@@ -215,7 +214,7 @@ LoadFileWindow::~LoadFileWindow()
 	delete loadmode;
 }
 
-int LoadFileWindow::create_objects()
+void LoadFileWindow::create_objects()
 {
 	BC_FileBox::create_objects();
 
@@ -223,8 +222,6 @@ int LoadFileWindow::create_objects()
 	int y = get_cancel_button()->get_y() - 50;
 	loadmode = new LoadMode(mwindow, this, x, y, &thread->load_mode, 0);
 	loadmode->create_objects();
-
-	return 0;
 }
 
 int LoadFileWindow::resize_event(int w, int h)
@@ -474,7 +471,7 @@ ReelWindow::~ReelWindow()
 	delete checkbox;
 }
 
-int ReelWindow::create_objects()
+void ReelWindow::create_objects()
 {
 	int y = 10;
 	int x = 0;
@@ -519,8 +516,6 @@ int ReelWindow::create_objects()
 		reel_number->disable();
 	}
 	show_window();
-
-	return 0;	
 }
 
 int ReelWindow::resize_event(int w, int h)

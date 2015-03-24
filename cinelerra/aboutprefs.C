@@ -39,7 +39,7 @@ AboutPrefs::~AboutPrefs()
 {
 }
 
-int AboutPrefs::create_objects()
+void AboutPrefs::create_objects()
 {
 	int x, y;
 
@@ -173,7 +173,6 @@ mpeg3_release());
 
 	flash();
 	flush();
-	return 0;
 }
 
 

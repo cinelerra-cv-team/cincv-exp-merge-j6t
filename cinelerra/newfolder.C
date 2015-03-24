@@ -54,7 +54,7 @@ NewFolder::~NewFolder()
 }
 
 
-int NewFolder::create_objects()
+void NewFolder::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Enter the name of the folder:")));
@@ -65,7 +65,6 @@ int NewFolder::create_objects()
 	x = get_w() - 100;
 	add_subwindow(new BC_CancelButton(x, y));
 	show_window();
-	return 0;
 }
 
 char* NewFolder::get_text()

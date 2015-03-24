@@ -51,7 +51,7 @@ public:
 	BlurZoomWindow(BlurZoomMain *client, int x, int y);
 	~BlurZoomWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BlurZoomMain *client;

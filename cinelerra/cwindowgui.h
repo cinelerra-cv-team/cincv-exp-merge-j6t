@@ -59,7 +59,7 @@ public:
 	CWindowGUI(MWindow *mwindow, CWindow *cwindow);
 	~CWindowGUI();
 
-    int create_objects();
+    void create_objects();
 	int resize_event(int w, int h);
 
 // Events for the fullscreen canvas fall through to here.

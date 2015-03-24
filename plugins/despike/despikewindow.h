@@ -41,7 +41,7 @@ public:
 	DespikeWindow(Despike *despike, int x, int y);
 	~DespikeWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	Despike *despike;

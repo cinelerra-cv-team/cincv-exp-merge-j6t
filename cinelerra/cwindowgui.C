@@ -122,7 +122,7 @@ CWindowGUI::~CWindowGUI()
 	delete inactive;
 }
 
-int CWindowGUI::create_objects()
+void CWindowGUI::create_objects()
 {
 	set_icon(mwindow->theme->get_image("cwindow_icon"));
 
@@ -207,8 +207,6 @@ int CWindowGUI::create_objects()
 	canvas->draw_refresh();
 
 	draw_status();
-
-	return 0;
 }
 
 int CWindowGUI::translation_event()

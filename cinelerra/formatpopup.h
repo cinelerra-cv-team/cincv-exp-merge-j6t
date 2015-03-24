@@ -37,7 +37,7 @@ public:
 		int use_brender = 0); // Show formats useful in background rendering
 	~FormatPopup();
 
-	int create_objects();
+	void create_objects();
 	virtual int handle_event();  // user copies text to value here
 	ArrayList<PluginServer*> *plugindb;
 	ArrayList<BC_ListBoxItem*> format_items;

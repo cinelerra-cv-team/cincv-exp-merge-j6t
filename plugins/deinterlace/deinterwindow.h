@@ -46,7 +46,7 @@ public:
 	DeInterlaceWindow(DeInterlaceMain *client, int x, int y);
 	~DeInterlaceWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int set_mode(int mode, int recursive);
 	void get_status_string(char *string, int changed_rows);
@@ -88,7 +88,7 @@ public:
 class DeInterlaceDominanceTop : public BC_Radial
 {
 public:
-	DeInterlaceDominanceTop(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, char * title);
+	DeInterlaceDominanceTop(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, const char *title);
 	int handle_event();
 	DeInterlaceMain *client;
 	DeInterlaceWindow *window;
@@ -97,7 +97,7 @@ public:
 class DeInterlaceDominanceBottom : public BC_Radial
 {
 public:
-	DeInterlaceDominanceBottom(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, const char * title);
+	DeInterlaceDominanceBottom(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, const char *title);
 	int handle_event();
 	DeInterlaceMain *client;
 	DeInterlaceWindow *window;

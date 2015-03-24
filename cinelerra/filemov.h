@@ -171,7 +171,7 @@ public:
 	MOVConfigAudio(BC_WindowBase *parent_window, Asset *asset);
 	~MOVConfigAudio();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_parameters();
 	void reset();
@@ -253,7 +253,7 @@ public:
 		const char *locked_compressor);
 	~MOVConfigVideo();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void reset();
 

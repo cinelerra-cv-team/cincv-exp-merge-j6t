@@ -514,7 +514,7 @@ int FileSystem::is_dir(const char *path)      // return 0 if the text is a direc
 		return 0;
 }
 
-int FileSystem::create_dir(char *new_dir_)
+int FileSystem::create_dir(const char *new_dir_)
 {
 	char new_dir[BCTEXTLEN];
 	strcpy(new_dir, new_dir_);

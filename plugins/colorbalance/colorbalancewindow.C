@@ -47,7 +47,7 @@ ColorBalanceWindow::~ColorBalanceWindow()
 {
 }
 
-int ColorBalanceWindow::create_objects()
+void ColorBalanceWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Color Balance")));
@@ -74,7 +74,6 @@ int ColorBalanceWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 void ColorBalanceWindow::update()

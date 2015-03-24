@@ -164,7 +164,7 @@ JPEGConfigVideo::~JPEGConfigVideo()
 {
 }
 
-int JPEGConfigVideo::create_objects()
+void JPEGConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -182,7 +182,6 @@ int JPEGConfigVideo::create_objects()
 		&asset->quality));
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int JPEGConfigVideo::close_event()

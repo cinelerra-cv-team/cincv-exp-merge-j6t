@@ -8,21 +8,25 @@ MAYBE_FINDOBJECT = \
 	findobject 
 endif
 
+# burn must come before any other effecttv plugin
+# colors must come before any plugin
+# parametric must come before fourier plugins
+# motion must come before perspective
+
 SUBDIRS= \
 	$(THEMES) \
-	libfourier \
 	colors \
-	libeffecttv \
 	1080to540 \
 	720to480 \
 	C41 \
-	aging \
 	bandslide \
 	bandwipe \
 	blur \
 	bluebanana \
 	brightness \
 	burn \
+	parametric \
+	aging \
 	cdripper \
 	chromakey \
 	chromakeyhsv \
@@ -76,7 +80,6 @@ SUBDIRS= \
 	oilpainting \
 	overlay \
 	overlayaudio \
-	parametric \
 	perspective \
 	pitch \
 	polar \

@@ -89,7 +89,7 @@ public:
 	PreferencesDialog(MWindow *mwindow, PreferencesWindow *pwindow);
 	virtual ~PreferencesDialog();
 	
-	virtual int create_objects() { return 0; };
+	virtual void create_objects() { };
 	virtual int draw_framerate() { return 0; };
 	PreferencesWindow *pwindow;
 	MWindow *mwindow;
@@ -108,7 +108,7 @@ public:
 		int y);
 	~PreferencesWindow();
 
-	int create_objects();
+	void create_objects();
 	int delete_current_dialog();
 	int set_current_dialog(int number);
 	int update_framerate();

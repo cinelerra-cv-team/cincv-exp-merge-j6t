@@ -57,7 +57,7 @@ public:
 	virtual ~Automation();
 
 	int autogrouptype(int autoidx, Track *track);
-	virtual int create_objects();
+	virtual void create_objects();
 	void equivalent_output(Automation *automation, int64_t *result);
 	virtual Automation& operator=(Automation& automation);
 	virtual void copy_from(Automation *automation);

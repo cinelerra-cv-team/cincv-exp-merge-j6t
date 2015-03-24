@@ -216,7 +216,7 @@ public:
 	
 	char* get_text();
 	wchar_t* get_wtext(int *length = 0);
-	void update(char *text);
+	void update(const char *text);
 	void update(const wchar_t *text);
 	void reposition_window(int x, int y, int w, int rows);
 	int get_x();
@@ -273,7 +273,7 @@ public:
 		int text_w,
 		int list_h);
 	virtual ~BC_PopupTextBox();
-	int create_objects();
+	void create_objects();
 	virtual int handle_event();
 	char* get_text();
 	int get_number();
@@ -345,11 +345,11 @@ public:
 		int text_w);
 	virtual ~BC_TumbleTextBox();
 
-	int create_objects();
+	void create_objects();
 	void reset();
 	virtual int handle_event();
 	char* get_text();
-	int update(char *value);
+	int update(const char *value);
 	int update(int64_t value);
 	int update(float value);
 	int get_x();

@@ -40,7 +40,7 @@ public:
 	HoloWindow(HoloMain *client, int x, int y);
 	~HoloWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	HoloMain *client;

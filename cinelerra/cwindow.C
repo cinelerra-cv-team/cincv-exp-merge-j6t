@@ -63,7 +63,7 @@ CWindow::~CWindow()
 	delete playback_cursor;
 }
 
-int CWindow::create_objects()
+void CWindow::create_objects()
 {
 	destination = mwindow->defaults->get("CWINDOW_DESTINATION", 0);
 
@@ -77,7 +77,7 @@ int CWindow::create_objects()
 	gui->transport->set_engine(playback_engine);
 	playback_cursor = new CTracking(mwindow, this);
 	playback_cursor->create_objects();
-    return 0;
+
 }
 
 

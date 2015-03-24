@@ -45,7 +45,7 @@ VAutomation::~VAutomation()
 }
 
 
-int VAutomation::create_objects()
+void VAutomation::create_objects()
 {
 	Automation::create_objects();
 
@@ -85,8 +85,6 @@ int VAutomation::create_objects()
 			autos[i]->autoidx = i;
 			autos[i]->autogrouptype = autogrouptype(i, autos[i]->track);
 		}
-
-	return 0;
 }
 
 int VAutomation::direct_copy_possible(int64_t start, int direction)

@@ -133,10 +133,9 @@ void MeterPanel::stop_meters()
 }
 
 
-int MeterPanel::create_objects()
+void MeterPanel::create_objects()
 {
 	set_meters(meter_count, use_meters);
-	return 0;
 }
 
 int MeterPanel::set_meters(int meter_count, int use_meters)

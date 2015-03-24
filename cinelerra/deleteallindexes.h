@@ -45,7 +45,7 @@ public:
 	ConfirmDeleteAllIndexes(MWindow *mwindow, char *string);
 	~ConfirmDeleteAllIndexes();
 	
-	int create_objects();
+	void create_objects();
 	char *string;
 };
 

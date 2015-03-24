@@ -55,7 +55,7 @@ MButtons::~MButtons()
 	delete edit_panel;
 }
 
-int MButtons::create_objects()
+void MButtons::create_objects()
 {
 	int x = 3, y = 0;
 	BC_SubWindow *button;
@@ -73,7 +73,6 @@ int MButtons::create_objects()
 	
 	x += edit_panel->get_w();
 	flash();
-	return 0;
 }
 
 int MButtons::resize_event()

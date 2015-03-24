@@ -1729,7 +1729,7 @@ wchar_t* BC_ScrollTextBox::get_wtext(int *length)
 	return text->get_wtext(length);
 }
 
-void BC_ScrollTextBox::update(char *text)
+void BC_ScrollTextBox::update(const char *text)
 {
 	this->text->update(text);
 	yscroll->update_length(this->text->get_text_rows(),
@@ -1922,13 +1922,12 @@ BC_PopupTextBox::~BC_PopupTextBox()
 	}
 }
 
-int BC_PopupTextBox::create_objects()
+void BC_PopupTextBox::create_objects()
 {
 	int x = this->x, y = this->y;
 	parent_window->add_subwindow(textbox = new BC_PopupTextBoxText(this, x, y));
 	x += textbox->get_w();
 	parent_window->add_subwindow(listbox = new BC_PopupTextBoxList(this, x, y));
-	return 0;
 }
 
 void BC_PopupTextBox::update(const char *text)
@@ -2184,7 +2183,7 @@ void BC_TumbleTextBox::set_log_floatincrement(int value)
 	if(tumbler) tumbler->set_log_floatincrement(value);
 }
 
-int BC_TumbleTextBox::create_objects()
+void BC_TumbleTextBox::create_objects()
 {
 	int x = this->x, y = this->y;
 
@@ -2223,7 +2222,6 @@ int BC_TumbleTextBox::create_objects()
 
 	tumbler->set_increment(increment);
 	tumbler->set_log_floatincrement(log_floatincrement);
-	return 0;
 }
 
 char* BC_TumbleTextBox::get_text()
@@ -2231,7 +2229,7 @@ char* BC_TumbleTextBox::get_text()
 	return textbox->get_text();
 }
 
-int BC_TumbleTextBox::update(char *value)
+int BC_TumbleTextBox::update(const char *value)
 {
 	textbox->update(value);
 	return 0;

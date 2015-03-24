@@ -158,7 +158,7 @@ class RotateWindow : public PluginClientWindow
 public:
 	RotateWindow(RotateEffect *plugin, int x, int y);
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int update();
 	int update_fine();
@@ -461,7 +461,7 @@ RotateWindow::RotateWindow(RotateEffect *plugin, int x, int y)
 
 #define RADIUS 30
 
-int RotateWindow::create_objects()
+void RotateWindow::create_objects()
 {
 	int x = 10, y = 10;
 	BC_Title *title;
@@ -534,7 +534,6 @@ int RotateWindow::create_objects()
 
 
 
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(RotateWindow)

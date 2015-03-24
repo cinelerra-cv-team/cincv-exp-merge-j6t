@@ -45,7 +45,7 @@ public:
 	TimeAvgWindow(TimeAvgMain *client, int x, int y);
 	~TimeAvgWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	TimeAvgMain *client;

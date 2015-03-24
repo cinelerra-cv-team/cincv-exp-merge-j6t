@@ -238,7 +238,7 @@ public:
 	OGGConfigAudio(BC_WindowBase *parent_window, Asset *asset);
 	~OGGConfigAudio();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	Asset *asset;
@@ -306,7 +306,7 @@ public:
 	OGGConfigVideo(BC_WindowBase *parent_window, Asset *asset);
 	~OGGConfigVideo();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	OGGTheoraFixedBitrate *fixed_bitrate;

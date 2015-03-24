@@ -130,7 +130,7 @@ void RecordGUI::save_defaults()
 }
 
 
-int RecordGUI::create_objects()
+void RecordGUI::create_objects()
 {
 	char string[BCTEXTLEN];
 	flash_color = RED;
@@ -430,7 +430,6 @@ int RecordGUI::create_objects()
 
 	startover_thread = new RecordStartoverThread(record, this);
 
-	return 0;
 }
 
 void RecordGUI::flash_batch()

@@ -39,7 +39,7 @@ public:
 	DotWindow(DotMain *client, int x, int y);
 	~DotWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	DotMain *client;

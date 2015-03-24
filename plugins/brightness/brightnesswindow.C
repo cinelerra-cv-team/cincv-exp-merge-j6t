@@ -43,7 +43,7 @@ BrightnessWindow::~BrightnessWindow()
 {
 }
 
-int BrightnessWindow::create_objects()
+void BrightnessWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Brightness/Contrast")));
@@ -67,7 +67,6 @@ int BrightnessWindow::create_objects()
 		y));
 	show_window();
 	flush();
-	return 0;
 }
 
 int BrightnessWindow::close_event()

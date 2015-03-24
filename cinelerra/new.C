@@ -60,10 +60,9 @@ New::New(MWindow *mwindow)
 	script = 0;
 }
 
-int New::create_objects()
+void New::create_objects()
 {
 	thread = new NewThread(mwindow, this);
-	return 0;
 }
 
 int New::handle_event() 
@@ -240,7 +239,7 @@ NewWindow::~NewWindow()
 	if(format_presets) delete format_presets;
 }
 
-int NewWindow::create_objects()
+void NewWindow::create_objects()
 {
 	int x = 10, y = 10, x1, y1;
 	BC_TextBox *textbox;
@@ -398,7 +397,6 @@ int NewWindow::create_objects()
 	flash();
 	update();
 	show_window();
-	return 0;
 }
 
 int NewWindow::update()

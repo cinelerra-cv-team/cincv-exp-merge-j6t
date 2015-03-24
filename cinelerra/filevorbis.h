@@ -134,7 +134,7 @@ public:
 	VorbisConfigAudio(BC_WindowBase *parent_window, Asset *asset);
 	~VorbisConfigAudio();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	VorbisFixedBitrate *fixed_bitrate;

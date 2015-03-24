@@ -155,7 +155,7 @@ public:
 	~VDriverMenu();
 	
 	char* driver_to_string(int driver);
-	int create_objects();
+	void create_objects();
 	
 	VDevicePrefs *device_prefs;
 	int do_input;

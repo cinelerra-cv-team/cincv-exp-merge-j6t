@@ -73,7 +73,7 @@ public:
 	void run();
 
 	void close_threads();   // Stop all the child threads on exit
-	int create_objects();
+	void create_objects();
 	void fix_size(int &w, int &h, int width_given, float aspect_ratio);
 	float get_scale(int w);
 	int get_mbuttons_height();
@@ -94,7 +94,7 @@ public:
 		int min_w);
 	~RecordMonitorGUI();
 
-	int create_objects();
+	void create_objects();
 	int cursor_leave_event();
 	int cursor_enter_event();
 	int button_release_event();

@@ -45,7 +45,7 @@ public:
 	ZoomBar(MWindow *mwindow, MWindowGUI *gui);
 	~ZoomBar();
 
-	int create_objects();
+	void create_objects();
 	void resize_event();
 	int draw();
 	int resize_event(int w, int h);

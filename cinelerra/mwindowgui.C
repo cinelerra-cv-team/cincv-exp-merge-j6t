@@ -187,7 +187,7 @@ void MWindowGUI::get_scrollbars()
 //printf("get_scrollbars 2 %d %d\n", need_xscroll, w_needed);
 }
 
-int MWindowGUI::create_objects()
+void MWindowGUI::create_objects()
 {
 SET_TRACE
 	set_icon(mwindow->theme->get_image("mwindow_icon"));
@@ -269,7 +269,6 @@ SET_TRACE
 
 	canvas->activate();
 SET_TRACE
-	return 0;
 }
 
 void MWindowGUI::update_title(char *path)

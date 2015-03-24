@@ -1083,7 +1083,7 @@ void RenderWindow::load_profile(int profile_slot)
 
 
 
-int RenderWindow::create_objects()
+void RenderWindow::create_objects()
 {
 	int x = 5, y = 5;
 	add_subwindow(new BC_Title(x, 
@@ -1142,7 +1142,6 @@ int RenderWindow::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
-	return 0;
 }
 
 void RenderWindow::update_range_type(int range_type)

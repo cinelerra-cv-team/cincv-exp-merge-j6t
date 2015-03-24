@@ -228,7 +228,7 @@ public:
 	friend class BC_FileBoxReload;
 	friend class BC_FileBoxRecent;
 
-	virtual int create_objects();
+	virtual void create_objects();
 	virtual int keypress_event();
 	virtual int close_event();
 // When file is submitted this is called for the user to retrieve it before the

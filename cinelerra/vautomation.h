@@ -32,7 +32,7 @@ public:
 	VAutomation(EDL *edl, Track *track);
 	~VAutomation();
 
-	int create_objects();
+	void create_objects();
 	void get_projector(float *x, 
 		float *y, 
 		float *z, 

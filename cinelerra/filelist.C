@@ -496,7 +496,7 @@ char* FileList::create_path(int number_override)
 
 
 
-	char *path = 0;
+	char *path = (char*)"";
 	char output[BCTEXTLEN];
 	if(file->current_frame >= path_list.total || !asset->use_header)
 	{

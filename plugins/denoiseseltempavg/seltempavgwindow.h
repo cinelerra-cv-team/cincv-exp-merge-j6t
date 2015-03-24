@@ -73,7 +73,7 @@ public:
 	SelTempAvgWindow(SelTempAvgMain *client, int x, int y);
 	~SelTempAvgWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	SelTempAvgMain *client;

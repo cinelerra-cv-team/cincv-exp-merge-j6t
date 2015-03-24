@@ -106,7 +106,7 @@ public:
 	
 
 	void update_channel_list();
-	int create_objects();
+	void create_objects();
 	int reposition();
 	void close_threads();
 	const char *get_source_name(Channel *channel);  // Get the name of the source for a channel

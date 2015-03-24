@@ -89,7 +89,7 @@ AVC1394Transport::~AVC1394Transport()
 
 }
 
-int AVC1394Transport::create_objects()
+void AVC1394Transport::create_objects()
 {
 	int x = this->x, y = this->y;
 
@@ -112,7 +112,6 @@ int AVC1394Transport::create_objects()
 
 	x_end = x + 10;
 
-	return 0;
 }
 
 int AVC1394Transport::keypress_event(int keypress)

@@ -66,9 +66,9 @@ APatchGUI::~APatchGUI()
 	if(pan) delete pan;
 }
 
-int APatchGUI::create_objects()
+void APatchGUI::create_objects()
 {
-	return update(x, y);
+	update(x, y);
 }
 
 int APatchGUI::reposition(int x, int y)

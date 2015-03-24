@@ -45,7 +45,7 @@ DotWindow::~DotWindow()
 {
 }
 
-int DotWindow::create_objects()
+void DotWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, 
@@ -55,7 +55,6 @@ int DotWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(DotWindow)

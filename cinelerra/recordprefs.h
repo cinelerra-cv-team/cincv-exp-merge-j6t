@@ -42,7 +42,7 @@ public:
 	RecordPrefs(MWindow *mwindow, PreferencesWindow *pwindow);
 	~RecordPrefs();
 
-	int create_objects();
+	void create_objects();
 
 	FormatTools *recording_format;
 	ADevicePrefs *audio_in_device;

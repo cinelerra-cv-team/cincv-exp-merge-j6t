@@ -37,7 +37,7 @@ public:
 	Load(MWindow *mwindow, MainMenu *mainmenu);
 	~Load();
 
-	int create_objects();
+	void create_objects();
 	int handle_event();
 
 	MWindow *mwindow;
@@ -74,7 +74,7 @@ public:
 		char *init_directory);
 	~LoadFileWindow();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 
 	LoadFileThread *thread;
@@ -165,7 +165,7 @@ public:
 	ReelWindow(MWindow *mwindow);
 	~ReelWindow();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 
 	BC_OKButton *ok_button;

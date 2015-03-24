@@ -50,7 +50,7 @@ RecordPrefs::~RecordPrefs()
 //	delete duplex_device;
 }
 
-int RecordPrefs::create_objects()
+void RecordPrefs::create_objects()
 {
 	int x, y, x2;
 	char string[BCTEXTLEN];
@@ -248,7 +248,6 @@ int RecordPrefs::create_objects()
 	y += 3;
 	add_subwindow(new BC_Title(x, y, _("Seconds")));
 
-	return 0;
 }
 
 

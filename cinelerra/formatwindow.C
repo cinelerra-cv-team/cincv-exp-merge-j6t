@@ -35,7 +35,7 @@ FormatAWindow::~FormatAWindow()
 {
 }
 
-int FormatAWindow::create_objects()
+void FormatAWindow::create_objects()
 {
 	int x;
 	int init_x;
@@ -94,7 +94,7 @@ FormatVWindow::~FormatVWindow()
 {
 }
 
-int FormatVWindow::create_objects()
+void FormatVWindow::create_objects()
 {
 	int x, y = 10;
 	int init_x;

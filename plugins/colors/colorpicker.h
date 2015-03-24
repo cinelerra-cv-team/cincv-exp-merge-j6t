@@ -104,7 +104,7 @@ public:
 	int cursor_motion_event();
 	int button_release_event();
 
-	int create_objects();
+	void create_objects();
 	int draw(float hue, float saturation);
 	int get_angle(float x1, float y1, float x2, float y2);
 	float torads(float angle);
@@ -119,7 +119,7 @@ class PaletteWheelValue : public BC_SubWindow
 public:
 	PaletteWheelValue(ColorWindow *window, int x, int y);
 	~PaletteWheelValue();
-	int create_objects();
+	void create_objects();
 	int button_press_event();
 	int cursor_motion_event();
 	int button_release_event();
@@ -135,7 +135,7 @@ class PaletteOutput : public BC_SubWindow
 public:
 	PaletteOutput(ColorWindow *window, int x, int y);
 	~PaletteOutput();
-	int create_objects();
+	void create_objects();
 	int handle_event();
 	int draw();
 	ColorWindow *window;

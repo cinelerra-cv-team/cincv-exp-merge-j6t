@@ -70,7 +70,7 @@ public:
 	EDL(EDL *parent_edl = 0);
 	~EDL();
 
-	int create_objects();
+	void create_objects();
 	EDL& operator=(EDL &edl);
 
 // Load configuration and track counts

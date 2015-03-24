@@ -81,7 +81,7 @@ void ilacemode_to_xmltext(char *string, int ilacemode)
 	}
 }
 
-int ilacemode_from_xmltext(char *text, int thedefault)
+int ilacemode_from_xmltext(const char *text, int thedefault)
 {
 	if(!text) return thedefault;
 	if(!strcasecmp(text, BC_ILACE_MODE_UNDETECTED_XMLT))     return BC_ILACE_MODE_UNDETECTED;
@@ -123,7 +123,7 @@ void ilacefixmethod_to_xmltext(char *string, int fixmethod)
 	}
 }
 
-int ilacefixmethod_from_xmltext(char *text, int thedefault)
+int ilacefixmethod_from_xmltext(const char *text, int thedefault)
 {
 	if(!strcasecmp(text, BC_ILACE_FIXMETHOD_NONE_XMLT))   	return BC_ILACE_FIXMETHOD_NONE;
 	if(!strcasecmp(text, BC_ILACE_FIXMETHOD_UPONE_XMLT))  	return BC_ILACE_FIXMETHOD_UPONE;

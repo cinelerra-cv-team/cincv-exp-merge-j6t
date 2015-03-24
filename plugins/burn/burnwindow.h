@@ -41,7 +41,7 @@ public:
 	BurnWindow(BurnMain *client, int x, int y);
 	~BurnWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BurnMain *client;

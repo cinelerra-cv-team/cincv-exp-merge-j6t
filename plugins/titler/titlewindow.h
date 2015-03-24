@@ -71,7 +71,7 @@ public:
 	TitleWindow(TitleMain *client, int x, int y);
 	~TitleWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_color();
 	void update_justification();

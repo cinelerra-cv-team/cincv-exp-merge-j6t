@@ -110,7 +110,7 @@ EDL::~EDL()
 }
 
 
-int EDL::create_objects()
+void EDL::create_objects()
 {
 	tracks = new Tracks(this);
 	if(!parent_edl)
@@ -127,7 +127,6 @@ int EDL::create_objects()
 	local_session = new LocalSession(this);
 	labels = new Labels(this, "LABELS");
 //	last_playback_position = 0;
-	return 0;
 }
 
 EDL& EDL::operator=(EDL &edl)

@@ -202,7 +202,7 @@ public:
 	MPEGConfigAudio(BC_WindowBase *parent_window, Asset *asset);
 	~MPEGConfigAudio();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BC_WindowBase *parent_window;
@@ -347,7 +347,7 @@ public:
 		Asset *asset);
 	~MPEGConfigVideo();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void delete_cmodel_objs();
 	void reset_cmodel();

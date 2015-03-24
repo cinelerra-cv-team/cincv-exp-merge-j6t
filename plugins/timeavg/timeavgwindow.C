@@ -43,7 +43,7 @@ TimeAvgWindow::~TimeAvgWindow()
 {
 }
 
-int TimeAvgWindow::create_objects()
+void TimeAvgWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Frames to average")));
@@ -61,7 +61,6 @@ int TimeAvgWindow::create_objects()
 	add_tool(no_subtract = new TimeAvgNoSubtract(client, x, y));
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(TimeAvgWindow)

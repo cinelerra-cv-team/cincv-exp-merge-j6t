@@ -46,7 +46,7 @@ InterfacePrefs::InterfacePrefs(MWindow *mwindow, PreferencesWindow *pwindow)
 {
 }
 
-int InterfacePrefs::create_objects()
+void InterfacePrefs::create_objects()
 {
 	int y, x, value;
 	BC_Resources *resources = BC_WindowBase::get_resources();
@@ -238,7 +238,6 @@ int InterfacePrefs::create_objects()
 	add_subwindow(theme = new ViewTheme(x, y, pwindow));
 	theme->create_objects();
 
-	return 0;
 }
 
 const char* InterfacePrefs::behavior_to_text(int mode)
@@ -487,14 +486,13 @@ int ViewBehaviourText::handle_event()
 	return 1;
 }
 
-int ViewBehaviourText::create_objects()
+void ViewBehaviourText::create_objects()
 {
 // Video4linux versions are automatically detected
 	add_item(new ViewBehaviourItem(this, _(MOVE_ALL_EDITS_TITLE), MOVE_ALL_EDITS));
 	add_item(new ViewBehaviourItem(this, _(MOVE_ONE_EDIT_TITLE), MOVE_ONE_EDIT));
 	add_item(new ViewBehaviourItem(this, _(MOVE_NO_EDITS_TITLE), MOVE_NO_EDITS));
 	add_item(new ViewBehaviourItem(this, _(MOVE_EDITS_DISABLED_TITLE), MOVE_EDITS_DISABLED));
-	return 0;
 }
 
 

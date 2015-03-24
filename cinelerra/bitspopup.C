@@ -53,7 +53,7 @@ BitsPopup::~BitsPopup()
 		delete bits_items.values[i];
 }
 
-int BitsPopup::create_objects()
+void BitsPopup::create_objects()
 {
 	bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR8)));
 	bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR16)));
@@ -67,7 +67,6 @@ int BitsPopup::create_objects()
 	parent_window->add_subwindow(textbox = new BitsPopupText(this, x, y));
 	x += textbox->get_w();
 	parent_window->add_subwindow(menu = new BitsPopupMenu(this, x, y));
-	return 0;
 }
 
 int BitsPopup::get_w()

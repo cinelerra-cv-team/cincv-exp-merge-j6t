@@ -48,7 +48,7 @@ MotionWindow::~MotionWindow()
 {
 }
 
-int MotionWindow::create_objects()
+void MotionWindow::create_objects()
 {
 	int x1 = 10, x = 10, y = 10;
 	int x2 = 310;
@@ -240,7 +240,6 @@ int MotionWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 void MotionWindow::update_mode()

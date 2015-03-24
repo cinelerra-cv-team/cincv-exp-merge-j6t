@@ -59,7 +59,7 @@ public:
 	Track();
 	virtual ~Track();
 
-	int create_objects();
+	void create_objects();
 	int get_id();
 	virtual int load_defaults(BC_Hash *defaults);
 	int load(FileXML *file, int track_offset, uint32_t load_flags);

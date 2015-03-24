@@ -61,9 +61,9 @@ VPatchGUI::~VPatchGUI()
 	if(mode) delete mode;
 }
 
-int VPatchGUI::create_objects()
+void VPatchGUI::create_objects()
 {
-	return update(x, y);
+	update(x, y);
 }
 
 int VPatchGUI::reposition(int x, int y)
@@ -325,7 +325,7 @@ IntAuto* VModePatch::get_keyframe(MWindow *mwindow, VPatchGUI *patch)
 }
 
 
-int VModePatch::create_objects()
+void VModePatch::create_objects()
 {
 	add_item(new VModePatchItem(this, mode_to_text(TRANSFER_NORMAL), TRANSFER_NORMAL));
 	add_item(new VModePatchItem(this, mode_to_text(TRANSFER_ADDITION), TRANSFER_ADDITION));
@@ -334,7 +334,6 @@ int VModePatch::create_objects()
 	add_item(new VModePatchItem(this, mode_to_text(TRANSFER_DIVIDE), TRANSFER_DIVIDE));
 	add_item(new VModePatchItem(this, mode_to_text(TRANSFER_REPLACE), TRANSFER_REPLACE));
 	add_item(new VModePatchItem(this, mode_to_text(TRANSFER_MAX), TRANSFER_MAX));
-	return 0;
 }
 
 void VModePatch::update(int mode)

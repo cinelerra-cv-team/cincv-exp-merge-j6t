@@ -51,7 +51,7 @@ public:
 	InterfacePrefs(MWindow *mwindow, PreferencesWindow *pwindow);
 	~InterfacePrefs();
 
-	int create_objects();
+	void create_objects();
 // must delete each derived class
 	void update(int new_value);
 	const char* behavior_to_text(int mode);
@@ -224,7 +224,7 @@ public:
 	~ViewBehaviourText();
 
 	int handle_event();  // user copies text to value here
-	int create_objects();         // add initial items
+	void create_objects();         // add initial items
 	InterfacePrefs *tfwindow;
 	int *output;
 };

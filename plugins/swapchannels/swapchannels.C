@@ -142,7 +142,7 @@ int SwapMenu::handle_event()
 	return 1;
 }
 
-int SwapMenu::create_objects()
+void SwapMenu::create_objects()
 {
 	add_item(new SwapItem(this, client->output_to_text(RED_SRC)));
 	add_item(new SwapItem(this, client->output_to_text(GREEN_SRC)));
@@ -150,7 +150,6 @@ int SwapMenu::create_objects()
 	add_item(new SwapItem(this, client->output_to_text(ALPHA_SRC)));
 	add_item(new SwapItem(this, client->output_to_text(NO_SRC)));
 	add_item(new SwapItem(this, client->output_to_text(MAX_SRC)));
-	return 0;
 }
 
 
@@ -465,7 +464,7 @@ const char* SwapMain::output_to_text(int value)
 	}
 }
 
-int SwapMain::text_to_output(char *text)
+int SwapMain::text_to_output(const char *text)
 {
 	if(!strcmp(text, _("Red"))) return RED_SRC;
 	if(!strcmp(text, _("Green"))) return GREEN_SRC;

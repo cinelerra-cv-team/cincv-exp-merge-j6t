@@ -166,7 +166,7 @@ public:
 	EditPopupTitleWindow (MWindow *mwindow, EditPopup *popup);
 	~EditPopupTitleWindow ();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	EditPopupTitleText *title_text;

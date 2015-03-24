@@ -48,7 +48,7 @@ public:
 	CropVideoWindow(MWindow *mwindow, CropVideo *thread);
 	~CropVideoWindow();
 
-	int create_objects();
+	void create_objects();
 
 	CropVideo *thread;
 	MWindow *mwindow;

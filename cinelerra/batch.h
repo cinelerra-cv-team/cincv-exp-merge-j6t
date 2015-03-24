@@ -37,7 +37,7 @@ public:
 	Batch(MWindow *mwindow, Record *record);
 	~Batch();
 
-	int create_objects();
+	void create_objects();
 	static char* mode_to_text(int record_mode);
 	static int text_to_mode(char *text);
 	Asset* get_current_asset();

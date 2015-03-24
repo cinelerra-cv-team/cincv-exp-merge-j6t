@@ -183,7 +183,7 @@ AssetEditWindow::~AssetEditWindow()
 
 
 
-int AssetEditWindow::create_objects()
+void AssetEditWindow::create_objects()
 {
 	int y = 10, x = 10, x1 = 10, x2 = 160;
 	char string[BCTEXTLEN];
@@ -541,7 +541,6 @@ int AssetEditWindow::create_objects()
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 AssetEditChannels::AssetEditChannels(AssetEditWindow *fwindow, 
@@ -677,7 +676,7 @@ const char* InterlacefixmethodPulldown::interlacefixmethod_to_text()
 	return (this->string);
 }
 
-AssetEditILaceautofixoption::AssetEditILaceautofixoption(AssetEditWindow *fwindow, char *text, int thedefault, int x, int y, int w)
+AssetEditILaceautofixoption::AssetEditILaceautofixoption(AssetEditWindow *fwindow, const char *text, int thedefault, int x, int y, int w)
  : BC_TextBox(x, y, w, 1, text)
 {
 	this->fwindow = fwindow;
@@ -839,8 +838,22 @@ int AssetEditPathText::handle_event()
 	return 1;
 }
 
-AssetEditPath::AssetEditPath(MWindow *mwindow, AssetEditWindow *fwindow, BC_TextBox *textbox, int y, const char *text, const char *window_title, const char *window_caption)
- : BrowseButton(mwindow, fwindow, textbox, 310, y, text, window_title, window_caption, 0) 
+AssetEditPath::AssetEditPath(MWindow *mwindow, 
+	AssetEditWindow *fwindow, 
+	BC_TextBox *textbox, 
+	int y, 
+	const char *text, 
+	const char *window_title, 
+	const char *window_caption)
+ : BrowseButton(mwindow, 
+ 	fwindow, 
+	textbox, 
+	310, 
+	y, 
+	text, 
+	window_title, 
+	window_caption, 
+	0) 
 { 
 	this->fwindow = fwindow; 
 }

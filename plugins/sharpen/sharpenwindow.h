@@ -47,7 +47,7 @@ public:
 	SharpenWindow(SharpenMain *client, int x, int y);
 	~SharpenWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	SharpenMain *client;

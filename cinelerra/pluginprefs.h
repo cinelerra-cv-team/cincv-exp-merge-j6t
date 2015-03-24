@@ -34,7 +34,7 @@ public:
 	PluginPrefs(MWindow *mwindow, PreferencesWindow *pwindow);
 	~PluginPrefs();
 	
-	int create_objects();
+	void create_objects();
 // must delete each derived class
 	BrowseButton *ipath;
 	PluginGlobalPathText *ipathtext;

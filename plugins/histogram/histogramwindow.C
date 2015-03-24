@@ -56,7 +56,7 @@ static VFrame max_picon_image(max_picon_png);
 static VFrame mid_picon_image(mid_picon_png);
 static VFrame min_picon_image(min_picon_png);
 
-int HistogramWindow::create_objects()
+void HistogramWindow::create_objects()
 {
 	int x = 10, y = 10, x1 = 10;
 	BC_Title *title = 0;
@@ -213,8 +213,6 @@ int HistogramWindow::create_objects()
 
 
 	show_window();
-
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(HistogramWindow)

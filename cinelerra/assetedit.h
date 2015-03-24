@@ -68,7 +68,7 @@ public:
 	AssetEditWindow(MWindow *mwindow, AssetEdit *asset_edit);
 	~AssetEditWindow();
 
-	int create_objects();
+	void create_objects();
 	Asset *asset;
 	AssetEditPathText *path_text;
 	AssetEditPath *path_button;
@@ -173,7 +173,7 @@ private:
 class AssetEditILaceautofixoption : public BC_TextBox
 {
 public:
-	AssetEditILaceautofixoption(AssetEditWindow *fwindow, char *text, int thedefault, int x, int y, int w);
+	AssetEditILaceautofixoption(AssetEditWindow *fwindow, const char *text, int thedefault, int x, int y, int w);
 
 	int handle_event();
 	int thedefault;

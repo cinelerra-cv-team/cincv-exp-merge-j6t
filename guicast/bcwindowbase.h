@@ -196,6 +196,7 @@ public:
 	virtual int uses_text() { return 0; };
 // Only if opengl is enabled
 	virtual int expose_event() { return 0; };
+	virtual void create_objects() { return; };
 
 // Check if a hardware accelerated colormodel is available and reserve it
 	int accel_available(int color_model, int lock_it); 

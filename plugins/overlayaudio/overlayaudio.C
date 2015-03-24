@@ -66,7 +66,7 @@ class OverlayAudioWindow : public PluginClientWindow
 public:
 	OverlayAudioWindow(OverlayAudio *plugin, int x, int y);
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	OverlayAudio *plugin;
@@ -154,7 +154,7 @@ OverlayAudioWindow::OverlayAudioWindow(OverlayAudio *plugin, int x, int y)
 	this->plugin = plugin;
 }
 
-int OverlayAudioWindow::create_objects()
+void OverlayAudioWindow::create_objects()
 {
 	int x = 10, y = 10;
 	BC_Title *title;
@@ -163,7 +163,6 @@ int OverlayAudioWindow::create_objects()
 	add_subwindow(output = new OutputTrack(plugin, x, y));
 	output->create_objects();
 	show_window();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(OverlayAudioWindow)

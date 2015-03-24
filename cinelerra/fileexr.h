@@ -87,7 +87,7 @@ public:
 	EXRConfigVideo(BC_WindowBase *parent_window, Asset *asset);
 	~EXRConfigVideo();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BC_WindowBase *parent_window;

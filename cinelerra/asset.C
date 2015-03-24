@@ -665,7 +665,7 @@ int Asset::read_index(FileXML *file)
 	return 0;
 }
 
-void Asset::write_index(char *path, int data_bytes)
+void Asset::write_index(const char *path, int data_bytes)
 {
 	FILE *file;
 	if(!(file = fopen(path, "wb")))
@@ -899,7 +899,9 @@ int Asset::write_index(FileXML *file)
 
 
 
-char* Asset::construct_param(const char *param, const char *prefix, char *return_value)
+const char* Asset::construct_param(const char *param, 
+	const char *prefix, 
+	char *return_value)
 {
 	if(prefix)
 		sprintf(return_value, "%s%s", prefix, param);

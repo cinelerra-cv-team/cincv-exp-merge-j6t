@@ -461,7 +461,7 @@ BC_WindowBase* ChannelPicker::get_subwindow()
 
 
 
-int ChannelPicker::create_objects()
+void ChannelPicker::create_objects()
 {
 	channel_text = 0;
 	update_channel_list();
@@ -475,7 +475,6 @@ int ChannelPicker::create_objects()
 	get_subwindow()->add_subwindow(channel_button = new ChannelButton(this, 
 		x, 
 		y - 1));
-	return 0;
 }
 
 int ChannelPicker::reposition()

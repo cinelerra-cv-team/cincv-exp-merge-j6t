@@ -355,7 +355,7 @@ int PaletteWheel::button_release_event()
 	return 0;
 }
 
-int PaletteWheel::create_objects()
+void PaletteWheel::create_objects()
 {
 // Upper right
 //printf("PaletteWheel::create_objects 1\n");
@@ -419,7 +419,6 @@ int PaletteWheel::create_objects()
 //printf("PaletteWheel::create_objects 1\n");
 	flash();
 //printf("PaletteWheel::create_objects 2\n");
-	return 0;
 }
 
 float PaletteWheel::torads(float angle)
@@ -508,12 +507,11 @@ PaletteWheelValue::~PaletteWheelValue()
 	delete frame;
 }
 
-int PaletteWheelValue::create_objects()
+void PaletteWheelValue::create_objects()
 {
 	frame = new VFrame(0, get_w(), get_h(), BC_RGB888);
 	draw(window->h, window->s, window->v);
 	flash();
-	return 0;
 }
 
 int PaletteWheelValue::button_press_event()
@@ -601,11 +599,10 @@ PaletteOutput::~PaletteOutput()
 }
 
 
-int PaletteOutput::create_objects()
+void PaletteOutput::create_objects()
 {
 	draw();
 	flash();
-	return 0;
 }
 
 int PaletteOutput::handle_event()

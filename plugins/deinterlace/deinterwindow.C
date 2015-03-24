@@ -51,7 +51,7 @@ DeInterlaceWindow::~DeInterlaceWindow()
 {
 }
 
-int DeInterlaceWindow::create_objects()
+void DeInterlaceWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(x, y, _("Select deinterlacing mode")));
@@ -68,7 +68,6 @@ int DeInterlaceWindow::create_objects()
 	flash();
 	show_window();
 	set_mode(client->config.mode,0);
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(DeInterlaceWindow)
@@ -195,7 +194,7 @@ int DeInterlaceAdaptive::handle_event()
 	return 1;
 }
 
-DeInterlaceDominanceTop::DeInterlaceDominanceTop(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, char * title)
+DeInterlaceDominanceTop::DeInterlaceDominanceTop(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, const char *title)
  : BC_Radial(x, y, client->config.dominance, title)
 {
 	this->client = client;
@@ -211,7 +210,7 @@ int DeInterlaceDominanceTop::handle_event()
 }
 
 
-DeInterlaceDominanceBottom::DeInterlaceDominanceBottom(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, const char * title)
+DeInterlaceDominanceBottom::DeInterlaceDominanceBottom(DeInterlaceMain *client, DeInterlaceWindow *window, int x, int y, const char *title)
  : BC_Radial(x, y, client->config.dominance, title)
 {
 	this->client = client;

@@ -40,7 +40,7 @@ public:
 	APanel(MWindow *mwindow, CWindowGUI *subwindow, int x, int y, int w, int h);
 	~APanel();
 
-	int create_objects();
+	void create_objects();
 
 	MWindow *mwindow;
 	CWindowGUI *subwindow;

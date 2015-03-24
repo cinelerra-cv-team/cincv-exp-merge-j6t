@@ -2749,7 +2749,7 @@ int BC_WindowBase::get_window_lock()
 	return top_level->window_lock;
 }
 
-int BC_WindowBase::lock_window(const char *location) 
+int BC_WindowBase::lock_window(const char *location)
 {
 	if(top_level && top_level != this)
 	{

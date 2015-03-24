@@ -55,7 +55,7 @@ TranslateWin::~TranslateWin()
 {
 }
 
-int TranslateWin::create_objects()
+void TranslateWin::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -114,7 +114,6 @@ int TranslateWin::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int TranslateWin::close_event()

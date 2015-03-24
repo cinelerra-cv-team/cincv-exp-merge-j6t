@@ -47,7 +47,7 @@ public:
 	MWindowGUI(MWindow *mwindow);
 	~MWindowGUI();
 
-	int create_objects();
+	void create_objects();
 	void get_scrollbars();
 
 // ======================== event handlers

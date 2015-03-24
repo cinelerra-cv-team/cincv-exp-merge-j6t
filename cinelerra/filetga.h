@@ -108,7 +108,7 @@ class TGAConfigVideo : public BC_Window
 public:
 	TGAConfigVideo(BC_WindowBase *gui, Asset *asset);
 	~TGAConfigVideo();
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	ArrayList<BC_ListBoxItem*> compression_items;

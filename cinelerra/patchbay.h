@@ -42,7 +42,7 @@ public:
 	~PatchBay();
 
 	int delete_all_patches();
-	int create_objects();
+	void create_objects();
 	void resize_event();
 	int button_press_event();
 	int cursor_motion_event();

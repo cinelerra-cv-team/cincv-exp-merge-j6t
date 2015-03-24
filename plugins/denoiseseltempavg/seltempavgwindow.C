@@ -43,7 +43,7 @@ SelTempAvgWindow::~SelTempAvgWindow()
 {
 }
 
-int SelTempAvgWindow::create_objects()
+void SelTempAvgWindow::create_objects()
 {
 	int x1 = 10, x2 = 40, x3 = 80, x4 = 175, x5 = 260, y = 10;
 
@@ -114,7 +114,6 @@ int SelTempAvgWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(SelTempAvgWindow)

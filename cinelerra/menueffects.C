@@ -592,7 +592,7 @@ MenuEffectWindow::~MenuEffectWindow()
 
 
 
-int MenuEffectWindow::create_objects()
+void MenuEffectWindow::create_objects()
 {
 	int x, y;
 	result = -1;
@@ -648,7 +648,6 @@ int MenuEffectWindow::create_objects()
 	add_subwindow(new MenuEffectWindowCancel(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 int MenuEffectWindow::resize_event(int w, int h)
@@ -778,7 +777,7 @@ int MenuEffectPrompt::calculate_h(BC_WindowBase *gui)
 }
 
 
-int MenuEffectPrompt::create_objects()
+void MenuEffectPrompt::create_objects()
 {
 	int x = 10, y = 10;
 	BC_Title *title;
@@ -788,6 +787,5 @@ int MenuEffectPrompt::create_objects()
 	show_window();
 	raise_window();
 	flush();
-	return 0;
 }
 

@@ -168,7 +168,7 @@ int ShapeWipeBrowseButton::handle_event()
 
 ShapeWipeLoad::ShapeWipeLoad(
 	ShapeWipeFilename *filename, 
-	char *init_directory)
+	const char *init_directory)
  : BC_FileBox(
 	1,
 	1,

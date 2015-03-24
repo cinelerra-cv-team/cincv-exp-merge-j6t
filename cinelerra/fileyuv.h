@@ -73,7 +73,7 @@ class YUVConfigVideo : public BC_Window
 		       FormatTools *format);
 	~YUVConfigVideo();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BC_WindowBase *parent_window;

@@ -38,7 +38,7 @@ APanel::~APanel()
 {
 }
 
-int APanel::create_objects()
+void APanel::create_objects()
 {
 	int x = this->x + 5, y = this->y + 10;
 	char string[BCTEXTLEN];
@@ -65,7 +65,6 @@ int APanel::create_objects()
 	subwindow->add_subwindow(mute = new APanelMute(mwindow, this, x, y));
 	y += mute->get_h();
 	subwindow->add_subwindow(play = new APanelPlay(mwindow, this, x, y));
-	return 0;
 }
 
 

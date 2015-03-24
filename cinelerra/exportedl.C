@@ -388,7 +388,7 @@ ExportEDLWindow::~ExportEDLWindow()
 
 
 
-int ExportEDLWindow::create_objects()
+void ExportEDLWindow::create_objects()
 {
 	int x = 5, y = 5;
 	add_subwindow(new BC_Title(x, 
@@ -454,7 +454,6 @@ int ExportEDLWindow::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
-	return 0;
 }
 
 

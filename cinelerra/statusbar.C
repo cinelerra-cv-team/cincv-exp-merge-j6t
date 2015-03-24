@@ -48,7 +48,7 @@ StatusBar::~StatusBar()
 
 
 
-int StatusBar::create_objects()
+void StatusBar::create_objects()
 {
 //printf("StatusBar::create_objects 1\n");
 	int x = 10, y = 5;
@@ -75,8 +75,6 @@ int StatusBar::create_objects()
 //printf("StatusBar::create_objects 1\n");
 	default_message();
 	flash();
-//printf("StatusBar::create_objects 2\n");
-	return 0;
 }
 
 void StatusBar::resize_event()

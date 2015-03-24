@@ -590,7 +590,7 @@ EXRConfigVideo::~EXRConfigVideo()
 {
 }
 
-int EXRConfigVideo::create_objects()
+void EXRConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new EXRUseAlpha(this, x, y));
@@ -601,7 +601,6 @@ int EXRConfigVideo::create_objects()
 	add_subwindow(menu = new EXRCompression(this, x, y, 100));
 	menu->create_objects();
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int EXRConfigVideo::close_event()

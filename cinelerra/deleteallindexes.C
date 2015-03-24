@@ -114,7 +114,7 @@ ConfirmDeleteAllIndexes::~ConfirmDeleteAllIndexes()
 {
 }
 	
-int ConfirmDeleteAllIndexes::create_objects()
+void ConfirmDeleteAllIndexes::create_objects()
 { 
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, string));
@@ -123,5 +123,4 @@ int ConfirmDeleteAllIndexes::create_objects()
 	add_subwindow(new BC_OKButton(x, y));
 	x = get_w() - 100;
 	add_subwindow(new BC_CancelButton(x, y));
-	return 0;
 }

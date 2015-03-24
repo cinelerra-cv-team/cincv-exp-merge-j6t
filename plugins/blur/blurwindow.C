@@ -50,7 +50,7 @@ BlurWindow::~BlurWindow()
 //printf("BlurWindow::~BlurWindow 1\n");
 }
 
-int BlurWindow::create_objects()
+void BlurWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, _("Blur")));
@@ -72,7 +72,6 @@ int BlurWindow::create_objects()
 	
 	show_window();
 	flush();
-	return 0;
 }
 
 int BlurWindow::close_event()

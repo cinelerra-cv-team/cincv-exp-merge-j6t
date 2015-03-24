@@ -50,7 +50,7 @@ VideoWindowGUI::~VideoWindowGUI()
 {
 }
 
-int VideoWindowGUI::create_objects()
+void VideoWindowGUI::create_objects()
 {
 	add_subwindow(canvas = new VideoWindowCanvas(this, get_w(), get_h()));
 	update_title();

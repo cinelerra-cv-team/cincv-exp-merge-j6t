@@ -64,14 +64,14 @@ public:
 		int use_nothing);
 	~RenderProfile();
 	
-	int create_objects();
+	void create_objects();
 	int reposition_window(int x, int y);
 	static int calculate_h(BC_WindowBase *gui);
 	int get_h();
 	int get_x();
 	int get_y();
 
-	int get_profile_slot_by_name(char *profile_name);
+	int get_profile_slot_by_name(const char *profile_name);
 	int get_new_profile_slot();
 	int save_to_slot(int profile_slot, const char *profile_name);
 	

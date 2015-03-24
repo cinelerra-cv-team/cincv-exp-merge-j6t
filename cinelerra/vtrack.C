@@ -59,13 +59,12 @@ VTrack::~VTrack()
 {
 }
 
-int VTrack::create_objects()
+void VTrack::create_objects()
 {
 	Track::create_objects();
 	automation = new VAutomation(edl, this);
 	automation->create_objects();
 	edits = new VEdits(edl, this);
-	return 0;
 }
 
 // Used by PlaybackEngine

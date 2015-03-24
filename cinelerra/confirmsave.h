@@ -49,7 +49,7 @@ public:
 	ConfirmSaveWindow(MWindow *mwindow, ArrayList<BC_ListBoxItem*> *list);
 	~ConfirmSaveWindow();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 
 	ArrayList<BC_ListBoxItem*> *list;

@@ -198,7 +198,7 @@ public:
 	GradientWindow(GradientMain *plugin, int x, int y);
 	~GradientWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update_in_color();
 	void update_out_color();

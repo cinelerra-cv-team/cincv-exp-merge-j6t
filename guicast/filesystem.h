@@ -81,7 +81,7 @@ public:
 	int set_want_directory();
 	void set_sort_order(int value);
 	void set_sort_field(int field);
-	int create_dir(char *new_dir_);    // create a new directory
+	int create_dir(const char *new_dir_);    // create a new directory
 	int complete_path(char *filename);   // use the filename and the current_dir to create a complete filename
 // return 1 if the text is a directory
 	int is_dir(const char *new_dir_);	  

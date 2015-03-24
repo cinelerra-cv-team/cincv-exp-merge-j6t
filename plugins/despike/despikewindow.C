@@ -51,7 +51,7 @@ DespikeWindow::~DespikeWindow()
 {
 }
 
-int DespikeWindow::create_objects()
+void DespikeWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_tool(new BC_Title(5, y, _("Maximum level:")));
@@ -63,7 +63,6 @@ int DespikeWindow::create_objects()
 	add_tool(slope = new DespikeSlope(despike, x, y));
 	show_window();
 	flush();
-	return 0;
 }
 
 int DespikeWindow::close_event()

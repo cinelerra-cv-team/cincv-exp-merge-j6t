@@ -63,7 +63,7 @@ int VideoWindow::update_defaults(BC_Hash *defaults)
 	defaults->update("PLAYVIDEOW", video_window_w);
 }
 
-int VideoWindow::create_objects()
+void VideoWindow::create_objects()
 {
 	set_synchronous(1);
 	if(mwindow->gui)

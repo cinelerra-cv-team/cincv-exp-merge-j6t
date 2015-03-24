@@ -47,7 +47,7 @@ public:
 	AgingWindow(AgingMain *client, int x, int y);
 	~AgingWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	AgingMain *client;

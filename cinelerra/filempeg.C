@@ -1523,7 +1523,7 @@ MPEGConfigAudio::~MPEGConfigAudio()
 {
 }
 
-int MPEGConfigAudio::create_objects()
+void MPEGConfigAudio::create_objects()
 {
 	int x = 10, y = 10;
 	int x1 = 150;
@@ -1533,7 +1533,7 @@ int MPEGConfigAudio::create_objects()
 	if(asset->format == FILE_MPEG)
 	{
 		add_subwindow(new BC_Title(x, y, _("No options for MPEG transport stream.")));
-		return 0;
+		return;
 	}
 
 
@@ -1550,7 +1550,6 @@ int MPEGConfigAudio::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 int MPEGConfigAudio::close_event()
@@ -1719,7 +1718,7 @@ MPEGConfigVideo::~MPEGConfigVideo()
 {
 }
 
-int MPEGConfigVideo::create_objects()
+void MPEGConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
 	int x1 = x + 150;
@@ -1728,7 +1727,7 @@ int MPEGConfigVideo::create_objects()
 	if(asset->format == FILE_MPEG)
 	{
 		add_subwindow(new BC_Title(x, y, _("No options for MPEG transport stream.")));
-		return 0;
+		return;
 	}
 
 	add_subwindow(new BC_Title(x, y, _("Color model:")));
@@ -1741,7 +1740,6 @@ int MPEGConfigVideo::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 int MPEGConfigVideo::close_event()

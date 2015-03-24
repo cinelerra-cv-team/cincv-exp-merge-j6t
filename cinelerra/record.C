@@ -874,7 +874,7 @@ Batch* Record::get_editing_batch()
 		return 0;
 }
 
-char* Record::current_mode()
+const char* Record::current_mode()
 {
 	return Batch::mode_to_text(get_current_batch()->record_mode);
 }
@@ -929,7 +929,7 @@ const char* Record::current_source()
 	return get_current_batch()->get_source_text();
 }
 
-char* Record::current_news()
+const char* Record::current_news()
 {
 	return batches.values[current_batch]->news;
 }

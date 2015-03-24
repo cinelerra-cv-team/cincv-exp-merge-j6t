@@ -39,7 +39,7 @@ AAutomation::~AAutomation()
 {
 }
 
-int AAutomation::create_objects()
+void AAutomation::create_objects()
 {
 	Automation::create_objects();
 
@@ -54,6 +54,4 @@ int AAutomation::create_objects()
 	autos[AUTOMATION_PAN]->create_objects();
 	autos[AUTOMATION_PAN]->autoidx = AUTOMATION_PAN;
 	autos[AUTOMATION_PAN]->autogrouptype = -1;
-
-	return 0;
 }

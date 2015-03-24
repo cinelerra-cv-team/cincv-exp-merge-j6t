@@ -43,7 +43,7 @@ CDRipWindow::~CDRipWindow()
 {
 }
 
-int CDRipWindow::create_objects()
+void CDRipWindow::create_objects()
 {
 	int y = 10, x = 10;
 	add_tool(new BC_Title(x, y, _("Select the range to transfer:"))); y += 25;
@@ -85,7 +85,6 @@ int CDRipWindow::create_objects()
 	add_tool(new BC_CancelButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 

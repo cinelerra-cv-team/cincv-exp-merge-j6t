@@ -42,7 +42,7 @@ public:
 	RecordWindow(MWindow *mwindow, Record *record, int w, int h);
 	~RecordWindow();
 
-	int create_objects();
+	void create_objects();
 
 	MWindow *mwindow;
 	FormatTools *format_tools;

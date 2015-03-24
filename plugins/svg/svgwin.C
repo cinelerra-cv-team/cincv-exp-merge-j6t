@@ -67,7 +67,7 @@ SvgWin::~SvgWin()
 {
 }
 
-int SvgWin::create_objects()
+void SvgWin::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -131,7 +131,6 @@ int SvgWin::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 int SvgWin::close_event()

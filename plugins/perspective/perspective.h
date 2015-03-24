@@ -145,7 +145,7 @@ public:
 	PerspectiveWindow(PerspectiveMain *plugin, int x, int y);
 	~PerspectiveWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	int resize_event(int x, int y);
 	void update_canvas();

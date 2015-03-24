@@ -111,7 +111,7 @@ class ShapeWipeLoad : public BC_FileBox
 {
 public:
 	ShapeWipeLoad(ShapeWipeFilename *filename,
-		char *init_directory);
+		const char *init_directory);
 	ShapeWipeFilename *filename;
 };
 

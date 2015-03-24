@@ -362,7 +362,7 @@ int FileOGG::open_file(int rd, int wr)
 			}
 
 			vorbis_comment_init (&tf->vc); // comment is cleared lateron 
-			vorbis_comment_add_tag (&tf->vc, "ENCODER", PACKAGE_STRING);
+			vorbis_comment_add_tag (&tf->vc, (char*)"ENCODER", (char*)PACKAGE_STRING);
 			/* set up the analysis state and auxiliary encoding storage */
 			vorbis_analysis_init (&tf->vd, &tf->vi);
 			vorbis_block_init (&tf->vd, &tf->vb);
@@ -2049,7 +2049,7 @@ OGGConfigAudio::~OGGConfigAudio()
 
 }
 
-int OGGConfigAudio::create_objects()
+void OGGConfigAudio::create_objects()
 {
 //	add_tool(new BC_Title(10, 10, _("There are no audio options for this format")));
 
@@ -2079,10 +2079,6 @@ int OGGConfigAudio::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
-	return 0;
-
-
-
 }
 
 int OGGConfigAudio::close_event()
@@ -2179,7 +2175,7 @@ OGGConfigVideo::~OGGConfigVideo()
 
 }
 
-int OGGConfigVideo::create_objects()
+void OGGConfigVideo::create_objects()
 {
 //	add_tool(new BC_Title(10, 10, _("There are no video options for this format")));
 	int x = 10, y = 10;
@@ -2228,7 +2224,6 @@ int OGGConfigVideo::create_objects()
 	
 
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 

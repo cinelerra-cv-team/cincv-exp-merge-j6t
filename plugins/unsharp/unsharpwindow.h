@@ -56,7 +56,7 @@ public:
 	UnsharpWindow(UnsharpMain *plugin, int x, int y);
 	~UnsharpWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	void update();
 

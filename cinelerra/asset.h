@@ -82,7 +82,7 @@ public:
 		int do_path,
 		int do_data_types,
 		int do_bits);
-	char* construct_param(const char *param, const char *prefix, char *return_value);
+	const char* construct_param(const char *param, const char *prefix, char *return_value);
 
 
 
@@ -112,7 +112,7 @@ public:
 		int include_index, 
 		const char *output_path);
 // Write the index data and asset info.  Used by IndexThread.
-	void write_index(char *path, int data_bytes);
+	void write_index(const char *path, int data_bytes);
 
 
 // Necessary for renderfarm to get encoding parameters

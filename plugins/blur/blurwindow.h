@@ -48,7 +48,7 @@ public:
 	BlurWindow(BlurMain *client, int x, int y);
 	~BlurWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	BlurMain *client;

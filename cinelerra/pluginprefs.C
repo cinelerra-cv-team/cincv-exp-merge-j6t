@@ -43,7 +43,7 @@ PluginPrefs::~PluginPrefs()
 	delete lpathtext;
 }
 
-int PluginPrefs::create_objects()
+void PluginPrefs::create_objects()
 {
 	char string[1024];
 	int x = 5, y = 5;
@@ -82,9 +82,6 @@ int PluginPrefs::create_objects()
 		_("Personal Plugin Path"), 
 		_("Select the directory for plugins"), 
 		1));
-
-
-	return 0;
 }
 
 

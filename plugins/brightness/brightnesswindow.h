@@ -42,7 +42,7 @@ public:
 	BrightnessWindow(BrightnessMain *client, int x, int y);
 	~BrightnessWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	BrightnessMain *client;

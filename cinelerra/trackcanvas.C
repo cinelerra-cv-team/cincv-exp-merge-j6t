@@ -123,7 +123,7 @@ TrackCanvas::~TrackCanvas()
 	delete resource_timer;
 }
 
-int TrackCanvas::create_objects()
+void TrackCanvas::create_objects()
 {
 	background_pixmap = new BC_Pixmap(this, get_w(), get_h());
 //	transition_handles = new TransitionHandles(mwindow, this);
@@ -138,7 +138,6 @@ int TrackCanvas::create_objects()
 	draw();
 	update_cursor();
 	flash();
-	return 0;
 }
 
 void TrackCanvas::resize_event()
@@ -2677,6 +2676,61 @@ void TrackCanvas::draw_floatline(int center_pixel,
 
 }
 
+int TrackCanvas::test_floatline(int center_pixel, 
+		FloatAutos *autos,
+		double unit_start,
+		double zoom_units,
+		double yscale,
+		int x1,
+		int x2,
+		int cursor_x, 
+		int cursor_y, 
+		int buttonpress,
+		int autogrouptype)
+{
+	int result = 0;
+
+
+	float automation_min = mwindow->edl->local_session->automation_mins[autogrouptype];
+	float automation_max = mwindow->edl->local_session->automation_maxs[autogrouptype];
+	float automation_range = automation_max - automation_min;
+	int64_t position = (int64_t)(unit_start + cursor_x * zoom_units);
+// Call by reference fails for some reason here
+	FloatAuto *previous = 0, *next = 0;
+	float value = autos->get_value(position, previous, next);
+	AUTOMATIONCLAMPS(value,autogrouptype);
+	int y = center_pixel + 
+		(int)(((value - automation_min) / automation_range - 0.5) * -yscale);
+
+	if(cursor_x >= x1 && 
+		cursor_x < x2 &&
+		cursor_y >= y - HANDLE_W / 2 && 
+		cursor_y < y + HANDLE_W / 2 &&
+		!ctrl_down())
+	{
+		result = 1;
+
+
+		if(buttonpress)
+		{
+
+
+			Auto *current;
+			current = mwindow->session->drag_auto = autos->insert_auto(position);
+			((FloatAuto*)current)->set_value(value);
+			mwindow->session->drag_start_percentage = value_to_percentage(value, autogrouptype);
+			mwindow->session->drag_start_position = current->position;
+			mwindow->session->drag_origin_x = cursor_x;
+			mwindow->session->drag_origin_y = cursor_y;
+			mwindow->session->drag_handle = 0;
+
+		}
+	}
+
+
+	return result;
+}
+
 void TrackCanvas::synchronize_autos(float change, 
 	Track *skip, 
 	FloatAuto *fauto, 
@@ -2751,61 +2805,6 @@ void TrackCanvas::synchronize_autos(float change,
 	}
 }
 
-
-int TrackCanvas::test_floatline(int center_pixel, 
-		FloatAutos *autos,
-		double unit_start,
-		double zoom_units,
-		double yscale,
-		int x1,
-		int x2,
-		int cursor_x, 
-		int cursor_y, 
-		int buttonpress,
-		int autogrouptype)
-{
-	int result = 0;
-
-
-	float automation_min = mwindow->edl->local_session->automation_mins[autogrouptype];
-	float automation_max = mwindow->edl->local_session->automation_maxs[autogrouptype];
-	float automation_range = automation_max - automation_min;
-	int64_t position = (int64_t)(unit_start + cursor_x * zoom_units);
-// Call by reference fails for some reason here
-	FloatAuto *previous = 0, *next = 0;
-	float value = autos->get_value(position, previous, next);
-	AUTOMATIONCLAMPS(value,autogrouptype);
-	int y = center_pixel + 
-		(int)(((value - automation_min) / automation_range - 0.5) * -yscale);
-
-	if(cursor_x >= x1 && 
-		cursor_x < x2 &&
-		cursor_y >= y - HANDLE_W / 2 && 
-		cursor_y < y + HANDLE_W / 2 &&
-		!ctrl_down())
-	{
-		result = 1;
-
-
-		if(buttonpress)
-		{
-
-
-			Auto *current;
-			current = mwindow->session->drag_auto = autos->insert_auto(position);
-			((FloatAuto*)current)->set_value(value);
-			mwindow->session->drag_start_percentage = value_to_percentage(value, autogrouptype);
-			mwindow->session->drag_start_position = current->position;
-			mwindow->session->drag_origin_x = cursor_x;
-			mwindow->session->drag_origin_y = cursor_y;
-			mwindow->session->drag_handle = 0;
-
-		}
-	}
-
-
-	return result;
-}
 
 void TrackCanvas::draw_toggleline(int center_pixel, 
 	int x1,

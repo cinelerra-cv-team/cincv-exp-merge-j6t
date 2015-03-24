@@ -44,6 +44,7 @@ public:
 		VFrame **data = 0,
 // Alternative text margin
 		int margin = -1);
+
 	BC_PopupMenu(int x, 
 		int y, 
 		const char *text, 

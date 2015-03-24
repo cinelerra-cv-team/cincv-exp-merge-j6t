@@ -38,7 +38,7 @@ public:
 	~AWindow();
 
 	void run();
-	int create_objects();
+	void create_objects();
 
 	char current_folder[BCTEXTLEN];
 

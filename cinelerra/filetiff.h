@@ -101,7 +101,7 @@ public:
 	~TIFFConfigVideo();
 
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 	static char* alpha_to_codec(int use_alpha);
 	static int codec_to_alpha(char *codec);

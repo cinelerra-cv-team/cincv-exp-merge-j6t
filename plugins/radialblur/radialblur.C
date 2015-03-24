@@ -102,7 +102,7 @@ public:
 	RadialBlurWindow(RadialBlurMain *plugin, int x, int y);
 	~RadialBlurWindow();
 
-	int create_objects();
+	void create_objects();
 	int close_event();
 
 	RadialBlurSize *x, *y, *steps, *angle;
@@ -271,7 +271,7 @@ RadialBlurWindow::~RadialBlurWindow()
 {
 }
 
-int RadialBlurWindow::create_objects()
+void RadialBlurWindow::create_objects()
 {
 	int x = 10, y = 10;
 
@@ -302,7 +302,6 @@ int RadialBlurWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(RadialBlurWindow)

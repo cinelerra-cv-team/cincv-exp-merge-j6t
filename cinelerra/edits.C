@@ -282,7 +282,7 @@ Edit* Edits::split_edit(int64_t position)
 	return new_edit;
 }
 
-int Edits::save(FileXML *xml, char *output_path)
+int Edits::save(FileXML *xml, const char *output_path)
 {
 	copy(0, length(), xml, output_path);
 	return 0;

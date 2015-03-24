@@ -116,7 +116,7 @@ public:
 		Asset *asset);
 	virtual ~MenuEffectWindow();
 
-	int create_objects();
+	void create_objects();
 	int resize_event(int w, int h);
 
 	BC_Title *list_title;
@@ -180,7 +180,7 @@ public:
 
 	static int calculate_w(BC_WindowBase *gui);
 	static int calculate_h(BC_WindowBase *gui);	
-	int create_objects();
+	void create_objects();
 
 	MenuEffectPromptOK *ok;
 	MenuEffectPromptCancel *cancel;

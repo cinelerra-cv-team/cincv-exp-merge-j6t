@@ -1014,11 +1014,10 @@ DVConfigAudio::~DVConfigAudio()
 
 }
 
-int DVConfigAudio::create_objects()
+void DVConfigAudio::create_objects()
 {
 	add_tool(new BC_Title(10, 10, _("There are no audio options for this format")));
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int DVConfigAudio::close_event()
@@ -1048,11 +1047,10 @@ DVConfigVideo::~DVConfigVideo()
 
 }
 
-int DVConfigVideo::create_objects()
+void DVConfigVideo::create_objects()
 {
 	add_tool(new BC_Title(10, 10, _("There are no video options for this format")));
 	add_subwindow(new BC_OKButton(this));
-	return 0;
 }
 
 int DVConfigVideo::close_event()

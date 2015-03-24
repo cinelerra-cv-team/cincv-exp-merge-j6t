@@ -53,7 +53,7 @@ public:
 	ReverbWindow(Reverb *reverb, int x, int y);
 	~ReverbWindow();
 	
-	int create_objects();
+	void create_objects();
 	int close_event();
 	
 	Reverb *reverb;

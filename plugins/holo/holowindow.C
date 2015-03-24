@@ -44,7 +44,7 @@ HoloWindow::~HoloWindow()
 {
 }
 
-int HoloWindow::create_objects()
+void HoloWindow::create_objects()
 {
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(x, y, 
@@ -54,7 +54,6 @@ int HoloWindow::create_objects()
 
 	show_window();
 	flush();
-	return 0;
 }
 
 WINDOW_CLOSE_EVENT(HoloWindow)

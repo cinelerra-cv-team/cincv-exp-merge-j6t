@@ -49,7 +49,7 @@ public:
 	int get_property_int(int number);
 	float get_property_float(int number);
 	char *get_property(const char *property);
-	char* get_property(const char *property, char *value);
+	const char* get_property(const char *property, char *value);
 	int32_t get_property(const char *property, int32_t default_);
 	int64_t get_property(const char *property, int64_t default_);
 //	int get_property(const char *property, int default_);
