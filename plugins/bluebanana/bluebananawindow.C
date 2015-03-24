@@ -1957,7 +1957,7 @@ BluebananaWindow::BluebananaWindow(BluebananaMain *plugin, int x, int y)
 BluebananaWindow::~BluebananaWindow(){
 }
 
-int BluebananaWindow::create_objects(){
+void BluebananaWindow::create_objects(){
   int xmargin = 20, ymargin = 10;
   float row_padding = .1;
   float column_padding = .3;
@@ -2293,7 +2293,6 @@ int BluebananaWindow::create_objects(){
   reposition_window(windowx,windowy,get_w(),y);
   leave_config_change(); // also forces render
   plugin->server->mwindow->sync_parameters();
-  return 0;
 }
 
 int BluebananaWindow::close_event(){
