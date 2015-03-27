@@ -34,7 +34,7 @@ PLUGIN_THREAD_OBJECT(BurnMain, BurnThread, BurnWindow)
 
 
 BurnWindow::BurnWindow(BurnMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client, 
 	x,
 	y,
 	300, 

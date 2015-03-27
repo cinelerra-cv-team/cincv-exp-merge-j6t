@@ -450,7 +450,7 @@ int RotateY::handle_event()
 
 
 RotateWindow::RotateWindow(RotateEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
 	x,
 	y,
 	250, 

@@ -173,7 +173,7 @@ int YUVLevel::handle_event()
 
 
 YUVWindow::YUVWindow(YUVEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	260, 

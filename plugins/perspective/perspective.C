@@ -112,7 +112,7 @@ PLUGIN_THREAD_OBJECT(PerspectiveMain, PerspectiveThread, PerspectiveWindow)
 
 
 PerspectiveWindow::PerspectiveWindow(PerspectiveMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	400,

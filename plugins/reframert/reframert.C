@@ -199,7 +199,7 @@ void ReframeRTConfig::boundaries()
 
 
 ReframeRTWindow::ReframeRTWindow(ReframeRT *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	210, 

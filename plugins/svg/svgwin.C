@@ -53,7 +53,7 @@ PLUGIN_THREAD_OBJECT(SvgMain, SvgThread, SvgWin)
 
 
 SvgWin::SvgWin(SvgMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client,
  	x,
 	y,
 	300, 

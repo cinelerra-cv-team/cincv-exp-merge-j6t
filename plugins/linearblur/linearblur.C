@@ -267,7 +267,7 @@ PLUGIN_THREAD_OBJECT(LinearBlurMain, LinearBlurThread, LinearBlurWindow)
 
 
 LinearBlurWindow::LinearBlurWindow(LinearBlurMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	230, 

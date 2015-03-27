@@ -196,7 +196,7 @@ void LiveVideoConfig::interpolate(LiveVideoConfig &prev,
 
 
 LiveVideoWindow::LiveVideoWindow(LiveVideo *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	plugin->w, 

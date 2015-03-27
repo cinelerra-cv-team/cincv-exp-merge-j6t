@@ -202,7 +202,7 @@ void PolarConfig::interpolate(PolarConfig &prev,
 
 
 PolarWindow::PolarWindow(PolarEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	270, 

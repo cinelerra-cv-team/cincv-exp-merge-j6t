@@ -425,7 +425,7 @@ int ThresholdHighColorThread::handle_new_color(int output, int alpha)
 
 
 ThresholdWindow::ThresholdWindow(ThresholdMain *plugin, int x, int y)
-: PluginClientWindow(plugin->gui_string, x, y, 450, 450)
+: PluginClientWindow(plugin, x, y, 450, 450)
 {
 	this->plugin = plugin;
 	this->min = 0;

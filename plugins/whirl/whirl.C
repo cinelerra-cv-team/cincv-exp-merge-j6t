@@ -238,7 +238,7 @@ void WhirlConfig::interpolate(WhirlConfig &prev,
 
 
 WhirlWindow::WhirlWindow(WhirlEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	220, 

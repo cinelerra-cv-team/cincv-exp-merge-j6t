@@ -270,7 +270,7 @@ int C41Button::handle_event()
 
 // C41Window
 C41Window::C41Window(C41Effect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string, x, y, 270, 620)
+ : PluginClientWindow(plugin, x, y, 270, 620)
 {
 	this->plugin = plugin;
 }

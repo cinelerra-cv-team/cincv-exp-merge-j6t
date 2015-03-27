@@ -464,7 +464,7 @@ const char* LensMode::to_text(int mode)
 
 
 LensGUI::LensGUI(LensMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client,
 	x,
 	y,
 	350, 

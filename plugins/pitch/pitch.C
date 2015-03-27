@@ -380,7 +380,7 @@ PLUGIN_THREAD_OBJECT(PitchEffect, PitchThread, PitchWindow)
 
 
 PitchWindow::PitchWindow(PitchEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	150, 

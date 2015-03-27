@@ -273,7 +273,7 @@ PLUGIN_THREAD_OBJECT(ZoomBlurMain, ZoomBlurThread, ZoomBlurWindow)
 
 
 ZoomBlurWindow::ZoomBlurWindow(ZoomBlurMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	230, 

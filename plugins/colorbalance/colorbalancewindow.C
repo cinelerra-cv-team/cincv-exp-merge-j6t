@@ -35,7 +35,8 @@ PLUGIN_THREAD_OBJECT(ColorBalanceMain, ColorBalanceThread, ColorBalanceWindow)
 
 
 ColorBalanceWindow::ColorBalanceWindow(ColorBalanceMain *client, int x, int y)
- : PluginClientWindow(client->gui_string, x,
+ : PluginClientWindow(client,
+	x,
  	y,
 	330, 
 	250)

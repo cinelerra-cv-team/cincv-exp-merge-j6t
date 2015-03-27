@@ -38,7 +38,7 @@ PLUGIN_THREAD_OBJECT(Despike, DespikeThread, DespikeWindow)
 
 
 DespikeWindow::DespikeWindow(Despike *despike, int x, int y)
- : PluginClientWindow(despike->gui_string,
+ : PluginClientWindow(despike, 
  	x, 
 	y, 
 	230, 

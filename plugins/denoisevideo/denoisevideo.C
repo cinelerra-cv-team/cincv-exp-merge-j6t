@@ -172,7 +172,7 @@ int DenoiseVideoToggle::handle_event()
 
 
 DenoiseVideoWindow::DenoiseVideoWindow(DenoiseVideo *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	210, 

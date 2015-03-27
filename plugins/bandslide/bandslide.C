@@ -120,7 +120,7 @@ int BandSlideOut::handle_event()
 
 
 BandSlideWindow::BandSlideWindow(BandSlideMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	320, 

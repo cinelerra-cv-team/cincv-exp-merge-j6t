@@ -35,7 +35,7 @@ PLUGIN_THREAD_OBJECT(RGB601Main, RGB601Thread, RGB601Window)
 
 
 RGB601Window::RGB601Window(RGB601Main *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client,
 	x,
 	y,
 	210, 

@@ -311,7 +311,7 @@ char* ValueSlider::get_caption()
 
 
 HueWindow::HueWindow(HueEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
 			x,
 			y,
 			310, 

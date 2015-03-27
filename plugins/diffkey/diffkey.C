@@ -275,7 +275,7 @@ int DiffKeyDoValue::handle_event()
 
 
 DiffKeyGUI::DiffKeyGUI(DiffKey *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	320,

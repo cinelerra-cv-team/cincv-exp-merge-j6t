@@ -272,7 +272,7 @@ void DelayAudioThread::run()
 
 
 DelayAudioWindow::DelayAudioWindow(DelayAudio *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	200, 

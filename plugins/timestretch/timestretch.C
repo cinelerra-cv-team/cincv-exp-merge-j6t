@@ -496,7 +496,7 @@ PLUGIN_THREAD_OBJECT(TimeStretch, TimeStretchThread, TimeStretchWindow)
 
 
 TimeStretchWindow::TimeStretchWindow(TimeStretch *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x, 
 	y, 
 	150, 

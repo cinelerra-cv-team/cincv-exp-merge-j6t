@@ -37,7 +37,7 @@ PLUGIN_THREAD_OBJECT(Reverb, ReverbThread, ReverbWindow)
 
 
 ReverbWindow::ReverbWindow(Reverb *reverb, int x, int y)
- : PluginClientWindow(reverb->gui_string,
+ : PluginClientWindow(reverb, 
  	x, 
 	y, 
 	250, 

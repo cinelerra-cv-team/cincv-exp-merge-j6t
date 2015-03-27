@@ -785,7 +785,7 @@ PLUGIN_THREAD_OBJECT(DenoiseEffect, DenoiseThread, DenoiseWindow)
 
 
 DenoiseWindow::DenoiseWindow(DenoiseEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	150, 

@@ -352,7 +352,7 @@ int ParametricWetness::handle_event()
 
 
 ParametricWindow::ParametricWindow(ParametricEQ *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	320, 

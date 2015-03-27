@@ -73,7 +73,7 @@ void _1080to540Config::interpolate(_1080to540Config &prev,
 
 
 _1080to540Window::_1080to540Window(_1080to540Main *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client, 
  	x, 
 	y, 
 	200, 

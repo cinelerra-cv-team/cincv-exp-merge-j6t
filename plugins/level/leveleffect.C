@@ -112,7 +112,7 @@ int SoundLevelDuration::handle_event()
 
 
 SoundLevelWindow::SoundLevelWindow(SoundLevelEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	350, 

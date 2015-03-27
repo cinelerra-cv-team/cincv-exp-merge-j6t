@@ -389,7 +389,7 @@ int WaveLength::handle_event()
 
 
 WaveWindow::WaveWindow(WaveEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	320, 

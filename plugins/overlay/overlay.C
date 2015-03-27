@@ -241,7 +241,7 @@ const char* OverlayConfig::output_to_text(int output_layer)
 
 
 OverlayWindow::OverlayWindow(Overlay *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	300, 

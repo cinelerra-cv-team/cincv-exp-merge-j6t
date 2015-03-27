@@ -252,7 +252,7 @@ PLUGIN_THREAD_OBJECT(DownSampleMain, DownSampleThread, DownSampleWindow)
 
 
 DownSampleWindow::DownSampleWindow(DownSampleMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	230, 

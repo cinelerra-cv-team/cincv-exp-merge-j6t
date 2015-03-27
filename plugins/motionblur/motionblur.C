@@ -233,7 +233,7 @@ PLUGIN_THREAD_OBJECT(MotionBlurMain, MotionBlurThread, MotionBlurWindow)
 
 
 MotionBlurWindow::MotionBlurWindow(MotionBlurMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	260, 

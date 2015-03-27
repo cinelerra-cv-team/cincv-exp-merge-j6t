@@ -42,7 +42,7 @@ PLUGIN_THREAD_OBJECT(TranslateMain, TranslateThread, TranslateWin)
 
 
 TranslateWin::TranslateWin(TranslateMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client,
  	x,
 	y,
 	300, 

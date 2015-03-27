@@ -124,7 +124,7 @@ LiveAudioConfig::LiveAudioConfig()
 
 
 LiveAudioWindow::LiveAudioWindow(LiveAudio *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	300, 

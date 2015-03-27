@@ -221,7 +221,7 @@ int DecimateConfig::equivalent(DecimateConfig *config)
 
 
 DecimateWindow::DecimateWindow(Decimate *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	210, 

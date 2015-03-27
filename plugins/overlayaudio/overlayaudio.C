@@ -145,7 +145,7 @@ const char* OverlayAudioConfig::output_to_text(int output_layer)
 
 
 OverlayAudioWindow::OverlayAudioWindow(OverlayAudio *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	400, 

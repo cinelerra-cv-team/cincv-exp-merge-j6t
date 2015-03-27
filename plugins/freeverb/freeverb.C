@@ -307,7 +307,7 @@ int FreeverbMode::handle_event()
 
 
 FreeverbWindow::FreeverbWindow(FreeverbEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	180, 

@@ -36,7 +36,7 @@ PLUGIN_THREAD_OBJECT(DeInterlaceMain, DeInterlaceThread, DeInterlaceWindow)
 
 
 DeInterlaceWindow::DeInterlaceWindow(DeInterlaceMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client, 
  	x, 
 	y, 
 	400, 

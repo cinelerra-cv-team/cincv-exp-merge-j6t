@@ -36,7 +36,7 @@ PLUGIN_THREAD_OBJECT(BlurMain, BlurThread, BlurWindow)
 
 
 BlurWindow::BlurWindow(BlurMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client, 
  	x,
 	y,
 	150, 

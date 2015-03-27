@@ -30,7 +30,7 @@ PLUGIN_THREAD_OBJECT(TimeAvgMain, TimeAvgThread, TimeAvgWindow)
 
 
 TimeAvgWindow::TimeAvgWindow(TimeAvgMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client, 
  	x, 
 	y, 
 	210, 

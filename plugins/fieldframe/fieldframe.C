@@ -168,7 +168,7 @@ int FieldFrameConfig::equivalent(FieldFrameConfig &src)
 
 
 FieldFrameWindow::FieldFrameWindow(FieldFrame *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	230, 

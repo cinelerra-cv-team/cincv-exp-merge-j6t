@@ -183,7 +183,7 @@ void ShiftInterlaceConfig::interpolate(ShiftInterlaceConfig &prev,
 ShiftInterlaceWindow::ShiftInterlaceWindow(ShiftInterlaceMain *plugin, 
 	int x, 
 	int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
 	x,
 	y,
 	310, 

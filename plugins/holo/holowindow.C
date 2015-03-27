@@ -31,7 +31,7 @@ PLUGIN_THREAD_OBJECT(HoloMain, HoloThread, HoloWindow)
 
 
 HoloWindow::HoloWindow(HoloMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client,
 	x,
 	y,
 	300, 

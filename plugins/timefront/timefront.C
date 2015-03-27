@@ -121,7 +121,7 @@ PLUGIN_THREAD_OBJECT(TimeFrontMain, TimeFrontThread, TimeFrontWindow)
 
 
 TimeFrontWindow::TimeFrontWindow(TimeFrontMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x,
 	y,
 	350, 

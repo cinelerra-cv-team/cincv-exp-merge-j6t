@@ -32,7 +32,7 @@ PLUGIN_THREAD_OBJECT(DotMain, DotThread, DotWindow)
 
 
 DotWindow::DotWindow(DotMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client,
 	x,
 	y,
 	300, 

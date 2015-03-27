@@ -191,7 +191,7 @@ int InterpolateVideoConfig::equivalent(InterpolateVideoConfig *config)
 
 
 InterpolateVideoWindow::InterpolateVideoWindow(InterpolateVideo *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	210, 

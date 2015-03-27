@@ -181,7 +181,7 @@ const char* RerouteConfig::output_to_text(int output_track)
 
 
 RerouteWindow::RerouteWindow(Reroute *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x, 
 	y, 
 	300, 

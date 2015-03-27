@@ -103,7 +103,7 @@ LoopVideoConfig::LoopVideoConfig()
 
 
 LoopVideoWindow::LoopVideoWindow(LoopVideo *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	210, 

@@ -35,7 +35,7 @@ PLUGIN_THREAD_OBJECT(AgingMain, AgingThread, AgingWindow)
 
 
 AgingWindow::AgingWindow(AgingMain *client, int x, int y)
- : PluginClientWindow(client->gui_string,
+ : PluginClientWindow(client, 
 	x,
 	y,
 	300, 

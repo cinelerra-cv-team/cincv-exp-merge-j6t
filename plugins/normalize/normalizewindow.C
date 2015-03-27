@@ -28,7 +28,7 @@
 #define N_(String) gettext_noop (String)
 
 NormalizeWindow::NormalizeWindow(NormalizeMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  				x - 160,
 				y - 75,
  				320, 

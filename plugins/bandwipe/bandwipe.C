@@ -119,7 +119,7 @@ int BandWipeOut::handle_event()
 
 
 BandWipeWindow::BandWipeWindow(BandWipeMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	320, 

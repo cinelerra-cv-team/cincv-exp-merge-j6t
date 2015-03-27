@@ -36,7 +36,7 @@ PLUGIN_THREAD_OBJECT(FlipMain, FlipThread, FlipWindow)
 
 
 FlipWindow::FlipWindow(FlipMain *client, int x, int y)
- : PluginClientWindow(client->get_gui_string(),
+ : PluginClientWindow(client,
  	x,
 	y,
 	140,

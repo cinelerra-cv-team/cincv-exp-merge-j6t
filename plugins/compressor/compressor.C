@@ -883,7 +883,7 @@ PLUGIN_THREAD_OBJECT(CompressorEffect, CompressorThread, CompressorWindow)
 
 
 CompressorWindow::CompressorWindow(CompressorEffect *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin,
  	x, 
 	y, 
 	650, 

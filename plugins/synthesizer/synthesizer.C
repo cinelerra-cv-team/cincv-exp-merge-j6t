@@ -548,7 +548,7 @@ void SynthThread::run()
 
 
 SynthWindow::SynthWindow(Synth *synth, int x, int y)
- : PluginClientWindow(synth->gui_string,
+ : PluginClientWindow(synth,
  	x, 
 	y, 
 	420,

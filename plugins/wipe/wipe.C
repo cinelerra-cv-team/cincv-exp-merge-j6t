@@ -92,7 +92,7 @@ int WipeRight::handle_event()
 
 
 WipeWindow::WipeWindow(WipeMain *plugin, int x, int y)
- : PluginClientWindow(plugin->gui_string,
+ : PluginClientWindow(plugin, 
  	x, 
 	y, 
 	320, 

@@ -34,6 +34,28 @@
 #include <string.h>
 
 
+PluginClientWindow::PluginClientWindow(PluginClient *client, 
+	int x,
+	int y,
+	int w,
+	int h)
+ : BC_Window(client->gui_string,
+	x,
+	y,
+	w,
+	h,
+	w, 
+	h, 
+	0,
+	0,
+	1,
+	-1,
+	0,
+	1,
+	WINDOW_UTF8)
+{
+}
+
 PluginClient::PluginClient(PluginServer *server)
 {
 	reset();
