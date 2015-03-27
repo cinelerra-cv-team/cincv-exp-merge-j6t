@@ -117,7 +117,7 @@ public:
 };
 
 
-class PluginAClientWindow : public BC_Window
+class PluginAClientWindow : public PluginClientWindow
 {
 public:
 	PluginAClientWindow(PluginAClientLAD *plugin, 

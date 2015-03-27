@@ -338,15 +338,11 @@ int PluginACLientFreq::handle_event()
 PluginAClientWindow::PluginAClientWindow(PluginAClientLAD *plugin, 
 	int x, 
 	int y)
- : BC_Window(plugin->gui_string, 
+ : PluginClientWindow(plugin, 
  	x,
 	y,
 	500, 
-	plugin->config.total_ports * 30 + 60, 
-	500, 
-	plugin->config.total_ports * 30 + 60, 
-	0, 
-	1)
+	plugin->config.total_ports * 30 + 60)
 {
 	this->plugin = plugin;
 }
