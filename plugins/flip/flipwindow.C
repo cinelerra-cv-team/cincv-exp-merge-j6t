@@ -28,17 +28,13 @@
 #define N_(String) gettext_noop (String)
 
 
-PLUGIN_THREAD_OBJECT(FlipMain, FlipThread, FlipWindow)
 
 
 
 
 
-
-FlipWindow::FlipWindow(FlipMain *client, int x, int y)
+FlipWindow::FlipWindow(FlipMain *client)
  : PluginClientWindow(client,
- 	x,
-	y,
 	140,
 	100)
 { 
@@ -67,11 +63,6 @@ void FlipWindow::create_objects()
 	flush();
 }
 
-int FlipWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 FlipToggle::FlipToggle(FlipMain *client, int *output, char *string, int x, int y)
  : BC_CheckBox(x, y, *output, string)

@@ -27,17 +27,14 @@
 
 
 
-PLUGIN_THREAD_OBJECT(RGB601Main, RGB601Thread, RGB601Window)
 
 
 
 
 
 
-RGB601Window::RGB601Window(RGB601Main *client, int x, int y)
+RGB601Window::RGB601Window(RGB601Main *client)
  : PluginClientWindow(client,
-	x,
-	y,
 	210, 
 	200)
 { 
@@ -76,7 +73,7 @@ void RGB601Window::update()
 	reverse->update(client->config.direction == 2);
 }
 
-WINDOW_CLOSE_EVENT(RGB601Window)
+
 
 RGB601Direction::RGB601Direction(RGB601Window *window, int x, int y, int *output, int true_value, char *text)
  : BC_CheckBox(x, y, *output == true_value, text)

@@ -29,14 +29,12 @@
 
 
 
-PLUGIN_THREAD_OBJECT(UnsharpMain, UnsharpThread, UnsharpWindow)
 
 
 
-UnsharpWindow::UnsharpWindow(UnsharpMain *plugin, int x, int y)
+
+UnsharpWindow::UnsharpWindow(UnsharpMain *plugin)
  : PluginClientWindow(plugin,
- 	x,
-	y,
 	200, 
 	160)
 {
@@ -82,7 +80,6 @@ void UnsharpWindow::update()
 }
 
 
-WINDOW_CLOSE_EVENT(UnsharpWindow)
 
 
 

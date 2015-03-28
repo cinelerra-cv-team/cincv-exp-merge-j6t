@@ -28,17 +28,13 @@
 #include <string.h>
 
 
-PLUGIN_THREAD_OBJECT(Gain, GainThread, GainWindow)
 
 
 
 
 
-
-GainWindow::GainWindow(Gain *gain, int x, int y)
+GainWindow::GainWindow(Gain *gain)
  : PluginClientWindow(gain, 
- 	x, 
-	y, 
 	230, 
 	60)
 {
@@ -59,7 +55,9 @@ void GainWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(GainWindow)
+
+
+
 
 
 

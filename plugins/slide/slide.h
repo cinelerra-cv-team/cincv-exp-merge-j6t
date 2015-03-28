@@ -88,9 +88,8 @@ public:
 class SlideWindow : public PluginClientWindow
 {
 public:
-	SlideWindow(SlideMain *plugin, int x, int y);
+	SlideWindow(SlideMain *plugin);
 	void create_objects();
-	int close_event();
 	SlideMain *plugin;
 	SlideLeft *left;
 	SlideRight *right;
@@ -99,7 +98,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(SlideMain, SlideThread, SlideWindow)
 
 
 class SlideMain : public PluginVClient
@@ -109,25 +107,21 @@ public:
 	~SlideMain();
 
 // required for all realtime plugins
-	void load_configuration();
+	int load_configuration();
 	int process_realtime(VFrame *incoming, VFrame *outgoing);
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	void raise_window();
 	int uses_gui();
 	int is_transition();
 	int is_video();
-	const char* plugin_title();
-	int set_string();
 	VFrame* new_picon();
+	const char* plugin_title();
+	PluginClientWindow* new_window();
 
 	int motion_direction;
 	int direction;
-	SlideThread *thread;
-	BC_Hash *defaults;
 };
 
 #endif

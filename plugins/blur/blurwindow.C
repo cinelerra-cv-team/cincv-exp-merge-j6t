@@ -29,16 +29,13 @@
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
-PLUGIN_THREAD_OBJECT(BlurMain, BlurThread, BlurWindow)
 
 
 
 
 
-BlurWindow::BlurWindow(BlurMain *client, int x, int y)
+BlurWindow::BlurWindow(BlurMain *client)
  : PluginClientWindow(client, 
- 	x,
-	y,
 	150, 
 	270)
 { 
@@ -72,13 +69,6 @@ void BlurWindow::create_objects()
 	
 	show_window();
 	flush();
-}
-
-int BlurWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
 }
 
 BlurRadius::BlurRadius(BlurMain *client, int x, int y)

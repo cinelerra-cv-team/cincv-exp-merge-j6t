@@ -90,13 +90,13 @@ void SharpenConfig::interpolate(SharpenConfig &prev,
 SharpenMain::SharpenMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 SharpenMain::~SharpenMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(engine)
 	{
@@ -108,11 +108,7 @@ SharpenMain::~SharpenMain()
 	}
 }
 
-SHOW_GUI_MACRO(SharpenMain, SharpenThread)
-
-SET_STRING_MACRO(SharpenMain)
-
-RAISE_WINDOW_MACRO(SharpenMain)
+NEW_WINDOW_MACRO(SharpenMain, SharpenWindow)
 
 NEW_PICON_MACRO(SharpenMain)
 
@@ -174,11 +170,11 @@ void SharpenMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->sharpen_slider->update((int)config.sharpness);
-		thread->window->sharpen_interlace->update(config.interlace);
-		thread->window->sharpen_horizontal->update(config.horizontal);
-		thread->window->sharpen_luminance->update(config.luminance);
+		thread->window->lock_window("SharpenMain::update_gui");
+		((SharpenWindow*)thread->window)->sharpen_slider->update((int)config.sharpness);
+		((SharpenWindow*)thread->window)->sharpen_interlace->update(config.interlace);
+		((SharpenWindow*)thread->window)->sharpen_horizontal->update(config.horizontal);
+		((SharpenWindow*)thread->window)->sharpen_luminance->update(config.luminance);
 		thread->window->unlock_window();
 	}
 }

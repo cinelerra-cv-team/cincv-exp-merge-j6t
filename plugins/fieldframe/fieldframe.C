@@ -99,9 +99,8 @@ public:
 class FieldFrameWindow : public PluginClientWindow
 {
 public:
-	FieldFrameWindow(FieldFrame *plugin, int x, int y);
+	FieldFrameWindow(FieldFrame *plugin);
 	void create_objects();
-	int close_event();
 	FieldFrame *plugin;
 	FieldFrameTop *top;
 	FieldFrameBottom *bottom;
@@ -110,7 +109,8 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(FieldFrame, FieldFrameThread, FieldFrameWindow)
+
+
 
 
 class FieldFrame : public PluginVClient
@@ -119,7 +119,7 @@ public:
 	FieldFrame(PluginServer *server);
 	~FieldFrame();
 
-	PLUGIN_CLASS_MEMBERS(FieldFrameConfig, FieldFrameThread);
+	PLUGIN_CLASS_MEMBERS(FieldFrameConfig);
 
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
@@ -167,10 +167,8 @@ int FieldFrameConfig::equivalent(FieldFrameConfig &src)
 
 
 
-FieldFrameWindow::FieldFrameWindow(FieldFrame *plugin, int x, int y)
+FieldFrameWindow::FieldFrameWindow(FieldFrame *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	230, 
 	100)
 {
@@ -191,8 +189,6 @@ void FieldFrameWindow::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(FieldFrameWindow)
 
 
 
@@ -316,7 +312,7 @@ int FieldFrameBottom::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(FieldFrame, FieldFrameThread, FieldFrameWindow)
+
 
 
 
@@ -325,14 +321,14 @@ PLUGIN_THREAD_OBJECT(FieldFrame, FieldFrameThread, FieldFrameWindow)
 FieldFrame::FieldFrame(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	input = 0;
 }
 
 
 FieldFrame::~FieldFrame()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(input) delete input;
 }
@@ -342,12 +338,7 @@ int FieldFrame::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(FieldFrame)
-
-SHOW_GUI_MACRO(FieldFrame, FieldFrameThread)
-
-RAISE_WINDOW_MACRO(FieldFrame)
-
-SET_STRING_MACRO(FieldFrame);
+NEW_WINDOW_MACRO(FieldFrame, FieldFrameWindow)
 
 int FieldFrame::load_configuration()
 {
@@ -425,8 +416,8 @@ void FieldFrame::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window();
-			thread->window->top->update(config.field_dominance == TOP_FIELD_FIRST);
-			thread->window->bottom->update(config.field_dominance == BOTTOM_FIELD_FIRST);
+			((FieldFrameWindow*)thread->window)->top->update(config.field_dominance == TOP_FIELD_FIRST);
+			((FieldFrameWindow*)thread->window)->bottom->update(config.field_dominance == BOTTOM_FIELD_FIRST);
 //			thread->window->first->update(config.first_frame == 0);
 //			thread->window->second->update(config.first_frame == 1);
 			thread->window->unlock_window();

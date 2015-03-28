@@ -69,7 +69,7 @@ REGISTER_PLUGIN(HistogramMain)
 HistogramMain::HistogramMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	for(int i = 0; i < HISTOGRAM_MODES; i++)
 	{
@@ -88,7 +88,7 @@ HistogramMain::HistogramMain(PluginServer *server)
 
 HistogramMain::~HistogramMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	for(int i = 0; i < HISTOGRAM_MODES;i++)
 	{
 		delete [] lookup[i];
@@ -107,11 +107,7 @@ int HistogramMain::is_realtime() { return 1; }
 #include "picon_png.h"
 NEW_PICON_MACRO(HistogramMain)
 
-SHOW_GUI_MACRO(HistogramMain, HistogramThread)
-
-SET_STRING_MACRO(HistogramMain)
-
-RAISE_WINDOW_MACRO(HistogramMain)
+NEW_WINDOW_MACRO(HistogramMain, HistogramWindow)
 
 LOAD_CONFIGURATION_MACRO(HistogramMain, HistogramConfig)
 
@@ -126,11 +122,11 @@ SET_TRACE
 		{
 // Generate curves for value histogram
 // Lock out changes to curves
-			thread->window->lock_window("HistogramMain::render_gui 1");
+			((HistogramWindow*)thread->window)->lock_window("HistogramMain::render_gui 1");
 			tabulate_curve(HISTOGRAM_RED, 0);
 			tabulate_curve(HISTOGRAM_GREEN, 0);
 			tabulate_curve(HISTOGRAM_BLUE, 0);
-			thread->window->unlock_window();
+			((HistogramWindow*)thread->window)->unlock_window();
 		}
 
 		calculate_histogram((VFrame*)data, !config.automatic);
@@ -145,11 +141,11 @@ SET_TRACE
 SET_TRACE
 // Generate curves for value histogram
 // Lock out changes to curves
-			thread->window->lock_window("HistogramMain::render_gui 1");
+			((HistogramWindow*)thread->window)->lock_window("HistogramMain::render_gui 1");
 			tabulate_curve(HISTOGRAM_RED, 0);
 			tabulate_curve(HISTOGRAM_GREEN, 0);
 			tabulate_curve(HISTOGRAM_BLUE, 0);
-			thread->window->unlock_window();
+			((HistogramWindow*)thread->window)->unlock_window();
 
 SET_TRACE
 // Need a second pass to get the luminance values.
@@ -158,13 +154,13 @@ SET_TRACE
 		}
 
 SET_TRACE
-		thread->window->lock_window("HistogramMain::render_gui 2");
-		thread->window->update_canvas();
+		((HistogramWindow*)thread->window)->lock_window("HistogramMain::render_gui 2");
+		((HistogramWindow*)thread->window)->update_canvas();
 		if(config.automatic)
 		{
-			thread->window->update_input();
+			((HistogramWindow*)thread->window)->update_input();
 		}
-		thread->window->unlock_window();
+		((HistogramWindow*)thread->window)->unlock_window();
 SET_TRACE
 	}
 }
@@ -173,17 +169,17 @@ void HistogramMain::update_gui()
 {
 	if(thread)
 	{
-		thread->window->lock_window("HistogramMain::update_gui");
+		((HistogramWindow*)thread->window)->lock_window("HistogramMain::update_gui");
 		int reconfigure = load_configuration();
 		if(reconfigure) 
 		{
-			thread->window->update(0);
+			((HistogramWindow*)thread->window)->update(0);
 			if(!config.automatic)
 			{
-				thread->window->update_input();
+				((HistogramWindow*)thread->window)->update_input();
 			}
 		}
-		thread->window->unlock_window();
+		((HistogramWindow*)thread->window)->unlock_window();
 	}
 }
 

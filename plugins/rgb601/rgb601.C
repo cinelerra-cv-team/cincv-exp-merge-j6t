@@ -44,23 +44,19 @@ RGB601Config::RGB601Config()
 RGB601Main::RGB601Main(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 RGB601Main::~RGB601Main()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* RGB601Main::plugin_title() { return N_("RGB - 601"); }
 int RGB601Main::is_realtime() { return 1; }
 
 
-SHOW_GUI_MACRO(RGB601Main, RGB601Thread)
-
-SET_STRING_MACRO(RGB601Main)
-
-RAISE_WINDOW_MACRO(RGB601Main)
+NEW_WINDOW_MACRO(RGB601Main, RGB601Window)
 
 NEW_PICON_MACRO(RGB601Main)
 
@@ -70,8 +66,8 @@ void RGB601Main::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->forward->update(config.direction == 1);
-		thread->window->reverse->update(config.direction == 2);
+		((RGB601Window*)thread->window)->forward->update(config.direction == 1);
+		((RGB601Window*)thread->window)->reverse->update(config.direction == 2);
 		thread->window->unlock_window();
 	}
 }
@@ -97,13 +93,14 @@ int RGB601Main::save_defaults()
 	return 0;
 }
 
-void RGB601Main::load_configuration()
+int RGB601Main::load_configuration()
 {
 	KeyFrame *prev_keyframe;
 
 	prev_keyframe = get_prev_keyframe(get_source_position());
 // Must also switch between interpolation between keyframes and using first keyframe
 	read_data(prev_keyframe);
+	return 1;
 }
 
 
@@ -145,7 +142,7 @@ void RGB601Main::read_data(KeyFrame *keyframe)
 
 	if(thread) 
 	{
-		thread->window->update();
+		((RGB601Window*)thread->window)->update();
 	}
 }
 

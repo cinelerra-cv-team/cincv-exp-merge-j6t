@@ -95,11 +95,10 @@ public:
 class RerouteWindow : public PluginClientWindow
 {
 public:
-	RerouteWindow(Reroute *plugin, int x, int y);
+	RerouteWindow(Reroute *plugin);
 	~RerouteWindow();
 
 	void create_objects();
-	int close_event();
 
 	Reroute *plugin;
 	RerouteOperation *operation;
@@ -107,7 +106,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(Reroute, RerouteThread, RerouteWindow)
 
 
 
@@ -118,7 +116,7 @@ public:
 	~Reroute();
 
 
-	PLUGIN_CLASS_MEMBERS(RerouteConfig, RerouteThread);
+	PLUGIN_CLASS_MEMBERS(RerouteConfig);
 
 	int process_buffer(VFrame **frame, int64_t start_position, double frame_rate);
 	int is_realtime();
@@ -180,10 +178,8 @@ const char* RerouteConfig::output_to_text(int output_track)
 
 
 
-RerouteWindow::RerouteWindow(Reroute *plugin, int x, int y)
+RerouteWindow::RerouteWindow(Reroute *plugin)
  : PluginClientWindow(plugin,
- 	x, 
-	y, 
 	300, 
 	160)
 {
@@ -218,7 +214,6 @@ void RerouteWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(RerouteWindow)
 
 
 
@@ -321,7 +316,6 @@ int RerouteOutput::handle_event()
 
 /***** Register Plugin ***********************************/
 
-PLUGIN_THREAD_OBJECT(Reroute, RerouteThread, RerouteWindow)
 
 REGISTER_PLUGIN(Reroute)
 
@@ -334,13 +328,11 @@ REGISTER_PLUGIN(Reroute)
 Reroute::Reroute(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 
 Reroute::~Reroute()
 {
-	PLUGIN_DESTRUCTOR_MACRO
 }
 
 
@@ -486,12 +478,7 @@ int Reroute::is_multichannel() 	{ return 1; }
 
 
 NEW_PICON_MACRO(Reroute) 
-
-SHOW_GUI_MACRO(Reroute, RerouteThread)
-
-RAISE_WINDOW_MACRO(Reroute)
-
-SET_STRING_MACRO(Reroute);
+NEW_WINDOW_MACRO(Reroute, RerouteWindow)
 
 
 
@@ -562,8 +549,8 @@ void Reroute::update_gui()
 	if(thread)
 	{
 		thread->window->lock_window("Reroute::update_gui");
-		thread->window->operation->set_text(RerouteConfig::operation_to_text(config.operation));
-		thread->window->output->set_text(RerouteConfig::output_to_text(config.output_track));
+		((RerouteWindow*)thread->window)->operation->set_text(RerouteConfig::operation_to_text(config.operation));
+		((RerouteWindow*)thread->window)->output->set_text(RerouteConfig::output_to_text(config.output_track));
 		thread->window->unlock_window();
 	}
 }

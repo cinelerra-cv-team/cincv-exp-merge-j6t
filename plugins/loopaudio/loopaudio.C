@@ -53,15 +53,14 @@ public:
 class LoopAudioWindow : public PluginClientWindow
 {
 public:
-	LoopAudioWindow(LoopAudio *plugin, int x, int y);
+	LoopAudioWindow(LoopAudio *plugin);
 	~LoopAudioWindow();
 	void create_objects();
-	int close_event();
 	LoopAudio *plugin;
 	LoopAudioSamples *samples;
 };
 
-PLUGIN_THREAD_HEADER(LoopAudio, LoopAudioThread, LoopAudioWindow)
+
 
 class LoopAudio : public PluginAClient
 {
@@ -69,7 +68,7 @@ public:
 	LoopAudio(PluginServer *server);
 	~LoopAudio();
 
-	PLUGIN_CLASS_MEMBERS(LoopAudioConfig, LoopAudioThread)
+	PLUGIN_CLASS_MEMBERS(LoopAudioConfig)
 
 	int load_defaults();
 	int save_defaults();
@@ -103,10 +102,8 @@ LoopAudioConfig::LoopAudioConfig()
 
 
 
-LoopAudioWindow::LoopAudioWindow(LoopAudio *plugin, int x, int y)
+LoopAudioWindow::LoopAudioWindow(LoopAudio *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	210, 
 	160)
 {
@@ -130,10 +127,8 @@ void LoopAudioWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(LoopAudioWindow)
 
 
-PLUGIN_THREAD_OBJECT(LoopAudio, LoopAudioThread, LoopAudioWindow)
 
 
 
@@ -172,13 +167,13 @@ int LoopAudioSamples::handle_event()
 LoopAudio::LoopAudio(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
 LoopAudio::~LoopAudio()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* LoopAudio::plugin_title() { return N_("Loop audio"); }
@@ -189,11 +184,7 @@ int LoopAudio::is_synthesis() { return 1; }
 #include "picon_png.h"
 NEW_PICON_MACRO(LoopAudio)
 
-SHOW_GUI_MACRO(LoopAudio, LoopAudioThread)
-
-RAISE_WINDOW_MACRO(LoopAudio)
-
-SET_STRING_MACRO(LoopAudio);
+NEW_WINDOW_MACRO(LoopAudio, LoopAudioWindow)
 
 
 int LoopAudio::process_buffer(int64_t size, 
@@ -362,7 +353,7 @@ void LoopAudio::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->samples->update(config.samples);
+		((LoopAudioWindow*)thread->window)->samples->update(config.samples);
 		thread->window->unlock_window();
 	}
 }

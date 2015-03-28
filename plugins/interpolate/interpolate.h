@@ -67,20 +67,16 @@ public:
 class InterpolatePixelsWindow : public PluginClientWindow
 {
 public:
-	InterpolatePixelsWindow(InterpolatePixelsMain *client, int x, int y);
+	InterpolatePixelsWindow(InterpolatePixelsMain *client);
 	~InterpolatePixelsWindow();
 	
 	void create_objects();
-	int close_event();
 
 	InterpolatePixelsMain *client;
 	InterpolatePixelsOffset *x_offset;
 	InterpolatePixelsOffset *y_offset;
 };
 
-PLUGIN_THREAD_HEADER(InterpolatePixelsMain, 
-	InterpolatePixelsThread, 
-	InterpolatePixelsWindow);
 
 class InterpolatePixelsMain : public PluginVClient
 {
@@ -88,7 +84,7 @@ public:
 	InterpolatePixelsMain(PluginServer *server);
 	~InterpolatePixelsMain();
 
-	PLUGIN_CLASS_MEMBERS(InterpolatePixelsConfig, InterpolatePixelsThread);
+	PLUGIN_CLASS_MEMBERS(InterpolatePixelsConfig);
 
 // required for all realtime plugins
 	int process_buffer(VFrame *frame,

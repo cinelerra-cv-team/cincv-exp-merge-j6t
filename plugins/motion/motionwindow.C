@@ -30,14 +30,12 @@
 
 
 
-PLUGIN_THREAD_OBJECT(MotionMain, MotionThread, MotionWindow)
 
 
 
-MotionWindow::MotionWindow(MotionMain *plugin, int x, int y)
+
+MotionWindow::MotionWindow(MotionMain *plugin)
  : PluginClientWindow(plugin,
- 	x,
-	y,
 	610, 
 	650)
 {
@@ -260,7 +258,7 @@ void MotionWindow::update_mode()
 }
 
 
-WINDOW_CLOSE_EVENT(MotionWindow)
+
 
 
 

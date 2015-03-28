@@ -83,7 +83,7 @@ int TimeAvgConfig::equivalent(TimeAvgConfig *src)
 TimeAvgMain::TimeAvgMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	accumulation = 0;
 	history = 0;
 	history_size = 0;
@@ -95,7 +95,7 @@ TimeAvgMain::TimeAvgMain(PluginServer *server)
 
 TimeAvgMain::~TimeAvgMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(accumulation) delete [] accumulation;
 	if(history)
@@ -114,11 +114,7 @@ int TimeAvgMain::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(TimeAvgMain)
 
-SHOW_GUI_MACRO(TimeAvgMain, TimeAvgThread)
-
-SET_STRING_MACRO(TimeAvgMain)
-
-RAISE_WINDOW_MACRO(TimeAvgMain);
+NEW_WINDOW_MACRO(TimeAvgMain, TimeAvgWindow);
 
 
 
@@ -814,12 +810,12 @@ void TimeAvgMain::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("TimeAvgMain::update_gui");
-			thread->window->total_frames->update(config.frames);
-			thread->window->accum->update(config.mode == TimeAvgConfig::ACCUMULATE);
-			thread->window->avg->update(config.mode == TimeAvgConfig::AVERAGE);
-			thread->window->inclusive_or->update(config.mode == TimeAvgConfig::OR);
-			thread->window->paranoid->update(config.paranoid);
-			thread->window->no_subtract->update(config.nosubtract);
+			((TimeAvgWindow*)thread->window)->total_frames->update(config.frames);
+			((TimeAvgWindow*)thread->window)->accum->update(config.mode == TimeAvgConfig::ACCUMULATE);
+			((TimeAvgWindow*)thread->window)->avg->update(config.mode == TimeAvgConfig::AVERAGE);
+			((TimeAvgWindow*)thread->window)->inclusive_or->update(config.mode == TimeAvgConfig::OR);
+			((TimeAvgWindow*)thread->window)->paranoid->update(config.paranoid);
+			((TimeAvgWindow*)thread->window)->no_subtract->update(config.nosubtract);
 			thread->window->unlock_window();
 		}
 	}

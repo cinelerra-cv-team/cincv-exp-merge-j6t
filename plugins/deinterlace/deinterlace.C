@@ -85,14 +85,14 @@ void DeInterlaceConfig::interpolate(DeInterlaceConfig &prev,
 DeInterlaceMain::DeInterlaceMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 //	temp = 0;
 	temp_prevframe=0;
 }
 
 DeInterlaceMain::~DeInterlaceMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 //	if(temp) delete temp;
 	if(temp_prevframe) delete temp_prevframe;
 }
@@ -584,18 +584,16 @@ void DeInterlaceMain::render_gui(void *data)
 {
 	if(thread)
 	{
-		thread->window->lock_window();
+		((DeInterlaceWindow*)thread->window)->lock_window();
 		char string[BCTEXTLEN];
-		thread->window->get_status_string(string, *(int*)data);
-		thread->window->status->update(string);
-		thread->window->flush();
-		thread->window->unlock_window();
+		((DeInterlaceWindow*)thread->window)->get_status_string(string, *(int*)data);
+//		((DeInterlaceWindow*)thread->window)->status->update(string);
+		((DeInterlaceWindow*)thread->window)->flush();
+		((DeInterlaceWindow*)thread->window)->unlock_window();
 	}
 }
 
-SHOW_GUI_MACRO(DeInterlaceMain, DeInterlaceThread)
-RAISE_WINDOW_MACRO(DeInterlaceMain)
-SET_STRING_MACRO(DeInterlaceMain)
+NEW_WINDOW_MACRO(DeInterlaceMain, DeInterlaceWindow)
 NEW_PICON_MACRO(DeInterlaceMain)
 LOAD_CONFIGURATION_MACRO(DeInterlaceMain, DeInterlaceConfig)
 
@@ -663,17 +661,18 @@ void DeInterlaceMain::update_gui()
 	if(thread) 
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->set_mode(config.mode, 1);
-		if (thread->window->dominance_top)
-			thread->window->dominance_top->update(config.dominance?0:BC_Toggle::TOGGLE_CHECKED);
-		if (thread->window->dominance_bottom)
-			thread->window->dominance_bottom->update(config.dominance?BC_Toggle::TOGGLE_CHECKED:0);
-		if (thread->window->adaptive)
-			thread->window->adaptive->update(config.adaptive);
-		if (thread->window->threshold)
-			thread->window->threshold->update(config.threshold);
-		thread->window->unlock_window();
+		DeInterlaceWindow* w = (DeInterlaceWindow*)thread->window;
+		w->lock_window();
+		w->set_mode(config.mode, 1);
+		if (w->dominance_top)
+			w->dominance_top->update(config.dominance?0:BC_Toggle::TOGGLE_CHECKED);
+		if (w->dominance_bottom)
+			w->dominance_bottom->update(config.dominance?BC_Toggle::TOGGLE_CHECKED:0);
+		if (w->adaptive)
+			w->adaptive->update(config.adaptive);
+		if (w->threshold)
+			w->threshold->update(config.threshold);
+		w->unlock_window();
 	}
 }
 

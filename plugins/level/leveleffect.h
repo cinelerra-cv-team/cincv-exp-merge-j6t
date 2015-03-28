@@ -57,9 +57,8 @@ public:
 class SoundLevelWindow : public PluginClientWindow
 {
 public:
-	SoundLevelWindow(SoundLevelEffect *plugin, int x, int y);
+	SoundLevelWindow(SoundLevelEffect *plugin);
 	void create_objects();
-	int close_event();
 
 
 	BC_Title *soundlevel_max;
@@ -72,7 +71,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(SoundLevelEffect, SoundLevelThread, SoundLevelWindow)
 
 
 
@@ -98,7 +96,7 @@ public:
 
 
 
-	PLUGIN_CLASS_MEMBERS(SoundLevelConfig, SoundLevelThread)
+	PLUGIN_CLASS_MEMBERS(SoundLevelConfig)
 
 	double rms_accum;
 	double max_accum;

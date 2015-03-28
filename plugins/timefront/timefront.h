@@ -201,11 +201,10 @@ public:
 class TimeFrontWindow : public PluginClientWindow
 {
 public:
-	TimeFrontWindow(TimeFrontMain *plugin, int x, int y);
+	TimeFrontWindow(TimeFrontMain *plugin);
 	~TimeFrontWindow();
 	
 	void create_objects();
-	int close_event();
 	void update_shape();
 
 	TimeFrontMain *plugin;
@@ -231,7 +230,7 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(TimeFrontMain, TimeFrontThread, TimeFrontWindow)
+
 
 
 class TimeFrontMain : public PluginVClient
@@ -254,7 +253,7 @@ public:
 	void update_gui();
 	int is_synthesis();
 
-	PLUGIN_CLASS_MEMBERS(TimeFrontConfig, TimeFrontThread)
+	PLUGIN_CLASS_MEMBERS(TimeFrontConfig)
 
 	int need_reconfigure;
 

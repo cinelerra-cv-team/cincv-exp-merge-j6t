@@ -101,8 +101,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(ParametricEQ, ParametricThread, ParametricWindow)
-
 
 class ParametricFreq : public BC_QPot
 {
@@ -197,11 +195,10 @@ public:
 class ParametricWindow : public PluginClientWindow
 {
 public:
-	ParametricWindow(ParametricEQ *plugin, int x, int y);
+	ParametricWindow(ParametricEQ *plugin);
 	~ParametricWindow();
 
 	void create_objects();
-	int close_event();
 	void update_gui();
 	void update_canvas();
 	
@@ -251,7 +248,7 @@ public:
 
 	double envelope[WINDOW_SIZE / 2];
 	int need_reconfigure;
-	PLUGIN_CLASS_MEMBERS(ParametricConfig, ParametricThread)
+	PLUGIN_CLASS_MEMBERS(ParametricConfig)
 	ParametricFFT *fft;
 };
 

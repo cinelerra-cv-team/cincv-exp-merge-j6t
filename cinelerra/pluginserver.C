@@ -307,6 +307,11 @@ int PluginServer::open_plugin(int master,
 		client = new_plugin(this);
 	}
 
+
+
+// Run initialization functions
+// Don't load defaults when probing the directory.
+	if(!master) client->load_defaults();
 	realtime = client->is_realtime();
 	audio = client->is_audio();
 	video = client->is_video();
@@ -333,7 +338,12 @@ int PluginServer::close_plugin()
 	if(!plugin_open) return 0;
 
 	int plugin_status, result;
-	if(client) delete client;
+	if(client)
+	{
+// Defaults are saved in the thread.
+//		if(client->defaults) client->save_defaults();
+		delete client;
+	}
 
 // shared object is persistent since plugin deletion would unlink its own object
 //	dlclose(plugin_fd);
@@ -800,6 +810,13 @@ void PluginServer::show_gui()
 	}
 	client->update_display_title();
 	client->show_gui();
+}
+
+void PluginServer::hide_gui()
+{
+	if(!plugin_open) return;
+	if(client->defaults) client->save_defaults();
+	client->hide_gui();
 }
 
 void PluginServer::update_gui()

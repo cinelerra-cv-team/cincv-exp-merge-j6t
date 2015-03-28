@@ -66,18 +66,18 @@ public:
 class FreezeFrameWindow : public PluginClientWindow
 {
 public:
-	FreezeFrameWindow(FreezeFrameMain *client, int x, int y);
+	FreezeFrameWindow(FreezeFrameMain *client);
 	~FreezeFrameWindow();
 	
 	void create_objects();
-	int close_event();
-	
+
 	FreezeFrameMain *client;
 	FreezeFrameToggle *enabled;
 //	FreezeFrameToggle *line_double;
 };
 
-PLUGIN_THREAD_HEADER(FreezeFrameMain, FreezeFrameThread, FreezeFrameWindow)
+
+
 
 class FreezeFrameMain : public PluginVClient
 {
@@ -85,7 +85,7 @@ public:
 	FreezeFrameMain(PluginServer *server);
 	~FreezeFrameMain();
 
-	PLUGIN_CLASS_MEMBERS(FreezeFrameConfig, FreezeFrameThread)
+	PLUGIN_CLASS_MEMBERS(FreezeFrameConfig)
 
 	int process_buffer(VFrame *frame,
 		int64_t start_position,

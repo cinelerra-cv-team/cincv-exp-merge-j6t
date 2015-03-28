@@ -31,7 +31,6 @@ class DeInterlaceWindow;
 #include "deinterlace.h"
 #include "pluginclient.h"
 
-PLUGIN_THREAD_HEADER(DeInterlaceMain, DeInterlaceThread, DeInterlaceWindow);
 
 class DeInterlaceOption;
 class DeInterlaceMode;
@@ -43,11 +42,10 @@ class DeInterlaceThreshold;
 class DeInterlaceWindow : public PluginClientWindow
 {
 public:
-	DeInterlaceWindow(DeInterlaceMain *client, int x, int y);
+	DeInterlaceWindow(DeInterlaceMain *client);
 	~DeInterlaceWindow();
 	
 	void create_objects();
-	int close_event();
 	int set_mode(int mode, int recursive);
 	void get_status_string(char *string, int changed_rows);
 	DeInterlaceMain *client;

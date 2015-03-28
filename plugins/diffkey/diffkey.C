@@ -88,12 +88,11 @@ public:
 class DiffKeyGUI : public PluginClientWindow
 {
 public:
-	DiffKeyGUI(DiffKey *plugin, int x, int y);
+	DiffKeyGUI(DiffKey *plugin);
 	~DiffKeyGUI();
 
 
 	void create_objects();
-	int close_event();
 
 
 	DiffKeyThreshold *threshold;
@@ -102,8 +101,6 @@ public:
 	DiffKey *plugin;
 };
 
-
-PLUGIN_THREAD_HEADER(DiffKey, DiffKeyThread, DiffKeyGUI)
 
 
 
@@ -158,7 +155,7 @@ public:
 
 
 
-	PLUGIN_CLASS_MEMBERS(DiffKeyConfig, DiffKeyThread)
+	PLUGIN_CLASS_MEMBERS(DiffKeyConfig)
 
 	DiffKeyEngine *engine;
 	VFrame *top_frame;
@@ -274,10 +271,8 @@ int DiffKeyDoValue::handle_event()
 
 
 
-DiffKeyGUI::DiffKeyGUI(DiffKey *plugin, int x, int y)
+DiffKeyGUI::DiffKeyGUI(DiffKey *plugin)
  : PluginClientWindow(plugin,
- 	x,
-	y,
 	320,
 	100)
 {
@@ -310,29 +305,23 @@ void DiffKeyGUI::create_objects()
 	show_window();
 }
 
-WINDOW_CLOSE_EVENT(DiffKeyGUI)
-
-
-PLUGIN_THREAD_OBJECT(DiffKey, DiffKeyThread, DiffKeyGUI)
 
 
 
 DiffKey::DiffKey(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 DiffKey::~DiffKey()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete engine;
 }
 
-SHOW_GUI_MACRO(DiffKey, DiffKeyThread)
-RAISE_WINDOW_MACRO(DiffKey)
-SET_STRING_MACRO(DiffKey)
+NEW_WINDOW_MACRO(DiffKey, DiffKeyGUI)
 #include "picon_png.h"
 NEW_PICON_MACRO(DiffKey)
 LOAD_CONFIGURATION_MACRO(DiffKey, DiffKeyConfig)
@@ -404,9 +393,9 @@ void DiffKey::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("DiffKey::update_gui");
-			thread->window->threshold->update(config.threshold);
-			thread->window->slope->update(config.slope);
-			thread->window->do_value->update(config.do_value);
+			((DiffKeyGUI*)thread->window)->threshold->update(config.threshold);
+			((DiffKeyGUI*)thread->window)->slope->update(config.slope);
+			((DiffKeyGUI*)thread->window)->do_value->update(config.do_value);
 			thread->window->unlock_window();
 		}
 	}

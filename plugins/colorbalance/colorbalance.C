@@ -353,12 +353,12 @@ ColorBalanceMain::ColorBalanceMain(PluginServer *server)
 {
 	need_reconfigure = 1;
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 ColorBalanceMain::~ColorBalanceMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 
 	if(engine)
@@ -443,23 +443,23 @@ int ColorBalanceMain::synchronize_params(ColorBalanceSlider *slider, float diffe
 {
 	if(thread && config.lock_params)
     {
-	    if(slider != thread->window->cyan)
+	    if(slider != ((ColorBalanceWindow*)thread->window)->cyan)
         {
         	config.cyan += difference;
             test_boundary(config.cyan);
-        	thread->window->cyan->update((int64_t)config.cyan);
+        	((ColorBalanceWindow*)thread->window)->cyan->update((int64_t)config.cyan);
         }
-	    if(slider != thread->window->magenta)
+	    if(slider != ((ColorBalanceWindow*)thread->window)->magenta)
         {
         	config.magenta += difference;
             test_boundary(config.magenta);
-        	thread->window->magenta->update((int64_t)config.magenta);
+        	((ColorBalanceWindow*)thread->window)->magenta->update((int64_t)config.magenta);
         }
-	    if(slider != thread->window->yellow)
+	    if(slider != ((ColorBalanceWindow*)thread->window)->yellow)
         {
         	config.yellow += difference;
             test_boundary(config.yellow);
-        	thread->window->yellow->update((int64_t)config.yellow);
+        	((ColorBalanceWindow*)thread->window)->yellow->update((int64_t)config.yellow);
         }
     }
 	return 0;
@@ -472,9 +472,7 @@ int ColorBalanceMain::synchronize_params(ColorBalanceSlider *slider, float diffe
 
 NEW_PICON_MACRO(ColorBalanceMain)
 LOAD_CONFIGURATION_MACRO(ColorBalanceMain, ColorBalanceConfig)
-SHOW_GUI_MACRO(ColorBalanceMain, ColorBalanceThread)
-RAISE_WINDOW_MACRO(ColorBalanceMain)
-SET_STRING_MACRO(ColorBalanceMain)
+NEW_WINDOW_MACRO(ColorBalanceMain, ColorBalanceWindow)
 
 
 
@@ -562,13 +560,13 @@ void ColorBalanceMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window("ColorBalanceMain::update_gui");
-		thread->window->cyan->update((int64_t)config.cyan);
-		thread->window->magenta->update((int64_t)config.magenta);
-		thread->window->yellow->update((int64_t)config.yellow);
-		thread->window->preserve->update(config.preserve);
-		thread->window->lock_params->update(config.lock_params);
-		thread->window->unlock_window();
+		((ColorBalanceWindow*)thread->window)->lock_window("ColorBalanceMain::update_gui");
+		((ColorBalanceWindow*)thread->window)->cyan->update((int64_t)config.cyan);
+		((ColorBalanceWindow*)thread->window)->magenta->update((int64_t)config.magenta);
+		((ColorBalanceWindow*)thread->window)->yellow->update((int64_t)config.yellow);
+		((ColorBalanceWindow*)thread->window)->preserve->update(config.preserve);
+		((ColorBalanceWindow*)thread->window)->lock_params->update(config.lock_params);
+		((ColorBalanceWindow*)thread->window)->unlock_window();
 	}
 }
 

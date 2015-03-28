@@ -24,16 +24,15 @@
 #include "language.h"
 
 
-PLUGIN_THREAD_OBJECT(BrightnessMain, BrightnessThread, BrightnessWindow)
 
 
 
 
 
-BrightnessWindow::BrightnessWindow(BrightnessMain *client, int x, int y)
+
+
+BrightnessWindow::BrightnessWindow(BrightnessMain *client)
  : PluginClientWindow(client, 
-	x,
- 	y,
 	330, 
 	160)
 { 
@@ -70,12 +69,6 @@ void BrightnessWindow::create_objects()
 	flush();
 }
 
-int BrightnessWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
 
 BrightnessSlider::BrightnessSlider(BrightnessMain *client, 
 	float *output, 

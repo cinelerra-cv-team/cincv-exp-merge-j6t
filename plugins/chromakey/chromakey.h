@@ -115,11 +115,10 @@ public:
 class ChromaKeyWindow : public PluginClientWindow
 {
 public:
-	ChromaKeyWindow(ChromaKey *plugin, int x, int y);
+	ChromaKeyWindow(ChromaKey *plugin);
 	~ChromaKeyWindow();
 
 	void create_objects();
-	int close_event();
 	void update_sample();
 
 	ChromaKeyColor *color;
@@ -134,7 +133,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(ChromaKey, ChromaKeyThread, ChromaKeyWindow)
 
 
 class ChromaKeyServer : public LoadServer
@@ -171,28 +169,20 @@ public:
 	ChromaKey(PluginServer *server);
 	~ChromaKey();
 	
+	PLUGIN_CLASS_MEMBERS(ChromaKeyConfig)
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
 		double frame_rate);
 	int handle_opengl();
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	int set_string();
-	void raise_window();
 	void update_gui();
 
-	ChromaKeyConfig config;
 	VFrame *input, *output;
 	ChromaKeyServer *engine;
-	ChromaKeyThread *thread;
-	BC_Hash *defaults;
 };
 
 

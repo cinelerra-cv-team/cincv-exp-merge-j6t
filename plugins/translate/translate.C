@@ -102,12 +102,12 @@ TranslateMain::TranslateMain(PluginServer *server)
 {
 	temp_frame = 0;
 	overlayer = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 TranslateMain::~TranslateMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(temp_frame) delete temp_frame;
 	temp_frame = 0;
@@ -283,12 +283,7 @@ int TranslateMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 
 
 
-
-SHOW_GUI_MACRO(TranslateMain, TranslateThread)
-
-RAISE_WINDOW_MACRO(TranslateMain)
-
-SET_STRING_MACRO(TranslateMain)
+NEW_WINDOW_MACRO(TranslateMain, TranslateWin)
 
 void TranslateMain::update_gui()
 {
@@ -297,14 +292,14 @@ void TranslateMain::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window();
-			thread->window->in_x->update(config.in_x);
-			thread->window->in_y->update(config.in_y);
-			thread->window->in_w->update(config.in_w);
-			thread->window->in_h->update(config.in_h);
-			thread->window->out_x->update(config.out_x);
-			thread->window->out_y->update(config.out_y);
-			thread->window->out_w->update(config.out_w);
-			thread->window->out_h->update(config.out_h);
+			((TranslateWin*)thread->window)->in_x->update(config.in_x);
+			((TranslateWin*)thread->window)->in_y->update(config.in_y);
+			((TranslateWin*)thread->window)->in_w->update(config.in_w);
+			((TranslateWin*)thread->window)->in_h->update(config.in_h);
+			((TranslateWin*)thread->window)->out_x->update(config.out_x);
+			((TranslateWin*)thread->window)->out_y->update(config.out_y);
+			((TranslateWin*)thread->window)->out_w->update(config.out_w);
+			((TranslateWin*)thread->window)->out_h->update(config.out_h);
 			thread->window->unlock_window();
 		}
 	}

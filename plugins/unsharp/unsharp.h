@@ -63,6 +63,7 @@ public:
 	UnsharpMain(PluginServer *server);
 	~UnsharpMain();
 
+	PLUGIN_CLASS_MEMBERS(UnsharpConfig)
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
 		double frame_rate);
@@ -72,8 +73,6 @@ public:
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
-
-	PLUGIN_CLASS_MEMBERS(UnsharpConfig, UnsharpThread)
 
 	UnsharpEngine *engine;
 };

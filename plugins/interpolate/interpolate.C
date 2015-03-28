@@ -36,9 +36,6 @@ REGISTER_PLUGIN(InterpolatePixelsMain)
 
 
 
-PLUGIN_THREAD_OBJECT(InterpolatePixelsMain, 
-	InterpolatePixelsThread, 
-	InterpolatePixelsWindow)
 
 
 
@@ -76,10 +73,8 @@ int InterpolatePixelsOffset::handle_event()
 
 
 
-InterpolatePixelsWindow::InterpolatePixelsWindow(InterpolatePixelsMain *client, int x, int y)
+InterpolatePixelsWindow::InterpolatePixelsWindow(InterpolatePixelsMain *client)
  : PluginClientWindow(client,
-	x,
-	y,
 	200, 
 	100)
 { 
@@ -112,7 +107,7 @@ void InterpolatePixelsWindow::create_objects()
 }
 
 
-WINDOW_CLOSE_EVENT(InterpolatePixelsWindow)
+
 
 
 
@@ -160,13 +155,13 @@ void InterpolatePixelsConfig::interpolate(InterpolatePixelsConfig &prev,
 InterpolatePixelsMain::InterpolatePixelsMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 InterpolatePixelsMain::~InterpolatePixelsMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete engine;
 }
 
@@ -174,11 +169,7 @@ const char* InterpolatePixelsMain::plugin_title() { return N_("Interpolate Pixel
 int InterpolatePixelsMain::is_realtime() { return 1; }
 
 
-SHOW_GUI_MACRO(InterpolatePixelsMain, InterpolatePixelsThread)
-
-SET_STRING_MACRO(InterpolatePixelsMain)
-
-RAISE_WINDOW_MACRO(InterpolatePixelsMain)
+NEW_WINDOW_MACRO(InterpolatePixelsMain, InterpolatePixelsWindow)
 
 NEW_PICON_MACRO(InterpolatePixelsMain)
 
@@ -190,8 +181,8 @@ void InterpolatePixelsMain::update_gui()
 		if(changed)
 		{
 			thread->window->lock_window("InterpolatePixelsMain::update_gui");
-			thread->window->x_offset->update(config.x);
-			thread->window->y_offset->update(config.y);
+			((InterpolatePixelsWindow*)thread->window)->x_offset->update(config.x);
+			((InterpolatePixelsWindow*)thread->window)->y_offset->update(config.y);
 			thread->window->unlock_window();
 		}
 	}

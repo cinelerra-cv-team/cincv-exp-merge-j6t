@@ -63,12 +63,12 @@ DotMain::DotMain(PluginServer *server)
 	sampy = 0;
 	effecttv = 0;
 	need_reconfigure = 1;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 DotMain::~DotMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	
 	if(pattern) delete [] pattern;
 	if(sampx) delete [] sampx;
@@ -84,12 +84,7 @@ const char* DotMain::plugin_title() { return N_("DotTV"); }
 int DotMain::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(DotMain)
-
-SHOW_GUI_MACRO(DotMain, DotThread)
-
-SET_STRING_MACRO(DotMain)
-
-RAISE_WINDOW_MACRO(DotMain)
+NEW_WINDOW_MACRO(DotMain, DotWindow)
 
 
 int DotMain::load_defaults()
@@ -102,8 +97,9 @@ int DotMain::save_defaults()
 	return 0;
 }
 
-void DotMain::load_configuration()
+int DotMain::load_configuration()
 {
+	return 0;
 }
 
 

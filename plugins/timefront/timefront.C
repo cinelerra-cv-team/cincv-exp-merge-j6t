@@ -117,13 +117,10 @@ void TimeFrontConfig::interpolate(TimeFrontConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(TimeFrontMain, TimeFrontThread, TimeFrontWindow)
 
 
-TimeFrontWindow::TimeFrontWindow(TimeFrontMain *plugin, int x, int y)
+TimeFrontWindow::TimeFrontWindow(TimeFrontMain *plugin)
  : PluginClientWindow(plugin,
- 	x,
-	y,
 	350, 
 	290)
 {
@@ -334,12 +331,7 @@ void TimeFrontWindow::update_shape()
 
 }
 
-int TimeFrontWindow::close_event()
-{
-// Set result to 1 to indicate a plugin side close
-	set_done(1);
-	return 1;
-}
+
 
 
 
@@ -637,7 +629,7 @@ int TimeFrontShowGrayscale::handle_event()
 TimeFrontMain::TimeFrontMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	need_reconfigure = 1;
 	gradient = 0;
 	engine = 0;
@@ -646,7 +638,7 @@ TimeFrontMain::TimeFrontMain(PluginServer *server)
 
 TimeFrontMain::~TimeFrontMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(gradient) delete gradient;
 	if(engine) delete engine;
@@ -660,11 +652,7 @@ int TimeFrontMain::is_multichannel() { return 1; }
 
 NEW_PICON_MACRO(TimeFrontMain)
 
-SHOW_GUI_MACRO(TimeFrontMain, TimeFrontThread)
-
-SET_STRING_MACRO(TimeFrontMain)
-
-RAISE_WINDOW_MACRO(TimeFrontMain)
+NEW_WINDOW_MACRO(TimeFrontMain, TimeFrontWindow)
 
 LOAD_CONFIGURATION_MACRO(TimeFrontMain, TimeFrontConfig)
 
@@ -1072,27 +1060,27 @@ void TimeFrontMain::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("TimeFrontMain::update_gui");
-			thread->window->frame_range->update(config.frame_range);
-			thread->window->shape->set_text(TimeFrontShape::to_text(config.shape));
-			thread->window->show_grayscale->update(config.show_grayscale);
-			thread->window->invert->update(config.invert);
-			thread->window->shape->set_text(TimeFrontShape::to_text(config.shape));
-			if (thread->window->rate)
-				thread->window->rate->set_text(TimeFrontRate::to_text(config.rate));
-			if (thread->window->in_radius)
-				thread->window->in_radius->update(config.in_radius);
-			if (thread->window->out_radius)
-				thread->window->out_radius->update(config.out_radius);
-			if (thread->window->track_usage)
-				thread->window->track_usage->set_text(TimeFrontTrackUsage::to_text(config.track_usage));
-			if(thread->window->angle)
-				thread->window->angle->update(config.angle);
-			if(thread->window->center_x)
-				thread->window->center_x->update(config.center_x);
-			if(thread->window->center_y)
-				thread->window->center_y->update(config.center_y);
+			((TimeFrontWindow*)thread->window)->frame_range->update(config.frame_range);
+			((TimeFrontWindow*)thread->window)->shape->set_text(TimeFrontShape::to_text(config.shape));
+			((TimeFrontWindow*)thread->window)->show_grayscale->update(config.show_grayscale);
+			((TimeFrontWindow*)thread->window)->invert->update(config.invert);
+			((TimeFrontWindow*)thread->window)->shape->set_text(TimeFrontShape::to_text(config.shape));
+			if (((TimeFrontWindow*)thread->window)->rate)
+				((TimeFrontWindow*)thread->window)->rate->set_text(TimeFrontRate::to_text(config.rate));
+			if (((TimeFrontWindow*)thread->window)->in_radius)
+				((TimeFrontWindow*)thread->window)->in_radius->update(config.in_radius);
+			if (((TimeFrontWindow*)thread->window)->out_radius)
+				((TimeFrontWindow*)thread->window)->out_radius->update(config.out_radius);
+			if (((TimeFrontWindow*)thread->window)->track_usage)
+				((TimeFrontWindow*)thread->window)->track_usage->set_text(TimeFrontTrackUsage::to_text(config.track_usage));
+			if(((TimeFrontWindow*)thread->window)->angle)
+				((TimeFrontWindow*)thread->window)->angle->update(config.angle);
+			if(((TimeFrontWindow*)thread->window)->center_x)
+				((TimeFrontWindow*)thread->window)->center_x->update(config.center_x);
+			if(((TimeFrontWindow*)thread->window)->center_y)
+				((TimeFrontWindow*)thread->window)->center_y->update(config.center_y);
 			
-			thread->window->update_shape();
+			((TimeFrontWindow*)thread->window)->update_shape();
 			thread->window->unlock_window();
 		}
 	}

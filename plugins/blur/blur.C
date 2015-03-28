@@ -109,13 +109,13 @@ BlurMain::BlurMain(PluginServer *server)
 	temp = 0;
 	need_reconfigure = 1;
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 BlurMain::~BlurMain()
 {
 //printf("BlurMain::~BlurMain 1\n");
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(temp) delete temp;
 	if(engine)
@@ -130,13 +130,8 @@ const char* BlurMain::plugin_title() { return N_("Blur"); }
 int BlurMain::is_realtime() { return 1; }
 
 
+NEW_WINDOW_MACRO(BlurMain, BlurWindow)
 NEW_PICON_MACRO(BlurMain)
-
-SHOW_GUI_MACRO(BlurMain, BlurThread)
-
-SET_STRING_MACRO(BlurMain)
-
-RAISE_WINDOW_MACRO(BlurMain)
 
 LOAD_CONFIGURATION_MACRO(BlurMain, BlurConfig)
 
@@ -227,16 +222,19 @@ void BlurMain::update_gui()
 {
 	if(thread)
 	{
-		load_configuration();
-		thread->window->lock_window();
-		thread->window->horizontal->update(config.horizontal);
-		thread->window->vertical->update(config.vertical);
-		thread->window->radius->update(config.radius);
-		thread->window->a->update(config.a);
-		thread->window->r->update(config.r);
-		thread->window->g->update(config.g);
-		thread->window->b->update(config.b);
-		thread->window->unlock_window();
+		int reconfigure = load_configuration();
+		if(reconfigure) 
+		{
+			((BlurWindow*)thread->window)->lock_window("BlurMain::update_gui");
+			((BlurWindow*)thread->window)->horizontal->update(config.horizontal);
+			((BlurWindow*)thread->window)->vertical->update(config.vertical);
+			((BlurWindow*)thread->window)->radius->update(config.radius);
+			((BlurWindow*)thread->window)->a->update(config.a);
+			((BlurWindow*)thread->window)->r->update(config.r);
+			((BlurWindow*)thread->window)->g->update(config.g);
+			((BlurWindow*)thread->window)->b->update(config.b);
+			((BlurWindow*)thread->window)->unlock_window();
+		}
 	}
 }
 

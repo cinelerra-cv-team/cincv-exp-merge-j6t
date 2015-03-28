@@ -62,12 +62,12 @@ HoloMain::HoloMain(PluginServer *server)
 	bgimage = 0;
 	do_reconfigure = 1;
 	yuv = new YUV;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 HoloMain::~HoloMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 
 	if(effecttv)
@@ -84,6 +84,8 @@ HoloMain::~HoloMain()
 const char* HoloMain::plugin_title() { return N_("HolographicTV"); }
 int HoloMain::is_realtime() { return 1; }
 
+NEW_WINDOW_MACRO(HoloMain, HoloWindow)
+
 VFrame* HoloMain::new_picon()
 {
 	return new VFrame(picon_png);
@@ -99,8 +101,9 @@ int HoloMain::save_defaults()
 	return 0;
 }
 
-void HoloMain::load_configuration()
+int HoloMain::load_configuration()
 {
+	return 0;
 }
 
 
@@ -287,28 +290,6 @@ int HoloMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 	return 0;
 }
 
-int HoloMain::show_gui()
-{
-	load_configuration();
-	thread = new HoloThread(this);
-	thread->start();
-	return 0;
-}
-
-int HoloMain::set_string()
-{
-	if(thread) thread->window->set_title(gui_string);
-	return 0;
-}
-
-void HoloMain::raise_window()
-{
-	if(thread)
-	{
-		thread->window->raise_window();
-		thread->window->flush();
-	}
-}
 
 
 

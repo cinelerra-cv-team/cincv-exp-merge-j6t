@@ -26,17 +26,14 @@
 
 
 
-PLUGIN_THREAD_OBJECT(BurnMain, BurnThread, BurnWindow)
 
 
 
 
 
 
-BurnWindow::BurnWindow(BurnMain *client, int x, int y)
+BurnWindow::BurnWindow(BurnMain *client)
  : PluginClientWindow(client, 
-	x,
-	y,
 	300, 
 	170)
 { 
@@ -58,7 +55,5 @@ void BurnWindow::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(BurnWindow)
 
 

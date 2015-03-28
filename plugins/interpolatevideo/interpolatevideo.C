@@ -97,11 +97,10 @@ public:
 class InterpolateVideoWindow : public PluginClientWindow
 {
 public:
-	InterpolateVideoWindow(InterpolateVideo *plugin, int x, int y);
+	InterpolateVideoWindow(InterpolateVideo *plugin);
 	~InterpolateVideoWindow();
 
 	void create_objects();
-	int close_event();
 	void update_enabled();
 
 	ArrayList<BC_ListBoxItem*> frame_rates;
@@ -113,7 +112,6 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(InterpolateVideo, InterpolateVideoThread, InterpolateVideoWindow)
 
 
 
@@ -123,7 +121,7 @@ public:
 	InterpolateVideo(PluginServer *server);
 	~InterpolateVideo();
 
-	PLUGIN_CLASS_MEMBERS(InterpolateVideoConfig, InterpolateVideoThread)
+	PLUGIN_CLASS_MEMBERS(InterpolateVideoConfig)
 
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
@@ -190,10 +188,8 @@ int InterpolateVideoConfig::equivalent(InterpolateVideoConfig *config)
 
 
 
-InterpolateVideoWindow::InterpolateVideoWindow(InterpolateVideo *plugin, int x, int y)
+InterpolateVideoWindow::InterpolateVideoWindow(InterpolateVideo *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	210, 
 	160)
 {
@@ -242,7 +238,6 @@ void InterpolateVideoWindow::update_enabled()
 	}
 }
 
-WINDOW_CLOSE_EVENT(InterpolateVideoWindow)
 
 
 
@@ -339,7 +334,6 @@ int InterpolateVideoKeyframes::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(InterpolateVideo, InterpolateVideoThread, InterpolateVideoWindow)
 
 
 
@@ -360,7 +354,7 @@ REGISTER_PLUGIN(InterpolateVideo)
 InterpolateVideo::InterpolateVideo(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	bzero(frames, sizeof(VFrame*) * 2);
 	for(int i = 0; i < 2; i++)
 		frame_number[i] = -1;
@@ -371,7 +365,7 @@ InterpolateVideo::InterpolateVideo(PluginServer *server)
 
 InterpolateVideo::~InterpolateVideo()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(frames[0]) delete frames[0];
 	if(frames[1]) delete frames[1];
 }
@@ -529,18 +523,9 @@ int InterpolateVideo::is_realtime()
 	return 1;
 }
 
-const char* InterpolateVideo::plugin_title()
-{
-	return N_("Interpolate");
-}
-
 NEW_PICON_MACRO(InterpolateVideo) 
-
-SHOW_GUI_MACRO(InterpolateVideo, InterpolateVideoThread)
-
-RAISE_WINDOW_MACRO(InterpolateVideo)
-
-SET_STRING_MACRO(InterpolateVideo)
+NEW_WINDOW_MACRO(InterpolateVideo, InterpolateVideoWindow)
+const char* InterpolateVideo::plugin_title() { return N_("Interpolate Video"); }
 
 int InterpolateVideo::load_configuration()
 {
@@ -701,9 +686,9 @@ void InterpolateVideo::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("InterpolateVideo::update_gui");
-			thread->window->rate->update((float)config.input_rate);
-			thread->window->keyframes->update(config.use_keyframes);
-			thread->window->update_enabled();
+			((InterpolateVideoWindow*)thread->window)->rate->update((float)config.input_rate);
+			((InterpolateVideoWindow*)thread->window)->keyframes->update(config.use_keyframes);
+			((InterpolateVideoWindow*)thread->window)->update_enabled();
 			thread->window->unlock_window();
 		}
 	}

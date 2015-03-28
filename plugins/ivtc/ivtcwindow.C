@@ -35,17 +35,13 @@ static const char *pattern_text[] =
 };
 
 
-PLUGIN_THREAD_OBJECT(IVTCMain, IVTCThread, IVTCWindow)
 
 
 
 
 
-
-IVTCWindow::IVTCWindow(IVTCMain *client, int x, int y)
+IVTCWindow::IVTCWindow(IVTCMain *client)
  : PluginClientWindow(client,
-	x,
-	y,
 	210, 
 	230)
 { 
@@ -94,7 +90,7 @@ void IVTCWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(IVTCWindow)
+
 
 IVTCOffset::IVTCOffset(IVTCMain *client, int x, int y)
  : BC_TextBox(x, 

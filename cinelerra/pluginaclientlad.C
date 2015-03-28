@@ -23,17 +23,13 @@
 #include "data/lad_picon_png.h"
 #include "bchash.h"
 #include "filexml.h"
+#include "language.h"
 #include "pluginaclientlad.h"
 #include "pluginserver.h"
 #include "vframe.h"
 
 #include <ctype.h>
 #include <string.h>
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 
@@ -335,12 +331,8 @@ int PluginACLientFreq::handle_event()
 
 
 
-PluginAClientWindow::PluginAClientWindow(PluginAClientLAD *plugin, 
-	int x, 
-	int y)
+PluginAClientWindow::PluginAClientWindow(PluginAClientLAD *plugin)
  : PluginClientWindow(plugin, 
- 	x,
-	y,
 	500, 
 	plugin->config.total_ports * 30 + 60)
 {
@@ -479,11 +471,6 @@ void PluginAClientWindow::create_objects()
 	add_subwindow(new BC_Title(x, y, string));
 }
 
-int PluginAClientWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 
 
@@ -495,8 +482,6 @@ int PluginAClientWindow::close_event()
 
 
 
-
-PLUGIN_THREAD_OBJECT(PluginAClientLAD, PluginAClientThread, PluginAClientWindow)
 
 
 
@@ -505,7 +490,6 @@ PLUGIN_THREAD_OBJECT(PluginAClientLAD, PluginAClientThread, PluginAClientWindow)
 PluginAClientLAD::PluginAClientLAD(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
 	in_buffers = 0;
 	total_inbuffers = 0;
 	out_buffers = 0;
@@ -516,10 +500,11 @@ PluginAClientLAD::PluginAClientLAD(PluginServer *server)
 
 PluginAClientLAD::~PluginAClientLAD()
 {
-	PLUGIN_DESTRUCTOR_MACRO
 	delete_buffers();
 	delete_plugin();
 }
+
+NEW_WINDOW_MACRO(PluginAClientLAD, PluginAClientWindow)
 
 int PluginAClientLAD::is_realtime()
 {
@@ -577,9 +562,6 @@ VFrame* PluginAClientLAD::new_picon()
 	return new VFrame(lad_picon_png);
 }
 
-SHOW_GUI_MACRO(PluginAClientLAD, PluginAClientThread)
-RAISE_WINDOW_MACRO(PluginAClientLAD)
-SET_STRING_MACRO(PluginAClientLAD)
 LOAD_CONFIGURATION_MACRO(PluginAClientLAD, PluginAClientConfig)
 
 void PluginAClientLAD::update_gui()

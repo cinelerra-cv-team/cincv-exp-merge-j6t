@@ -115,7 +115,7 @@ public:
 	void calculate_histogram(VFrame *frame);
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(ThresholdConfig, ThresholdThread);
+	PLUGIN_CLASS_MEMBERS(ThresholdConfig);
 	HistogramEngine *engine;
 	ThresholdEngine *threshold_engine;
 };

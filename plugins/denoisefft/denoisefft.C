@@ -81,9 +81,8 @@ public:
 class DenoiseFFTWindow : public PluginClientWindow
 {
 public:
-	DenoiseFFTWindow(DenoiseFFTEffect *plugin, int x, int y);
+	DenoiseFFTWindow(DenoiseFFTEffect *plugin);
 	void create_objects();
-	int close_event();
 	DenoiseFFTLevel *level;
 	DenoiseFFTSamples *samples;
 	DenoiseFFTEffect *plugin;
@@ -101,7 +100,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(DenoiseFFTEffect, DenoiseFFTThread, DenoiseFFTWindow)
 
 
 class DenoiseFFTRemove : public CrossfadeFFT
@@ -151,7 +149,7 @@ public:
 	void process_window();
 
 
-	PLUGIN_CLASS_MEMBERS(DenoiseFFTConfig, DenoiseFFTThread)
+	PLUGIN_CLASS_MEMBERS(DenoiseFFTConfig)
 
 // Need to sample noise now.
 	int need_collection;
@@ -230,10 +228,8 @@ int DenoiseFFTSamples::handle_event()
 
 
 
-DenoiseFFTWindow::DenoiseFFTWindow(DenoiseFFTEffect *plugin, int x, int y)
+DenoiseFFTWindow::DenoiseFFTWindow(DenoiseFFTEffect *plugin)
  : PluginClientWindow(plugin,
- 	x, 
-	y, 
 	300, 
 	130)
 {
@@ -265,7 +261,6 @@ void DenoiseFFTWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(DenoiseFFTWindow)
 
 
 
@@ -276,8 +271,6 @@ WINDOW_CLOSE_EVENT(DenoiseFFTWindow)
 
 
 
-
-PLUGIN_THREAD_OBJECT(DenoiseFFTEffect, DenoiseFFTThread, DenoiseFFTWindow)
 
 
 
@@ -291,24 +284,19 @@ DenoiseFFTEffect::DenoiseFFTEffect(PluginServer *server)
  : PluginAClient(server)
 {
 	reset();
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 DenoiseFFTEffect::~DenoiseFFTEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(reference) delete [] reference;
 	if(remove_engine) delete remove_engine;
 	if(collect_engine) delete collect_engine;
 }
 
 NEW_PICON_MACRO(DenoiseFFTEffect)
-
-SHOW_GUI_MACRO(DenoiseFFTEffect, DenoiseFFTThread)
-
-RAISE_WINDOW_MACRO(DenoiseFFTEffect)
-
-SET_STRING_MACRO(DenoiseFFTEffect)
+NEW_WINDOW_MACRO(DenoiseFFTEffect, DenoiseFFTWindow)
 
 
 void DenoiseFFTEffect::reset()
@@ -390,12 +378,12 @@ void DenoiseFFTEffect::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->level->update(config.level);
+		((DenoiseFFTWindow*)thread->window)->lock_window();
+		((DenoiseFFTWindow*)thread->window)->level->update(config.level);
 		char string[BCTEXTLEN];
 		sprintf(string, "%d", config.samples);
-		thread->window->samples->set_text(string);
-		thread->window->unlock_window();
+		((DenoiseFFTWindow*)thread->window)->samples->set_text(string);
+		((DenoiseFFTWindow*)thread->window)->unlock_window();
 	}
 }
 

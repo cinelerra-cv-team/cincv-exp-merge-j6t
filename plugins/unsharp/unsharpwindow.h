@@ -53,11 +53,10 @@ public:
 class UnsharpWindow : public PluginClientWindow
 {
 public:
-	UnsharpWindow(UnsharpMain *plugin, int x, int y);
+	UnsharpWindow(UnsharpMain *plugin);
 	~UnsharpWindow();
 
 	void create_objects();
-	int close_event();
 	void update();
 
 	UnsharpRadius *radius;
@@ -68,7 +67,7 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(UnsharpMain, UnsharpThread, UnsharpWindow)
+
 
 
 

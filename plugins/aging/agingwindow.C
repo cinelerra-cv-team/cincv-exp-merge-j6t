@@ -28,16 +28,15 @@
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
-PLUGIN_THREAD_OBJECT(AgingMain, AgingThread, AgingWindow)
 
 
 
 
 
-AgingWindow::AgingWindow(AgingMain *client, int x, int y)
+
+
+AgingWindow::AgingWindow(AgingMain *client)
  : PluginClientWindow(client, 
-	x,
-	y,
 	300, 
 	170)
 { 
@@ -75,7 +74,6 @@ void AgingWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(AgingWindow)
 
 
 

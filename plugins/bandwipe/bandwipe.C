@@ -118,22 +118,14 @@ int BandWipeOut::handle_event()
 
 
 
-BandWipeWindow::BandWipeWindow(BandWipeMain *plugin, int x, int y)
+BandWipeWindow::BandWipeWindow(BandWipeMain *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	320, 
 	50)
 {
 	this->plugin = plugin;
 }
 
-
-int BandWipeWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 void BandWipeWindow::create_objects()
 {
@@ -166,8 +158,6 @@ void BandWipeWindow::create_objects()
 
 
 
-PLUGIN_THREAD_OBJECT(BandWipeMain, BandWipeThread, BandWipeWindow)
-
 
 
 
@@ -178,22 +168,19 @@ BandWipeMain::BandWipeMain(PluginServer *server)
 {
 	bands = 9;
 	direction = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 BandWipeMain::~BandWipeMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* BandWipeMain::plugin_title() { return N_("BandWipe"); }
-int BandWipeMain::is_video() { return 1; }
 int BandWipeMain::is_transition() { return 1; }
 int BandWipeMain::uses_gui() { return 1; }
 
-SHOW_GUI_MACRO(BandWipeMain, BandWipeThread);
-SET_STRING_MACRO(BandWipeMain)
-RAISE_WINDOW_MACRO(BandWipeMain)
+NEW_WINDOW_MACRO(BandWipeMain, BandWipeWindow);
 
 
 VFrame* BandWipeMain::new_picon()
@@ -253,9 +240,10 @@ void BandWipeMain::read_data(KeyFrame *keyframe)
 	}
 }
 
-void BandWipeMain::load_configuration()
+int BandWipeMain::load_configuration()
 {
 	read_data(get_prev_keyframe(get_source_position()));
+	return 1;
 }
 
 

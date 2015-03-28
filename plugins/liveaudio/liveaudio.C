@@ -56,17 +56,16 @@ public:
 class LiveAudioWindow : public PluginClientWindow
 {
 public:
-	LiveAudioWindow(LiveAudio *plugin, int x, int y);
+	LiveAudioWindow(LiveAudio *plugin);
 	~LiveAudioWindow();
 
 	void create_objects();
-	int close_event();
 
 	LiveAudio *plugin;
 };
 
 
-PLUGIN_THREAD_HEADER(LiveAudio, LiveAudioThread, LiveAudioWindow)
+
 
 
 
@@ -77,7 +76,7 @@ public:
 	~LiveAudio();
 
 
-	PLUGIN_CLASS_MEMBERS(LiveAudioConfig, LiveAudioThread);
+	PLUGIN_CLASS_MEMBERS(LiveAudioConfig);
 
 	int process_buffer(int64_t size, 
 		double **buffer,
@@ -123,10 +122,8 @@ LiveAudioConfig::LiveAudioConfig()
 
 
 
-LiveAudioWindow::LiveAudioWindow(LiveAudio *plugin, int x, int y)
+LiveAudioWindow::LiveAudioWindow(LiveAudio *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	300, 
 	160)
 {
@@ -147,7 +144,6 @@ void LiveAudioWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(LiveAudioWindow)
 
 
 
@@ -157,7 +153,8 @@ WINDOW_CLOSE_EVENT(LiveAudioWindow)
 
 
 
-PLUGIN_THREAD_OBJECT(LiveAudio, LiveAudioThread, LiveAudioWindow)
+
+
 
 
 
@@ -184,7 +181,7 @@ LiveAudio::LiveAudio(PluginServer *server)
 	history_ptr = 0;
 	history_position = 0;
 	history_size = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
@@ -202,7 +199,7 @@ LiveAudio::~LiveAudio()
 			delete [] history[i];
 		delete [] history;
 	}
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 
@@ -353,11 +350,9 @@ int LiveAudio::is_synthesis() { return 1; }
 
 NEW_PICON_MACRO(LiveAudio) 
 
-SHOW_GUI_MACRO(LiveAudio, LiveAudioThread)
+NEW_WINDOW_MACRO(LiveAudio, LiveAudioWindow)
 
-RAISE_WINDOW_MACRO(LiveAudio)
 
-SET_STRING_MACRO(LiveAudio);
 
 int LiveAudio::load_configuration()
 {

@@ -816,7 +816,7 @@ LoadPackage* TitleTranslate::new_package()
 TitleMain::TitleMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 
 	text_mask = 0;
 	glyph_engine = 0;
@@ -830,7 +830,8 @@ TitleMain::TitleMain(PluginServer *server)
 
 TitleMain::~TitleMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+//printf("TitleMain::~TitleMain 1\n");
+	
 	if(text_mask) delete text_mask;
 	if(char_positions) delete [] char_positions;
 	clear_glyphs();
@@ -850,6 +851,7 @@ VFrame* TitleMain::new_picon()
 	return new VFrame(picon_png);
 }
 
+NEW_WINDOW_MACRO(TitleMain, TitleWindow);
 
 int TitleMain::load_freetype_face(FT_Library &freetype_library,
 	FT_Face &freetype_face,
@@ -1477,29 +1479,6 @@ int TitleMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 	return 0;
 }
 
-int TitleMain::show_gui()
-{
-	load_configuration();
-	thread = new TitleThread(this);
-	thread->start();
-	return 0;
-}
-
-int TitleMain::set_string()
-{
-	if(thread) thread->window->set_utf8title(gui_string);
-	return 0;
-}
-
-void TitleMain::raise_window()
-{
-	if(thread)
-	{
-		thread->window->raise_window();
-		thread->window->flush();
-	}
-}
-
 void TitleMain::update_gui()
 {
 	if(thread)
@@ -1507,10 +1486,10 @@ void TitleMain::update_gui()
 		int reconfigure = load_configuration();
 		if(reconfigure)
 		{
-			thread->window->lock_window();
-			thread->window->update();
+			thread->window->lock_window("TitleMain::update_gui");
+			((TitleWindow*)thread->window)->update();
 			thread->window->unlock_window();
-			thread->window->color_thread->update_gui(config.color, 0);
+			((TitleWindow*)thread->window)->color_thread->update_gui(config.color, 0);
 		}
 	}
 }

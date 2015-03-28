@@ -76,7 +76,7 @@ public:
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
 
-	PLUGIN_CLASS_MEMBERS(BlurConfig, BlurThread)
+	PLUGIN_CLASS_MEMBERS(BlurConfig)
 
 	int need_reconfigure;
 

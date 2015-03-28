@@ -109,16 +109,14 @@ public:
 class FrameFieldWindow : public PluginClientWindow
 {
 public:
-	FrameFieldWindow(FrameField *plugin, int x, int y);
+	FrameFieldWindow(FrameField *plugin);
 	void create_objects();
-	int close_event();
 	FrameField *plugin;
 	FrameFieldTop *top;
 	FrameFieldBottom *bottom;
 };
 
 
-PLUGIN_THREAD_HEADER(FrameField, FrameFieldThread, FrameFieldWindow)
 
 
 
@@ -128,7 +126,7 @@ public:
 	FrameField(PluginServer *server);
 	~FrameField();
 
-	PLUGIN_CLASS_MEMBERS(FrameFieldConfig, FrameFieldThread);
+	PLUGIN_CLASS_MEMBERS(FrameFieldConfig);
 
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
@@ -194,10 +192,8 @@ int FrameFieldConfig::equivalent(FrameFieldConfig &src)
 
 
 
-FrameFieldWindow::FrameFieldWindow(FrameField *plugin, int x, int y)
+FrameFieldWindow::FrameFieldWindow(FrameField *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	210, 
 	160)
 {
@@ -214,8 +210,6 @@ void FrameFieldWindow::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(FrameFieldWindow)
 
 
 
@@ -280,7 +274,6 @@ int FrameFieldBottom::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(FrameField, FrameFieldThread, FrameFieldWindow)
 
 
 
@@ -300,7 +293,7 @@ PLUGIN_THREAD_OBJECT(FrameField, FrameFieldThread, FrameFieldWindow)
 FrameField::FrameField(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	field_number = 0;
 	src_frame = 0;
 	src_frame_number = -1;
@@ -313,7 +306,7 @@ FrameField::FrameField(PluginServer *server)
 
 FrameField::~FrameField()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(src_frame) delete src_frame;
 	if(src_texture) delete src_texture;
@@ -577,12 +570,7 @@ const char* FrameField::plugin_title() { return N_("Frames to fields"); }
 int FrameField::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(FrameField) 
-
-SHOW_GUI_MACRO(FrameField, FrameFieldThread)
-
-RAISE_WINDOW_MACRO(FrameField)
-
-SET_STRING_MACRO(FrameField);
+NEW_WINDOW_MACRO(FrameField, FrameFieldWindow)
 
 int FrameField::load_configuration()
 {
@@ -654,8 +642,8 @@ void FrameField::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window();
-			thread->window->top->update(config.field_dominance == TOP_FIELD_FIRST);
-			thread->window->bottom->update(config.field_dominance == BOTTOM_FIELD_FIRST);
+			((FrameFieldWindow*)thread->window)->top->update(config.field_dominance == TOP_FIELD_FIRST);
+			((FrameFieldWindow*)thread->window)->bottom->update(config.field_dominance == BOTTOM_FIELD_FIRST);
 			thread->window->unlock_window();
 		}
 	}

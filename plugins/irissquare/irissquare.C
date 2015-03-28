@@ -91,22 +91,14 @@ int IrisSquareOut::handle_event()
 
 
 
-IrisSquareWindow::IrisSquareWindow(IrisSquareMain *plugin, int x, int y)
+IrisSquareWindow::IrisSquareWindow(IrisSquareMain *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	320, 
 	50)
 {
 	this->plugin = plugin;
 }
 
-
-int IrisSquareWindow::close_event()
-{
-	set_done(1);
-	return 1;
-}
 
 void IrisSquareWindow::create_objects()
 {
@@ -129,7 +121,6 @@ void IrisSquareWindow::create_objects()
 
 
 
-PLUGIN_THREAD_OBJECT(IrisSquareMain, IrisSquareThread, IrisSquareWindow)
 
 
 
@@ -140,12 +131,12 @@ IrisSquareMain::IrisSquareMain(PluginServer *server)
  : PluginVClient(server)
 {
 	direction = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 IrisSquareMain::~IrisSquareMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* IrisSquareMain::plugin_title() { return N_("IrisSquare"); }
@@ -153,9 +144,7 @@ int IrisSquareMain::is_video() { return 1; }
 int IrisSquareMain::is_transition() { return 1; }
 int IrisSquareMain::uses_gui() { return 1; }
 
-SHOW_GUI_MACRO(IrisSquareMain, IrisSquareThread);
-SET_STRING_MACRO(IrisSquareMain)
-RAISE_WINDOW_MACRO(IrisSquareMain)
+NEW_WINDOW_MACRO(IrisSquareMain, IrisSquareWindow)
 
 
 VFrame* IrisSquareMain::new_picon()
@@ -211,9 +200,10 @@ void IrisSquareMain::read_data(KeyFrame *keyframe)
 	}
 }
 
-void IrisSquareMain::load_configuration()
+int IrisSquareMain::load_configuration()
 {
 	read_data(get_prev_keyframe(get_source_position()));
+	return 1;
 }
 
 

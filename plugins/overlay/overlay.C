@@ -107,11 +107,11 @@ public:
 class OverlayWindow : public PluginClientWindow
 {
 public:
-	OverlayWindow(Overlay *plugin, int x, int y);
+	OverlayWindow(Overlay *plugin);
 	~OverlayWindow();
 
 	void create_objects();
-	int close_event();
+
 
 	Overlay *plugin;
 	OverlayMode *mode;
@@ -120,7 +120,7 @@ public:
 };
 
 
-PLUGIN_THREAD_HEADER(Overlay, OverlayThread, OverlayWindow)
+
 
 
 
@@ -131,7 +131,7 @@ public:
 	~Overlay();
 
 
-	PLUGIN_CLASS_MEMBERS(OverlayConfig, OverlayThread);
+	PLUGIN_CLASS_MEMBERS(OverlayConfig);
 
 	int process_buffer(VFrame **frame,
 		int64_t start_position,
@@ -240,10 +240,8 @@ const char* OverlayConfig::output_to_text(int output_layer)
 
 
 
-OverlayWindow::OverlayWindow(Overlay *plugin, int x, int y)
+OverlayWindow::OverlayWindow(Overlay *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	300, 
 	160)
 {
@@ -283,7 +281,7 @@ void OverlayWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(OverlayWindow)
+
 
 
 
@@ -414,7 +412,7 @@ int OverlayOutput::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(Overlay, OverlayThread, OverlayWindow)
+
 
 
 
@@ -435,7 +433,7 @@ REGISTER_PLUGIN(Overlay)
 Overlay::Overlay(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	overlayer = 0;
 	temp = 0;
 }
@@ -443,7 +441,7 @@ Overlay::Overlay(PluginServer *server)
 
 Overlay::~Overlay()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(overlayer) delete overlayer;
 	if(temp) delete temp;
 }
@@ -715,11 +713,9 @@ int Overlay::is_synthesis() { return 1; }
 
 NEW_PICON_MACRO(Overlay) 
 
-SHOW_GUI_MACRO(Overlay, OverlayThread)
+NEW_WINDOW_MACRO(Overlay, OverlayWindow)
 
-RAISE_WINDOW_MACRO(Overlay)
 
-SET_STRING_MACRO(Overlay);
 
 int Overlay::load_configuration()
 {
@@ -794,9 +790,9 @@ void Overlay::update_gui()
 	if(thread)
 	{
 		thread->window->lock_window("Overlay::update_gui");
-		thread->window->mode->set_text(OverlayConfig::mode_to_text(config.mode));
-		thread->window->direction->set_text(OverlayConfig::direction_to_text(config.direction));
-		thread->window->output->set_text(OverlayConfig::output_to_text(config.output_layer));
+		((OverlayWindow*)thread->window)->mode->set_text(OverlayConfig::mode_to_text(config.mode));
+		((OverlayWindow*)thread->window)->direction->set_text(OverlayConfig::direction_to_text(config.direction));
+		((OverlayWindow*)thread->window)->output->set_text(OverlayConfig::output_to_text(config.output_layer));
 		thread->window->unlock_window();
 	}
 }

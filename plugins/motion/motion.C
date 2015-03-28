@@ -221,7 +221,7 @@ void MotionConfig::interpolate(MotionConfig &prev,
 MotionMain::MotionMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	rotate_engine = 0;
 	motion_rotate = 0;
@@ -247,7 +247,7 @@ MotionMain::MotionMain(PluginServer *server)
 
 MotionMain::~MotionMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete engine;
 	delete overlayer;
 	delete [] search_area;
@@ -273,11 +273,7 @@ int MotionMain::is_multichannel() { return 1; }
 
 NEW_PICON_MACRO(MotionMain)
 
-SHOW_GUI_MACRO(MotionMain, MotionThread)
-
-SET_STRING_MACRO(MotionMain)
-
-RAISE_WINDOW_MACRO(MotionMain)
+NEW_WINDOW_MACRO(MotionMain, MotionWindow)
 
 LOAD_CONFIGURATION_MACRO(MotionMain, MotionConfig)
 
@@ -293,42 +289,42 @@ void MotionMain::update_gui()
 			
 			char string[BCTEXTLEN];
 			sprintf(string, "%d", config.global_positions);
-			thread->window->global_search_positions->set_text(string);
+			((MotionWindow*)thread->window)->global_search_positions->set_text(string);
 			sprintf(string, "%d", config.rotate_positions);
-			thread->window->rotation_search_positions->set_text(string);
+			((MotionWindow*)thread->window)->rotation_search_positions->set_text(string);
 
-			thread->window->global_block_w->update(config.global_block_w);
-			thread->window->global_block_h->update(config.global_block_h);
-			thread->window->rotation_block_w->update(config.rotation_block_w);
-			thread->window->rotation_block_h->update(config.rotation_block_h);
-			thread->window->block_x->update(config.block_x);
-			thread->window->block_y->update(config.block_y);
-			thread->window->block_x_text->update((float)config.block_x);
-			thread->window->block_y_text->update((float)config.block_y);
-			thread->window->magnitude->update(config.magnitude);
-			thread->window->return_speed->update(config.return_speed);
+			((MotionWindow*)thread->window)->global_block_w->update(config.global_block_w);
+			((MotionWindow*)thread->window)->global_block_h->update(config.global_block_h);
+			((MotionWindow*)thread->window)->rotation_block_w->update(config.rotation_block_w);
+			((MotionWindow*)thread->window)->rotation_block_h->update(config.rotation_block_h);
+			((MotionWindow*)thread->window)->block_x->update(config.block_x);
+			((MotionWindow*)thread->window)->block_y->update(config.block_y);
+			((MotionWindow*)thread->window)->block_x_text->update((float)config.block_x);
+			((MotionWindow*)thread->window)->block_y_text->update((float)config.block_y);
+			((MotionWindow*)thread->window)->magnitude->update(config.magnitude);
+			((MotionWindow*)thread->window)->return_speed->update(config.return_speed);
 
 
-			thread->window->track_single->update(config.mode3 == MotionConfig::TRACK_SINGLE);
-			thread->window->track_frame_number->update(config.track_frame);
-			thread->window->track_previous->update(config.mode3 == MotionConfig::TRACK_PREVIOUS);
-			thread->window->previous_same->update(config.mode3 == MotionConfig::PREVIOUS_SAME_BLOCK);
+			((MotionWindow*)thread->window)->track_single->update(config.mode3 == MotionConfig::TRACK_SINGLE);
+			((MotionWindow*)thread->window)->track_frame_number->update(config.track_frame);
+			((MotionWindow*)thread->window)->track_previous->update(config.mode3 == MotionConfig::TRACK_PREVIOUS);
+			((MotionWindow*)thread->window)->previous_same->update(config.mode3 == MotionConfig::PREVIOUS_SAME_BLOCK);
 			if(config.mode3 != MotionConfig::TRACK_SINGLE)
-				thread->window->track_frame_number->disable();
+				((MotionWindow*)thread->window)->track_frame_number->disable();
 			else
-				thread->window->track_frame_number->enable();
+				((MotionWindow*)thread->window)->track_frame_number->enable();
 
-			thread->window->mode1->set_text(
+			((MotionWindow*)thread->window)->mode1->set_text(
 				Mode1::to_text(config.mode1));
-			thread->window->mode2->set_text(
+			((MotionWindow*)thread->window)->mode2->set_text(
 				Mode2::to_text(config.mode2));
-			thread->window->mode3->set_text(
+			((MotionWindow*)thread->window)->mode3->set_text(
 				Mode3::to_text(config.horizontal_only, config.vertical_only));
-			thread->window->master_layer->set_text(
+			((MotionWindow*)thread->window)->master_layer->set_text(
 				MasterLayer::to_text(config.bottom_is_master));
 
 
-			thread->window->update_mode();
+			((MotionWindow*)thread->window)->update_mode();
 			thread->window->unlock_window();
 		}
 	}

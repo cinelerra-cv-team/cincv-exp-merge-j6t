@@ -53,12 +53,12 @@ DenoiseEffect::DenoiseEffect(PluginServer *server)
  : PluginAClient(server)
 {
 	reset();
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 DenoiseEffect::~DenoiseEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete_dsp();
 }
 
@@ -66,11 +66,7 @@ NEW_PICON_MACRO(DenoiseEffect)
 
 LOAD_CONFIGURATION_MACRO(DenoiseEffect, DenoiseConfig)
 
-SHOW_GUI_MACRO(DenoiseEffect, DenoiseThread)
-
-RAISE_WINDOW_MACRO(DenoiseEffect)
-
-SET_STRING_MACRO(DenoiseEffect)
+NEW_WINDOW_MACRO(DenoiseEffect, DenoiseWindow)
 
 void DenoiseEffect::delete_dsp()
 {
@@ -200,9 +196,9 @@ void DenoiseEffect::update_gui()
 {
 	if(thread)
 	{
-		thread->window->lock_window();
-		thread->window->update();
-		thread->window->unlock_window();
+		((DenoiseWindow*)thread->window)->lock_window();
+		((DenoiseWindow*)thread->window)->update();
+		((DenoiseWindow*)thread->window)->unlock_window();
 	}
 }
 
@@ -773,7 +769,6 @@ void DenoiseConfig::interpolate(DenoiseConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(DenoiseEffect, DenoiseThread, DenoiseWindow)
 
 
 
@@ -783,11 +778,8 @@ PLUGIN_THREAD_OBJECT(DenoiseEffect, DenoiseThread, DenoiseWindow)
 
 
 
-
-DenoiseWindow::DenoiseWindow(DenoiseEffect *plugin, int x, int y)
+DenoiseWindow::DenoiseWindow(DenoiseEffect *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	150, 
 	50)
 {
@@ -805,12 +797,7 @@ void DenoiseWindow::create_objects()
 	flush();
 }
 
-int DenoiseWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
+
 
 void DenoiseWindow::update()
 {

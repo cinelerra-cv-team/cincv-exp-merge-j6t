@@ -52,7 +52,7 @@ IVTCConfig::IVTCConfig()
 IVTCMain::IVTCMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	previous_min = 0x4000000000000000LL;
 	previous_strategy = 0;
@@ -60,7 +60,7 @@ IVTCMain::IVTCMain(PluginServer *server)
 
 IVTCMain::~IVTCMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(engine)
 	{
@@ -107,9 +107,7 @@ int IVTCMain::save_defaults()
 
 #include "picon_png.h"
 NEW_PICON_MACRO(IVTCMain)
-SHOW_GUI_MACRO(IVTCMain, IVTCThread)
-SET_STRING_MACRO(IVTCMain)
-RAISE_WINDOW_MACRO(IVTCMain)
+NEW_WINDOW_MACRO(IVTCMain, IVTCWindow)
 
 
 
@@ -431,25 +429,25 @@ void IVTCMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
+		((IVTCWindow*)thread->window)->lock_window();
 		if(config.pattern == IVTCConfig::AUTOMATIC)
 		{
-			thread->window->frame_offset->disable();
-			thread->window->first_field->disable();
+			((IVTCWindow*)thread->window)->frame_offset->disable();
+			((IVTCWindow*)thread->window)->first_field->disable();
 		}
 		else
 		{
-			thread->window->frame_offset->enable();
-			thread->window->first_field->enable();
+			((IVTCWindow*)thread->window)->frame_offset->enable();
+			((IVTCWindow*)thread->window)->first_field->enable();
 		}
-		thread->window->frame_offset->update((int64_t)config.frame_offset);
-		thread->window->first_field->update(config.first_field);
-//		thread->window->automatic->update(config.automatic);
+		((IVTCWindow*)thread->window)->frame_offset->update((int64_t)config.frame_offset);
+		((IVTCWindow*)thread->window)->first_field->update(config.first_field);
+//		((IVTCWindow*)thread->window)->automatic->update(config.automatic);
 		for(int i = 0; i < TOTAL_PATTERNS; i++)
 		{
-			thread->window->pattern[i]->update(config.pattern == i);
+			((IVTCWindow*)thread->window)->pattern[i]->update(config.pattern == i);
 		}
-		thread->window->unlock_window();
+		((IVTCWindow*)thread->window)->unlock_window();
 	}
 }
 

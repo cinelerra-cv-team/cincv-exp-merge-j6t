@@ -92,13 +92,13 @@ void UnsharpConfig::interpolate(UnsharpConfig &prev,
 UnsharpMain::UnsharpMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 UnsharpMain::~UnsharpMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete engine;
 }
 
@@ -107,11 +107,7 @@ int UnsharpMain::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(UnsharpMain)
 
-SHOW_GUI_MACRO(UnsharpMain, UnsharpThread)
-
-SET_STRING_MACRO(UnsharpMain)
-
-RAISE_WINDOW_MACRO(UnsharpMain)
+NEW_WINDOW_MACRO(UnsharpMain, UnsharpWindow)
 
 LOAD_CONFIGURATION_MACRO(UnsharpMain, UnsharpConfig)
 
@@ -124,7 +120,7 @@ void UnsharpMain::update_gui()
 		if(load_configuration())
 		{
 			thread->window->lock_window("UnsharpMain::update_gui");
-			thread->window->update();
+			((UnsharpWindow*)thread->window)->update();
 			thread->window->unlock_window();
 		}
 	}

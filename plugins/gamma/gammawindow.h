@@ -39,15 +39,14 @@ class GammaColorPicker;
 #include "gamma.h"
 #include "pluginclient.h"
 
-PLUGIN_THREAD_HEADER(GammaMain, GammaThread, GammaWindow)
+
 
 class GammaWindow : public PluginClientWindow
 {
 public:
-	GammaWindow(GammaMain *client, int x, int y);
+	GammaWindow(GammaMain *client);
 
 	void create_objects();
-	int close_event();
 	void update();
 	void update_histogram();
 

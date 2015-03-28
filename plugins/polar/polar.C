@@ -87,16 +87,15 @@ public:
 class PolarWindow : public PluginClientWindow
 {
 public:
-	PolarWindow(PolarEffect *plugin, int x, int y);
+	PolarWindow(PolarEffect *plugin);
 	void create_objects();
-	int close_event();
 	PolarEffect *plugin;
 	PolarDepth *depth;
 	PolarAngle *angle;
 };
 
 
-PLUGIN_THREAD_HEADER(PolarEffect, PolarThread, PolarWindow)
+
 
 
 class PolarPackage : public LoadPackage
@@ -130,23 +129,15 @@ public:
 	PolarEffect(PluginServer *server);
 	~PolarEffect();
 
+	PLUGIN_CLASS_MEMBERS(PolarConfig)
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	int set_string();
-	void raise_window();
 	void update_gui();
 
-	PolarConfig config;
-	BC_Hash *defaults;
-	PolarThread *thread;
 	PolarEngine *engine;
 	VFrame *temp_frame;
 	VFrame *input, *output;
@@ -201,10 +192,8 @@ void PolarConfig::interpolate(PolarConfig &prev,
 
 
 
-PolarWindow::PolarWindow(PolarEffect *plugin, int x, int y)
+PolarWindow::PolarWindow(PolarEffect *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	270, 
 	100)
 {
@@ -224,9 +213,10 @@ void PolarWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(PolarWindow)
 
-PLUGIN_THREAD_OBJECT(PolarEffect, PolarThread, PolarWindow)
+
+
+
 
 
 PolarDepth::PolarDepth(PolarEffect *plugin, int x, int y)
@@ -281,12 +271,12 @@ PolarEffect::PolarEffect(PluginServer *server)
 	need_reconfigure = 1;
 	temp_frame = 0;
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 PolarEffect::~PolarEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(temp_frame) delete temp_frame;
 	if(engine) delete engine;
 }
@@ -300,11 +290,7 @@ int PolarEffect::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(PolarEffect)
 
-SHOW_GUI_MACRO(PolarEffect, PolarThread)
-
-RAISE_WINDOW_MACRO(PolarEffect)
-
-SET_STRING_MACRO(PolarEffect)
+NEW_WINDOW_MACRO(PolarEffect, PolarWindow)
 
 void PolarEffect::update_gui()
 {
@@ -312,8 +298,8 @@ void PolarEffect::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->angle->update(config.angle);
-		thread->window->depth->update(config.depth);
+		((PolarWindow*)thread->window)->angle->update(config.angle);
+		((PolarWindow*)thread->window)->depth->update(config.depth);
 		thread->window->unlock_window();
 	}
 }

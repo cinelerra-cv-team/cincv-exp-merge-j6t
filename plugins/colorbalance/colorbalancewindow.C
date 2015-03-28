@@ -27,17 +27,14 @@
 
 
 
-PLUGIN_THREAD_OBJECT(ColorBalanceMain, ColorBalanceThread, ColorBalanceWindow)
 
 
 
 
 
 
-ColorBalanceWindow::ColorBalanceWindow(ColorBalanceMain *client, int x, int y)
+ColorBalanceWindow::ColorBalanceWindow(ColorBalanceMain *client)
  : PluginClientWindow(client,
-	x,
- 	y,
 	330, 
 	250)
 { 
@@ -84,7 +81,6 @@ void ColorBalanceWindow::update()
 	yellow->update((int64_t)client->config.yellow);
 }
 
-WINDOW_CLOSE_EVENT(ColorBalanceWindow)
 
 ColorBalanceSlider::ColorBalanceSlider(ColorBalanceMain *client, 
 	float *output, int x, int y)

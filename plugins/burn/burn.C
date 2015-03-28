@@ -64,12 +64,12 @@ BurnMain::BurnMain(PluginServer *server)
 	buffer = 0;
 	effecttv = 0;
 	yuv = new YUV;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 BurnMain::~BurnMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(buffer) delete [] buffer;
 	if(burn_server) delete burn_server;
@@ -81,10 +81,8 @@ const char* BurnMain::plugin_title() { return N_("BurningTV"); }
 int BurnMain::is_realtime() { return 1; }
 
 
+NEW_WINDOW_MACRO(BurnMain, BurnWindow)
 NEW_PICON_MACRO(BurnMain)
-SHOW_GUI_MACRO(BurnMain, BurnThread)
-SET_STRING_MACRO(BurnMain)
-RAISE_WINDOW_MACRO(BurnMain)
 
 int BurnMain::load_defaults()
 {
@@ -96,8 +94,9 @@ int BurnMain::save_defaults()
 	return 0;
 }
 
-void BurnMain::load_configuration()
+int BurnMain::load_configuration()
 {
+	return 0;
 //printf("BurnMain::load_configuration %d\n", source_position);
 }
 

@@ -162,7 +162,7 @@ public:
 	void calculate_pointers(VFrame **frame, VFrame **src, VFrame **dst);
 	void allocate_temp(int w, int h, int color_model);
 
-	PLUGIN_CLASS_MEMBERS(MotionConfig, MotionThread)
+	PLUGIN_CLASS_MEMBERS(MotionConfig)
 
 	int64_t abs_diff(unsigned char *prev_ptr,
 		unsigned char *current_ptr,

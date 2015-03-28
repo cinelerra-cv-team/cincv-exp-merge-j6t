@@ -202,14 +202,13 @@ public:
 class VideoScopeWindow : public PluginClientWindow
 {
 public:
-	VideoScopeWindow(VideoScopeEffect *plugin, int x, int y);
+	VideoScopeWindow(VideoScopeEffect *plugin);
 	~VideoScopeWindow();
 
 	void calculate_sizes(int w, int h);
 	int get_label_width();
 	int get_widget_area_height();
 	void create_objects();
-	int close_event();
 	void allocate_bitmaps();
 	void draw_labels();
 
@@ -227,7 +226,6 @@ public:
 	int wave_x, wave_y, wave_w, wave_h;
 };
 
-PLUGIN_THREAD_HEADER(VideoScopeEffect, VideoScopeThread, VideoScopeWindow)
 
 
 
@@ -270,25 +268,18 @@ public:
 	VideoScopeEffect(PluginServer *server);
 	~VideoScopeEffect();
 
+
+	PLUGIN_CLASS_MEMBERS(VideoScopeConfig)
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int show_gui();
-	int set_string();
-	void raise_window();
 	void render_gui(void *input);
-	int load_configuration();
 
 	VFrame *input;
-	VideoScopeConfig config;
 	VideoScopeEngine *engine;
-	BC_Hash *defaults;
-	VideoScopeThread *thread;
 };
 
 
@@ -347,12 +338,11 @@ VideoScopeVectorscope::VideoScopeVectorscope(VideoScopeEffect *plugin,
 
 
 
-VideoScopeWindow::VideoScopeWindow(VideoScopeEffect *plugin, 
-	int x, 
-	int y)
+
+
+
+VideoScopeWindow::VideoScopeWindow(VideoScopeEffect *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	640,
 	260)
 {
@@ -453,7 +443,7 @@ void VideoScopeWindow::create_objects()
 	
 }
 
-WINDOW_CLOSE_EVENT(VideoScopeWindow)
+
 
 void VideoScopeWaveform::redraw()
 {
@@ -676,7 +666,7 @@ VideoScopeShow709Limits::VideoScopeShow709Limits(VideoScopeEffect *plugin,
 int VideoScopeShow709Limits::handle_event()
 {
 	plugin->config.show_709_limits = get_value();
-	plugin->thread->window->waveform->redraw();
+	((VideoScopeWindow *)plugin->thread->window)->waveform->redraw();
 	return 1;
 }
 
@@ -692,7 +682,7 @@ VideoScopeShow601Limits::VideoScopeShow601Limits(VideoScopeEffect *plugin,
 int VideoScopeShow601Limits::handle_event()
 {
 	plugin->config.show_601_limits = get_value();
-	plugin->thread->window->waveform->redraw();
+	((VideoScopeWindow *)plugin->thread->window)->waveform->redraw();
 	return 1;
 }
 
@@ -708,7 +698,7 @@ VideoScopeShowIRELimits::VideoScopeShowIRELimits(VideoScopeEffect *plugin,
 int VideoScopeShowIRELimits::handle_event()
 {
 	plugin->config.show_IRE_limits = get_value();
-	plugin->thread->window->waveform->redraw();
+	((VideoScopeWindow *)plugin->thread->window)->waveform->redraw();
 	return 1;
 }
 
@@ -724,7 +714,7 @@ VideoScopeDrawLinesInverse::VideoScopeDrawLinesInverse(VideoScopeEffect *plugin,
 int VideoScopeDrawLinesInverse::handle_event()
 {
 	plugin->config.draw_lines_inverse = get_value();
-	plugin->thread->window->waveform->redraw();
+	((VideoScopeWindow *)plugin->thread->window)->waveform->redraw();
 	return 1;
 }
 
@@ -736,7 +726,6 @@ int VideoScopeDrawLinesInverse::handle_event()
 
 
 
-PLUGIN_THREAD_OBJECT(VideoScopeEffect, VideoScopeThread, VideoScopeWindow)
 
 
 
@@ -753,12 +742,11 @@ VideoScopeEffect::VideoScopeEffect(PluginServer *server)
  : PluginVClient(server)
 {
 	engine = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 VideoScopeEffect::~VideoScopeEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(engine) delete engine;
 }
@@ -775,11 +763,7 @@ int VideoScopeEffect::load_configuration()
 
 NEW_PICON_MACRO(VideoScopeEffect)
 
-SHOW_GUI_MACRO(VideoScopeEffect, VideoScopeThread)
-
-RAISE_WINDOW_MACRO(VideoScopeEffect)
-
-SET_STRING_MACRO(VideoScopeEffect)
+NEW_WINDOW_MACRO(VideoScopeEffect, VideoScopeWindow)
 
 int VideoScopeEffect::load_defaults()
 {
@@ -856,7 +840,7 @@ void VideoScopeEffect::render_gui(void *input)
 {
 	if(thread)
 	{
-		VideoScopeWindow *window = thread->window;
+		VideoScopeWindow *window = ((VideoScopeWindow*)thread->window);
 		window->lock_window();
 
 //printf("VideoScopeEffect::process_realtime 1\n");
@@ -975,7 +959,7 @@ static int brighten(int v)
 template<typename TYPE, typename TEMP_TYPE, int MAX, int COMPONENTS, bool USE_YUV>
 void VideoScopeUnit::render_data(LoadPackage *package)
 {
-	VideoScopeWindow *window = plugin->thread->window;
+	VideoScopeWindow *window = (VideoScopeWindow *)plugin->thread->window;
 	VideoScopePackage *pkg = (VideoScopePackage*)package;
 	int w = plugin->input->get_w();
 	int h = plugin->input->get_h();

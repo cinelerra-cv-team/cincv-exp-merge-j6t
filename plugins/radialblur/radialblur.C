@@ -99,11 +99,11 @@ public:
 class RadialBlurWindow : public PluginClientWindow
 {
 public:
-	RadialBlurWindow(RadialBlurMain *plugin, int x, int y);
+	RadialBlurWindow(RadialBlurMain *plugin);
 	~RadialBlurWindow();
 
 	void create_objects();
-	int close_event();
+
 
 	RadialBlurSize *x, *y, *steps, *angle;
 	RadialBlurToggle *r, *g, *b, *a;
@@ -112,7 +112,7 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(RadialBlurMain, RadialBlurThread, RadialBlurWindow)
+
 
 
 class RadialBlurMain : public PluginVClient
@@ -132,7 +132,7 @@ public:
 	void update_gui();
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(RadialBlurConfig, RadialBlurThread)
+	PLUGIN_CLASS_MEMBERS(RadialBlurConfig)
 
 	VFrame *input, *output, *temp;
 	RadialBlurEngine *engine;
@@ -253,14 +253,12 @@ void RadialBlurConfig::interpolate(RadialBlurConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(RadialBlurMain, RadialBlurThread, RadialBlurWindow)
 
 
 
-RadialBlurWindow::RadialBlurWindow(RadialBlurMain *plugin, int x, int y)
+
+RadialBlurWindow::RadialBlurWindow(RadialBlurMain *plugin)
  : PluginClientWindow(plugin,
- 	x,
-	y,
 	230, 
 	340)
 {
@@ -304,7 +302,7 @@ void RadialBlurWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(RadialBlurWindow)
+
 
 
 
@@ -368,7 +366,7 @@ int RadialBlurSize::handle_event()
 RadialBlurMain::RadialBlurMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	temp = 0;
 	rotate = 0;
@@ -376,7 +374,7 @@ RadialBlurMain::RadialBlurMain(PluginServer *server)
 
 RadialBlurMain::~RadialBlurMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 	if(temp) delete temp;
 	delete rotate;
@@ -388,11 +386,7 @@ int RadialBlurMain::is_realtime() { return 1; }
 
 NEW_PICON_MACRO(RadialBlurMain)
 
-SHOW_GUI_MACRO(RadialBlurMain, RadialBlurThread)
-
-SET_STRING_MACRO(RadialBlurMain)
-
-RAISE_WINDOW_MACRO(RadialBlurMain)
+NEW_WINDOW_MACRO(RadialBlurMain, RadialBlurWindow)
 
 LOAD_CONFIGURATION_MACRO(RadialBlurMain, RadialBlurConfig)
 
@@ -438,14 +432,14 @@ void RadialBlurMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->x->update(config.x);
-		thread->window->y->update(config.y);
-		thread->window->angle->update(config.angle);
-		thread->window->steps->update(config.steps);
-		thread->window->r->update(config.r);
-		thread->window->g->update(config.g);
-		thread->window->b->update(config.b);
-		thread->window->a->update(config.a);
+		((RadialBlurWindow*)thread->window)->x->update(config.x);
+		((RadialBlurWindow*)thread->window)->y->update(config.y);
+		((RadialBlurWindow*)thread->window)->angle->update(config.angle);
+		((RadialBlurWindow*)thread->window)->steps->update(config.steps);
+		((RadialBlurWindow*)thread->window)->r->update(config.r);
+		((RadialBlurWindow*)thread->window)->g->update(config.g);
+		((RadialBlurWindow*)thread->window)->b->update(config.b);
+		((RadialBlurWindow*)thread->window)->a->update(config.a);
 		thread->window->unlock_window();
 	}
 }

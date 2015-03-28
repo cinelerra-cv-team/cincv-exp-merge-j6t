@@ -30,15 +30,13 @@
 
 
 
-PLUGIN_THREAD_OBJECT(DeInterlaceMain, DeInterlaceThread, DeInterlaceWindow)
 
 
 
 
-DeInterlaceWindow::DeInterlaceWindow(DeInterlaceMain *client, int x, int y)
+
+DeInterlaceWindow::DeInterlaceWindow(DeInterlaceMain *client)
  : PluginClientWindow(client, 
- 	x, 
-	y, 
 	400, 
 	200)
 { 
@@ -70,7 +68,6 @@ void DeInterlaceWindow::create_objects()
 	set_mode(client->config.mode,0);
 }
 
-WINDOW_CLOSE_EVENT(DeInterlaceWindow)
 
 void DeInterlaceWindow::get_status_string(char *string, int changed_rows)
 {

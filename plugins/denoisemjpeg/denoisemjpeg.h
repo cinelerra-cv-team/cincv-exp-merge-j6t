@@ -153,10 +153,9 @@ public:
 class DenoiseMJPEGWindow : public PluginClientWindow
 {
 public:
-	DenoiseMJPEGWindow(DenoiseMJPEG *plugin, int x, int y);
+	DenoiseMJPEGWindow(DenoiseMJPEG *plugin);
 
 	void create_objects();
-	int close_event();
 	void update_mode(int value);
 
 	DenoiseMJPEG *plugin;
@@ -177,7 +176,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(DenoiseMJPEG, DenoiseMJPEGThread, DenoiseMJPEGWindow)
 
 class DenoiseMJPEG : public PluginVClient
 {
@@ -185,24 +183,16 @@ public:
 	DenoiseMJPEG(PluginServer *server);
 	~DenoiseMJPEG();
 
+	PLUGIN_CLASS_MEMBERS(DenoiseMJPEGConfig);
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
-	int show_gui();
-	int load_configuration();
-	int set_string();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	void raise_window();
 	void update_gui();
 
 	float *accumulation;
-	DenoiseMJPEGThread *thread;
-	DenoiseMJPEGConfig config;
-	BC_Hash *defaults;
 };
 
 

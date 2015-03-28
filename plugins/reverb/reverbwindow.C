@@ -27,19 +27,14 @@
 
 #include <string.h>
 
-PLUGIN_THREAD_OBJECT(Reverb, ReverbThread, ReverbWindow)
 
 #include <libintl.h>
 #define _(String) gettext(String)
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
-
-
-ReverbWindow::ReverbWindow(Reverb *reverb, int x, int y)
+ReverbWindow::ReverbWindow(Reverb *reverb)
  : PluginClientWindow(reverb, 
- 	x, 
-	y, 
 	250, 
 	230)
 { 
@@ -73,7 +68,6 @@ void ReverbWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(ReverbWindow)
 
 
 

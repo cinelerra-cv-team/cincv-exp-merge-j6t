@@ -39,7 +39,6 @@
 
 
 
-PLUGIN_THREAD_OBJECT(TitleMain, TitleThread, TitleWindow)
 
 
 
@@ -50,10 +49,9 @@ PLUGIN_THREAD_OBJECT(TitleMain, TitleThread, TitleWindow)
 
 
 
-TitleWindow::TitleWindow(TitleMain *client, int x, int y)
+
+TitleWindow::TitleWindow(TitleMain *client)
  : PluginClientWindow(client,
-	x,
-	y,
 	770,
 	360)
 { 
@@ -349,12 +347,6 @@ void  TitleWindow::next_font()
 }
 
 
-int TitleWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
 
 void TitleWindow::update_color()
 {

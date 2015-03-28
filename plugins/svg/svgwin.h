@@ -29,10 +29,8 @@
 #include "svg.h"
 #include "thread.h"
 
-class SvgThread;
 class SvgWin;
 
-PLUGIN_THREAD_HEADER(SvgMain, SvgThread, SvgWin)
 
 class SvgCoord;
 class NewSvgButton;
@@ -42,11 +40,10 @@ class EditSvgButton;
 class SvgWin : public PluginClientWindow
 {
 public:
-	SvgWin(SvgMain *client, int x, int y);
+	SvgWin(SvgMain *client);
 	~SvgWin();
 
 	void create_objects();
-	int close_event();
 
 	SvgCoord *in_x, *in_y, *in_w, *in_h, *out_x, *out_y, *out_w, *out_h;
 	SvgMain *client;

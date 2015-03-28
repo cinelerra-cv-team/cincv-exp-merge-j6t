@@ -131,9 +131,8 @@ public:
 class FreeverbWindow : public PluginClientWindow
 {
 public:
-	FreeverbWindow(FreeverbEffect *plugin, int x, int y);
+	FreeverbWindow(FreeverbEffect *plugin);
 	void create_objects();
-	int close_event();
 
 	FreeverbEffect *plugin;
 	
@@ -146,7 +145,7 @@ public:
 	FreeverbMode *mode;
 };
 
-PLUGIN_THREAD_HEADER(FreeverbEffect, FreeverbThread, FreeverbWindow)
+
 
 
 
@@ -156,11 +155,7 @@ public:
 	FreeverbEffect(PluginServer *server);
 	~FreeverbEffect();
 
-	VFrame* new_picon();
-	const char* plugin_title();
-	int show_gui();
-	void raise_window();
-	int set_string();
+	PLUGIN_CLASS_MEMBERS(FreeverbConfig)
 	int is_realtime();
 	int is_multichannel();
 	void read_data(KeyFrame *keyframe);
@@ -172,13 +167,9 @@ public:
 
 	int load_defaults();
 	int save_defaults();
-	int load_configuration();
 	void update_gui();
 
 
-	BC_Hash *defaults;
-	FreeverbThread *thread;
-	FreeverbConfig config;
 	revmodel *engine;
 	float **temp;
 	float **temp_out;
@@ -306,10 +297,8 @@ int FreeverbMode::handle_event()
 
 
 
-FreeverbWindow::FreeverbWindow(FreeverbEffect *plugin, int x, int y)
+FreeverbWindow::FreeverbWindow(FreeverbEffect *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	180, 
 	250)
 {
@@ -349,12 +338,6 @@ void FreeverbWindow::create_objects()
 	flush();
 }
 
-int FreeverbWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
-}
 
 
 
@@ -441,7 +424,6 @@ void FreeverbConfig::interpolate(FreeverbConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(FreeverbEffect, FreeverbThread, FreeverbWindow)
 
 
 
@@ -454,7 +436,7 @@ FreeverbEffect::FreeverbEffect(PluginServer *server)
 	temp = 0;
 	temp_out = 0;
 	temp_allocated = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 FreeverbEffect::~FreeverbEffect()
@@ -470,18 +452,11 @@ FreeverbEffect::~FreeverbEffect()
 		delete [] temp;
 		delete [] temp_out;
 	}
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 NEW_PICON_MACRO(FreeverbEffect)
-
-LOAD_CONFIGURATION_MACRO(FreeverbEffect, FreeverbConfig)
-
-SHOW_GUI_MACRO(FreeverbEffect, FreeverbThread)
-
-RAISE_WINDOW_MACRO(FreeverbEffect)
-
-SET_STRING_MACRO(FreeverbEffect)
+NEW_WINDOW_MACRO(FreeverbEffect, FreeverbWindow)
 
 
 const char* FreeverbEffect::plugin_title() { return N_("Freeverb"); }
@@ -570,6 +545,7 @@ int FreeverbEffect::save_defaults()
 	return 0;
 }
 
+LOAD_CONFIGURATION_MACRO(FreeverbEffect, FreeverbConfig)
 
 void FreeverbEffect::update_gui()
 {
@@ -577,13 +553,13 @@ void FreeverbEffect::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->gain->update(config.gain);
-		thread->window->roomsize->update(config.roomsize);
-		thread->window->damp->update(config.damp);
-		thread->window->wet->update(config.wet);
-		thread->window->dry->update(config.dry);
-		thread->window->width->update(config.width);
-		thread->window->mode->update((int)config.mode);
+		((FreeverbWindow*)thread->window)->gain->update(config.gain);
+		((FreeverbWindow*)thread->window)->roomsize->update(config.roomsize);
+		((FreeverbWindow*)thread->window)->damp->update(config.damp);
+		((FreeverbWindow*)thread->window)->wet->update(config.wet);
+		((FreeverbWindow*)thread->window)->dry->update(config.dry);
+		((FreeverbWindow*)thread->window)->width->update(config.width);
+		((FreeverbWindow*)thread->window)->mode->update((int)config.mode);
 		thread->window->unlock_window();
 	}
 }

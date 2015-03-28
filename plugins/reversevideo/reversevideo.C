@@ -52,15 +52,14 @@ public:
 class ReverseVideoWindow : public PluginClientWindow
 {
 public:
-	ReverseVideoWindow(ReverseVideo *plugin, int x, int y);
+	ReverseVideoWindow(ReverseVideo *plugin);
 	~ReverseVideoWindow();
 	void create_objects();
-	int close_event();
+
 	ReverseVideo *plugin;
 	ReverseVideoEnabled *enabled;
 };
 
-PLUGIN_THREAD_HEADER(ReverseVideo, ReverseVideoThread, ReverseVideoWindow)
 
 class ReverseVideo : public PluginVClient
 {
@@ -68,7 +67,7 @@ public:
 	ReverseVideo(PluginServer *server);
 	~ReverseVideo();
 
-	PLUGIN_CLASS_MEMBERS(ReverseVideoConfig, ReverseVideoThread)
+	PLUGIN_CLASS_MEMBERS(ReverseVideoConfig)
 
 	int load_defaults();
 	int save_defaults();
@@ -102,10 +101,8 @@ ReverseVideoConfig::ReverseVideoConfig()
 
 
 
-ReverseVideoWindow::ReverseVideoWindow(ReverseVideo *plugin, int x, int y)
+ReverseVideoWindow::ReverseVideoWindow(ReverseVideo *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	210, 
 	160)
 {
@@ -127,10 +124,11 @@ void ReverseVideoWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(ReverseVideoWindow)
 
 
-PLUGIN_THREAD_OBJECT(ReverseVideo, ReverseVideoThread, ReverseVideoWindow)
+
+
+
 
 
 
@@ -166,13 +164,13 @@ int ReverseVideoEnabled::handle_event()
 ReverseVideo::ReverseVideo(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
 ReverseVideo::~ReverseVideo()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* ReverseVideo::plugin_title() { return N_("Reverse video"); }
@@ -181,11 +179,7 @@ int ReverseVideo::is_realtime() { return 1; }
 #include "picon_png.h"
 NEW_PICON_MACRO(ReverseVideo)
 
-SHOW_GUI_MACRO(ReverseVideo, ReverseVideoThread)
-
-RAISE_WINDOW_MACRO(ReverseVideo)
-
-SET_STRING_MACRO(ReverseVideo);
+NEW_WINDOW_MACRO(ReverseVideo, ReverseVideoWindow)
 
 
 int ReverseVideo::process_buffer(VFrame *frame,
@@ -332,7 +326,7 @@ void ReverseVideo::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->enabled->update(config.enabled);
+		((ReverseVideoWindow*)thread->window)->enabled->update(config.enabled);
 		thread->window->unlock_window();
 	}
 }

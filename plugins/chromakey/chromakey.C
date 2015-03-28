@@ -104,10 +104,8 @@ int ChromaKeyConfig::get_color()
 
 
 
-ChromaKeyWindow::ChromaKeyWindow(ChromaKey *plugin, int x, int y)
+ChromaKeyWindow::ChromaKeyWindow(ChromaKey *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	320, 
 	220)
 {
@@ -171,7 +169,6 @@ void ChromaKeyWindow::update_sample()
 
 
 
-WINDOW_CLOSE_EVENT(ChromaKeyWindow)
 
 
 
@@ -303,7 +300,6 @@ int ChromaKeyColorThread::handle_new_color(int output, int alpha)
 
 
 
-PLUGIN_THREAD_OBJECT(ChromaKey, ChromaKeyThread, ChromaKeyWindow)
 
 
 ChromaKeyServer::ChromaKeyServer(ChromaKey *plugin)
@@ -531,13 +527,13 @@ REGISTER_PLUGIN(ChromaKey)
 ChromaKey::ChromaKey(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 }
 
 ChromaKey::~ChromaKey()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	delete engine;
 }
 
@@ -577,6 +573,7 @@ SET_TRACE
 const char* ChromaKey::plugin_title() { return N_("Chroma key"); }
 int ChromaKey::is_realtime() { return 1; }
 
+NEW_WINDOW_MACRO(ChromaKey, ChromaKeyWindow)
 NEW_PICON_MACRO(ChromaKey)
 
 LOAD_CONFIGURATION_MACRO(ChromaKey, ChromaKeyConfig)
@@ -654,11 +651,6 @@ void ChromaKey::read_data(KeyFrame *keyframe)
 }
 
 
-SHOW_GUI_MACRO(ChromaKey, ChromaKeyThread)
-
-SET_STRING_MACRO(ChromaKey)
-
-RAISE_WINDOW_MACRO(ChromaKey)
 
 void ChromaKey::update_gui()
 {
@@ -666,10 +658,10 @@ void ChromaKey::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->threshold->update(config.threshold);
-		thread->window->slope->update(config.slope);
-		thread->window->use_value->update(config.use_value);
-		thread->window->update_sample();
+		((ChromaKeyWindow*)thread->window)->threshold->update(config.threshold);
+		((ChromaKeyWindow*)thread->window)->slope->update(config.slope);
+		((ChromaKeyWindow*)thread->window)->use_value->update(config.use_value);
+		((ChromaKeyWindow*)thread->window)->update_sample();
 
 		thread->window->unlock_window();
 	}

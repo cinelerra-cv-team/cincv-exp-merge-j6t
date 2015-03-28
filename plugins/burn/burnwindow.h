@@ -31,18 +31,16 @@ class BurnWindow;
 #include "mutex.h"
 #include "burn.h"
 
-PLUGIN_THREAD_HEADER(BurnMain, BurnThread, BurnWindow)
 
 
 
 class BurnWindow : public PluginClientWindow
 {
 public:
-	BurnWindow(BurnMain *client, int x, int y);
+	BurnWindow(BurnMain *client);
 	~BurnWindow();
 
 	void create_objects();
-	int close_event();
 
 	BurnMain *client;
 };

@@ -50,7 +50,7 @@ public:
 	int calculate_use_opengl();
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(HistogramConfig, HistogramThread)
+	PLUGIN_CLASS_MEMBERS(HistogramConfig)
 
 // Interpolate quantized transfer table to linear output
 	float calculate_linear(float input, int mode, int do_value);

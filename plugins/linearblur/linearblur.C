@@ -97,11 +97,10 @@ public:
 class LinearBlurWindow : public PluginClientWindow
 {
 public:
-	LinearBlurWindow(LinearBlurMain *plugin, int x, int y);
+	LinearBlurWindow(LinearBlurMain *plugin);
 	~LinearBlurWindow();
 
 	void create_objects();
-	int close_event();
 
 	LinearBlurSize *angle, *steps, *radius;
 	LinearBlurToggle *r, *g, *b, *a;
@@ -110,7 +109,6 @@ public:
 
 
 
-PLUGIN_THREAD_HEADER(LinearBlurMain, LinearBlurThread, LinearBlurWindow)
 
 
 // Output coords for a layer of blurring
@@ -139,7 +137,7 @@ public:
 	void update_gui();
 	int handle_opengl();
 
-	PLUGIN_CLASS_MEMBERS(LinearBlurConfig, LinearBlurThread)
+	PLUGIN_CLASS_MEMBERS(LinearBlurConfig)
 
 	void delete_tables();
 	VFrame *input, *output, *temp;
@@ -262,14 +260,11 @@ void LinearBlurConfig::interpolate(LinearBlurConfig &prev,
 
 
 
-PLUGIN_THREAD_OBJECT(LinearBlurMain, LinearBlurThread, LinearBlurWindow)
 
 
 
-LinearBlurWindow::LinearBlurWindow(LinearBlurMain *plugin, int x, int y)
+LinearBlurWindow::LinearBlurWindow(LinearBlurMain *plugin)
  : PluginClientWindow(plugin,
- 	x,
-	y,
 	230, 
 	290)
 {
@@ -309,7 +304,6 @@ void LinearBlurWindow::create_objects()
 	flush();
 }
 
-WINDOW_CLOSE_EVENT(LinearBlurWindow)
 
 
 
@@ -374,7 +368,7 @@ int LinearBlurSize::handle_event()
 LinearBlurMain::LinearBlurMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	engine = 0;
 	scale_x_table = 0;
 	scale_y_table = 0;
@@ -387,7 +381,7 @@ LinearBlurMain::LinearBlurMain(PluginServer *server)
 
 LinearBlurMain::~LinearBlurMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 	if(engine) delete engine;
 	delete_tables();
 	if(accum) delete [] accum;
@@ -399,13 +393,7 @@ int LinearBlurMain::is_realtime() { return 1; }
 
 
 NEW_PICON_MACRO(LinearBlurMain)
-
-SHOW_GUI_MACRO(LinearBlurMain, LinearBlurThread)
-
-SET_STRING_MACRO(LinearBlurMain)
-
-RAISE_WINDOW_MACRO(LinearBlurMain)
-
+NEW_WINDOW_MACRO(LinearBlurMain, LinearBlurWindow)
 LOAD_CONFIGURATION_MACRO(LinearBlurMain, LinearBlurConfig)
 
 void LinearBlurMain::delete_tables()
@@ -554,15 +542,15 @@ void LinearBlurMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->radius->update(config.radius);
-		thread->window->angle->update(config.angle);
-		thread->window->steps->update(config.steps);
-		thread->window->r->update(config.r);
-		thread->window->g->update(config.g);
-		thread->window->b->update(config.b);
-		thread->window->a->update(config.a);
-		thread->window->unlock_window();
+		((LinearBlurWindow*)thread->window)->lock_window();
+		((LinearBlurWindow*)thread->window)->radius->update(config.radius);
+		((LinearBlurWindow*)thread->window)->angle->update(config.angle);
+		((LinearBlurWindow*)thread->window)->steps->update(config.steps);
+		((LinearBlurWindow*)thread->window)->r->update(config.r);
+		((LinearBlurWindow*)thread->window)->g->update(config.g);
+		((LinearBlurWindow*)thread->window)->b->update(config.b);
+		((LinearBlurWindow*)thread->window)->a->update(config.a);
+		((LinearBlurWindow*)thread->window)->unlock_window();
 	}
 }
 

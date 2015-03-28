@@ -42,24 +42,15 @@ PluginClient* new_plugin(PluginServer *server)
 
 
 DelayAudio::DelayAudio(PluginServer *server)
- : PluginAClient(server),
-	thread(0),
-	defaults(0)
+ : PluginAClient(server)
 {
 	load_defaults();
 }
 
 DelayAudio::~DelayAudio()
 {
-	if(thread)
-	{
-		thread->window->set_done(0);
-		thread->completion.lock();
-		delete thread;
-	}
 
 	save_defaults();
-	delete defaults;
 }
 
 
@@ -69,16 +60,27 @@ VFrame* DelayAudio::new_picon()
 	return new VFrame(picon_png);
 }
 
+NEW_WINDOW_MACRO(DelayAudio, DelayAudioWindow)
+
 const char* DelayAudio::plugin_title() { return N_("Delay audio"); }
 int DelayAudio::is_realtime() { return 1; }
 
 
-void DelayAudio::load_configuration()
+int DelayAudio::load_configuration()
 {
 	KeyFrame *prev_keyframe;
 	prev_keyframe = get_prev_keyframe(get_source_position());
 	
+	DelayAudioConfig old_config;
+	old_config.copy_from(config);
  	read_data(prev_keyframe);
+
+ 	if(!old_config.equivalent(config))
+ 	{
+// Reconfigure
+		return 1;
+	}
+	return 0;
 }
 
 int DelayAudio::load_defaults()
@@ -184,38 +186,17 @@ int DelayAudio::process_realtime(int64_t size, double *input_ptr, double *output
 	return 0;
 }
 
-int DelayAudio::show_gui()
-{
-	load_configuration();
-	
-	thread = new DelayAudioThread(this);
-	thread->start();
-	return 0;
-}
 
-int DelayAudio::set_string()
-{
-	if(thread) thread->window->set_title(gui_string);
-	return 0;
-}
 
-void DelayAudio::raise_window()
-{
-	if(thread)
-	{
-		thread->window->raise_window();
-		thread->window->flush();
-	}
-}
 
 void DelayAudio::update_gui()
 {
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->update_gui();
-		thread->window->unlock_window();
+		((DelayAudioWindow*)thread->window)->lock_window();
+		((DelayAudioWindow*)thread->window)->update_gui();
+		((DelayAudioWindow*)thread->window)->unlock_window();
 	}
 }
 
@@ -230,51 +211,12 @@ void DelayAudio::update_gui()
 
 
 
-DelayAudioThread::DelayAudioThread(DelayAudio *plugin)
- : Thread()
-{
-	this->plugin = plugin;
-	set_synchronous(0);
-	completion.lock();
-}
 
 
 
 
-DelayAudioThread::~DelayAudioThread()
-{
-	delete window;
-}
-
-
-void DelayAudioThread::run()
-{
-	BC_DisplayInfo info;
-	
-	window = new DelayAudioWindow(plugin,
-		info.get_abs_cursor_x() - 125, 
-		info.get_abs_cursor_y() - 115);
-	
-	window->create_objects();
-	int result = window->run_window();
-	completion.unlock();
-// Last command executed in thread
-	if(result) plugin->client_side_close();
-}
-
-
-
-
-
-
-
-
-
-
-DelayAudioWindow::DelayAudioWindow(DelayAudio *plugin, int x, int y)
+DelayAudioWindow::DelayAudioWindow(DelayAudio *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	200, 
 	80)
 {
@@ -292,13 +234,6 @@ void DelayAudioWindow::create_objects()
 	update_gui();
 	show_window();
 	flush();
-}
-
-int DelayAudioWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
 }
 
 void DelayAudioWindow::update_gui()

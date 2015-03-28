@@ -52,15 +52,15 @@ public:
 class ReverseAudioWindow : public PluginClientWindow
 {
 public:
-	ReverseAudioWindow(ReverseAudio *plugin, int x, int y);
+	ReverseAudioWindow(ReverseAudio *plugin);
 	~ReverseAudioWindow();
 	void create_objects();
-	int close_event();
+
 	ReverseAudio *plugin;
 	ReverseAudioEnabled *enabled;
 };
 
-PLUGIN_THREAD_HEADER(ReverseAudio, ReverseAudioThread, ReverseAudioWindow)
+
 
 class ReverseAudio : public PluginAClient
 {
@@ -68,7 +68,7 @@ public:
 	ReverseAudio(PluginServer *server);
 	~ReverseAudio();
 
-	PLUGIN_CLASS_MEMBERS(ReverseAudioConfig, ReverseAudioThread)
+	PLUGIN_CLASS_MEMBERS(ReverseAudioConfig)
 
 	int load_defaults();
 	int save_defaults();
@@ -104,10 +104,8 @@ ReverseAudioConfig::ReverseAudioConfig()
 
 
 
-ReverseAudioWindow::ReverseAudioWindow(ReverseAudio *plugin, int x, int y)
+ReverseAudioWindow::ReverseAudioWindow(ReverseAudio *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	210, 
 	160)
 {
@@ -128,11 +126,6 @@ void ReverseAudioWindow::create_objects()
 	show_window();
 	flush();
 }
-
-WINDOW_CLOSE_EVENT(ReverseAudioWindow)
-
-
-PLUGIN_THREAD_OBJECT(ReverseAudio, ReverseAudioThread, ReverseAudioWindow)
 
 
 
@@ -168,13 +161,13 @@ int ReverseAudioEnabled::handle_event()
 ReverseAudio::ReverseAudio(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 
 ReverseAudio::~ReverseAudio()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 const char* ReverseAudio::plugin_title() { return N_("Reverse audio"); }
@@ -183,11 +176,7 @@ int ReverseAudio::is_realtime() { return 1; }
 #include "picon_png.h"
 NEW_PICON_MACRO(ReverseAudio)
 
-SHOW_GUI_MACRO(ReverseAudio, ReverseAudioThread)
-
-RAISE_WINDOW_MACRO(ReverseAudio)
-
-SET_STRING_MACRO(ReverseAudio);
+NEW_WINDOW_MACRO(ReverseAudio, ReverseAudioWindow)
 
 
 int ReverseAudio::process_buffer(int64_t size, 
@@ -367,7 +356,7 @@ void ReverseAudio::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->enabled->update(config.enabled);
+		((ReverseAudioWindow*)thread->window)->enabled->update(config.enabled);
 		thread->window->unlock_window();
 	}
 }

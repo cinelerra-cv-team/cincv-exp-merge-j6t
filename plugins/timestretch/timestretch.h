@@ -51,15 +51,13 @@ public:
 class TimeStretchWindow : public PluginClientWindow
 {
 public:
-	TimeStretchWindow(TimeStretch *plugin, int x, int y);
+	TimeStretchWindow(TimeStretch *plugin);
 	void create_objects();
 	void update();
-	int close_event();
 	TimeStretchScale *scale;
 	TimeStretch *plugin;
 };
 
-PLUGIN_THREAD_HEADER(TimeStretch, TimeStretchThread, TimeStretchWindow)
 
 
 class TimeStretchConfig
@@ -118,8 +116,7 @@ public:
 	~TimeStretch();
 	
 	
-	VFrame* new_picon();
-	const char* plugin_title();
+	PLUGIN_CLASS_MEMBERS(TimeStretchConfig);
 	int is_realtime();
 	int get_parameters();
 	void read_data(KeyFrame *keyframe);
@@ -131,12 +128,8 @@ public:
 		int sample_rate);
 
 
-	int show_gui();
-	void raise_window();
-	int set_string();
 
 	
-	int load_configuration();
 	int load_defaults();
 	int save_defaults();
 	
@@ -152,10 +145,6 @@ public:
 	int input_allocated;
 
 	TimeStretchEngine *stretch;
-
-	BC_Hash *defaults;
-	TimeStretchConfig config;
-	TimeStretchThread *thread;
 
 };
 

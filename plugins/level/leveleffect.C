@@ -111,10 +111,8 @@ int SoundLevelDuration::handle_event()
 
 
 
-SoundLevelWindow::SoundLevelWindow(SoundLevelEffect *plugin, int x, int y)
+SoundLevelWindow::SoundLevelWindow(SoundLevelEffect *plugin)
  : PluginClientWindow(plugin, 
- 	x, 
-	y, 
 	350, 
 	120)
 {
@@ -141,7 +139,6 @@ void SoundLevelWindow::create_objects()
 //printf("SoundLevelWindow::create_objects 2\n");
 }
 
-WINDOW_CLOSE_EVENT(SoundLevelWindow)
 
 
 
@@ -153,7 +150,8 @@ WINDOW_CLOSE_EVENT(SoundLevelWindow)
 
 
 
-PLUGIN_THREAD_OBJECT(SoundLevelEffect, SoundLevelThread, SoundLevelWindow)
+
+
 
 
 
@@ -172,24 +170,21 @@ PLUGIN_THREAD_OBJECT(SoundLevelEffect, SoundLevelThread, SoundLevelWindow)
 SoundLevelEffect::SoundLevelEffect(PluginServer *server)
  : PluginAClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 	reset();
 }
 
 SoundLevelEffect::~SoundLevelEffect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 }
 
 NEW_PICON_MACRO(SoundLevelEffect)
 
 LOAD_CONFIGURATION_MACRO(SoundLevelEffect, SoundLevelConfig)
 
-SHOW_GUI_MACRO(SoundLevelEffect, SoundLevelThread)
+NEW_WINDOW_MACRO(SoundLevelEffect, SoundLevelWindow)
 
-RAISE_WINDOW_MACRO(SoundLevelEffect)
-
-SET_STRING_MACRO(SoundLevelEffect)
 
 
 void SoundLevelEffect::reset()
@@ -262,7 +257,7 @@ void SoundLevelEffect::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->duration->update(config.duration);
+		((SoundLevelWindow*)thread->window)->duration->update(config.duration);
 		thread->window->unlock_window();
 	}
 //printf("SoundLevelEffect::update_gui 2\n");
@@ -303,9 +298,9 @@ void SoundLevelEffect::render_gui(void *data, int size)
 		char string[BCTEXTLEN];
 		double *arg = (double*)data;
 		sprintf(string, "%.2f", DB::todb(arg[0]));
-		thread->window->soundlevel_max->update(string);
+		((SoundLevelWindow*)thread->window)->soundlevel_max->update(string);
 		sprintf(string, "%.2f", DB::todb(arg[1]));
-		thread->window->soundlevel_rms->update(string);
+		((SoundLevelWindow*)thread->window)->soundlevel_rms->update(string);
 		thread->window->flush();
 		thread->window->unlock_window();
 	}

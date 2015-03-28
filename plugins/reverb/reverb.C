@@ -59,12 +59,12 @@ Reverb::Reverb(PluginServer *server)
 	lowpass_in1 = 0;
 	lowpass_in2 = 0;
 	initialized = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 Reverb::~Reverb()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(initialized)
 	{
@@ -263,11 +263,7 @@ int Reverb::process_realtime(int64_t size,
 
 NEW_PICON_MACRO(Reverb)
 
-SHOW_GUI_MACRO(Reverb, ReverbThread)
-
-SET_STRING_MACRO(Reverb)
-
-RAISE_WINDOW_MACRO(Reverb)
+NEW_WINDOW_MACRO(Reverb, ReverbWindow)
 
 int Reverb::load_defaults()
 {
@@ -379,14 +375,14 @@ void Reverb::update_gui()
 	if(thread)
 	{
 		thread->window->lock_window();
-		thread->window->level_init->update(config.level_init);
-		thread->window->delay_init->update(config.delay_init);
-		thread->window->ref_level1->update(config.ref_level1);
-		thread->window->ref_level2->update(config.ref_level2);
-		thread->window->ref_total->update(config.ref_total);
-		thread->window->ref_length->update(config.ref_length);
-		thread->window->lowpass1->update(config.lowpass1);
-		thread->window->lowpass2->update(config.lowpass2);
+		((ReverbWindow*)thread->window)->level_init->update(config.level_init);
+		((ReverbWindow*)thread->window)->delay_init->update(config.delay_init);
+		((ReverbWindow*)thread->window)->ref_level1->update(config.ref_level1);
+		((ReverbWindow*)thread->window)->ref_level2->update(config.ref_level2);
+		((ReverbWindow*)thread->window)->ref_total->update(config.ref_total);
+		((ReverbWindow*)thread->window)->ref_length->update(config.ref_length);
+		((ReverbWindow*)thread->window)->lowpass1->update(config.lowpass1);
+		((ReverbWindow*)thread->window)->lowpass2->update(config.lowpass2);
 		thread->window->unlock_window();
 	}
 }

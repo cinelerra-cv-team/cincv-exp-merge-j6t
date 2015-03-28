@@ -78,12 +78,12 @@ ScaleMain::ScaleMain(PluginServer *server)
  : PluginVClient(server)
 {
 	overlayer = 0;
-	PLUGIN_CONSTRUCTOR_MACRO
+	
 }
 
 ScaleMain::~ScaleMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
+	
 
 	if(overlayer) delete overlayer;
 	overlayer = 0;
@@ -345,9 +345,7 @@ int ScaleMain::handle_opengl()
 
 
 
-SHOW_GUI_MACRO(ScaleMain, ScaleThread)
-RAISE_WINDOW_MACRO(ScaleMain)
-SET_STRING_MACRO(ScaleMain)
+NEW_WINDOW_MACRO(ScaleMain, ScaleWin)
 
 void ScaleMain::update_gui()
 {
@@ -355,9 +353,9 @@ void ScaleMain::update_gui()
 	{
 		load_configuration();
 		thread->window->lock_window();
-		thread->window->width->update(config.w);
-		thread->window->height->update(config.h);
-		thread->window->constrain->update(config.constrain);
+		((ScaleWin*)thread->window)->width->update(config.w);
+		((ScaleWin*)thread->window)->height->update(config.h);
+		((ScaleWin*)thread->window)->constrain->update(config.constrain);
 		thread->window->unlock_window();
 	}
 }

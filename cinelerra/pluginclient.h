@@ -30,11 +30,13 @@ class PluginClient;
 
 
 #include "arraylist.h"
+#include "bchash.inc"
 #include "condition.h"
 #include "edlsession.inc"
 #include "keyframe.h"
 #include "mainprogress.inc"
 #include "maxbuffers.h"
+#include "pluginclient.inc"
 #include "plugincommands.h"
 #include "pluginserver.inc"
 #include "theme.inc"
@@ -66,124 +68,30 @@ PluginClient* new_plugin(PluginServer *server) \
 }
 
 
-#define WINDOW_CLOSE_EVENT(window_class) \
-int window_class::close_event() \
-{ \
-/* Set result to 1 to indicate a client side close */ \
-	set_done(1); \
-	return 1; \
-}
-
-
-#define PLUGIN_THREAD_HEADER(plugin_class, thread_class, window_class) \
-class thread_class : public Thread \
-{ \
-public: \
-	thread_class(plugin_class *plugin); \
-	~thread_class(); \
-	void run(); \
-	window_class *window; \
-	plugin_class *plugin; \
-};
-
-
-#define PLUGIN_THREAD_OBJECT(plugin_class, thread_class, window_class) \
-thread_class::thread_class(plugin_class *plugin) \
- : Thread(0, 0, 1) \
-{ \
-	this->plugin = plugin; \
-} \
- \
-thread_class::~thread_class() \
-{ \
-	delete window; \
-} \
- \
-void thread_class::run() \
-{ \
-	BC_DisplayInfo info; \
-	window = new window_class(plugin,  \
-		info.get_abs_cursor_x() - 75,  \
-		info.get_abs_cursor_y() - 65); \
-	window->create_objects(); \
- \
-/* Only set it here so tracking doesn't update it until everything is created. */ \
- 	plugin->thread = this; \
-	int result = window->run_window(); \
-/* This is needed when the GUI is closed from itself */ \
-	if(result) plugin->client_side_close(); \
-}
 
 
 
 
-#define PLUGIN_CLASS_MEMBERS(config_name, thread_name) \
+
+
+// Prototypes for user to put in class header
+#define PLUGIN_CLASS_MEMBERS(config_name) \
 	int load_configuration(); \
 	VFrame* new_picon(); \
 	const char* plugin_title(); \
-	int show_gui(); \
-	int set_string(); \
-	void raise_window(); \
-	BC_Hash *defaults; \
-	config_name config; \
-	thread_name *thread;
-
-#define PLUGIN_CONSTRUCTOR_MACRO \
-	thread = 0; \
-	defaults = 0; \
-	load_defaults(); \
-
-#define PLUGIN_DESTRUCTOR_MACRO \
-	if(thread) \
-	{ \
-/* This is needed when the GUI is closed from elsewhere than itself */ \
-/* Since we now use autodelete, this is all that has to be done, thread will take care of itself ... */ \
-/* Thread join will wait if this was not called from the thread itself or go on if it was */ \
-		thread->window->lock_window("PLUGIN_DESTRUCTOR_MACRO"); \
-		thread->window->set_done(0); \
-		thread->window->unlock_window(); \
-		thread->join(); \
-	} \
- \
- \
-	if(defaults) save_defaults(); \
-	if(defaults) delete defaults;
+	PluginClientWindow* new_window(); \
+	config_name config;
 
 
 
 
-#define SHOW_GUI_MACRO(plugin_class, thread_class) \
-int plugin_class::show_gui() \
+
+#define NEW_WINDOW_MACRO(plugin_class, window_class) \
+PluginClientWindow* plugin_class::new_window() \
 { \
-	load_configuration(); \
-	thread_class *new_thread = new thread_class(this); \
-	new_thread->start(); \
-	return 0; \
+	return new window_class(this); \
 }
 
-#define RAISE_WINDOW_MACRO(plugin_class) \
-void plugin_class::raise_window() \
-{ \
-	if(thread) \
-	{ \
-		thread->window->lock_window(); \
-		thread->window->raise_window(); \
-		thread->window->flush(); \
-		thread->window->unlock_window(); \
-	} \
-}
-
-#define SET_STRING_MACRO(plugin_class) \
-int plugin_class::set_string() \
-{ \
-	if(thread) \
-	{ \
-		thread->window->lock_window(); \
-		thread->window->set_utf8title(gui_string); \
-		thread->window->unlock_window(); \
-	} \
-	return 0; \
-}
 
 #define NEW_PICON_MACRO(plugin_class) \
 VFrame* plugin_class::new_picon() \
@@ -191,6 +99,8 @@ VFrame* plugin_class::new_picon() \
 	return new VFrame(picon_png); \
 }
 
+// Not all plugins load configuration the same way.  Use this to define
+// the normal way.
 #define LOAD_CONFIGURATION_MACRO(plugin_class, config_class) \
 int plugin_class::load_configuration() \
 { \
@@ -227,18 +137,39 @@ int plugin_class::load_configuration() \
 
 
 
-
-
 class PluginClientWindow : public BC_Window
 {
 public:
 	PluginClientWindow(PluginClient *client, 
-		int x,
-		int y,
 		int w,
 		int h);
+	virtual ~PluginClientWindow();
+	
+	virtual int close_event();
+	
+	PluginClient *client;
 };
 
+
+
+
+class PluginClientThread : public Thread
+{
+public:
+	PluginClientThread(PluginClient *client);
+	~PluginClientThread();
+	void run();
+	
+	friend class PluginClient;
+
+	BC_WindowBase* get_window();
+	PluginClient* get_client();
+	BC_WindowBase *window;
+	PluginClient *client;
+
+private:
+	Condition *init_complete;
+};
 
 
 
@@ -248,6 +179,8 @@ public:
 	PluginClient(PluginServer *server);
 	virtual ~PluginClient();
 
+	friend class PluginClientThread;
+	friend class PluginClientWindow;
 	
 // Queries for the plugin server.
 	virtual int is_realtime();
@@ -291,18 +224,26 @@ public:
 
 // Realtime commands for signal processors.
 // These must be defined by the plugin itself.
-	virtual int set_string();             // Set the string identifying the plugin to modules and patches.
-// cause the plugin to show the gui
-	virtual int show_gui();               
+// Set the GUI title identifying the plugin to modules and patches.
+	int set_string();
+// cause the plugin to create a new GUI class
+	virtual BC_WindowBase* new_window();
+// Load the current keyframe.  Return 1 if it changed.
+	virtual int load_configuration();
 // cause the plugin to hide the gui
 	void client_side_close();
 	void update_display_title();
 // Raise the GUI
-	virtual void raise_window() {};
+	void raise_window();
+// Create GUI
+	int show_gui();
+
 	virtual void update_gui() {};
 	virtual void save_data(KeyFrame *keyframe) {};    // write the plugin settings to text in text format
 	virtual void read_data(KeyFrame *keyframe) {};    // read the plugin settings from the text
 	int send_hide_gui();                                    // should be sent when the GUI recieves a close event from the user
+// Destroys the window but not the thread pointer.
+	void hide_gui();
 
 	int get_configure_change();                             // get propogated configuration change from a send_configure_change
 
@@ -415,7 +356,8 @@ public:
 // All plugins define these.
 	virtual int load_defaults();       // load default settings for the plugin
 	virtual int save_defaults();      // save the current settings as defaults
-
+	BC_Hash* get_defaults();
+	PluginClientThread* get_thread();
 
 
 
@@ -524,9 +466,12 @@ public:
 // Total number of processors available - 1
 	int smp;  
 	PluginServer *server;
+	BC_Hash *defaults;
+	PluginClientThread *thread;
 
 private:
-
+// Temporaries set in new_window
+	int window_x, window_y;
 // File handlers:
 //	Asset *asset;     // Point to asset structure in shared memory
 };

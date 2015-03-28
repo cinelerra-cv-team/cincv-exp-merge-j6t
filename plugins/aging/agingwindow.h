@@ -31,7 +31,6 @@ class AgingWindow;
 #include "mutex.h"
 #include "aging.h"
 
-PLUGIN_THREAD_HEADER(AgingMain, AgingThread, AgingWindow)
 
 class AgingColor;
 class AgingScratches;
@@ -44,11 +43,10 @@ class AgingDustCount;
 class AgingWindow : public PluginClientWindow
 {
 public:
-	AgingWindow(AgingMain *client, int x, int y);
+	AgingWindow(AgingMain *client);
 	~AgingWindow();
 
 	void create_objects();
-	int close_event();
 
 	AgingMain *client;
 	
