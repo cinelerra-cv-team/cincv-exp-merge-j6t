@@ -27,10 +27,8 @@
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
-NormalizeWindow::NormalizeWindow(NormalizeMain *plugin, int x, int y)
+NormalizeWindow::NormalizeWindow(NormalizeMain *plugin)
  : PluginClientWindow(plugin,
- 				x - 160,
-				y - 75,
  				320, 
 				150)
 { 
@@ -55,12 +53,6 @@ int NormalizeWindow::create_objects(float *db_over, int *separate_tracks)
 	show_window();
 	flush();
 	return 0;
-}
-
-int NormalizeWindow::close_event()
-{
-	set_done(1);
-	return 1;
 }
 
 NormalizeWindowOverload::NormalizeWindowOverload(int x, int y, float *db_over)

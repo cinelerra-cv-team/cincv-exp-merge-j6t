@@ -32,11 +32,10 @@ class _720to480Direction;
 class _720to480Window : public PluginClientWindow
 {
 public:
-	_720to480Window(_720to480Main *client, int x, int y);
+	_720to480Window(_720to480Main *client);
 	~_720to480Window();
 	
 	void create_objects();
-	int close_event();
 	int set_first_field(int first_field);
 	int set_direction(int direction);
 

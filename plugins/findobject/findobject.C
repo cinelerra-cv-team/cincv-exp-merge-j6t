@@ -156,7 +156,6 @@ void FindObjectConfig::interpolate(FindObjectConfig &prev,
 FindObjectMain::FindObjectMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
 	bzero(&blob_param, sizeof(CvBlobTrackerAutoParam1));
 	blob_pTracker = 0;
 	blob_initialized = 0;
@@ -197,8 +196,6 @@ FindObjectMain::~FindObjectMain()
     if(blob_param.pBTA) cvReleaseBlobTrackAnalysis(&blob_param.pBTA);
     if(blob_param.pFG) cvReleaseFGDetector(&blob_param.pFG);
     if(blob_pTracker) cvReleaseBlobTrackerAuto(&blob_pTracker);
-
-    PLUGIN_DESTRUCTOR_MACRO
 }
 
 const char* FindObjectMain::plugin_title() { return N_("Find Object"); }
@@ -206,11 +203,7 @@ int FindObjectMain::is_realtime() { return 1; }
 int FindObjectMain::is_multichannel() { return 1; }
 
 
-PLUGIN_THREAD_OBJECT(FindObjectMain, FindObjectThread, FindObjectWindow)
-
-SHOW_GUI_MACRO(FindObjectMain, FindObjectThread)
-RAISE_WINDOW_MACRO(FindObjectMain)
-SET_STRING_MACRO(FindObjectMain)
+NEW_WINDOW_MACRO(FindObjectMain, FindObjectWindow)
 LOAD_CONFIGURATION_MACRO(FindObjectMain, FindObjectConfig)
 
 VFrame* FindObjectMain::new_picon() { return NULL; }

@@ -135,11 +135,9 @@ class BB_Tumble : public BC_TextBox {
 
 class BluebananaWindow : public PluginClientWindow {
 public:
-	BluebananaWindow(BluebananaMain *plugin, int x, int y);
+	BluebananaWindow(BluebananaMain *plugin);
 	~BluebananaWindow();
 
-        int windowx;
-        int windowy;
         int slider_x;
         int slider_w;
         int slider_top_x_tumblers;
@@ -148,7 +146,6 @@ public:
         int slider_bottom_w_tumblers;
 
 	void create_objects();
-	int close_event();
         void enter_config_change();
         void commit_config_change();
         void leave_config_change();
@@ -246,6 +243,5 @@ public:
         int do_render;
 };
 
-PLUGIN_THREAD_HEADER(BluebananaMain, BluebananaThread, BluebananaWindow)
 
 #endif

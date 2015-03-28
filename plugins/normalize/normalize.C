@@ -19,7 +19,6 @@
  * 
  */
 
-#include "bcdisplayinfo.h"
 #include "bchash.h"
 #include "mainprogress.h"
 #include "normalize.h"
@@ -94,8 +93,7 @@ int NormalizeMain::save_defaults()
 
 int NormalizeMain::get_parameters()
 {
-	BC_DisplayInfo info;
-	NormalizeWindow window(this, info.get_abs_cursor_x(), info.get_abs_cursor_y());
+	NormalizeWindow window(this);
 	window.create_objects(&db_over, &separate_tracks);
 	int result = window.run_window();
 	return result;

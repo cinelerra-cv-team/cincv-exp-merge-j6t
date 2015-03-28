@@ -94,7 +94,7 @@ public:
         float sat_select_alpha(float sat);
         float val_select_alpha(float val);
 
-	PLUGIN_CLASS_MEMBERS(BluebananaConfig, BluebananaThread)
+	PLUGIN_CLASS_MEMBERS(BluebananaConfig)
 
 	YUV yuv;
 	VFrame *frame;

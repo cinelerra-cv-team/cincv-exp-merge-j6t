@@ -46,7 +46,7 @@ public:
 class ResampleWindow : public PluginClientWindow
 {
 public:
-	ResampleWindow(ResampleEffect *plugin, int x, int y);
+	ResampleWindow(ResampleEffect *plugin);
 	void create_objects();
 	ResampleEffect *plugin;
 };

@@ -105,7 +105,7 @@ public:
 	~Color3WayMain();
 
 // required for all realtime plugins
-	PLUGIN_CLASS_MEMBERS(Color3WayConfig, Color3WayThread);
+	PLUGIN_CLASS_MEMBERS(Color3WayConfig);
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
 		double frame_rate);
@@ -155,8 +155,6 @@ public:
 private:
 	int using_defaults;
 };
-
-PLUGIN_THREAD_HEADER(Color3WayMain, Color3WayThread, Color3WayWindow)
 
 
 #endif

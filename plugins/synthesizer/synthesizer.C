@@ -19,7 +19,6 @@
  * 
  */
 
-#include "bcdisplayinfo.h"
 #include "clip.h"
 #include "bchash.h"
 #include "filexml.h"
@@ -526,10 +525,7 @@ SynthThread::~SynthThread()
 
 void SynthThread::run()
 {
-	BC_DisplayInfo info;
-	window = new SynthWindow(synth, 
-		info.get_abs_cursor_x() - 125, 
-		info.get_abs_cursor_y() - 115);
+	window = new SynthWindow(synth);
 	window->create_objects();
 	int result = window->run_window();
 	completion.unlock();
@@ -547,10 +543,8 @@ void SynthThread::run()
 
 
 
-SynthWindow::SynthWindow(Synth *synth, int x, int y)
+SynthWindow::SynthWindow(Synth *synth)
  : PluginClientWindow(synth,
- 	x, 
-	y, 
 	420,
 	400)
 {
@@ -649,13 +643,6 @@ void SynthWindow::create_objects()
 
 	show_window();
 	flush();
-}
-
-int SynthWindow::close_event()
-{
-// Set result to 1 to indicate a client side close
-	set_done(1);
-	return 1;
 }
 
 void SynthWindow::update_gui()

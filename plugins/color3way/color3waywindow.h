@@ -195,11 +195,10 @@ public:
 class Color3WayWindow : public PluginClientWindow
 {
 public:
-	Color3WayWindow(Color3WayMain *plugin, int x, int y);
+	Color3WayWindow(Color3WayMain *plugin);
 	~Color3WayWindow();
 
 	void create_objects();
-	int close_event();
 	void update();
 
 	Color3WayMain *plugin;

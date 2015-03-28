@@ -19,7 +19,6 @@
  * 
  */
 
-#include "bcdisplayinfo.h"
 #include "bchash.h"
 #include "mainprogress.h"
 #include "picon_png.h"
@@ -56,10 +55,8 @@ int ResampleFraction::handle_event()
 
 
 
-ResampleWindow::ResampleWindow(ResampleEffect *plugin, int x, int y)
+ResampleWindow::ResampleWindow(ResampleEffect *plugin)
  : PluginClientWindow(plugin,
- 				x - 160,
-				y - 75,
  				320, 
 				150)
 {
@@ -112,8 +109,7 @@ void ResampleEffect::reset()
 
 int ResampleEffect::get_parameters()
 {
-	BC_DisplayInfo info;
-	ResampleWindow window(this, info.get_abs_cursor_x(), info.get_abs_cursor_y());
+	ResampleWindow window(this);
 	window.create_objects();
 	int result = window.run_window();
 	

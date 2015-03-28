@@ -28,19 +28,8 @@
 #include <string.h>
 
 
-
-
-
-
-
-
-WINDOW_CLOSE_EVENT(Color3WayWindow)
-
-
-Color3WayWindow::Color3WayWindow(Color3WayMain *plugin, int x, int y)
+Color3WayWindow::Color3WayWindow(Color3WayMain *plugin)
  : PluginClientWindow(plugin,
-	x,
-	y,
 	500,
 	370)
 { 

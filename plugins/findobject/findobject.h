@@ -160,7 +160,7 @@ public:
 	void calculate_pointers(VFrame **frame, VFrame **src, VFrame **dst);
 	void allocate_temp(int w, int h, int color_model);
 
-	PLUGIN_CLASS_MEMBERS(FindObjectConfig, FindObjectThread)
+	PLUGIN_CLASS_MEMBERS(FindObjectConfig)
 
 
 	AffineEngine *affine;
@@ -260,15 +260,6 @@ public:
 	
 	
 };
-
-PLUGIN_THREAD_HEADER(FindObjectMain, FindObjectThread, FindObjectWindow)
-
-
-
-
-
-
-
 
 
 #endif

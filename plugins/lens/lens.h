@@ -166,7 +166,7 @@ public:
 class LensGUI : public PluginClientWindow
 {
 public:
-	LensGUI(LensMain *client, int x, int y);
+	LensGUI(LensMain *client);
 	~LensGUI();
 	
 	void create_objects();
@@ -275,7 +275,7 @@ public:
 	LensMain(PluginServer *server);
 	~LensMain();
 
-	PLUGIN_CLASS_MEMBERS(LensConfig, LensThread)
+	PLUGIN_CLASS_MEMBERS(LensConfig)
 	int process_buffer(VFrame *frame,
 		int64_t start_position,
 		double frame_rate);
@@ -302,7 +302,5 @@ private:
 	int using_defaults;
 };
 
-
-PLUGIN_THREAD_HEADER(LensMain, LensThread, LensGUI)
 
 #endif

@@ -19,7 +19,6 @@
  * 
  */
 
-#include "bcdisplayinfo.h"
 #include "bchash.h"
 #include "language.h"
 #include "mainprogress.h"
@@ -84,8 +83,7 @@ int ReFrame::save_defaults()
 
 int ReFrame::get_parameters()
 {
-	BC_DisplayInfo info;
-	ReFrameWindow window(this, info.get_abs_cursor_x(), info.get_abs_cursor_y());
+	ReFrameWindow window(this);
 	window.create_objects();
 	int result = window.run_window();
 	
@@ -166,10 +164,8 @@ int ReFrameOutput::handle_event()
 
 
 
-ReFrameWindow::ReFrameWindow(ReFrame *plugin, int x, int y)
+ReFrameWindow::ReFrameWindow(ReFrame *plugin)
  : PluginClientWindow(plugin,
- 	x, 
-	y, 
 	230, 
 	160)
 {
@@ -193,11 +189,3 @@ void ReFrameWindow::create_objects()
 	show_window();
 	flush();
 }
-
-int ReFrameWindow::close_event()
-{
-	set_done(0);
-	return 1;
-}
-
-

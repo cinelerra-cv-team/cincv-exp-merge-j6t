@@ -33,8 +33,6 @@
 
 #include "bluebananacolor.c"
 
-PLUGIN_THREAD_OBJECT(BluebananaMain, BluebananaThread, BluebananaWindow)
-
 class BluebananaHActive : public BC_CheckBox {
 public:
   BluebananaHActive(BluebananaMain *plugin, BluebananaWindow *gui);
@@ -1925,12 +1923,10 @@ public:
 };
 
 // --------------------------------------- Main GUI window --------------------------------------
-BluebananaWindow::BluebananaWindow(BluebananaMain *plugin, int x, int y)
-: PluginClientWindow(plugin,x,y,1000,1000){
+BluebananaWindow::BluebananaWindow(BluebananaMain *plugin)
+: PluginClientWindow(plugin,1000,1000){
 
   do_render=0;
-  windowx=x;
-  windowy=y;
   this->plugin = plugin;
   config_refcount=1; // suppress pushing config during startup
   config_change=0;
@@ -2290,14 +2286,9 @@ void BluebananaWindow::create_objects(){
 
   resize_window(get_w(),y);
   show_window();
-  reposition_window(windowx,windowy,get_w(),y);
+  reposition_window(get_x(),get_y(),get_w(),y);
   leave_config_change(); // also forces render
   plugin->server->mwindow->sync_parameters();
-}
-
-int BluebananaWindow::close_event(){
-  set_done(1);
-  return 1;
 }
 
 // adds one to config push refcount

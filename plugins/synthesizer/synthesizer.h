@@ -58,11 +58,10 @@ class SynthWetness;
 class SynthWindow : public PluginClientWindow
 {
 public:
-	SynthWindow(Synth *synth, int x, int y);
+	SynthWindow(Synth *synth);
 	~SynthWindow();
 
 	void create_objects();
-	int close_event();
 	void update_gui();
 	int waveform_to_text(char *text, int waveform);
 	void update_scrollbar();

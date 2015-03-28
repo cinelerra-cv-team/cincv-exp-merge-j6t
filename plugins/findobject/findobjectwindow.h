@@ -197,11 +197,10 @@ public:
 class FindObjectWindow : public PluginClientWindow
 {
 public:
-	FindObjectWindow(FindObjectMain *plugin, int x, int y);
+	FindObjectWindow(FindObjectMain *plugin);
 	~FindObjectWindow();
 
 	void create_objects();
-	int close_event();
 	char* get_radius_title();
 
 	FindObjectGlobalRange *global_range_w;

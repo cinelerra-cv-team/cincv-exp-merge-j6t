@@ -43,11 +43,10 @@ public:
 class ReFrameWindow : public PluginClientWindow
 {
 public:
-	ReFrameWindow(ReFrame *plugin, int x, int y);
+	ReFrameWindow(ReFrame *plugin);
 	~ReFrameWindow();
 
 	void create_objects();
-	int close_event();
 
 	ReFrame *plugin;
 };

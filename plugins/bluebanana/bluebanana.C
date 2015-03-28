@@ -46,7 +46,6 @@ class BluebananaWindow;
 REGISTER_PLUGIN(BluebananaMain)
 
 BluebananaMain::BluebananaMain(PluginServer *server) : PluginVClient(server) {
-  PLUGIN_CONSTRUCTOR_MACRO
   engine = 0;
 
   /* be sure a lookup update triggers */
@@ -80,7 +79,6 @@ BluebananaMain::~BluebananaMain() {
   if(server && server->mwindow)
     server->mwindow->sync_parameters();
 
-  PLUGIN_DESTRUCTOR_MACRO
   delete engine;
 }
 
@@ -89,13 +87,7 @@ int BluebananaMain::is_realtime() { return 1; }
 
 #include "picon_png.h"
 NEW_PICON_MACRO(BluebananaMain)
-
-SHOW_GUI_MACRO(BluebananaMain, BluebananaThread)
-
-SET_STRING_MACRO(BluebananaMain)
-
-RAISE_WINDOW_MACRO(BluebananaMain)
-
+NEW_WINDOW_MACRO(BluebananaMain, BluebananaWindow)
 LOAD_CONFIGURATION_MACRO(BluebananaMain, BluebananaConfig)
 
 void BluebananaMain::render_gui(void *data){
@@ -104,12 +96,12 @@ void BluebananaMain::render_gui(void *data){
     thread->window->lock_window("BluebananaMain::render_gui");
 
     /* push histogram data to gui */
-    thread->window->update_histograms(that);
+    ((BluebananaWindow*)thread->window)->update_histograms(that);
 
     /* push any colormodel update to gui */
     if(that->frame && colormodel != that->frame->get_color_model()){
       colormodel = that->frame->get_color_model();
-      thread->window->update();
+      ((BluebananaWindow*)thread->window)->update();
     }
 
     thread->window->unlock_window();
@@ -119,10 +111,10 @@ void BluebananaMain::render_gui(void *data){
 void BluebananaMain::update_gui(){
   if(thread){
     thread->window->lock_window("BluebananaMain::update_gui");
-    thread->window->flush_config_change();
+    ((BluebananaWindow*)thread->window)->flush_config_change();
     int reconfigure = load_configuration();
     if(reconfigure)
-      thread->window->update();
+      ((BluebananaWindow*)thread->window)->update();
 
     thread->window->unlock_window();
   }

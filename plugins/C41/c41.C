@@ -100,9 +100,8 @@ public:
 class C41Window : public PluginClientWindow
 {
 public:
-	C41Window(C41Effect *plugin, int x, int y);
+	C41Window(C41Effect *plugin);
 	void create_objects();
-	int close_event();
 	void update();
 	void update_magic();
 	C41Enable *active;
@@ -123,39 +122,29 @@ public:
 	C41Effect *plugin;
 };
 
-PLUGIN_THREAD_HEADER(C41Effect, C41Thread, C41Window);
 
 class C41Effect : public PluginVClient
 {
 public:
 	C41Effect(PluginServer *server);
 	~C41Effect();
+	PLUGIN_CLASS_MEMBERS(C41Config);
 	int process_buffer(VFrame *frame,
 			int64_t start_position,
 			double frame_rate);
 	int is_realtime();
-	const char* plugin_title();
-	VFrame* new_picon();
 	int load_defaults();
 	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
 	void render_gui(void* data);
-	int show_gui();
-	void raise_window();
-	int set_string();
-	int load_configuration();
 	float myLog2(float i) __attribute__ ((optimize(0)));
 	float myPow2(float i) __attribute__ ((optimize(0)));
 	float myPow(float a, float b);
 	double difftime_nano(timespec start, timespec end);
 
 	struct magic values;
-
-	C41Config config;
-	C41Thread *thread;
-	BC_Hash *defaults;
 };
 
 
@@ -269,8 +258,10 @@ int C41Button::handle_event()
 }
 
 // C41Window
-C41Window::C41Window(C41Effect *plugin, int x, int y)
- : PluginClientWindow(plugin, x, y, 270, 620)
+C41Window::C41Window(C41Effect *plugin)
+ : PluginClientWindow(plugin,
+	270,
+	620)
 {
 	this->plugin = plugin;
 }
@@ -375,30 +366,24 @@ void C41Window::update_magic()
 	gamma_b->update(plugin->values.gamma_b);
 }
 
-WINDOW_CLOSE_EVENT(C41Window);
-PLUGIN_THREAD_OBJECT(C41Effect, C41Thread, C41Window);
 
 // C41Effect
 C41Effect::C41Effect(PluginServer *server)
  : PluginVClient(server)
 {
 	memset(&values, 0, sizeof(values));
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 C41Effect::~C41Effect()
 {
-	PLUGIN_DESTRUCTOR_MACRO
 }
 
 const char* C41Effect::plugin_title() { return N_("C41"); }
 
 int C41Effect::is_realtime() { return 1; }
 
+NEW_WINDOW_MACRO(C41Effect, C41Window)
 NEW_PICON_MACRO(C41Effect)
-SHOW_GUI_MACRO(C41Effect, C41Thread)
-RAISE_WINDOW_MACRO(C41Effect)
-SET_STRING_MACRO(C41Effect)
 LOAD_CONFIGURATION_MACRO(C41Effect, C41Config)
 
 
@@ -407,7 +392,7 @@ void C41Effect::update_gui()
 	if(thread && load_configuration())
 	{
 		thread->window->lock_window("C41Effect::update_gui");
-		thread->window->update();
+		((C41Window*)thread->window)->update();
 		thread->window->unlock_window();
 	}
 }
@@ -419,7 +404,7 @@ void C41Effect::render_gui(void* data)
 
 	values = *vp;
 	if(thread)
-		thread->window->update_magic();
+		((C41Window*)thread->window)->update_magic();
 }
 
 int C41Effect::load_defaults()

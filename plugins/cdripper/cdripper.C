@@ -108,9 +108,8 @@ int CDRipMain::get_parameters()
 	while(result2 && !result)
 	{
 		{
-			BC_DisplayInfo info;
 //printf("CDRipMain::get_parameters 1\n");
-			CDRipWindow window(this, info.get_abs_cursor_x(), info.get_abs_cursor_y());
+			CDRipWindow window(this);
 //printf("CDRipMain::get_parameters 2\n");
 			window.create_objects();
 //printf("CDRipMain::get_parameters 3\n");

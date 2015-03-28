@@ -33,7 +33,7 @@ class CDRipWindowDevice;
 class CDRipWindow : public PluginClientWindow
 {
 public:
-	CDRipWindow(CDRipMain *cdripper, int x, int y);
+	CDRipWindow(CDRipMain *cdripper);
 	~CDRipWindow();
 
 	void create_objects();

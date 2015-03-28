@@ -29,10 +29,8 @@
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
-CDRipWindow::CDRipWindow(CDRipMain *cdripper, int x, int y)
+CDRipWindow::CDRipWindow(CDRipMain *cdripper)
  : PluginClientWindow(cdripper,
- 	x,
-	y,
  	450, 
 	192)
 { 

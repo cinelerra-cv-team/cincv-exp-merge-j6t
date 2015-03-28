@@ -23,7 +23,6 @@
 #include "clip.h"
 #include "bchash.h"
 #include "filexml.h"
-#include "bcdisplayinfo.h"
 #include "keyframe.h"
 #include "language.h"
 #include "mainprogress.h"
@@ -50,10 +49,8 @@ _720to480Config::_720to480Config()
 
 
 
-_720to480Window::_720to480Window(_720to480Main *client, int x, int y)
+_720to480Window::_720to480Window(_720to480Main *client)
  : PluginClientWindow(client,
- 	x, 
-	y, 
 	230, 
 	150)
 { 
@@ -83,12 +80,6 @@ void _720to480Window::create_objects()
 
 	show_window();
 	flush();
-}
-
-int _720to480Window::close_event()
-{
-	set_done(0);
-	return 1;
 }
 
 int _720to480Window::set_first_field(int first_field)
@@ -222,10 +213,7 @@ int _720to480Main::save_defaults()
 
 int _720to480Main::get_parameters()
 {
-	BC_DisplayInfo info;
-	_720to480Window window(this, 
-		info.get_abs_cursor_x(), 
-		info.get_abs_cursor_y());
+	_720to480Window window(this);
 	window.create_objects();
 	int result = window.run_window();
 	return result;

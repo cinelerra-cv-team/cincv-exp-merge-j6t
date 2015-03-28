@@ -463,10 +463,8 @@ const char* LensMode::to_text(int mode)
 
 
 
-LensGUI::LensGUI(LensMain *client, int x, int y)
+LensGUI::LensGUI(LensMain *client)
  : PluginClientWindow(client,
-	x,
-	y,
 	350, 
 	510)
 {
@@ -677,7 +675,6 @@ void LensGUI::create_objects()
 LensMain::LensMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
 	using_defaults = 0;
 	engine = 0;
 	lock = 0;
@@ -689,13 +686,9 @@ LensMain::~LensMain()
 	
 	delete engine;
 	presets.remove_all_objects();
-	PLUGIN_DESTRUCTOR_MACRO
 }
 
-PLUGIN_THREAD_OBJECT(LensMain, LensThread, LensGUI)
-SHOW_GUI_MACRO(LensMain, LensThread)
-RAISE_WINDOW_MACRO(LensMain)
-SET_STRING_MACRO(LensMain)
+NEW_WINDOW_MACRO(LensMain, LensGUI)
 #include "picon_png.h"
 NEW_PICON_MACRO(LensMain)
 LOAD_CONFIGURATION_MACRO(LensMain, LensConfig)
