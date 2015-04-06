@@ -22,12 +22,7 @@
 #include "bcdisplayinfo.h"
 #include "blur.h"
 #include "blurwindow.h"
-
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
+#include "language.h"
 
 
 
@@ -37,7 +32,7 @@
 BlurWindow::BlurWindow(BlurMain *client)
  : PluginClientWindow(client, 
 	150, 
-	270)
+	300)
 { 
 	this->client = client; 
 }
@@ -50,15 +45,19 @@ BlurWindow::~BlurWindow()
 void BlurWindow::create_objects()
 {
 	int x = 10, y = 10;
+	BC_Title *title;
+
 	add_subwindow(new BC_Title(x, y, _("Blur")));
 	y += 20;
 	add_subwindow(horizontal = new BlurHorizontal(client, this, x, y));
 	y += 30;
 	add_subwindow(vertical = new BlurVertical(client, this, x, y));
 	y += 35;
-	add_subwindow(radius = new BlurRadius(client, x, y));
-	add_subwindow(new BC_Title(x + 50, y, _("Radius")));
-	y += 50;
+	add_subwindow(title = new BC_Title(x, y, _("Radius:")));
+	y += title->get_h() + 10;
+	add_subwindow(radius = new BlurRadius(client, this, x, y));
+	add_subwindow(radius_text = new BlurRadiusText(client, this, x + radius->get_w() + 10, y, 100));
+	y += radius->get_h() + 10;
 	add_subwindow(a = new BlurA(client, x, y));
 	y += 30;
 	add_subwindow(r = new BlurR(client, x, y));
@@ -71,7 +70,7 @@ void BlurWindow::create_objects()
 	flush();
 }
 
-BlurRadius::BlurRadius(BlurMain *client, int x, int y)
+BlurRadius::BlurRadius(BlurMain *client, BlurWindow *gui, int x, int y)
  : BC_IPot(x, 
  	y, 
 	client->config.radius, 
@@ -79,6 +78,7 @@ BlurRadius::BlurRadius(BlurMain *client, int x, int y)
 	MAXRADIUS)
 {
 	this->client = client;
+	this->gui = gui;
 }
 BlurRadius::~BlurRadius()
 {
@@ -86,9 +86,35 @@ BlurRadius::~BlurRadius()
 int BlurRadius::handle_event()
 {
 	client->config.radius = get_value();
+	gui->radius_text->update((int64_t)client->config.radius);
 	client->send_configure_change();
 	return 1;
 }
+
+
+
+
+BlurRadiusText::BlurRadiusText(BlurMain *client, BlurWindow *gui, int x, int y, int w)
+ : BC_TextBox(x, 
+	y, 
+	w, 
+	1, 
+	client->config.radius)
+{
+	this->client = client;
+	this->gui = gui;
+}
+
+int BlurRadiusText::handle_event()
+{
+	client->config.radius = atoi(get_text());
+	gui->radius->update((int64_t)client->config.radius);
+	client->send_configure_change();
+	return 1;
+}
+
+
+
 
 BlurVertical::BlurVertical(BlurMain *client, BlurWindow *window, int x, int y)
  : BC_CheckBox(x, 

@@ -136,6 +136,7 @@ void Plugin::copy_from(Edit *edit)
 
 void Plugin::copy_keyframes(Plugin *plugin)
 {
+	
 	keyframes->copy_from(plugin->keyframes);
 }
 
@@ -143,9 +144,15 @@ void Plugin::copy_keyframes(int64_t start,
 	int64_t end, 
 	FileXML *file, 
 	int default_only,
-	int autos_only)
+	int active_only)
 {
-	keyframes->copy(start, end, file, default_only, autos_only);
+// Only 1 default is copied from where the start position is
+	int64_t endproject = startproject + length;
+	if(!default_only ||
+		(default_only &&
+			start < endproject &&
+			start >= startproject))
+		keyframes->copy(start, end, file, default_only, active_only);
 }
 
 void Plugin::synchronize_params(Edit *edit)
@@ -286,7 +293,20 @@ int Plugin::identical_location(Plugin *that)
 		startproject == that->startproject) return 1;
 
 	return 0;
+
 }
+
+int Plugin::keyframe_exists(KeyFrame *ptr)
+{
+	for(KeyFrame *current = (KeyFrame*)keyframes->first; 
+		current;
+		current = (KeyFrame*)NEXT)
+	{
+		if(current == ptr) return 1;
+	}
+	return 0;
+}
+
 
 void Plugin::change_plugin(char *title, 
 		SharedLocation *shared_location, 
@@ -302,38 +322,7 @@ void Plugin::change_plugin(char *title,
 KeyFrame* Plugin::get_prev_keyframe(int64_t position,
 	int direction)
 {
-	KeyFrame *current = 0;
-
-// This doesn't work because edl->selectionstart doesn't change during
-// playback at the same rate as PluginClient::source_position.
-	if(position < 0)
-	{
-		position = track->to_units(edl->local_session->get_selectionstart(1), 0);
-	}
-
-// Get keyframe on or before current position
-	for(current = (KeyFrame*)keyframes->last;
-		current;
-		current = (KeyFrame*)PREVIOUS)
-	{
-		if(direction == PLAY_FORWARD && current->position <= position) break;
-		else
-		if(direction == PLAY_REVERSE && current->position < position) break;
-	}
-
-// Nothing before current position
-	if(!current && keyframes->first)
-	{
-		current = (KeyFrame*)keyframes->first;
-	}
-	else
-// No keyframes
-	if(!current)
-	{
-		current = (KeyFrame*)keyframes->default_auto;
-	}
-
-	return current;
+	return keyframes->get_prev_keyframe(position, direction);
 }
 
 KeyFrame* Plugin::get_next_keyframe(int64_t position,
@@ -376,30 +365,7 @@ KeyFrame* Plugin::get_next_keyframe(int64_t position,
 
 KeyFrame* Plugin::get_keyframe()
 {
-// Search for keyframe on or before selection
-	KeyFrame *result = 
-		get_prev_keyframe(track->to_units(edl->local_session->get_selectionstart(1), 0), 
-			PLAY_FORWARD);
-
-// Return nearest keyframe if not in automatic keyframe generation
-	if(!edl->session->auto_keyframes)
-	{
-		return result;
-	}
-	else
-// Return new keyframe
-	if(result == (KeyFrame*)keyframes->default_auto || 
-		result->position != track->to_units(edl->local_session->get_selectionstart(1), 0))
-	{
-		return (KeyFrame*)keyframes->insert_auto(track->to_units(edl->local_session->get_selectionstart(1), 0));
-	}
-	else
-// Return existing keyframe
-	{
-		return result;
-	}
-
-	return 0;
+	return keyframes->get_keyframe();
 }
 
 void Plugin::copy(int64_t start, int64_t end, FileXML *file)

@@ -145,6 +145,16 @@ public:
 	MotionMain *plugin;
 };
 
+class RotationCenter : public BC_IPot
+{
+public:
+	RotationCenter(MotionMain *plugin, 
+		int x, 
+		int y);
+	int handle_event();
+	MotionMain *plugin;
+};
+
 class BlockSize : public BC_IPot
 {
 public:
@@ -314,6 +324,7 @@ public:
 	GlobalRange *global_range_w;
 	GlobalRange *global_range_h;
 	RotationRange *rotation_range;
+	RotationCenter *rotation_center;
 	BlockSize *global_block_w;
 	BlockSize *global_block_h;
 	BlockSize *rotation_block_w;

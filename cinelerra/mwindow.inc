@@ -25,6 +25,7 @@
 #define PROGRAM_NAME "Cinelerra-CV"
 #define DEFAULT_THEME "S.U.V."
 #define CONFIG_FILE "Cinelerra_rc"
+#define PRESETS_FILE "Cinelerra_presets"
 
 // What to call silence in the EDL
 #define SILENCE "SILENCE"
@@ -32,6 +33,12 @@
 // Behavior of region selections
 #define SELECTION_SAMPLES 0
 #define SELECTION_EDIT 1
+
+// min milliseconds between tweek undos to create new undo entries
+#define UNDO_SPAN 1000
+
+// Make tweeks span keyframes if a region is selected
+#define USE_KEYFRAME_SPANNING
 
 class MWindow;
 

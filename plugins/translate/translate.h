@@ -66,7 +66,7 @@ public:
 
 
 	OverlayFrame *overlayer;   // To translate images
-	VFrame *temp_frame;        // Used if buffers are the same
+	VFrame *temp_frame;
 };
 
 

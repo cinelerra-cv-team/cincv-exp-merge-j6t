@@ -24,6 +24,7 @@
 #undef _LARGEFILE64_SOURCE
 
 #include "assets.h"
+#include "bcsignals.h"
 #include "channel.h"
 #include "chantables.h"
 #include "clip.h"
@@ -309,7 +310,6 @@ void VDeviceV4L2Thread::run()
 				perror("VDeviceV4L2Thread::run VIDIOC_G_PARM");
 		}
 
-
 // Set up data format
 		struct v4l2_format v4l2_params;
 		v4l2_params.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -383,12 +383,14 @@ void VDeviceV4L2Thread::run()
 			}
 		}
 
+
 		for(int i = 0; i < picture->controls.total; i++)
 		{
 			struct v4l2_control ctrl_arg;
 			struct v4l2_queryctrl arg;
 			PictureItem *item = picture->controls.values[i];
 			arg.id = item->device_id;
+
 			if(!ioctl(input_fd, VIDIOC_QUERYCTRL, &arg))
 			{
 				ctrl_arg.id = item->device_id;
@@ -425,14 +427,13 @@ void VDeviceV4L2Thread::run()
 			input = 0;
 		}
 
+
 		tuner.type = V4L2_TUNER_ANALOG_TV;
 		tuner.audmode = V4L2_TUNER_MODE_STEREO;
 		tuner.rxsubchans = V4L2_TUNER_SUB_STEREO;
 
 		if(ioctl(input_fd, VIDIOC_S_INPUT, &input) < 0)
 			perror("VDeviceV4L2Thread::run VIDIOC_S_INPUT");
-
-
 
 
 

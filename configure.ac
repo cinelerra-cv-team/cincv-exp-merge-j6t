@@ -344,6 +344,12 @@ AC_SUBST(FAAD_CFLAGS)
 AC_SUBST(FAAD_LIBS)
 ############## END OF LIBFAAD, LIBFAAC
 
+############## FLAC
+PKG_CHECK_MODULES(FLAC, flac,[libflac=yes],:)
+AC_SUBST(FLAC_CFLAGS)
+AC_SUBST(FLAC_LIBS)
+############## END OF FLAC
+
 ############## FIREWIRE
 # firewire settings are propagated through FIREWIRE_CFLAGS and FIREWIRE_LDFLAGS
 AC_ARG_ENABLE(firewire, 
@@ -544,7 +550,8 @@ if test "x$with_external_ffmpeg" = "xyes"; then
 else
      FFMPEG_FOLDER=ffmpeg
      FFMPEG_CFLAGS="-I\$(top_srcdir)/quicktime/ffmpeg"
-     FFMPEG_LIBS="-L\$(top_builddir)/quicktime/ffmpeg/libavcodec -lavcodec-cinelerra \
+     FFMPEG_LIBS="-L\$(top_builddir)/quicktime/ffmpeg/libavformat -lavformat-cinelerra \
+		-L\$(top_builddir)/quicktime/ffmpeg/libavcodec -lavcodec-cinelerra \
 		-L\$(top_builddir)/quicktime/ffmpeg/libavutil -lavutil-cinelerra"
      FFMPEG_EXTERNALTEXT="Internal ffmpeg"
 fi
@@ -803,7 +810,6 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/timefront/Makefile \
 	plugins/svg/Makefile \
 	plugins/diffkey/Makefile \
-	plugins/fonts/Makefile \
 	image/Makefile)
 
 succeeded=yes
@@ -847,6 +853,7 @@ RPT(libfaac,libfaac libraries)
 RPT(libfaach,libfaac headers)
 RPT(libfaad,libfaad libraries)
 RPT(libfaadh,libfaad headers)
+RPT(libflac,FLAC)
 mandatory="$succeeded"
 
 echo

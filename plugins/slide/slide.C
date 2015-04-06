@@ -23,6 +23,7 @@
 #include "bchash.h"
 #include "edl.inc"
 #include "filexml.h"
+#include "language.h"
 #include "overlayframe.h"
 #include "picon_png.h"
 #include "vframe.h"
@@ -32,10 +33,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
+
 
 REGISTER_PLUGIN(SlideMain)
 
@@ -246,7 +244,7 @@ int SlideMain::save_defaults()
 void SlideMain::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("SLIDE");
 	output.tag.set_property("MOTION_DIRECTION", motion_direction);
 	output.tag.set_property("DIRECTION", direction);
@@ -260,7 +258,7 @@ void SlideMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	while(!input.read_tag())
 	{

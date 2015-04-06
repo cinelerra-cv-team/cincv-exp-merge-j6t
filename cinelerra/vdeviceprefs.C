@@ -175,13 +175,9 @@ int VDevicePrefs::initialize(int creation)
 
 int VDevicePrefs::delete_objects()
 {
-SET_TRACE
 	delete output_title;
-SET_TRACE
 	delete channel_picker;
-SET_TRACE
 	delete buz_swap_channels;
-SET_TRACE
 	delete device_title;
 	delete device_text;
 
@@ -191,22 +187,13 @@ SET_TRACE
 	delete number_title;
 	delete device_number;
 
-SET_TRACE
-SET_TRACE
 	if(firewire_port) delete firewire_port;
-SET_TRACE
 	if(channel_title) delete channel_title;
-SET_TRACE
 	if(firewire_channel) delete firewire_channel;
-SET_TRACE
-SET_TRACE
 	if(firewire_path) delete firewire_path;
-SET_TRACE
 	if(syt_title) delete syt_title;
-SET_TRACE
 	if(firewire_syt) delete firewire_syt;
 
-SET_TRACE
 	reset_objects();
 	driver = -1;
 	return 0;

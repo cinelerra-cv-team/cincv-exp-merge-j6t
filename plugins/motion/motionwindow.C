@@ -143,6 +143,11 @@ void MotionWindow::create_objects()
 		x + title->get_w() + 10 + block_x->get_w() + 10, 
 		y + 10));
 
+	add_subwindow(title = new BC_Title(x2, y, _("Rotation center:")));
+	add_subwindow(rotation_center = new RotationCenter(plugin,
+		x2 + title->get_w() + 10,
+		y));
+
 	y += 40;
 	add_subwindow(title = new BC_Title(x, y + 10, _("Block Y:")));
 	add_subwindow(block_y = new MotionBlockY(plugin, 
@@ -317,6 +322,27 @@ int RotationRange::handle_event()
 
 
 
+RotationCenter::RotationCenter(MotionMain *plugin, 
+	int x, 
+	int y)
+ : BC_IPot(x, 
+		y, 
+		(int64_t)plugin->config.rotation_center,
+		(int64_t)-MAX_ROTATION,
+		(int64_t)MAX_ROTATION)
+{
+	this->plugin = plugin;
+}
+
+
+int RotationCenter::handle_event()
+{
+	plugin->config.rotation_center = (int)get_value();
+	plugin->send_configure_change();
+	return 1;
+}
+
+
 
 
 
@@ -369,6 +395,8 @@ GlobalSearchPositions::GlobalSearchPositions(MotionMain *plugin,
 }
 void GlobalSearchPositions::create_objects()
 {
+	add_item(new BC_MenuItem("16"));
+	add_item(new BC_MenuItem("32"));
 	add_item(new BC_MenuItem("64"));
 	add_item(new BC_MenuItem("128"));
 	add_item(new BC_MenuItem("256"));

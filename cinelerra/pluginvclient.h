@@ -137,6 +137,8 @@ public:
 // Called by PluginServer after process_buffer to delete the temp if it's too
 // large.
 	void age_temp();
+// Get the temporary created by new_temp.  Only valid if it occurs after new_temp
+// in the same process_buffer call.
 	VFrame* get_temp();
 
 // Frame rate relative to EDL
@@ -189,7 +191,7 @@ public:
 	float aspect_w;
 	float aspect_h;  
 
-// Tempo
+// Temp
 	VFrame *temp;
 };
 

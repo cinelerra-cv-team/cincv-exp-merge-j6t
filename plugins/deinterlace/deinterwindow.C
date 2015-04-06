@@ -21,12 +21,8 @@
 
 #include "bcdisplayinfo.h"
 #include "deinterwindow.h"
+#include "language.h"
 #include <string.h>
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 

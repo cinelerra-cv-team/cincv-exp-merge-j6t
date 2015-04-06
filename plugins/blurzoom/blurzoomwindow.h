@@ -48,11 +48,10 @@ public:
 class BlurZoomWindow : public PluginClientWindow
 {
 public:
-	BlurZoomWindow(BlurZoomMain *client, int x, int y);
+	BlurZoomWindow(BlurZoomMain *client);
 	~BlurZoomWindow();
 
 	void create_objects();
-	int close_event();
 
 	BlurZoomMain *client;
 };

@@ -444,7 +444,7 @@ int C41Effect::save_defaults()
 void C41Effect::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("C41");
 	output.tag.set_property("ACTIVE", config.active);
 	output.tag.set_property("COMPUTE_MAGIC", config.compute_magic);
@@ -465,7 +465,7 @@ void C41Effect::save_data(KeyFrame *keyframe)
 void C41Effect::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 	while(!input.read_tag())
 	{
 		if(input.tag.title_is("C41"))

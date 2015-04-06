@@ -35,7 +35,6 @@ class VRender : public CommonRender
 {
 public:
 	VRender(RenderEngine *renderengine);
-	VRender(MWindow *mwindow, RenderEngine *renderengine);
 	~VRender();
 
 	VirtualConsole* new_vconsole_object();

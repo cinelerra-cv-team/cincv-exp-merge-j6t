@@ -254,7 +254,7 @@ public:
 	int current_channel;
 	int current_layer;
 
-// Position information normalized
+// Position information normalized to project rates
 	int64_t normalized_sample;
 	int64_t normalized_sample_rate;
 	Preferences *preferences;
@@ -266,7 +266,7 @@ private:
 
 	int getting_options;
 	BC_WindowBase *format_window;
-	Mutex *format_completion;
+	Condition *format_completion;
 	FrameCache *frame_cache;
 // Copy read frames to the cache
 	int use_cache;

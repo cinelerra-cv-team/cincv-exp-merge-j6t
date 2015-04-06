@@ -99,6 +99,8 @@ public:
 	float automation_mins[6];
 	float automation_maxs[6];
 	int zoombar_showautotype;
+// Default type of float keyframe
+	int floatauto_type;
 
 // Eye dropper
 	float red, green, blue;

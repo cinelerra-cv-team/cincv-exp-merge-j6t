@@ -32,6 +32,7 @@ ErrorBox::~ErrorBox()
 
 int ErrorBox::create_objects(const char *text)
 {
+	lock_window("ErrorBox::create_objects");
 	int x = 10, y = 10;
 	BC_Title *title;
 
@@ -44,5 +45,6 @@ int ErrorBox::create_objects(const char *text)
 	x = get_w() / 2 - 30;
 	y = get_h() - 50;
 	add_tool(new BC_OKButton(x, y));
+	unlock_window();
 	return 0;
 }

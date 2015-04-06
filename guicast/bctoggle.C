@@ -72,7 +72,7 @@ int BC_Toggle::initialize()
 // Get the image
 	set_images(data);
 	calculate_extents(this,
-		data,
+		data ? data : BC_WindowBase::get_resources()->checkbox_images,
 		bottom_justify,
 		&text_line,
 		&w,
@@ -149,9 +149,12 @@ void BC_Toggle::calculate_extents(BC_WindowBase *gui,
 		*w = *text_x + *text_w;
 	}
 
-
 }
 
+void BC_Toggle::set_radial(int value)
+{
+	is_radial = value;
+}
 
 int BC_Toggle::set_images(VFrame **data)
 {

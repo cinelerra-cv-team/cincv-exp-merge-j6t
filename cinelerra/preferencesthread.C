@@ -79,23 +79,9 @@ PreferencesMenuitem::~PreferencesMenuitem()
 
 int PreferencesMenuitem::handle_event() 
 {
-	if(!thread->running())
-	{
-		thread->start();
-	}
-	else
-	{
-// window_lock has to be locked but window can't be locked until after
-// it is known to exist, so we neglect window_lock for now
-		if(thread->window)
-		{
-			thread->window_lock->lock("SetFormat::handle_event");
-			thread->window->lock_window("PreferencesMenuitem::handle_event");
-			thread->window->raise_window();
-			thread->window->unlock_window();
-			thread->window_lock->unlock();
-		}
-	}
+	mwindow->gui->unlock_window();
+	thread->start();
+	mwindow->gui->lock_window("PreferencesMenuitem::handle_event");
 	return 1;
 }
 
@@ -103,20 +89,18 @@ int PreferencesMenuitem::handle_event()
 
 
 PreferencesThread::PreferencesThread(MWindow *mwindow)
- : Thread()
+ : BC_DialogThread()
 {
 	this->mwindow = mwindow;
 	window = 0;
 	thread_running = 0;
-	window_lock = new Mutex("PreferencesThread::window_lock");
 }
 
 PreferencesThread::~PreferencesThread()
 {
-	delete window_lock;
 }
 
-void PreferencesThread::run()
+BC_Window* PreferencesThread::new_gui()
 {
 	int need_new_indexes;
 
@@ -135,17 +119,20 @@ void PreferencesThread::run()
 	need_new_indexes = 0;
 	rerender = 0;
 
- 	int x = mwindow->gui->get_root_w(0, 1) / 2 - WIDTH / 2;
-	int y = mwindow->gui->get_root_h(1) / 2 - HEIGHT / 2;
+ 	mwindow->gui->lock_window("NewThread::new_gui");
+	int x = mwindow->gui->get_abs_cursor_x(0) - WIDTH / 2;
+	int y = mwindow->gui->get_abs_cursor_y(0) - HEIGHT / 2;
 
-	window_lock->lock("PreferencesThread::run 1");
 	window = new PreferencesWindow(mwindow, this, x, y);
 	window->create_objects();
-	window_lock->unlock();
+	mwindow->gui->unlock_window();
 
 	thread_running = 1;
-	int result = window->run_window();
+	return window;
+}
 
+void PreferencesThread::handle_close_event(int result)
+{
 	thread_running = 0;
 	if(!result)
 	{
@@ -153,21 +140,25 @@ void PreferencesThread::run()
 		mwindow->save_defaults();
 	}
 
-	window_lock->lock("PreferencesThread::run 2");
-	delete window;
 	window = 0;
-	window_lock->unlock();
 	delete preferences;
 	delete edl;
+	preferences = 0;
+	edl = 0;
 
 	mwindow->defaults->update("DEFAULTPREF", current_dialog);
 }
 
+
+
 int PreferencesThread::update_framerate()
 {
-	if(thread_running && window)
+	if(thread_running)
 	{
-		window->update_framerate();
+		lock_gui("PreferencesThread::update_framerate");
+		PreferencesWindow *window = (PreferencesWindow*)get_gui();
+		if(window) window->update_framerate();
+		unlock_gui();
 	}
 	return 0;
 }
@@ -347,16 +338,18 @@ PreferencesWindow::PreferencesWindow(MWindow *mwindow,
 
 PreferencesWindow::~PreferencesWindow()
 {
+	lock_window("PreferencesWindow::~PreferencesWindow");
 	delete category;
 	if(dialog) delete dialog;
 	for(int i = 0; i < categories.total; i++)
 		delete categories.values[i];
+	unlock_window();
 }
 
 void PreferencesWindow::create_objects()
 {
 	BC_Button *button;
-
+	lock_window("PreferencesWindow::create_objects");
 
 	set_icon(mwindow->theme->get_image("mwindow_icon"));
 	mwindow->theme->draw_preferences_bg(this);
@@ -395,6 +388,7 @@ void PreferencesWindow::create_objects()
 
 	set_current_dialog(thread->current_dialog);
 	show_window();
+	unlock_window();
 }
 
 int PreferencesWindow::update_framerate()

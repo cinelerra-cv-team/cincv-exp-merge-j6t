@@ -167,11 +167,13 @@ void RecordAudio::run()
 			{
 // Read into monitor buffer for monitoring.
 //printf("RecordAudio::run 1\n");
+//SET_TRACE
 				grab_result = record->adevice->read_buffer(input, 
 					fragment_size, 
 					over, 
 					max, 
 					0);
+//SET_TRACE
 //printf("RecordAudio::run 2 %d\n", grab_result);
 			}
 //printf("RecordAudio::run 3 %d %f\n", fragment_size, max);
@@ -260,7 +262,6 @@ void RecordAudio::run()
 //printf("RecordAudio::run 4 %d %d\n", batch_done, write_result);
 	}
 
-TRACE("RecordAudio::run 4");
 	if(write_result && !record->default_asset->video_data)
 	{
 		ErrorBox error_box(PROGRAM_NAME ": Error",
@@ -270,7 +271,6 @@ TRACE("RecordAudio::run 4");
 		error_box.run_window();
 		batch_done = 1;
 	}
-TRACE("RecordAudio::run 10");
 
 	if(!record_thread->monitor)
 	{
@@ -288,20 +288,20 @@ TRACE("RecordAudio::run 10");
 		delete [] input;
 		input = 0;
 	}
-TRACE("RecordAudio::run 11");
+
 
 // reset meter
-	gui->lock_window("RecordAudio::run 2");
+//	gui->lock_window("RecordAudio::run 2");
+	record->record_monitor->window->lock_window("RecordAudio::run 2");
 	for(channel = 0; channel < record_channels; channel++)
 	{
 		record->record_monitor->window->meters->meters.values[channel]->reset();
 	}
-TRACE("RecordAudio::run 12");
+	record->record_monitor->window->unlock_window();
 
-	gui->unlock_window();
+//	gui->unlock_window();
 	delete [] max;
 	delete [] over;
-TRACE("RecordAudio::run 100");
 }
 
 void RecordAudio::write_buffer(int skip_new)

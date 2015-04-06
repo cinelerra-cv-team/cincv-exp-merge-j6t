@@ -20,6 +20,7 @@
  */
 
 #include "aboutprefs.h"
+#include "bcsignals.h"
 #include "language.h"
 #include "libmpeg3.h"
 #include "mwindow.h"
@@ -37,11 +38,13 @@ AboutPrefs::AboutPrefs(MWindow *mwindow, PreferencesWindow *pwindow)
 
 AboutPrefs::~AboutPrefs()
 {
+	credits.remove_all_objects();
 }
 
 void AboutPrefs::create_objects()
 {
 	int x, y;
+
 
 	BC_Resources *resources = BC_WindowBase::get_resources();
 
@@ -73,7 +76,7 @@ void AboutPrefs::create_objects()
 
 
 
-	y += get_text_height(MEDIUMFONT) * 3;
+	y += get_text_height(MEDIUMFONT) * 4;
 
 	char versions[BCTEXTLEN];
 	sprintf(versions, 
@@ -92,54 +95,50 @@ mpeg3_release());
 
 	y += get_text_height(MEDIUMFONT) * 3;
 	set_font(LARGEFONT);
-	draw_text(x, y, "Credits:");
+	draw_text(x, y, "Contributors:");
 	y += get_text_height(LARGEFONT);
-	set_font(MEDIUMFONT);
 
-	draw_utf8_text(x, y,
-"Jack Crossfire\n"
-"Richard Baverstock\n"
-"Karl Bielefeldt\n"
-"Kevin Brosius\n"
-"Jean-Luc Coulon\n"
-"Jean-Michel POURE\n"
-"Jerome Cornet\n"
-"Pierre Marc Dumuid\n"
-"Alex Ferrer\n"
-"Jan Gerber\n"
-"Koen Muylkens\n"
-"Stefan de Konink\n"
-"Nathan Kurz\n"
-"Greg Mekkes\n"
-"Eric Seigne\n"
-"Joe Stewart\n"
-);
 
-	int x_indented;
-	x_indented = x + get_text_width(MEDIUMFONT, "Pierre Marc Dumuid") + 20;
-	draw_utf8_text(x_indented, y,
-"Dan Streetman\n"
-#ifdef X_HAVE_UTF8_STRING
-"Gustavo Iñiguez\n"
-#else
-"Gustavo I\361iguez\n"
-#endif
-"Johannes Sixt\n"
-"Mark Taraba\n"
-"Andraz Tori\n"
-"Jonas Wulff\n"
-"David Arendt\n"
-#ifdef X_HAVE_UTF8_STRING
-"Einar Rünkaru\n"
-#else
-"Einar R\374nkaru\n"
-#endif
-"Monty Montgomery\n"
-);
+	credits.append(new BC_ListBoxItem("Adam Williams"));
+	credits.append(new BC_ListBoxItem("David Arendt"));
+	credits.append(new BC_ListBoxItem("Richard Baverstock"));
+	credits.append(new BC_ListBoxItem("Karl Bielefeldt"));
+	credits.append(new BC_ListBoxItem("Kevin Brosius"));
+	credits.append(new BC_ListBoxItem("Jean-Luc Coulon"));
+	credits.append(new BC_ListBoxItem("Jean-Michel POURE"));
+	credits.append(new BC_ListBoxItem("Jerome Cornet"));
+	credits.append(new BC_ListBoxItem("Pierre Marc Dumuid"));
+	credits.append(new BC_ListBoxItem("Alex Ferrer"));
+	credits.append(new BC_ListBoxItem("Jan Gerber"));
+	credits.append(new BC_ListBoxItem("Gustavo I\361iguez"));
+	credits.append(new BC_ListBoxItem("Stefan de Konink"));
+	credits.append(new BC_ListBoxItem("Nathan Kurz"));
+	credits.append(new BC_ListBoxItem("Greg Mekkes"));
+	credits.append(new BC_ListBoxItem("Monty Montgomery"));
+	credits.append(new BC_ListBoxItem("Koen Muylkens"));
+	credits.append(new BC_ListBoxItem("Einar R\374nkaru"));
+	credits.append(new BC_ListBoxItem("Eric Seigne"));
+	credits.append(new BC_ListBoxItem("Johannes Sixt"));
+	credits.append(new BC_ListBoxItem("Joe Stewart"));
+	credits.append(new BC_ListBoxItem("Dan Streetman"));
+	credits.append(new BC_ListBoxItem("Mark Taraba"));
+	credits.append(new BC_ListBoxItem("Andraz Tori"));
+	credits.append(new BC_ListBoxItem("Jonas Wulff"));
 
-	y = get_h() - 170;
+	BC_ListBox *listbox;
+	add_subwindow(listbox = new BC_ListBox(x, 
+		y,
+		200,
+		300,
+		LISTBOX_TEXT,
+		&credits,
+		0,
+		0,
+		1));
+	y += listbox->get_h() + get_text_height(LARGEFONT) + 10;
 
 	set_font(LARGEFONT);
+	set_color(resources->text_default);
 	draw_text(x, y, "License:");
 	y += get_text_height(LARGEFONT);
 

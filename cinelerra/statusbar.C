@@ -60,7 +60,8 @@ void StatusBar::create_objects()
 		MEDIUMFONT,
 		mwindow->theme->message_normal));
 	x = get_w() - 290;
-//printf("StatusBar::create_objects 1\n");
+// printf("StatusBar::create_objects %d: 0x%08x\n", 
+// __LINE__, mwindow->theme->message_normal);
 	add_subwindow(main_progress = 
 		new BC_ProgressBar(mwindow->theme->mstatus_progress_x, 
 			mwindow->theme->mstatus_progress_y, 

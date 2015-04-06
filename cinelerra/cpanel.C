@@ -313,8 +313,10 @@ CPanelToolWindow::~CPanelToolWindow()
 
 int CPanelToolWindow::handle_event()
 {
+	unlock_window();
 	mwindow->edl->session->tool_window = get_value();
 	gui->subwindow->tool_panel->update_show_window();
+	lock_window("CPanelToolWindow::handle_event");
 	return 1;
 }
 

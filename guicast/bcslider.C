@@ -255,7 +255,7 @@ int BC_Slider::keypress_event()
 int BC_Slider::cursor_enter_event()
 {
 //printf("BC_Slider::cursor_enter_event 1\n");
-	if(top_level->event_win == win && status == SLIDER_UP)
+	if(top_level->event_win == win && status == SLIDER_UP && enabled)
 	{
 		tooltip_done = 0;
 		status = SLIDER_HI;
@@ -288,10 +288,22 @@ int BC_Slider::activate()
 	active = 1;
 }
 
+void BC_Slider::enable()
+{
+	enabled = 1;
+	draw_face();
+}
+
+void BC_Slider::disable()
+{
+	enabled = 0;
+	draw_face();
+}
+
 int BC_Slider::button_press_event()
 {
 	int result = 0;
-	if(is_event_win())
+	if(is_event_win() && enabled)
 	{
 		if(!tooltip_on) top_level->hide_tooltip();
 		if(status == SLIDER_HI)

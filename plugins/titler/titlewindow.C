@@ -21,16 +21,11 @@
 
 #include "bcdisplayinfo.h"
 #include "clip.h"
+#include "language.h"
 #include "titlewindow.h"
 #include "bcfontentry.h"
 
-#include <string.h>
-#include <libintl.h>
 #include <wchar.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
-
 
 
 
@@ -75,6 +70,8 @@ void TitleWindow::create_objects()
 {
 	int x = 10, y = 10;
 	int w1, y1;
+#define COLOR_W 50
+#define COLOR_H 30
 
 	timecodeformats.append(new BC_ListBoxItem(TIME_SECONDS__STR));
 	timecodeformats.append(new BC_ListBoxItem(TIME_HMS__STR)); 		
@@ -184,10 +181,6 @@ void TitleWindow::create_objects()
 	w1 = italic->get_w();
 	add_tool(bold = new TitleBold(client, this, x, y + 50));
 	w1 = MAX(bold->get_w(), w1);
-#ifdef USE_OUTLINE
-	add_tool(stroke = new TitleStroke(client, this, x, y + 80));
-	w1 = MAX(stroke->get_w(), w1);
-#endif
 	x += w1 + 10;
 	add_tool(justify_title = new BC_Title(x, y, _("Justify:")));
 	add_tool(left = new TitleLeft(client, this, x, y + 20));
@@ -247,52 +240,43 @@ void TitleWindow::create_objects()
 	speed->create_objects();
 	x += MAX(speed_title->get_w(), speed->get_w()) + 10;
 
-	add_tool(color_button = new TitleColorButton(client, this, x, y + 20));
+	add_tool(color_button = new TitleColorButton(client, this, x, y + 20, 0));
 	x += color_button->get_w() + 5;
 	color_x = x;
 	color_y = y + 16;
-	color_thread = new TitleColorThread(client, this);
+	color_thread = new TitleColorThread(client, this, 0);
 
 	x = 10;
 	y += 50;
-#ifdef  USE_OUTLINE
 	y1 = y + 40;
-#else
-	y1 = y + 10;
-#endif
 	add_tool(text_title = new BC_Title(x, y1, _("Text:")));
 
 	x += MAX(100, text_title->get_w()) + 10;
 	add_tool(timecode = new TitleTimecode(client, x, y));
 
 	BC_SubWindow *thisw;
-#ifdef USE_OUTLINE
 	y1 = y + 30;
-#else
-	x += timecode->get_w() + 20;
-	y1 = y;
-#endif
 	add_tool(thisw = new BC_Title(x, y1, _("Format:")));
 	w1 = thisw->get_w() + 5;
 	timecodeformat = new TitleTimecodeFormat(client, this, x + w1, y1);
 	timecodeformat->create_objects();
 
-#ifdef USE_OUTLINE
 	x += w1 + timecodeformat->get_w() + 10;
-	add_tool(strokewidth_title = new BC_Title(x, y, _("Outline width:")));
-	stroke_width = new TitleStrokeW(client, 
+	add_tool(outline_title = new BC_Title(x, y, _("Outline:")));
+	outline = new TitleOutline(client,
 		this, 
-		x + strokewidth_title->get_w() + 10,
+		x + outline_title->get_w() + 10,
 		y);
-	stroke_width->create_objects();
+	outline->create_objects();
 
-	add_tool(color_stroke_button = new TitleColorStrokeButton(client, 
+	add_tool(outline_color_button = new TitleColorButton(client,
 		this, 
-		y1));
-	color_stroke_x = x + color_stroke_button->get_w() + 10;
-	color_stroke_y = y1;
-	color_stroke_thread = new TitleColorStrokeThread(client, this);
-#endif
+		x,
+		y1,
+		1));
+	outline_color_x = x + outline_color_button->get_w() + 10;
+	outline_color_y = y1 - 4;
+	outline_color_thread = new TitleColorThread(client, this, 1);
 
 
 	x = 10;
@@ -352,13 +336,11 @@ void TitleWindow::update_color()
 {
 //printf("TitleWindow::update_color %x\n", client->config.color);
 	set_color(client->config.color);
-	draw_box(color_x, color_y, 100, 30);
-	flash(color_x, color_y, 100, 30);
-#ifdef USE_OUTLINE
-	set_color(client->config.color_stroke);
-	draw_box(color_stroke_x, color_stroke_y, 100, 30);
-	flash(color_stroke_x, color_stroke_y, 100, 30);
-#endif
+	draw_box(color_x, color_y, COLOR_W, COLOR_H);
+	flash(color_x, color_y, COLOR_W, COLOR_H);
+	set_color(client->config.outline_color);
+	draw_box(outline_color_x, outline_color_y, COLOR_W, COLOR_H);
+	flash(outline_color_x, outline_color_y, COLOR_W, COLOR_H);
 }
 
 void TitleWindow::update_justification()
@@ -394,6 +376,7 @@ void TitleWindow::update()
 	font->update(client->config.font);
 	text->update(client->config.text);
 	speed->update(client->config.pixels_per_second);
+	outline->update((int64_t)client->config.outline_size);
 	update_justification();
 	update_color();
 }
@@ -444,22 +427,6 @@ int TitleItalic::handle_event()
 	return 1;
 }
 
-TitleStroke::TitleStroke(TitleMain *client, TitleWindow *window, int x, int y)
- : BC_CheckBox(x, y, client->config.style & FONT_OUTLINE, _("Outline"))
-{
-	this->client = client;
-	this->window = window;
-}
-
-int TitleStroke::handle_event()
-{
-	client->config.style = 
-		(client->config.style & ~FONT_OUTLINE) | 
-		(get_value() ? FONT_OUTLINE : 0);
-	client->send_configure_change();
-	return 1;
-}
-
 
 
 TitleSize::TitleSize(TitleMain *client, TitleWindow *window, int x, int y, char *text)
@@ -491,29 +458,25 @@ void TitleSize::update(int size)
 	BC_PopupTextBox::update(string);
 }
 
-TitleColorButton::TitleColorButton(TitleMain *client, TitleWindow *window, int x, int y)
- : BC_GenericButton(x, y, _("Color..."))
+TitleColorButton::TitleColorButton(TitleMain *client, 
+	TitleWindow *window, 
+	int x, 
+	int y, 
+	int is_outline)
+ : BC_GenericButton(x, y, is_outline ? _("Outline color...") : _("Color..."))
 {
 	this->client = client;
 	this->window = window;
+	this->is_outline = is_outline;
 }
 int TitleColorButton::handle_event()
 {
-	window->color_thread->start_window(client->config.color, 0);
-	return 1;
-}
-
-TitleColorStrokeButton::TitleColorStrokeButton(TitleMain *client, TitleWindow *window, int x, int y)
- : BC_GenericButton(x, y, _("Outline color..."))
-{
-	this->client = client;
-	this->window = window;
-}
-int TitleColorStrokeButton::handle_event()
-{
-#ifdef USE_OUTLINE
-	window->color_stroke_thread->start_window(client->config.color_stroke, 0);
-#endif
+	if(is_outline)
+		window->outline_color_thread->start_window(client->config.outline_color, 
+			client->config.outline_alpha);
+	else
+		window->color_thread->start_window(client->config.color, 
+			client->config.alpha);
 	return 1;
 }
 
@@ -662,6 +625,26 @@ TitleDropShadow::TitleDropShadow(TitleMain *client, TitleWindow *window, int x, 
 int TitleDropShadow::handle_event()
 {
 	client->config.dropshadow = atol(get_text());
+	client->send_configure_change();
+	return 1;
+}
+
+
+TitleOutline::TitleOutline(TitleMain *client, TitleWindow *window, int x, int y)
+ : BC_TumbleTextBox(window,
+ 	(int64_t)client->config.outline_size,
+	(int64_t)0,
+	(int64_t)1000,
+	x, 
+	y, 
+	70)
+{
+	this->client = client;
+	this->window = window;
+}
+int TitleOutline::handle_event()
+{
+	client->config.outline_size = atol(get_text());
 	client->send_configure_change();
 	return 1;
 }
@@ -819,16 +802,26 @@ int TitleBottom::handle_event()
 
 
 
-TitleColorThread::TitleColorThread(TitleMain *client, TitleWindow *window)
- : ColorThread()
+TitleColorThread::TitleColorThread(TitleMain *client, TitleWindow *window, int is_outline)
+ : ColorThread(1)
 {
 	this->client = client;
 	this->window = window;
+	this->is_outline = is_outline;
 }
 
-int TitleColorThread::handle_new_color(int output, int /*alpha*/)
+int TitleColorThread::handle_new_color(int output, int alpha)
 {
-	client->config.color = output;
+	if(is_outline)
+	{
+		client->config.outline_color = output;
+		client->config.outline_alpha = alpha;
+	}
+	else
+	{
+		client->config.color = output;
+		client->config.alpha = alpha;
+	}
 	window->update_color();
 	window->flush();
 	client->send_configure_change();

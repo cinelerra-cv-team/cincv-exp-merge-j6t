@@ -95,8 +95,34 @@ int FrameCache::get_frame(VFrame *frame,
 	{
 		if(result->data) 
 		{
+// Frame may have come from the readahead thread.
+// Those frames are in the codec color model.
+// But to pass frame_exists, they must be identical.
+// 			cmodel_transfer(frame->get_rows(), 
+// 				result->data->get_rows(),
+// 				result->data->get_y(),
+// 				result->data->get_u(),
+// 				result->data->get_v(),
+// 				frame->get_y(),
+// 				frame->get_u(),
+// 				frame->get_v(),
+// 				0, 
+// 				0, 
+// 				result->data->get_w(), 
+// 				result->data->get_h(),
+// 				0, 
+// 				0, 
+// 				frame->get_w(), 
+// 				frame->get_h(),
+// 				result->data->get_color_model(), 
+// 				frame->get_color_model(),
+// 				0,
+// 				result->data->get_w(),
+// 				frame->get_w());
 			frame->copy_from(result->data);
-			frame->copy_stacks(result->data);
+// This would have copied the color matrix for interpolate, but
+// required the same plugin stack as the reader.
+//			frame->copy_stacks(result->data);
 		}
 		result->age = get_age();
 	}
@@ -202,9 +228,24 @@ int FrameCache::frame_exists(VFrame *format,
 	FrameCacheItem *item = (FrameCacheItem*)get_item(position);
 	while(item && item->position == position)
 	{
+// printf("FrameCache::frame_exists %d %f,%f %d,%d %d,%d format match=%d item->data=%p\n",
+// __LINE__,
+// item->frame_rate,
+// frame_rate,
+// item->layer,
+// layer,
+// item->asset_id,
+// asset_id,
+// format->equivalent(item->data, 1),
+// item->data);
+// format->dump_params();
+
+// This originally tested the frame stacks because a change in the 
+// interpolate plugin could cause CR2 to interpolate or not interpolate.
+// This was disabled.
 		if(EQUIV(item->frame_rate, frame_rate) &&
 			layer == item->layer &&
-			format->equivalent(item->data, 1) &&
+			format->equivalent(item->data, 0) &&
 			(asset_id == -1 || item->asset_id == -1 || asset_id == item->asset_id))
 		{
 			*item_return = item;
@@ -228,6 +269,19 @@ int FrameCache::frame_exists(int64_t position,
 	FrameCacheItem *item = (FrameCacheItem*)get_item(position);
 	while(item && item->position == position)
 	{
+// printf("FrameCache::frame_exists %d %f,%f %d,%d %d,%d %d,%d\n",
+// __LINE__,
+// item->frame_rate,
+// frame_rate,
+// item->layer,
+// layer,
+// item->data->get_color_model(),
+// color_model,
+// item->data->get_w(),
+// w,
+// item->data->get_h(),
+// h);
+
 		if(EQUIV(item->frame_rate, frame_rate) &&
 			layer == item->layer &&
 			color_model == item->data->get_color_model() &&

@@ -32,7 +32,8 @@ BitsPopup::BitsPopup(BC_WindowBase *parent_window,
 	int use_ulaw,
 	int use_adpcm, 
 	int use_float,
-	int use_32linear)
+	int use_32linear,
+	int use_8linear)
 {
 	this->parent_window = parent_window;
 	this->output = output;
@@ -43,6 +44,7 @@ BitsPopup::BitsPopup(BC_WindowBase *parent_window,
 	this->use_adpcm = use_adpcm;
 	this->use_float = use_float;
 	this->use_32linear = use_32linear;
+	this->use_8linear = use_8linear;
 }
 
 BitsPopup::~BitsPopup()
@@ -55,7 +57,7 @@ BitsPopup::~BitsPopup()
 
 void BitsPopup::create_objects()
 {
-	bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR8)));
+	if(use_8linear) bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR8)));
 	bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR16)));
 	bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR24)));
 	if(use_32linear) bits_items.append(new BC_ListBoxItem(File::bitstostr(BITSLINEAR32)));

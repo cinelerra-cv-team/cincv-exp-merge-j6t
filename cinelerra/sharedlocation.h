@@ -35,6 +35,8 @@ public:
 	void load(FileXML *file);
 	int operator==(const SharedLocation &that);
 	SharedLocation& operator=(const SharedLocation &that);
+	void copy_from(SharedLocation *that);
+	int equivalent(SharedLocation *that);
 	int get_type();
 	void calculate_title(char *string, 
 		EDL *edl, 

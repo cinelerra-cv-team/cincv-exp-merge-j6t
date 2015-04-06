@@ -20,19 +20,15 @@
  */
 
 #include "cdripwindow.h"
+#include "language.h"
 #include "mwindow.inc"
 
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
-
 CDRipWindow::CDRipWindow(CDRipMain *cdripper)
  : PluginClientWindow(cdripper,
  	450, 
-	192)
+	230)
 { 
 	this->cdripper = cdripper; 
 }

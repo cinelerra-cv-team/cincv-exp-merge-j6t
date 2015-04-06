@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			char *new_filename;
-			new_filename = new char[1024];
+			new_filename = new char[BCTEXTLEN];
 			strcpy(new_filename, argv[i]);
             fs.complete_path(new_filename);
 
@@ -293,20 +293,28 @@ PROGRAM_NAME " is free software, covered by the GNU General Public License,\n"
 			mwindow.create_objects(1, 
 				!filenames.total,
 				config_path);
+//SET_TRACE
 
 // load the initial files on seperate tracks
 			if(filenames.total)
 			{
+//SET_TRACE
 				mwindow.gui->lock_window("main");
+//SET_TRACE
 				mwindow.load_filenames(&filenames, LOAD_REPLACE);
+//SET_TRACE
 				if(filenames.total == 1)
 					mwindow.gui->mainmenu->add_load(filenames.values[0]);
 				mwindow.gui->unlock_window();
+//SET_TRACE
 			}
 
 // run the program
+//SET_TRACE
 			mwindow.start();
+//SET_TRACE
 			mwindow.save_defaults();
+//SET_TRACE
 DISABLE_BUFFER
 			break;
 		}

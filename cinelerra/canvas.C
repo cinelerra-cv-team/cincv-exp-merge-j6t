@@ -651,7 +651,7 @@ int Canvas::get_buttonpress()
 }
 
 
-int Canvas::create_objects(EDL *edl)
+void Canvas::create_objects(EDL *edl)
 {
 	view_x = x;
 	view_y = y;
@@ -659,7 +659,9 @@ int Canvas::create_objects(EDL *edl)
 	view_h = h;
 	get_scrollbars(edl, view_x, view_y, view_w, view_h);
 
+	subwindow->unlock_window();
 	create_canvas();
+	subwindow->lock_window("Canvas::create_objects");
 
 	subwindow->add_subwindow(canvas_menu = new CanvasPopup(this));
 	canvas_menu->create_objects();
@@ -667,7 +669,6 @@ int Canvas::create_objects(EDL *edl)
 	subwindow->add_subwindow(fullscreen_menu = new CanvasFullScreenPopup(this));
 	fullscreen_menu->create_objects();
 
-	return 0;
 }
 
 int Canvas::button_press_event()
@@ -732,28 +733,27 @@ void Canvas::stop_fullscreen()
 void Canvas::create_canvas()
 {
 	int video_on = 0;
-SET_TRACE
 	lock_canvas("Canvas::create_canvas");
-SET_TRACE
 
 
 	if(!get_fullscreen())
+// Enter windowed
 	{
-SET_TRACE
+
 		if(canvas_fullscreen)
 		{
 			video_on = canvas_fullscreen->get_video_on();
 			canvas_fullscreen->stop_video();
 		}
-SET_TRACE
+
 
 		if(canvas_fullscreen)
 		{
+			canvas_fullscreen->lock_window("Canvas::create_canvas 2");
 			canvas_fullscreen->hide_window();
-//			delete canvas_fullscreen;
-//			canvas_fullscreen = 0;
+			canvas_fullscreen->unlock_window();
 		}
-SET_TRACE
+
 
 		if(!canvas_subwindow)
 		{
@@ -763,18 +763,18 @@ SET_TRACE
 				view_w, 
 				view_h));
 		}
-SET_TRACE
+
 	}
 	else
+// Enter fullscreen
 	{
+
 		if(canvas_subwindow)
 		{
 			video_on = canvas_subwindow->get_video_on();
 			canvas_subwindow->stop_video();
-
-//			delete canvas_subwindow;
-//			canvas_subwindow = 0;
 		}
+
 
 		if(!canvas_fullscreen)
 		{
@@ -784,15 +784,23 @@ SET_TRACE
 		}
 		else
 		{
+			canvas_fullscreen->reposition_window(subwindow->get_root_x(0), 
+				subwindow->get_root_y(0));
 			canvas_fullscreen->show_window();
 		}
-	}
-SET_TRACE
 
-	if(!video_on) draw_refresh();
-SET_TRACE
+	}
+
+
+	if(!video_on)
+	{
+		get_canvas()->lock_window("Canvas::create_canvas 1");
+		draw_refresh();
+		get_canvas()->unlock_window();
+	}
+
 	if(video_on) get_canvas()->start_video();
-SET_TRACE
+
 	unlock_canvas();
 }
 

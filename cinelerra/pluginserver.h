@@ -104,6 +104,10 @@ public:
 // Get or create keyframe for writing, depending on whether auto keyframes
 // is enabled.  Called by PluginClient::send_configure_change
 	KeyFrame* get_keyframe();
+// Apply new settings from the plugin GUI.  Called by PluginClient::send_configure_change
+// Used in keyframe spanning mode.
+	void apply_keyframe(KeyFrame *src);
+
 // Create new theme object.  Used by theme plugins.
 	Theme* new_theme();
 // Get theme being used by Cinelerra currently.  Used by all plugins.

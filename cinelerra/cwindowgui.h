@@ -116,8 +116,10 @@ public:
 	FloatAuto *affected_x;
 	FloatAuto *affected_y;
 	FloatAuto *affected_z;
-// Keyfrom not affecting transformation being affected
-	Auto *affected_keyframe;
+// Pointer to mask keyframe being modified in the EDL
+	MaskAuto *mask_keyframe;
+// Copy of original value of mask keyframe for keyframe spanning
+	MaskAuto *orig_mask_keyframe;
 // Mask point being modified
 	int affected_point;
 // Scrollbar offsets during last button press relative to output

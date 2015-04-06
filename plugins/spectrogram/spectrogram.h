@@ -28,6 +28,7 @@
 
 
 #include "bchash.inc"
+#include "bctimer.inc"
 #include "fourier.h"
 #include "guicast.h"
 #include "mutex.h"
@@ -38,8 +39,15 @@
 
 
 class Spectrogram;
-class SpectrogramFFT;
 
+#define MIN_FRAGMENT 128
+#define MAX_FRAGMENT 16384
+#define MIN_WINDOW 4096
+#define MAX_WINDOW 16384
+#define DIVISIONS 10
+#define DIVISION_W 60
+#define MARGIN 10
+#define MAX_COLUMNS 1024
 
 class SpectrogramLevel : public BC_FPot
 {
@@ -49,6 +57,53 @@ public:
 	Spectrogram *plugin;
 };
 
+class SpectrogramWindowSize : public BC_PopupMenu
+{
+public:
+	SpectrogramWindowSize(Spectrogram *plugin,
+		int x, 
+		int y,
+		char *text);
+	int handle_event();
+	Spectrogram *plugin;
+};
+
+class SpectrogramWindowSizeTumbler : public BC_Tumbler
+{
+public:
+	SpectrogramWindowSizeTumbler(Spectrogram *plugin, int x, int y);
+	int handle_up_event();
+	int handle_down_event();
+	Spectrogram *plugin;
+};
+
+class SpectrogramFragmentSize : public BC_PopupMenu
+{
+public:
+	SpectrogramFragmentSize(Spectrogram *plugin, 
+		int x, 
+		int y,
+		char *text);
+	int handle_event();
+	Spectrogram *plugin;
+};
+
+class SpectrogramFragmentSizeTumbler : public BC_Tumbler
+{
+public:
+	SpectrogramFragmentSizeTumbler(Spectrogram *plugin, int x, int y);
+	int handle_up_event();
+	int handle_down_event();
+	Spectrogram *plugin;
+};
+
+class SpectrogramNormalize : public BC_CheckBox
+{
+public:
+	SpectrogramNormalize(Spectrogram *plugin, int x, int y);
+	int handle_event();
+	Spectrogram *plugin;
+};
 
 class SpectrogramWindow : public PluginClientWindow
 {
@@ -58,8 +113,18 @@ public:
 
 	void create_objects();
 	void update_gui();
+	int resize_event(int w, int h);
 
+	BC_Title *division[DIVISIONS + 1];
+	BC_Title *level_title;
 	SpectrogramLevel *level;
+	BC_Title *window_size_title;
+	SpectrogramWindowSize *window_size;
+	SpectrogramWindowSizeTumbler *window_size_tumbler;
+	BC_Title *window_fragment_title;
+	SpectrogramFragmentSize *window_fragment;
+	SpectrogramFragmentSizeTumbler *window_fragment_tumbler;
+	SpectrogramNormalize *normalize;
 	Spectrogram *plugin;
 	int done;
 	BC_SubWindow *canvas;
@@ -70,28 +135,51 @@ public:
 
 
 
-class SpectrogramFFT : public CrossfadeFFT
-{
-public:
-	SpectrogramFFT(Spectrogram *plugin);
-	~SpectrogramFFT();
-	
-	int signal_process();
-	int read_samples(int64_t output_sample, 
-		int samples, 
-		double *buffer);
-
-	Spectrogram *plugin;
-};
-
-
 class SpectrogramConfig
 {
 public:
 	SpectrogramConfig();
+	int equivalent(SpectrogramConfig &that);
+	void copy_from(SpectrogramConfig &that);
+	void interpolate(SpectrogramConfig &prev, 
+		SpectrogramConfig &next, 
+		int64_t prev_frame, 
+		int64_t next_frame, 
+		int64_t current_frame);
 	double level;
+	int window_size;
+// Generate this many columns for each window
+	int window_fragment;
+	int normalize;
 };
 
+// Header for data buffer
+typedef struct
+{
+	int window_size;
+// Total fragments in this buffer
+	int total_fragments;
+// Samples per fragment
+	int window_fragment;
+// Samplerate
+	int sample_rate;
+// Linearized user level
+	float level;
+// Nothing goes after this
+	float samples[1];
+} data_header_t;
+
+class SpectrogramColumn
+{
+public:
+	SpectrogramColumn(int data_size, int fragment_number);
+	~SpectrogramColumn();
+
+	int64_t fragment_number;
+	float *data;
+// Draw immediately
+	int force;
+};
 
 class Spectrogram : public PluginAClient
 {
@@ -111,14 +199,38 @@ public:
 	void save_data(KeyFrame *keyframe);
 	void update_gui();
 	void render_gui(void *data, int size);	
+	void render_stop();
 	
 	void reset();
 
 	int done;
 	int need_reconfigure;
-	SpectrogramFFT *fft;
-	float *data;
-	int total_windows;
+	FFT *fft;
+// Data buffer for frequency & magnitude
+	unsigned char *data;
+// This stores 2 windows at a time to pull off the fragmenting
+	double *audio_buffer;
+// Temporaries for the FFT
+	double *freq_real;
+	double *freq_imag;
+// Last window size rendered
+	int window_size;
+// Total fragments sent to current GUI
+	int total_fragments;
+// Last fragment drawn by current GUI
+	int last_fragment;
+// Starting sample in audio_buffer.
+	int64_t audio_buffer_start;
+// Total floats allocated in data buffer
+	int allocated_data;
+// Accumulates canvas pixels until the next update_gui
+	ArrayList<SpectrogramColumn*> column_buffer;
+// Header from last data buffer
+	data_header_t header;
+// Time of last GUI update
+	Timer *timer;
+// Window dimensions
+	int w, h;
 };
 
 

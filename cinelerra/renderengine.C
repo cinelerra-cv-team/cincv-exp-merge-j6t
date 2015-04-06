@@ -482,9 +482,7 @@ void RenderEngine::interrupt_playback()
 	}
 	if(video)
 	{
-//printf("RenderEngine::interrupt_playback 3 %p\n", this);
 		video->interrupt_playback();
-//printf("RenderEngine::interrupt_playback 4 %p\n", this);
 	}
 	interrupt_lock->unlock();
 }
@@ -661,14 +659,6 @@ void RenderEngine::arm_playback_video(int every_frame,
 	this->every_frame = every_frame;
 
 	vrender = new VRender(this);
-// 	vrender->arm_playback(current_sample, 
-// 							read_length, 
-// 							output_length, 
-// 							output_length, 
-// 							track_w,
-// 							track_h,
-// 							output_w,
-// 							output_h);
 }
 
 void RenderEngine::start_video()

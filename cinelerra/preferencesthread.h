@@ -22,13 +22,13 @@
 #ifndef PREFERENCESTHREAD_H
 #define PREFERENCESTHREAD_H
 
+#include "bcdialog.h"
 #include "edl.inc"
 #include "guicast.h"
 #include "mutex.inc"
 #include "mwindow.inc"
 #include "preferences.inc"
 #include "preferencesthread.inc"
-#include "thread.h"
 
 
 class PreferencesMenuitem : public BC_MenuItem
@@ -43,12 +43,14 @@ public:
 	PreferencesThread *thread;
 };
 
-class PreferencesThread : public Thread
+class PreferencesThread : public BC_DialogThread
 {
 public:
 	PreferencesThread(MWindow *mwindow);
 	~PreferencesThread();
-	void run();
+
+	BC_Window* new_gui();
+	void handle_close_event(int result);
 
 	int update_framerate();
 	int apply_settings();
@@ -65,7 +67,6 @@ public:
 	int close_assets;
 	int reload_plugins;
 	PreferencesWindow *window;
-	Mutex *window_lock;
 	MWindow *mwindow;
 // Copy of mwindow preferences
 	Preferences *preferences;

@@ -138,7 +138,7 @@ public:
 	void update_textboxes();
 	void update_canvas();
 	void draw_scales();
-	
+	int resize_event(int w, int h);	
 	
 	CompressorCanvas *canvas;
 	CompressorReaction *reaction;

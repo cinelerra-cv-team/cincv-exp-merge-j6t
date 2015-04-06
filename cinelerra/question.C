@@ -19,6 +19,7 @@
  * 
  */
 
+#include "bcsignals.h"
 #include "language.h"
 #include "mwindow.h"
 #include "mwindowgui.h"
@@ -43,8 +44,9 @@ QuestionWindow::~QuestionWindow()
 {
 }
 
-int QuestionWindow::create_objects(char *string, int use_cancel)
+void QuestionWindow::create_objects(char *string, int use_cancel)
 {
+	lock_window("QuestionWindow::create_objects");
 	int x = 10, y = 10;
 	add_subwindow(new BC_Title(10, 10, string));
 	y += 30;
@@ -53,7 +55,7 @@ int QuestionWindow::create_objects(char *string, int use_cancel)
 	add_subwindow(new QuestionNoButton(mwindow, this, x, y));
 	x = get_w() - 100;
 	if(use_cancel) add_subwindow(new BC_CancelButton(x, y));
-	return 0;
+	unlock_window();
 }
 
 QuestionYesButton::QuestionYesButton(MWindow *mwindow, QuestionWindow *window, int x, int y)

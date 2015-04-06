@@ -32,7 +32,7 @@ if BUILDINFO_CUST
 
 endif
 endif
-	echo '#define COPYRIGHTTEXT1 "(C) 2006 Heroine Virtual Ltd."' >> versioninfo.h
+	echo '#define COPYRIGHTTEXT1 "(C) 2008 Adam Williams"' >> versioninfo.h
 	echo '#define COPYRIGHTTEXT2 "(C) 2006-2015 The CinelerraCV Community"' >> versioninfo.h
 	echo '#define COMPILEDATE "Compiled on $(BUILDDATE)"' >> versioninfo.h
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h
@@ -143,6 +143,8 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    filedv.C \
 		    fileogg.C \
 		    fileexr.C \
+		    fileffmpeg.C \
+		    fileflac.C \
 		    fileformat.C \
 		    filejpeg.C \
 		    filelist.C \
@@ -172,6 +174,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    intautos.C \
 		    interfaceprefs.C \
 		    keyframe.C \
+		    keyframegui.C \
 		    keyframehandles.C \
 		    keyframepopup.C \
 		    keyframes.C \
@@ -199,7 +202,10 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    maskengine.C \
 		    mbuttons.C \
 		    menuaeffects.C \
+		    menuattacheffect.C \
+		    menuattachtransition.C \
 		    menueffects.C \
+		    menutransitionlength.C \
 		    menuveffects.C \
 		    meterpanel.C \
 		    module.C \
@@ -230,7 +236,6 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    pluginaclient.C \
 		    pluginaclientlad.C \
 		    pluginarray.C \
-		    pluginautos.C \
 		    plugin.C \
 		    pluginclient.C \
 		    plugindialog.C \
@@ -242,6 +247,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    pluginvclient.C \
 		    preferences.C \
 		    preferencesthread.C \
+		    presets.C \
 		    question.C \
 		    quit.C \
 		    recconfirmdelete.C \
@@ -454,6 +460,8 @@ noinst_HEADERS = aattachmentpoint.h \
 	    filedv.h \
 	    fileogg.h \
 		 fileexr.h \
+		 fileffmpeg.h \
+		 fileflac.h \
 		 filejpeg.h \
 		 filelist.h \
 		 filemov.h \
@@ -488,6 +496,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 interfaceprefs.h \
 		 jpegwrapper.h \
 		 keyframe.h \
+		 keyframegui.h \
 		 keyframehandles.h \
 		 keyframepopup.h \
 		 keyframes.h \
@@ -517,7 +526,10 @@ noinst_HEADERS = aattachmentpoint.h \
 		 maxchannels.h \
 		 mbuttons.h \
 		 menuaeffects.h \
+		 menuattacheffect.h \
+		 menuattachtransition.h \
 		 menueffects.h \
+		 menutransitionlength.h \
 		 menuveffects.h \
 		 messages.h \
 		 meterpanel.h \
@@ -550,7 +562,6 @@ noinst_HEADERS = aattachmentpoint.h \
 		 pluginaclient.h \
 		 pluginaclientlad.h \
 		 pluginarray.h \
-		 pluginautos.h \
 		 pluginclient.h \
 		 plugincommands.h \
 		 plugindialog.h \
@@ -564,6 +575,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 pluginvclient.h \
 		 preferences.h \
 		 preferencesthread.h \
+		 presets.h \
 		 question.h \
 		 quit.h \
 		 recconfirmdelete.h \
@@ -690,6 +702,7 @@ cinelerra_LDADD = \
 	$(LIBDV_LIBS) \
 	-luuid \
 	$(MJPEG_LIBS) \
+	$(FLAC_LIBS) \
 	-lstdc++
 
 EXTRA_DIST = gen-feather-h

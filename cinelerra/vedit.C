@@ -83,14 +83,14 @@ int VEdit::read_frame(VFrame *video_out,
 		file->set_video_position(input_position - startproject + startsource, edl->session->frame_rate);
 		if(use_cache) file->set_cache_frames(use_cache);
 		result = file->read_frame(video_out);
+
 		if(use_cache) file->set_cache_frames(0);
 
 		cache->check_in(asset);
 	}
 	else
 		result = 1;
-	
-//for(int i = 0; i < video_out->get_w() * 3 * 20; i++) video_out->get_rows()[0][i] = 128;
+
 	return result;
 }
 

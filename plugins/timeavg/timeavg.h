@@ -37,13 +37,19 @@ public:
 	int equivalent(TimeAvgConfig *src);
 
 	int frames;
+	int threshold;
+	int border;
+
 	int mode;
 	enum
 	{
 		AVERAGE,
 		ACCUMULATE,
-		OR
+		REPLACE,
+		GREATER,
+		LESS
 	};
+
 	int paranoid;
 	int nosubtract;
 };
@@ -66,7 +72,7 @@ public:
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
-	void clear_accum(int w, int h, int color_model);
+	void reset_accum(int w, int h, int color_model);
 	void subtract_accum(VFrame *frame);
 	void add_accum(VFrame *frame);
 	void transfer_accum(VFrame *frame);

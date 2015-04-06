@@ -55,6 +55,7 @@ void FormatPopup::create_objects()
 		format_items.append(new BC_ListBoxItem(_(AC3_NAME)));
 		format_items.append(new BC_ListBoxItem(_(AIFF_NAME)));
 		format_items.append(new BC_ListBoxItem(_(AU_NAME)));
+		format_items.append(new BC_ListBoxItem(_(FLAC_NAME)));
 		format_items.append(new BC_ListBoxItem(_(JPEG_NAME)));
 	}
 

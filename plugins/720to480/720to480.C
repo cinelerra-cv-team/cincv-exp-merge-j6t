@@ -82,23 +82,21 @@ void _720to480Window::create_objects()
 	flush();
 }
 
-int _720to480Window::set_first_field(int first_field)
+void _720to480Window::set_first_field(int first_field)
 {
 	odd_first->update(first_field == 1);
 	even_first->update(first_field == 0);
 
 	client->config.first_field = first_field;
-	return 0;
 }
 
-int _720to480Window::set_direction(int direction)
+void _720to480Window::set_direction(int direction)
 {
 	forward->update(direction == FORWARD);
 	reverse->update(direction == REVERSE);
 
 
 	client->config.direction = direction;
-	return 0;
 }
 
 
@@ -349,7 +347,7 @@ int _720to480Main::process_loop(VFrame *output)
 void _720to480Main::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("720TO480");
 	output.tag.set_property("FIRST_FIELD", config.first_field);
 	output.tag.set_property("DIRECTION", config.direction);
@@ -362,7 +360,7 @@ void _720to480Main::save_data(KeyFrame *keyframe)
 void _720to480Main::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	while(!input.read_tag())
 	{

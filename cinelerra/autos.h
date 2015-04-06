@@ -36,8 +36,7 @@
 class Autos : public List<Auto>
 {
 public:
-	Autos(EDL *edl, 
-		Track *track);
+	Autos(EDL *edl, Track *track);
 		
 	virtual ~Autos();
 
@@ -71,11 +70,6 @@ public:
 		int64_t length_units,
 		int replace_default);
 	virtual int load(FileXML *xml);
-	void paste(int64_t start, 
-		int64_t length, 
-		double scale, 
-		FileXML *file, 
-		int default_only);
 	void remove_nonsequential(Auto *keyframe);
 	void optimize();
 
@@ -100,6 +94,14 @@ public:
 	int autoidx;
 	int autogrouptype;
 	int type;
+	enum
+	{
+		AUTOMATION_TYPE_FLOAT,
+		AUTOMATION_TYPE_MASK,
+		AUTOMATION_TYPE_INT,
+		AUTOMATION_TYPE_PAN,
+		AUTOMATION_TYPE_PLUGIN
+	};
 
 
 
@@ -113,16 +115,26 @@ public:
 	int clear_all();
 	int insert(int64_t start, int64_t end);
 	int paste_silence(int64_t start, int64_t end);
+// Copy for keyframe clipboard & drag & drop
+// default_only - only copy the default keyframe
 	int copy(int64_t start, 
 		int64_t end, 
 		FileXML *xml, 
 		int default_only,
-		int autos_only);
+		int active_only);
+// Paste for keyframe clipboard & drag & drop
+// default_only - only paste the default keyframe
+	void paste(int64_t start, 
+		int64_t length, 
+		double scale, 
+		FileXML *file, 
+		int default_only,
+		int active_only);
 // Stores the background rendering position in result
 	void clear(int64_t start, 
 		int64_t end, 
 		int shift_autos);
-	virtual void straighten(int64_t start, int64_t end);
+	virtual void set_automation_mode(int64_t start, int64_t end, int mode);
 	void clear_auto(int64_t position);
 	int save(FileXML *xml);
 	virtual int slope_adjustment(int64_t ax, double slope);

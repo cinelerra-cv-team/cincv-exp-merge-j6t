@@ -22,6 +22,7 @@
 #ifndef ABOUTPREFS_H
 #define ABOUTPREFS_H
 
+#include "guicast.h"
 #include "preferencesthread.h"
 
 class AboutPrefs : public PreferencesDialog
@@ -33,6 +34,7 @@ public:
 
 
 	void create_objects();
+	ArrayList<BC_ListBoxItem*> credits;
 };
 
 

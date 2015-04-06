@@ -534,7 +534,9 @@ int PrefsRenderFarmPort::handle_event()
 
 
 PrefsRenderFarmNodes::PrefsRenderFarmNodes(PreferencesWindow *pwindow, 
-	PerformancePrefs *subwindow, int x, int y)
+	PerformancePrefs *subwindow, 
+	int x, 
+	int y)
  : BC_ListBox(x, 
 		y, 
 		340, 

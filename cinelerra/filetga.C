@@ -927,7 +927,7 @@ TGAConfigVideo::~TGAConfigVideo()
 void TGAConfigVideo::create_objects()
 {
 	int x = 10, y = 10;
-
+	lock_window("TGAConfigVideo::create_objects");
 	add_subwindow(new BC_Title(x, y, _("Compression:")));
 	TGACompression *textbox = new TGACompression(this, 
 		x + 110, 
@@ -936,6 +936,7 @@ void TGAConfigVideo::create_objects()
 		&compression_items);
 	textbox->create_objects();
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 int TGAConfigVideo::close_event()

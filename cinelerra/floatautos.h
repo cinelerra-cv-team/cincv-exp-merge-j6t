@@ -61,11 +61,9 @@ public:
 		int64_t unit_start,
 		int64_t unit_end);
 
-	void straighten(int64_t start, int64_t end);
+	void set_automation_mode(int64_t start, int64_t end, int mode);
 
 	void dump();
-	Auto* add_auto(int64_t position, float value);
-	Auto* append_auto();
 	Auto* new_auto();
 	float default_;
 };

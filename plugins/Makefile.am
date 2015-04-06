@@ -115,8 +115,7 @@ SUBDIRS= \
 	wipe \
 	yuv \
 	zoomblur \
-	$(MAYBE_FINDOBJECT) \
-	fonts
+	$(MAYBE_FINDOBJECT)
 
 AUTOMAKE_OPTIONS=foreign
 

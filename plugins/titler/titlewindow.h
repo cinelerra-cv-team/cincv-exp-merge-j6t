@@ -42,9 +42,6 @@ class TitleItalic;
 class TitleBold;
 class TitleSize;
 class TitleColorButton;
-class TitleColorStrokeButton;
-class TitleStroke;
-class TitleStrokeW;
 class TitleDropShadow;
 class TitleMotion;
 class TitleLoop;
@@ -59,10 +56,10 @@ class TitleRight;class TitleTop;
 class TitleMid;
 class TitleBottom;
 class TitleColorThread;
-class TitleColorStrokeThread;
 class TitleSpeed;
 class TitleTimecode;
 class TitleTimecodeFormat;
+class TitleOutline;
 
 class TitleWindow : public PluginClientWindow
 {
@@ -88,24 +85,21 @@ public:
 	TitleY *title_y;
 	BC_Title *dropshadow_title;
 	TitleDropShadow *dropshadow;
+	BC_Title *outline_title;
+	TitleOutline *outline;
 	BC_Title *style_title;
 	TitleItalic *italic;
 	TitleBold *bold;
 
-#ifdef USE_OUTLINE
-	TitleStroke *stroke;
-	TitleColorStrokeButton *color_stroke_button;
-	TitleColorStrokeThread *color_stroke_thread;
-	BC_Title *strokewidth_title;
-	TitleStrokeW *stroke_width;
-	int color_stroke_x, color_stroke_y;
-#endif
 
 	int color_x, color_y;
+	int outline_color_x, outline_color_y;
 	BC_Title *size_title;
 	TitleSize *size;
 	TitleColorButton *color_button;
 	TitleColorThread *color_thread;
+	TitleColorButton *outline_color_button;
+	TitleColorThread *outline_color_thread;
 	BC_Title *motion_title;
 	TitleMotion *motion;
 	TitleLoop *loop;
@@ -164,15 +158,6 @@ public:
 	TitleWindow *window;
 };
 
-class TitleStroke : public BC_CheckBox
-{
-public:
-	TitleStroke(TitleMain *client, TitleWindow *window, int x, int y);
-	int handle_event();
-	TitleMain *client;
-	TitleWindow *window;
-};
-
 
 class TitleSize : public BC_PopupTextBox
 {
@@ -188,19 +173,28 @@ public:
 class TitleColorButton : public BC_GenericButton
 {
 public:
-	TitleColorButton(TitleMain *client, TitleWindow *window, int x, int y);
+	TitleColorButton(TitleMain *client, 
+		TitleWindow *window, 
+		int x, 
+		int y, 
+		int is_outline);
 	int handle_event();
 	TitleMain *client;
 	TitleWindow *window;
+	int is_outline;
 };
-class TitleColorStrokeButton : public BC_GenericButton
+
+class TitleColorThread : public ColorThread
 {
 public:
-	TitleColorStrokeButton(TitleMain *client, TitleWindow *window, int x, int y);
-	int handle_event();
+	TitleColorThread(TitleMain *client, TitleWindow *window, int is_outline);
+	virtual int handle_new_color(int output, int alpha);
 	TitleMain *client;
 	TitleWindow *window;
+	int is_outline;
 };
+
+
 class TitleMotion : public BC_PopupTextBox
 {
 public:
@@ -280,18 +274,20 @@ public:
 	TitleMain *client;
 	TitleWindow *window;
 };
-class TitleStrokeW : public BC_TumbleTextBox
-{
-public:
-	TitleStrokeW(TitleMain *client, TitleWindow *window, int x, int y);
-	int handle_event();
-	TitleMain *client;
-	TitleWindow *window;
-};
+
 class TitleDropShadow : public BC_TumbleTextBox
 {
 public:
 	TitleDropShadow(TitleMain *client, TitleWindow *window, int x, int y);
+	int handle_event();
+	TitleMain *client;
+	TitleWindow *window;
+};
+
+class TitleOutline : public BC_TumbleTextBox
+{
+public:
+	TitleOutline(TitleMain *client, TitleWindow *window, int x, int y);
 	int handle_event();
 	TitleMain *client;
 	TitleWindow *window;
@@ -351,24 +347,6 @@ class TitleBottom : public BC_Radial
 public:
 	TitleBottom(TitleMain *client, TitleWindow *window, int x, int y);
 	int handle_event();
-	TitleMain *client;
-	TitleWindow *window;
-};
-
-class TitleColorThread : public ColorThread
-{
-public:
-	TitleColorThread(TitleMain *client, TitleWindow *window);
-	virtual int handle_new_color(int output, int alpha);
-	TitleMain *client;
-	TitleWindow *window;
-};
-
-class TitleColorStrokeThread : public ColorThread
-{
-public:
-	TitleColorStrokeThread(TitleMain *client, TitleWindow *window);
-	int handle_event(int output);
 	TitleMain *client;
 	TitleWindow *window;
 };

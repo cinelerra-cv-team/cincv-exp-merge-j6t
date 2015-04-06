@@ -28,12 +28,15 @@ class PluginPopupIn;
 class PluginPopupOut;
 class PluginPopupOn;
 class PluginPopupShow;
+class PluginPresets;
 
 #include "guicast.h"
 #include "mwindow.inc"
 #include "mwindowgui.inc"
 #include "plugin.inc"
 #include "plugindialog.inc"
+#include "presets.inc"
+#include "presetsgui.inc"
 
 
 
@@ -52,6 +55,10 @@ public:
 	Plugin *plugin;
 
 
+#if 0
+	PresetsThread *thread;
+#endif
+
 
 
 
@@ -59,10 +66,9 @@ public:
 
 	PluginPopupChange *change;
 	PluginPopupDetach *detach;
-//	PluginPopupIn *in;
-//	PluginPopupOut *out;
 	PluginPopupShow *show;
 	PluginPopupOn *on;
+	PluginPresets *presets;
 };
 
 class PluginPopupAttach : public BC_MenuItem
@@ -166,6 +172,15 @@ class PluginPopupDown : public BC_MenuItem
 {
 public:
 	PluginPopupDown(MWindow *mwindow, PluginPopup *popup);
+	int handle_event();
+	MWindow *mwindow;
+	PluginPopup *popup;
+};
+
+class PluginPresets : public BC_MenuItem
+{
+public:
+	PluginPresets(MWindow *mwindow, PluginPopup *popup);
 	int handle_event();
 	MWindow *mwindow;
 	PluginPopup *popup;

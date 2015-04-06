@@ -157,6 +157,11 @@ int FileXML::reallocate_string(long new_available)
 	return 0;
 }
 
+char* FileXML::get_ptr()
+{
+	return string + position;
+}
+
 char* FileXML::read_text()
 {
 	long text_position = position;

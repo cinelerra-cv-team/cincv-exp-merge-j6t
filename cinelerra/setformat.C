@@ -154,7 +154,7 @@ void SetFormatThread::apply_changes()
 	mwindow->edl->resample(old_samplerate, new_samplerate, TRACK_AUDIO);
 	mwindow->edl->resample(old_framerate, new_framerate, TRACK_VIDEO);
 	mwindow->save_backup();
-	mwindow->undo->update_undo(_("set format"), LOAD_ALL);
+	mwindow->undo->update_undo_after(_("set format"), LOAD_ALL);
 
 // Update GUIs
 	mwindow->restart_brender();
@@ -337,6 +337,7 @@ void SetFormatWindow::create_objects()
 	BC_TextBox *textbox;
 	BC_Title *title;
 
+	lock_window("SetFormatWindow::create_objects");
 	mwindow->theme->draw_setformat_bg(this);
 
 
@@ -542,6 +543,7 @@ void SetFormatWindow::create_objects()
 		thread));
 	flash();
 	show_window();
+	unlock_window();
 }
 
 const char* SetFormatWindow::get_preset_text()

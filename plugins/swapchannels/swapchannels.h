@@ -113,12 +113,15 @@ public:
 
 	PLUGIN_CLASS_MEMBERS(SwapConfig)
 // required for all realtime plugins
-	int process_realtime(VFrame *input_ptr, VFrame *output_ptr);
+	int process_buffer(VFrame *frame,
+		int64_t start_position,
+		double frame_rate);
 	int is_realtime();
 	int is_synthesis();
 	void update_gui();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
+	int handle_opengl();
 
 
 

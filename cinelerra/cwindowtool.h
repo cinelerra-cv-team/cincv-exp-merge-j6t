@@ -26,6 +26,7 @@
 #include "cwindowgui.inc"
 #include "guicast.h"
 #include "maskauto.inc"
+#include "maskautos.inc"
 #include "mwindow.inc"
 
 
@@ -217,6 +218,7 @@ public:
 	void update();
 	void handle_event();
 	void get_keyframe(Track* &track, 
+		MaskAutos* &autos,
 		MaskAuto* &keyframe, 
 		SubMask* &mask, 
 		MaskPoint* &point,

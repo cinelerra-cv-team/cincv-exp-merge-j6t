@@ -19,6 +19,7 @@
  * 
  */
 
+#include "bcdisplay.h"
 #include "bcwindowbase.h"
 #include "bcwindowevents.h"
 #include "bctimer.h"
@@ -27,6 +28,16 @@ BC_WindowEvents::BC_WindowEvents(BC_WindowBase *window)
  : Thread(1, 0, 0)
 {
 	this->window = window;
+	display = 0;
+	done = 0;
+}
+
+
+BC_WindowEvents::BC_WindowEvents(BC_Display *display)
+ : Thread(1, 0, 0)
+{
+	this->display = display;
+	window = 0;
 	done = 0;
 }
 
@@ -57,11 +68,18 @@ void BC_WindowEvents::start()
 
 void BC_WindowEvents::run()
 {
-// Can't cancel in XNextEvent because X server never figures out it's not
-// listening anymore and XCloseDisplay locks up.
 	XEvent *event;
+
 	while(!done)
 	{
+// Can't cancel in XNextEvent because X server never figures out it's not
+// listening anymore and XCloseDisplay locks up.
+#ifdef SINGLE_THREAD
+		event = new XEvent;
+
+		XNextEvent(display->display, event);
+		display->put_event(event);
+#else
 // XNextEvent should also be protected by XLockDisplay ...
 // Currently implemented is a hackish solution, FIXME
 // Impact of this solution on the performance has not been analyzed
@@ -82,6 +100,8 @@ void BC_WindowEvents::run()
 		
 		window->unlock_window();
 		Timer::delay(20);    // sleep 20ms
+#endif
+
 	}
 }
 

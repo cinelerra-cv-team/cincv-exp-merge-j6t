@@ -76,6 +76,10 @@ public:
 	void paste_audio_transition(PluginServer *server);
 	void paste_video_transition(PluginServer *server, int first_track = 0);
 
+// Only tests effects
+	int plugin_exists(Plugin *plugin);
+	int track_exists(Track *track);
+
 	void paste_transition(PluginServer *server, Edit *dest_edit);
 // Return the numbers of tracks with the play patch enabled
 	int playable_audio_tracks();
@@ -168,8 +172,9 @@ public:
 	int clear(double start, double end, int clear_plugins);
 	void clear_automation(double selectionstart, 
 		double selectionend);
-	void straighten_automation(double selectionstart, 
-		double selectionend);
+	void set_automation_mode(double selectionstart, 
+		double selectionend,
+		int mode);
 	int clear_default_keyframe();
 	int clear_handle(double start, 
 		double end,
@@ -181,12 +186,13 @@ public:
 		FileXML *file,
 		int default_only,
 		int autos_only);
-	int copy_default_keyframe(FileXML *file);
+//	int copy_default_keyframe(FileXML *file);
 	void loaded_lengths_to_tracklengths(int includerecordtracks);
 	void paste_automation(double selectionstart, 
 		FileXML *xml,
-		int default_only);
-	int paste_default_keyframe(FileXML *file);
+		int default_only,
+		int active_only);
+//	int paste_default_keyframe(FileXML *file);
 	int paste(int64_t start, int64_t end);
 // all units are samples by default
 	int paste_output(int64_t startproject, 
@@ -224,6 +230,11 @@ public:
 	int64_t get_feather(int64_t selectionstart, int64_t selectionend, int audio, int video);
 // Move edit boundaries and automation during a framerate change
 	int scale_time(float rate_scale, int ignore_record, int scale_edits, int scale_autos, int64_t start, int64_t end);
+
+	void clear_transitions(double start, double end);
+	void set_transition_length(double start, double end, double length);
+	void set_transition_length(Transition *transition, double length);
+	void paste_transitions(double start, double end, int track_type, char* title);
 
 // ================================== accounting
 

@@ -44,10 +44,10 @@ Quit::Quit(MWindow *mwindow)
 { 
 	this->mwindow = mwindow; 
 }
-int Quit::create_objects(Save *save)
+
+void Quit::create_objects(Save *save)
 { 
 	this->save = save; 
-	return 0;
 }
 
 int Quit::handle_event() 

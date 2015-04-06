@@ -569,6 +569,28 @@ void BC_WindowBase::draw_polygon(ArrayList<int> *x, ArrayList<int> *y, BC_Pixmap
 	delete [] points;
 }
 
+void BC_WindowBase::fill_polygon(ArrayList<int> *x, ArrayList<int> *y, BC_Pixmap *pixmap)
+{
+	int npoints = MIN(x->total, y->total);
+	XPoint *points = new XPoint[npoints];
+
+	for(int i = 0; i < npoints; i++)
+	{
+		points[i].x = x->values[i];
+		points[i].y = y->values[i];
+	}
+
+	XFillPolygon(top_level->display,
+    	pixmap ? pixmap->opaque_pixmap : this->pixmap->opaque_pixmap,
+    	top_level->gc,
+    	points,
+    	npoints,
+		Nonconvex, 
+    	CoordModeOrigin);
+
+	delete [] points;
+}
+
 
 void BC_WindowBase::draw_rectangle(int x, int y, int w, int h)
 {

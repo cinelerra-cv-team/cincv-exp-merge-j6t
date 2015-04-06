@@ -208,7 +208,7 @@ float VFadePatch::update_edl()
 	float result = get_value() - current->get_value();
 	current->set_value(get_value());
 
-	mwindow->undo->update_undo(_("fade"), LOAD_AUTOMATION, need_undo ? 0 : this);
+	mwindow->undo->update_undo_after(_("fade"), LOAD_AUTOMATION, need_undo ? 0 : this);
 
 	return result;
 }
@@ -225,7 +225,7 @@ int VFadePatch::handle_event()
 
 	float change = update_edl();
 
-	if(patch->track->gang) 
+	if(patch->track->gang && patch->track->record) 
 		patch->patchbay->synchronize_faders(change, TRACK_VIDEO, patch->track);
 
 	patch->change_source = 0;
@@ -298,7 +298,7 @@ int VModePatch::handle_event()
 	current = (IntAuto*)mode_autos->get_auto_for_editing(position);
 	current->value = mode;
 
-	mwindow->undo->update_undo(_("mode"), LOAD_AUTOMATION, need_undo ? 0 : this);
+	mwindow->undo->update_undo_after(_("mode"), LOAD_AUTOMATION, need_undo ? 0 : this);
 
 	mwindow->sync_parameters(CHANGE_PARAMS);
 

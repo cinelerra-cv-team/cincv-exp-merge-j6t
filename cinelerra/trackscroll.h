@@ -33,7 +33,7 @@ public:
 	TrackScroll(MWindow *mwindow, MWindowGUI *gui, int x, int y, int h);
 	~TrackScroll();
 
-	int create_objects(int top, int bottom);
+	void create_objects(int top, int bottom);
 	int resize_event();
 	int flip_vertical(int top, int bottom);
 	int update();               // reflect new track view

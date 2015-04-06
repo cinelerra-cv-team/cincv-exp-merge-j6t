@@ -20,6 +20,12 @@
  */
 
 #include "asset.h"
+
+extern "C" 
+{
+#include <libavcodec/avcodec.h>
+}
+
 #include "clip.h"
 #include "fileac3.h"
 #include "language.h"
@@ -94,10 +100,10 @@ int FileAC3::open_file(int rd, int wr)
 			return 1;
 		}
 		codec_context = avcodec_alloc_context();
-		codec_context->bit_rate = asset->ac3_bitrate * 1000;
-		codec_context->sample_rate = asset->sample_rate;
-		codec_context->channels = asset->channels;
-		if(avcodec_open(codec_context, codec))
+		((AVCodecContext*)codec_context)->bit_rate = asset->ac3_bitrate * 1000;
+		((AVCodecContext*)codec_context)->sample_rate = asset->sample_rate;
+		((AVCodecContext*)codec_context)->channels = asset->channels;
+		if(avcodec_open(((AVCodecContext*)codec_context), ((AVCodec*)codec)))
 		{
 			eprintf("failed to open codec.\n");
 			return 1;
@@ -128,7 +134,7 @@ int FileAC3::close_file()
 {
 	if(codec_context)
 	{
-		avcodec_close(codec_context);
+		avcodec_close(((AVCodecContext*)codec_context));
 		free(codec_context);
 		codec_context = 0;
 		codec = 0;
@@ -206,7 +212,7 @@ int FileAC3::write_samples(double **buffer, int64_t len)
 	}
 	temp_raw_size += len;
 
-	int frame_size = codec_context->frame_size;
+	int frame_size = ((AVCodecContext*)codec_context)->frame_size;
 	int output_size = 0;
 	int current_sample = 0;
 	for(current_sample = 0; 
@@ -214,7 +220,7 @@ int FileAC3::write_samples(double **buffer, int64_t len)
 		current_sample += frame_size)
 	{
 		int compressed_size = avcodec_encode_audio(
-			codec_context, 
+			((AVCodecContext*)codec_context), 
 			temp_compressed + output_size, 
 			compressed_allocated - output_size, 
             temp_raw + current_sample * asset->channels);
@@ -263,6 +269,7 @@ void AC3ConfigAudio::create_objects()
 {
 	int x = 10, y = 10;
 	int x1 = 150;
+	lock_window("AC3ConfigAudio::create_objects");
 	add_tool(new BC_Title(x, y, "Bitrate (kbps):"));
 	AC3ConfigAudioBitrate *bitrate;
 	add_tool(bitrate = 
@@ -274,6 +281,7 @@ void AC3ConfigAudio::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
+	unlock_window();
 }
 
 int AC3ConfigAudio::close_event()

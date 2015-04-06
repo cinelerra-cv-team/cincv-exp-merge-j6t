@@ -38,7 +38,8 @@ public:
 		int use_ulaw, 
 		int use_adpcm,
 		int use_float,
-		int use_32linear);
+		int use_32linear,
+		int use_8linear = 1);
 	~BitsPopup();
 	void create_objects();
 	int get_w();
@@ -49,6 +50,7 @@ public:
 	BitsPopupText *textbox;
 	int x, y, use_ima4, use_ulaw, use_float, use_adpcm, *output;
 	int use_32linear;
+	int use_8linear;
 	BC_WindowBase *parent_window;
 };
 

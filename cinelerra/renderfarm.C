@@ -20,6 +20,7 @@
  */
 
 #include "asset.h"
+#include "bcsignals.h"
 #include "brender.h"
 #include "clip.h"
 #include "condition.h"
@@ -313,6 +314,7 @@ int RenderFarmServerThread::read_socket(char *data, int len)
 {
 	int bytes_read = 0;
 	int offset = 0;
+//printf("RenderFarmServerThread::read_socket 1\n");
 	watchdog->begin_request();
 	while(len > 0 && bytes_read >= 0)
 	{
@@ -329,13 +331,18 @@ int RenderFarmServerThread::read_socket(char *data, int len)
 			break;
 	}
 	watchdog->end_request();
+//printf("RenderFarmServerThread::read_socket 10\n");
 
 	return offset;
 }
 
 int RenderFarmServerThread::write_socket(char *data, int len)
 {
-	return write(socket_fd, data, len);
+//printf("RenderFarmServerThread::write_socket 1\n");
+	int result = write(socket_fd, data, len);
+//printf("RenderFarmServerThread::write_socket 10\n");
+
+	return result;
 }
 
 void RenderFarmServerThread::reallocate_buffer(int size)
@@ -367,7 +374,6 @@ void RenderFarmServerThread::run()
 //	fs_server->initialize();
 
 
-
 // Send command to run package renderer.
 	write_int64(RENDERFARM_PACKAGES);
 
@@ -397,6 +403,7 @@ void RenderFarmServerThread::run()
 
 // Get accompanying buffer
 		bytes_read = read_socket((char*)buffer, request_size);
+
 //printf("RenderFarmServerThread::run 2 %d %lld %d\n", request_id, request_size, bytes_read);
 		if(bytes_read != request_size)
 		{
@@ -695,19 +702,19 @@ void RenderFarmWatchdog::run()
 
 		int result = request_complete->timed_lock(RENDERFARM_TIMEOUT * 1000000, 
 			"RenderFarmWatchdog::run");
+//printf("RenderFarmWatchdog::run 1 %d\n", result);
 
 		if(result)
 		{
 			if(client)
 			{
-				printf("RenderFarmWatchdog::run 1 killing pid %d\n", client->pid);
-//				client->cancel();
+				printf("RenderFarmWatchdog::run 1 killing client pid %d\n", client->pid);
 				kill(client->pid, SIGKILL);
 			}
 			else
 			if(server)
 			{
-				printf("RenderFarmWatchdog::run 1 killing thread %p\n", server);
+				printf("RenderFarmWatchdog::run 1 killing server thread %p\n", server);
 				server->cancel();
 				unsigned char buffer[4];
 				buffer[0] = 1;

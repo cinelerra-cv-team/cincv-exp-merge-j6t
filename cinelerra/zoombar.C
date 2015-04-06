@@ -19,6 +19,7 @@
  * 
  */
 
+#include "apatchgui.inc"
 #include "clip.h"
 #include "edl.h"
 #include "edlsession.h"

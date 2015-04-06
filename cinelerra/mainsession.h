@@ -138,7 +138,13 @@ public:
 	int afolders_w;
 	int show_vwindow, show_awindow, show_cwindow, show_gwindow, show_lwindow;
 	int plugindialog_w, plugindialog_h;
+	int presetdialog_w, presetdialog_h;
+	int keyframedialog_w, keyframedialog_h;
+	int keyframedialog_column1;
+	int keyframedialog_column2;
+	int keyframedialog_all;
 	int menueffect_w, menueffect_h;
+	int transitiondialog_w, transitiondialog_h;
 
 	int cwindow_fullscreen;
 	int rwindow_fullscreen;

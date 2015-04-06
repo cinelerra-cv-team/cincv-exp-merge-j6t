@@ -40,7 +40,8 @@ HistogramPoint::~HistogramPoint()
 
 int HistogramPoint::equivalent(HistogramPoint *src)
 {
-	return EQUIV(x, src->x) && EQUIV(y, src->y);
+// EQUIV isn't precise enough to detect changes in points
+	return x == src->x && y == src->y;
 }
 
 
@@ -214,11 +215,12 @@ void HistogramConfig::boundaries()
 
 int HistogramConfig::equivalent(HistogramConfig &that)
 {
+// EQUIV isn't precise enough to detect changes in points
 	for(int i = 0; i < HISTOGRAM_MODES; i++)
 	{
 		if(!points[i].equivalent(&that.points[i]) ||
-			!EQUIV(output_min[i], that.output_min[i]) ||
-			!EQUIV(output_max[i], that.output_max[i])) return 0;
+			output_min[i] != that.output_min[i] ||
+			output_max[i] != that.output_max[i]) return 0;
 	}
 
 	if(automatic != that.automatic ||

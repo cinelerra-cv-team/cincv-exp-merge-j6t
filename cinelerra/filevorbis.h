@@ -26,7 +26,6 @@
 #include "filebase.h"
 #include "vorbis/vorbisenc.h"
 #include "vorbis/vorbisfile.h"
-#include "resample.inc"
 
 
 
@@ -48,22 +47,15 @@ public:
 
 	static int check_sig(Asset *asset);
 	int open_file(int rd, int wr);
-	int close_file();
+	int close_file_derived();
 	int write_samples(double **buffer, 
 			int64_t len);
 
 	int read_samples(double *buffer, int64_t len);
-	int read_samples_float(float *buffer, int64_t len);
-	int prefer_samples_float();
 	
 // Decoding
 	OggVorbis_File vf;
 	FILE *fd;
-	double **pcm_history;
-	float **pcm_history_float;
-#define HISTORY_MAX 0x100000
-	int history_size;
-	int history_start;
 
 // Encoding
 	vorbis_info vi;

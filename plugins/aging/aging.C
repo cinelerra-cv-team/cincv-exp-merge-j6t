@@ -26,16 +26,13 @@
 #include "aging.h"
 #include "agingwindow.h"
 #include "effecttv.h"
+#include "language.h"
 
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 

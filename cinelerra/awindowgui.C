@@ -371,6 +371,7 @@ void AWindowGUI::create_objects()
 	int x, y;
 	AssetPicon *picon;
 
+	lock_window("AWindowGUI::create_objects");
 SET_TRACE
 //printf("AWindowGUI::create_objects 1\n");
 	asset_titles[0] = _("Title");
@@ -495,6 +496,9 @@ SET_TRACE
 
 SET_TRACE
 	create_custom_xatoms();
+
+SET_TRACE
+	unlock_window();
 }
 
 int AWindowGUI::resize_event(int w, int h)
@@ -1428,6 +1432,7 @@ int AWindowAssets::drag_start_event()
 int AWindowAssets::drag_motion_event()
 {
 	BC_ListBox::drag_motion_event();
+	unlock_window();
 
 	mwindow->gui->lock_window("AWindowAssets::drag_motion_event");
 	mwindow->gui->drag_motion();
@@ -1440,6 +1445,8 @@ int AWindowAssets::drag_motion_event()
 	mwindow->cwindow->gui->lock_window("AWindowAssets::drag_motion_event");
 	mwindow->cwindow->gui->drag_motion();
 	mwindow->cwindow->gui->unlock_window();
+
+	lock_window("AWindowAssets::drag_motion_event");
 	return 0;
 }
 
@@ -1449,6 +1456,7 @@ int AWindowAssets::drag_stop_event()
 
 	result = gui->drag_stop();
 
+	unlock_window();
 
 	if(!result)
 	{
@@ -1471,7 +1479,7 @@ int AWindowAssets::drag_stop_event()
 		mwindow->cwindow->gui->unlock_window();
 	}
 
-
+	lock_window("AWindowAssets::drag_stop_event");
 
 	if(result) get_drag_popup()->set_animation(0);
 

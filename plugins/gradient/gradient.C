@@ -507,8 +507,11 @@ int GradientInColorThread::handle_new_color(int output, int alpha)
 	plugin->config.in_g = (output & 0xff00) >> 8;
 	plugin->config.in_b = (output & 0xff);
 	plugin->config.in_a = alpha;
+	
+	window->lock_window("GradientInColorThread::handle_new_color");
 	window->update_in_color();
 	window->flush();
+	window->unlock_window();
 	plugin->send_configure_change();
 // printf("GradientInColorThread::handle_event 1 %d %d %d %d %d %d %d %d\n",
 // plugin->config.in_r,
@@ -539,8 +542,10 @@ int GradientOutColorThread::handle_new_color(int output, int alpha)
 	plugin->config.out_g = (output & 0xff00) >> 8;
 	plugin->config.out_b = (output & 0xff);
 	plugin->config.out_a = alpha;
+	window->lock_window("GradientOutColorThread::handle_new_color");
 	window->update_out_color();
 	window->flush();
+	window->unlock_window();
 	plugin->send_configure_change();
 // printf("GradientOutColorThread::handle_event 1 %d %d %d %d %d %d %d %d\n",
 // plugin->config.in_r,
@@ -763,7 +768,7 @@ void GradientMain::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("GRADIENT");
 
 	output.tag.set_property("ANGLE", config.angle);
@@ -791,7 +796,7 @@ void GradientMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 

@@ -158,6 +158,7 @@ int Automation::paste(int64_t start,
 	double scale,
 	FileXML *file, 
 	int default_only,
+	int active_only,
 	AutoConf *autoconf)
 {
 	if(!autoconf) autoconf = edl->session->auto_conf;
@@ -166,7 +167,12 @@ int Automation::paste(int64_t start,
 	{
 		if(file->tag.title_is(xml_titles[i]) && autos[i] && autoconf->autos[i])
 		{
-			autos[i]->paste(start, length, scale, file, default_only);
+			autos[i]->paste(start, 
+				length, 
+				scale, 
+				file, 
+				default_only,
+				active_only);
 			return 1;
 		}
 	}
@@ -177,7 +183,7 @@ int Automation::copy(int64_t start,
 	int64_t end, 
 	FileXML *file, 
 	int default_only,
-	int autos_only)
+	int active_only)
 {
 // Copy regardless of what's visible.
 	for(int i = 0; i < AUTOMATION_TOTAL; i++)
@@ -191,7 +197,7 @@ int Automation::copy(int64_t start,
 							end, 
 							file, 
 							default_only,
-							autos_only);
+							active_only);
 			char string[BCTEXTLEN];
 			sprintf(string, "/%s", xml_titles[i]);
 			file->tag.set_title(string);
@@ -229,8 +235,9 @@ void Automation::clear(int64_t start,
 	if(temp_autoconf) delete temp_autoconf;
 }
 
-void Automation::straighten(int64_t start, 
+void Automation::set_automation_mode(int64_t start, 
 	int64_t end, 
+	int mode,
 	AutoConf *autoconf)
 {
 	AutoConf *temp_autoconf = 0;
@@ -246,7 +253,7 @@ void Automation::straighten(int64_t start,
 	{
 		if(autos[i] && autoconf->autos[i])
 		{
-			autos[i]->straighten(start, end);
+			autos[i]->set_automation_mode(start, end, mode);
 		}
 	}
 

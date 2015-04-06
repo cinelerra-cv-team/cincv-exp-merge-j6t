@@ -106,7 +106,9 @@ int EditAttachEffect::handle_event()
 {
 	dialog_thread->start_window(popup->track,
 		0, 
-		PROGRAM_NAME ": Attach Effect");
+		PROGRAM_NAME ": Attach Effect",
+		0,
+		popup->track->data_type);
 	return 1;
 }
 

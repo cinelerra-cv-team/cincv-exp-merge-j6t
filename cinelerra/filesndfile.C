@@ -232,16 +232,12 @@ int FileSndFile::open_file(int rd, int wr)
 // Doesn't calculate the length
 			if(fd) format_to_asset();
 		}
-SET_TRACE
 	}
 	else
 	if(wr)
 	{
-printf("FileSNDFile::open 1\n");
 		asset_to_format();
-printf("FileSNDFile::open 1\n");
 		fd = sf_open(asset->path, SFM_WRITE, &fd_config);
-printf("FileSNDFile::open 10 %p\n", fd);
 	}
 
 	if(!fd) 
@@ -389,6 +385,7 @@ void SndFileConfig::create_objects()
 {
 	int x = 10, y = 10;
 
+	lock_window("SndFileConfig::create_objects");
 	bits_popup = 0;
 	switch(asset->format)
 	{
@@ -419,6 +416,7 @@ void SndFileConfig::create_objects()
 		add_subwindow(lohi = new SndFileLOHI(this, x + 170, y));
 	}
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 int SndFileConfig::close_event()

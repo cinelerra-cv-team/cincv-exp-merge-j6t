@@ -67,15 +67,22 @@ void CWindow::create_objects()
 {
 	destination = mwindow->defaults->get("CWINDOW_DESTINATION", 0);
 
+
 	gui = new CWindowGUI(mwindow, this);
+
     gui->create_objects();
+
 
 	playback_engine = new CPlayback(mwindow, this, gui->canvas);
 
+
 // Start command loop
 	playback_engine->create_objects();
+
 	gui->transport->set_engine(playback_engine);
+
 	playback_cursor = new CTracking(mwindow, this);
+
 	playback_cursor->create_objects();
 
 }
@@ -146,6 +153,7 @@ Auto* CWindow::calculate_affected_auto(Autos *autos,
 			if(created) *created = 1;
 			if(redraw)
 			{
+// May have to unlock CWindowGUI here.
 				mwindow->gui->lock_window("CWindow::calculate_affected_auto");
 				mwindow->gui->canvas->draw_overlays();
 				mwindow->gui->canvas->flash();

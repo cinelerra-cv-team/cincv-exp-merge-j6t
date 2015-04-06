@@ -92,7 +92,7 @@ public:
 	int64_t restartoffset;
 	int onakeyframe;
 
-	char string[64];		
+	char string[BCTEXTLEN];		
 
 	VFrame **history;
 

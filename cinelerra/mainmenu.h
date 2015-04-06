@@ -35,6 +35,7 @@ class ShowGWindow;
 class ShowCWindow;
 class ShowLWindow;
 class Undo;
+class KeyframeType;
 
 #include "arraylist.h"
 #include "guicast.h"
@@ -106,6 +107,7 @@ public:
 	int total_veffects;
 	BC_Menu *filemenu, *audiomenu, *videomenu;      // needed by most recents
 
+	KeyframeType *keyframe_type;
 	LabelsFollowEdits *labels_follow_edits;
 	PluginsFollowEdits *plugins_follow_edits;
 	CursorOnFrames *cursor_on_frames;
@@ -258,6 +260,23 @@ public:
 	MWindow *mwindow;
 };
 
+class BendKeyframes : public BC_MenuItem
+{
+public:
+	BendKeyframes(MWindow *mwindow);
+	int handle_event();
+	MWindow *mwindow;
+};
+
+class KeyframeType : public BC_MenuItem
+{
+public:
+	KeyframeType(MWindow *mwindow, int type);
+	int handle_event();
+	MWindow *mwindow;
+	int new_type;
+};
+
 class CutDefaultKeyframe : public BC_MenuItem
 {
 public:
@@ -310,6 +329,14 @@ class ClearLabels : public BC_MenuItem
 {
 public:
 	ClearLabels(MWindow *mwindow);
+	int handle_event();
+	MWindow *mwindow;
+};
+
+class DetachTransitions : public BC_MenuItem
+{
+public:
+	DetachTransitions(MWindow *mwindow);
 	int handle_event();
 	MWindow *mwindow;
 };

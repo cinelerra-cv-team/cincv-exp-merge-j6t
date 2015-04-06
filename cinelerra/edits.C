@@ -142,11 +142,13 @@ void Edits::insert_asset(Asset *asset,
 	}
 }
 
-void Edits::insert_edits(Edits *source_edits, int64_t position)
+void Edits::insert_edits(Edits *source_edits, 
+	int64_t position,
+	int64_t min_length)
 {
-	int64_t clipboard_length = 
-		track->to_units(source_edits->edl->local_session->clipboard_length, 1);
-	int64_t clipboard_end = position + clipboard_length;
+	int64_t clipboard_end = position + min_length;
+// Length pasted so far
+	int64_t source_len = 0;
 
 	int64_t total_length = 0;
 	for(Edit *source_edit = source_edits->first;
@@ -184,14 +186,18 @@ void Edits::insert_edits(Edits *source_edits, int64_t position)
 			future_edit->startproject += dest_edit->length;
 			future_edit->shift_keyframes(dest_edit->length);
 		}
+		
+		source_len += source_edit->length;
+	}
 
-// Fill clipboard length with silence
-		if(!source_edit->next && 
-			dest_edit->startproject + dest_edit->length < clipboard_end)
-		{
-			paste_silence(dest_edit->startproject + dest_edit->length,
-				clipboard_end);
-		}
+
+
+
+// Fill remaining clipboard length with silence
+	if(source_len < min_length)
+	{
+//printf("Edits::insert_edits %d\n", __LINE__);
+		paste_silence(position + source_len, position + min_length);
 	}
 }
 
@@ -524,7 +530,7 @@ int Edits::load_edit(FileXML *file, int64_t &startproject, int track_offset)
 		{
 			if(file->tag.title_is("FILE"))
 			{
-				char filename[1024];
+				char filename[BCTEXTLEN];
 				sprintf(filename, SILENCE);
 				file->tag.get_property("SRC", filename);
 // Extend path
@@ -784,8 +790,7 @@ int Edits::clear_handle(double start,
 // Lengthen effects
 					if(edit_plugins)
 						track->shift_effects(current_edit->next->startproject, 
-							length,
-							0);
+							length);
 
 					for(current_edit = current_edit->next; current_edit; current_edit = current_edit->next)
 					{
@@ -969,11 +974,11 @@ Edit* Edits::shift(int64_t position, int64_t difference)
 
 void Edits::shift_keyframes_recursive(int64_t position, int64_t length)
 {
-	track->shift_keyframes(position, length, 0);
+	track->shift_keyframes(position, length);
 }
 
 void Edits::shift_effects_recursive(int64_t position, int64_t length)
 {
-	track->shift_effects(position, length, 0);
+	track->shift_effects(position, length);
 }
 

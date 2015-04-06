@@ -454,6 +454,8 @@ int Overlay::process_buffer(VFrame **frame,
 {
 	load_configuration();
 
+
+printf("Overlay::process_buffer mode=%d\n", config.mode);
 	if(!temp) temp = new VFrame(0,
 		frame[0]->get_w(),
 		frame[0]->get_h(),
@@ -514,13 +516,14 @@ int Overlay::process_buffer(VFrame **frame,
 			frame_rate,
 			get_use_opengl());
 
+// Call the opengl handler once for each layer
 		if(get_use_opengl()) 
 		{
 			current_layer = i;
 			run_opengl();
 		}
 		else
-// Call the opengl handler once for each layer
+		{
 			overlayer->overlay(output,
 				temp,
 				0,
@@ -534,6 +537,7 @@ int Overlay::process_buffer(VFrame **frame,
 				1,
 				config.mode,
 				NEAREST_NEIGHBOR);
+		}
 	}
 
 
@@ -755,7 +759,7 @@ void Overlay::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("OVERLAY");
 	output.tag.set_property("MODE", config.mode);
 	output.tag.set_property("DIRECTION", config.direction);
@@ -770,7 +774,7 @@ void Overlay::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 

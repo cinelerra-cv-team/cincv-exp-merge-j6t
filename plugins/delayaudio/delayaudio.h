@@ -50,18 +50,6 @@ public:
 
 
 
-class DelayAudioThread : public Thread
-{
-public:
-	DelayAudioThread(DelayAudio *plugin);
-	~DelayAudioThread();
-	
-	void run();
-	
-	Mutex completion;
-	DelayAudioWindow *window;
-	DelayAudio *plugin;
-};
 
 
 

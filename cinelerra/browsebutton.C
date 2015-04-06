@@ -19,6 +19,7 @@
  * 
  */
 
+#include "bcsignals.h"
 #include "browsebutton.h"
 #include "language.h"
 #include "mutex.h"
@@ -39,7 +40,7 @@ BrowseButton::BrowseButton(MWindow *mwindow,
 	int want_directory,
 	const char *recent_prefix)
  : BC_Button(x, y, mwindow->theme->get_image_set("magnify_button")), 
-   Thread()
+   Thread(1, 0, 0)
 {
 	this->parent_window = parent_window;
 	this->want_directory = want_directory;
@@ -74,7 +75,7 @@ int BrowseButton::handle_event()
 	{
 		if(gui)
 		{
-			gui->lock_window();
+			gui->lock_window("BrowseButton::handle_event");
 			gui->raise_window();
 			gui->unlock_window();
 		}
@@ -102,7 +103,10 @@ void BrowseButton::run()
 		want_directory);
 	gui = &browsewindow;
 	startup_lock->unlock();
+	
+	browsewindow.lock_window("BrowseButton::run");
 	browsewindow.create_objects();
+	browsewindow.unlock_window();
 	int result2 = browsewindow.run_window();
 
 	if(!result2)
@@ -116,10 +120,13 @@ void BrowseButton::run()
 // 			textbox->update(browsewindow.get_filename());
 // 		}
 
+		parent_window->lock_window("BrowseButton::run");
 		textbox->update(browsewindow.get_submitted_path());
 		parent_window->flush();
 		textbox->handle_event();
+		parent_window->unlock_window();
 	}
+
 	startup_lock->lock("BrowseButton::run");
 	gui = 0;
 	startup_lock->unlock();

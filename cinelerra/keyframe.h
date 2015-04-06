@@ -37,16 +37,37 @@ public:
 	virtual ~KeyFrame();
 	
 	void load(FileXML *file);
+
+// Copy to clipboard
 	void copy(int64_t start, int64_t end, FileXML *file, int default_only);
+// Copy data + everything else from that to this
 	void copy_from(Auto *that);
 	void copy_from(KeyFrame *that);
 	void copy_from_common(KeyFrame *that);
 	int operator==(Auto &that);
 	int operator==(KeyFrame &that);
+	void copy_data(KeyFrame *src);
 	void dump();
 	int identical(KeyFrame *src);
+// Generate pointers to parameters which are different than *src.
+// User must free nonzero return arguments.
+	void get_diff(KeyFrame *src, 
+		BC_Hash **params, 
+		char **text, 
+		char **extra);
 	char* get_data();
+	void set_data(char *data);
 
+// Get parameters in a hash table,
+// the anonymous text in a newly allocated string.
+// extra text in a newly allocated string
+	void get_contents(BC_Hash *ptr, char **text, char **extra);
+// Update a single parameter or the anonymous text depending on which argument is nonzero
+	void update_parameter(BC_Hash *params, 
+		char *text,
+		char *extra);
+
+private:
 	char data[MESSAGESIZE];
 };
 

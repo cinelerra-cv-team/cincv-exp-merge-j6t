@@ -22,6 +22,7 @@
 #include "clip.h"
 #include "bchash.h"
 #include "filexml.h"
+#include "language.h"
 #include "picon_png.h"
 #include "synthesizer.h"
 #include "vframe.h"
@@ -29,18 +30,9 @@
 #include <string.h>
 
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
-
-PluginClient* new_plugin(PluginServer *server)
-{
-	return new Synth(server);
-}
-
+REGISTER_PLUGIN(Synth)
 
 
 
@@ -56,15 +48,6 @@ Synth::Synth(PluginServer *server)
 
 Synth::~Synth()
 {
-	if(thread)
-	{
-		thread->window->set_done(0);
-		thread->completion.lock();
-		delete thread;
-	}
-
-	save_defaults();
-	delete defaults;
 	
 	if(dsp_buffer) delete [] dsp_buffer;
 }
@@ -74,6 +57,7 @@ VFrame* Synth::new_picon()
 	return new VFrame(picon_png);
 }
 
+NEW_WINDOW_MACRO(Synth, SynthWindow);
 
 const char* Synth::plugin_title() { return N_("Synthesizer"); }
 int Synth::is_realtime() { return 1; }
@@ -82,7 +66,6 @@ int Synth::is_synthesis() { return 1; }
 
 void Synth::reset()
 {
-	thread = 0;
 	need_reconfigure = 1;
 	dsp_buffer = 0;
 }
@@ -106,6 +89,7 @@ int Synth::load_defaults()
 	config.wetness = defaults->get("WETNESS", 0);
 	config.base_freq = defaults->get("BASEFREQ", 440);
 	config.wavefunction = defaults->get("WAVEFUNCTION", 0);
+	momentary_notes = defaults->get("MOMENTARY_NOTES", 0);
 
 	int total_oscillators = defaults->get("OSCILLATORS", TOTALOSCILLATORS);
 	config.oscillator_config.remove_all_objects();
@@ -123,9 +107,9 @@ void Synth::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 // cause htal file to read directly from text
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
-//printf("Synth::read_data %s\n", keyframe->data);
+//printf("Synth::read_data %s\n", keyframe->get_data());
 	int result = 0, current_osc = 0, total_oscillators = 0;
 	while(!result)
 	{
@@ -160,7 +144,7 @@ void Synth::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
 // cause htal file to store data directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("SYNTH");
 	output.tag.set_property("WETNESS", config.wetness);
@@ -189,6 +173,7 @@ int Synth::save_defaults()
 	defaults->update("BASEFREQ", config.base_freq);
 	defaults->update("WAVEFUNCTION", config.wavefunction);
 	defaults->update("OSCILLATORS", config.oscillator_config.total);
+	defaults->update("MOMENTARY_NOTES", momentary_notes);
 
 	for(int i = 0; i < config.oscillator_config.total; i++)
 	{
@@ -199,38 +184,17 @@ int Synth::save_defaults()
 	return 0;
 }
 
-int Synth::show_gui()
-{
-	load_configuration();
-	
-	thread = new SynthThread(this);
-	thread->start();
-	return 0;
-}
-
-int Synth::set_string()
-{
-	if(thread) thread->window->set_utf8title(gui_string);
-	return 0;
-}
-
-void Synth::raise_window()
-{
-	if(thread)
-	{
-		thread->window->raise_window();
-		thread->window->flush();
-	}
-}
 
 void Synth::update_gui()
 {
 	if(thread)
 	{
-		load_configuration();
-		thread->window->lock_window();
-		thread->window->update_gui();
-		thread->window->unlock_window();
+		if(load_configuration())
+		{
+			thread->window->lock_window();
+			((SynthWindow*)thread->window)->update_gui();
+			thread->window->unlock_window();
+		}
 	}
 }
 
@@ -404,9 +368,9 @@ double Synth::function_triangle(double x)
 
 int Synth::process_realtime(int64_t size, double *input_ptr, double *output_ptr)
 {
-
-
 	need_reconfigure |= load_configuration();
+// Mute if a certain frequency
+	if(config.base_freq <= 0) return 0;
 	if(need_reconfigure) reconfigure();
 
 	double wetness = DB::fromdb(config.wetness);
@@ -482,9 +446,13 @@ void Synth::reconfigure()
 	}
 
 //printf("Synth::reconfigure 1 %d\n", PluginAClient::project_sample_rate);
+
 	waveform_length = PluginAClient::project_sample_rate;
-	period = (float)PluginAClient::project_sample_rate / config.base_freq;
 	dsp_buffer = new double[waveform_length + 1];
+	if(config.base_freq <= 0) 
+		period = 1;
+	else
+		period = (float)PluginAClient::project_sample_rate / config.base_freq;
 
 	samples_rendered = 0;     // do some calculations on the next process_realtime
 	waveform_sample = 0;
@@ -510,30 +478,6 @@ void Synth::reconfigure()
 
 
 
-SynthThread::SynthThread(Synth *synth)
- : Thread()
-{
-	this->synth = synth;
-	set_synchronous(0);
-	completion.lock();
-}
-
-SynthThread::~SynthThread()
-{
-	delete window;
-}
-
-void SynthThread::run()
-{
-	window = new SynthWindow(synth);
-	window->create_objects();
-	int result = window->run_window();
-	completion.unlock();
-// Last command executed in thread
-	if(result) synth->client_side_close();
-}
-
-
 
 
 
@@ -544,16 +488,36 @@ void SynthThread::run()
 
 
 SynthWindow::SynthWindow(Synth *synth)
- : PluginClientWindow(synth,
-	420,
+ : PluginClientWindow(synth, 
+	950, 
 	400)
 {
 	this->synth = synth; 
+	white_key[0] = 0;
+	white_key[1] = 0;
+	white_key[2] = 0;
+	black_key[0] = 0;
+	black_key[1] = 0;
+	black_key[2] = 0;
+	bzero(notes, sizeof(SynthNote*) * TOTALNOTES);
+	current_note = -1;
 }
 
 SynthWindow::~SynthWindow()
 {
+	delete white_key[0];
+	delete white_key[1];
+	delete white_key[2];
+	delete black_key[0];
+	delete black_key[1];
+	delete black_key[2];
 }
+
+static const char *keyboard_map[] = 
+{
+	"q", "2", "w", "3", "e", "r", "5", "t", "6", "y", "7", "u", 
+	"z", "s", "x", "d", "c", "v", "g", "b", "h", "n", "j", "m"
+};
 
 void SynthWindow::create_objects()
 {
@@ -584,6 +548,7 @@ void SynthWindow::create_objects()
 	harmonicmenu->add_item(new SynthFreqPrime(synth));
 
 	int x = 10, y = 30, i;
+	
 	add_subwindow(new BC_Title(x, y, _("Waveform")));
 	x += 240;
 	add_subwindow(new BC_Title(x, y, _("Wave Function")));
@@ -599,11 +564,12 @@ void SynthWindow::create_objects()
 	add_subwindow(waveform = new SynthWaveForm(synth, x, y, string));
 	waveform->create_objects();
 	y += 30;
+	int x1 = x + waveform->get_w() + 10;
 
 
 	add_subwindow(new BC_Title(x, y, _("Base Frequency:")));
 	y += 30;
-	add_subwindow(base_freq = new SynthBaseFreq(synth, x, y));
+	add_subwindow(base_freq = new SynthBaseFreq(synth, this, x, y));
 	x += 80;
 	add_subwindow(freqpot = new SynthFreqPot(synth, this, x, y - 10));
 	base_freq->freq_pot = freqpot;
@@ -628,9 +594,9 @@ void SynthWindow::create_objects()
 
 
 	y += 20; x = 10;
-	add_subwindow(subwindow = new SynthSubWindow(synth, x, y, 265, get_h() - y));
+	add_subwindow(osc_subwindow = new BC_SubWindow(x, y, 265, get_h() - y));
 	x += 265;
-	add_subwindow(scroll = new SynthScroll(synth, this, x, y, get_h() - y));
+	add_subwindow(osc_scroll = new OscScroll(synth, this, x, y, get_h() - y));
 
 
 	x += 20;
@@ -638,11 +604,64 @@ void SynthWindow::create_objects()
 	y += 30;
 	add_subwindow(new SynthDelOsc(synth, this, x, y));
 
+// Create keyboard
+	y = 30;
+
+#include "white_up_png.h"
+#include "white_hi_png.h"
+#include "white_dn_png.h"
+#include "white_checked_png.h"
+#include "white_checkedhi_png.h"
+#include "black_up_png.h"
+#include "black_hi_png.h"
+#include "black_dn_png.h"
+#include "black_checked_png.h"
+#include "black_checkedhi_png.h"
+	white_key[0] = new VFrame(white_up_png);
+	white_key[1] = new VFrame(white_hi_png);
+	white_key[2] = new VFrame(white_checked_png);
+	white_key[3] = new VFrame(white_dn_png);
+	white_key[4] = new VFrame(white_checkedhi_png);
+	black_key[0] = new VFrame(black_up_png);
+	black_key[1] = new VFrame(black_hi_png);
+	black_key[2] = new VFrame(black_checked_png);
+	black_key[3] = new VFrame(black_dn_png);
+	black_key[4] = new VFrame(black_checkedhi_png);
+
+
+	add_subwindow(note_subwindow = new BC_SubWindow(x1, 
+		y, 
+		get_w() - x1, 
+		white_key[0]->get_h() + MARGIN +
+		get_text_height(MEDIUMFONT) + MARGIN +
+		get_text_height(MEDIUMFONT) + MARGIN));
+	add_subwindow(note_scroll = new NoteScroll(synth,
+		this,
+		x1,
+		note_subwindow->get_y() + note_subwindow->get_h(),
+		note_subwindow->get_w()));
+
+	add_subwindow(momentary = new SynthMomentary(this, 
+		x1, 
+		note_scroll->get_y() + note_scroll->get_h() + MARGIN, 
+		_("Momentary notes")));
+
+
 	update_scrollbar();
 	update_oscillators();
+	update_notes();
 
 	show_window();
-	flush();
+}
+
+int SynthWindow::keypress_event()
+{
+	if(ctrl_down() && get_keypress() == 'w')
+	{
+		set_done(1);
+		return 1;
+	}
+	return 0;
 }
 
 void SynthWindow::update_gui()
@@ -657,18 +676,198 @@ void SynthWindow::update_gui()
 	update_scrollbar();
 	update_oscillators();
 	canvas->update();
+	update_note_selection();
 }
 
 void SynthWindow::update_scrollbar()
 {
-	scroll->update_length(synth->config.oscillator_config.total * OSCILLATORHEIGHT, 
-		scroll->get_position(), 
-		subwindow->get_h());
+	osc_scroll->update_length(synth->config.oscillator_config.total * OSCILLATORHEIGHT, 
+		osc_scroll->get_position(), 
+		osc_subwindow->get_h());
 }
+
+
+void SynthWindow::update_whitekey(int number, 
+	int *current_title, 
+	int x, 
+	int y)
+{
+	if(!notes[number])
+	{
+		note_subwindow->add_subwindow(notes[number] = new SynthNote(this, 
+			white_key, number, x, y));
+		if(number >= FIRST_TITLE && number < LAST_TITLE)
+			note_subwindow->add_subwindow(
+				note_titles[(*current_title)++] = new BC_Title(
+					x + text_white_margin, 
+					y2, 
+					keyboard_map[number - FIRST_TITLE]));
+	}
+	else
+	{
+		notes[number]->reposition_window(x, y);
+		if(number >= FIRST_TITLE && number < LAST_TITLE)
+			note_titles[(*current_title)++]->reposition_window(x + text_white_margin, 
+					y2);
+	}
+}
+
+
+void SynthWindow::update_blackkey(int number, 
+	int *current_title, 
+	int x, 
+	int y)
+{
+	if(!notes[number])
+	{
+		note_subwindow->add_subwindow(notes[number] = new SynthNote(this, 
+			black_key, number, x, y));
+		if(number >= FIRST_TITLE && number < LAST_TITLE)
+			note_subwindow->add_subwindow(
+				note_titles[(*current_title)++] = new BC_Title(x + text_black_margin, 
+					y1, 
+					keyboard_map[number - FIRST_TITLE]));
+	}
+	else
+	{
+		notes[number]->reposition_window(x, y);
+		if(number >= FIRST_TITLE && number < LAST_TITLE)
+			note_titles[(*current_title)++]->reposition_window(x + text_black_margin, 
+					y1);
+	}
+}
+
+void SynthWindow::update_notes()
+{
+	int octave_w = white_key[0]->get_w() * 7;
+	int white_w = white_key[0]->get_w();
+	int black_w = black_key[0]->get_w();
+	int white_w1 = white_w - black_w / 2 - 2;
+	int white_w2 = white_w / 2;
+	int white_w3 = white_w * 2 / 3;
+	int y = 0;
+	int x = 0;
+	y1 = y + white_key[0]->get_h() + 10;
+	y2 = y1 + get_text_height(MEDIUMFONT) + 10;
+	y3 = y2 + get_text_height(MEDIUMFONT) + 10;
+	text_black_margin = black_w / 2 - get_text_width(MEDIUMFONT, "O") / 2;
+	text_white_margin = white_w / 2 - get_text_width(MEDIUMFONT, "O") / 2;
+
+	note_subwindow->clear_box(0, 0, get_w(), get_h());
+
+	note_subwindow->set_color(get_resources()->default_text_color);
+
+// Add new notes
+// To get the stacking order:
+// pass 0 is white keys
+// pass 1 is black keys
+	int current_title = 0;
+	for(int pass = 0; pass < 2; pass++)
+	{
+		x = -note_scroll->get_position();
+
+		for(int i = 0; i < TOTALNOTES; i++)
+		{
+			int octave_note = i % 12;
+			if(!pass)
+			{
+// White keys
+				switch(octave_note)
+				{
+					case 0:
+						update_whitekey(i, &current_title, x, y);
+						break;
+					case 1:
+						x += white_w;
+						break;
+					case 2:
+						update_whitekey(i, &current_title, x, y);
+						break;
+					case 3:
+						x += white_w;
+						break;
+					case 4:
+						update_whitekey(i, &current_title, x, y);
+						x += white_w;
+						break;
+					case 5:
+						update_whitekey(i, &current_title, x, y);
+						break;
+					case 6:
+						x += white_w;
+						break;
+					case 7:
+						update_whitekey(i, &current_title, x, y);
+						break;
+					case 8:
+						x += white_w;
+						break;
+					case 9:
+						update_whitekey(i, &current_title, x, y);
+						break;
+					case 10:
+						x += white_w;
+						break;
+					case 11:
+						update_whitekey(i, &current_title, x, y);
+						x += white_w;
+						break;
+				}
+			}
+			else
+			{
+// Black keys
+				switch(octave_note)
+				{
+					case 1:
+						update_blackkey(i, &current_title, x + white_w2, y);
+						x += white_w;
+						break;
+					case 3:
+						update_blackkey(i, &current_title, x + white_w3, y);
+						x += white_w;
+						break;
+					case 4:
+						x += white_w;
+						break;
+					case 6:
+						update_blackkey(i, &current_title, x + white_w2, y);
+						x += white_w;
+						break;
+					case 8:
+						update_blackkey(i, &current_title, x + white_w1, y);
+						x += white_w;
+						break;
+					case 10:
+						update_blackkey(i, &current_title, x + white_w3, y);
+						x += white_w;
+						break;
+					case 11:
+						x += white_w;
+						break;
+				}
+			}
+		}
+	}
+}
+
+void SynthWindow::update_note_selection()
+{
+	for(int i = 0; i < TOTALNOTES; i++)
+	{
+		if((int)(keyboard_freqs[notes[i]->number]) == synth->config.base_freq)
+		{
+			notes[i]->set_value(1);
+		}
+		else
+			notes[i]->set_value(0);
+	}
+}
+
 
 void SynthWindow::update_oscillators()
 {
-	int i, y = -scroll->get_position();
+	int i, y = -osc_scroll->get_position();
 
 
 
@@ -727,8 +926,134 @@ int SynthWindow::waveform_to_text(char *text, int waveform)
 }
 
 
+SynthMomentary::SynthMomentary(SynthWindow *window, int x, int y, char *text)
+ : BC_CheckBox(x, 
+	y, 
+	window->synth->momentary_notes, 
+	text)
+{
+	this->window = window;
+}
+
+int SynthMomentary::handle_event()
+{
+	window->synth->momentary_notes = get_value();
+	window->synth->save_defaults();
+	return 1;
+}
 
 
+
+
+SynthNote::SynthNote(SynthWindow *window, VFrame **images, 
+	int number, 
+	int x, 
+	int y)
+ : BC_Toggle(x, 
+ 	y, 
+	images, 
+	window->synth->config.base_freq == (int)keyboard_freqs[number])
+{
+	this->window = window;
+	this->number = number;
+	note_on = 0;
+	set_select_drag(1);
+	set_radial(1);
+}
+
+void SynthNote::start_note()
+{
+	if(window->synth->momentary_notes) note_on = 1;
+	window->synth->config.base_freq = (int64_t)keyboard_freqs[number];
+	window->base_freq->update(window->synth->config.base_freq);
+	window->freqpot->update(window->synth->config.base_freq);
+	window->synth->send_configure_change();
+	window->update_note_selection();
+}
+
+void SynthNote::stop_note()
+{
+	if(window->synth->momentary_notes) 
+	{
+		note_on = 0;
+		window->synth->config.base_freq = 0;
+		window->base_freq->update(window->synth->config.base_freq);
+		window->freqpot->update(window->synth->config.base_freq);
+		window->synth->send_configure_change();
+	}
+}
+
+int SynthNote::keypress_event()
+{
+	if(number >= FIRST_TITLE && number < LAST_TITLE)
+	{
+		if(get_keypress() == keyboard_map[number - FIRST_TITLE][0])
+		{
+			start_note();
+			set_value(1);
+// Key releases are repeated, so momentary notes may not work
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int SynthNote::keyrelease_event()
+{
+	if(note_on && window->synth->momentary_notes)
+	{
+		stop_note();
+		set_value(0);
+		return 1;
+	}
+	return 0;
+}
+
+int SynthNote::cursor_motion_event()
+{
+	int result = 0;
+	if(window->current_note > -1)
+	{
+		int cursor_x = get_relative_cursor_x();
+		int cursor_y = get_relative_cursor_y();
+		if(cursor_x >= 0 && cursor_x < get_w() &&
+			cursor_y >= 0 && cursor_y < get_h())
+		{
+			start_note();
+			window->current_note = number;
+			result = 1;
+		}
+	}
+	return result;
+}
+
+int SynthNote::button_press_event()
+{
+	if(BC_Toggle::button_press_event())
+	{
+		start_note();
+		window->current_note = number;
+		return 1;
+	}
+	return 0;
+}
+
+int SynthNote::button_release_event()
+{
+// Change frequency permanently
+	if(window->current_note == number)
+	{
+		if(window->synth->momentary_notes)
+		{
+// Mute on button release
+			stop_note();
+			set_value(0);
+		}
+		window->current_note = -1;
+	}
+
+	return BC_Toggle::button_release_event();
+}
 
 
 
@@ -746,16 +1071,15 @@ SynthOscGUI::~SynthOscGUI()
 	delete freq;
 }
 
-int SynthOscGUI::create_objects(int y)
+void SynthOscGUI::create_objects(int y)
 {
 	char text[BCTEXTLEN];
 	sprintf(text, "%d:", number + 1);
-	window->subwindow->add_subwindow(title = new BC_Title(10, y + 15, text));
+	window->osc_subwindow->add_subwindow(title = new BC_Title(10, y + 15, text));
 
-	window->subwindow->add_subwindow(level = new SynthOscGUILevel(window->synth, this, y));
-	window->subwindow->add_subwindow(phase = new SynthOscGUIPhase(window->synth, this, y));
-	window->subwindow->add_subwindow(freq = new SynthOscGUIFreq(window->synth, this, y));
-	return 1;
+	window->osc_subwindow->add_subwindow(level = new SynthOscGUILevel(window->synth, this, y));
+	window->osc_subwindow->add_subwindow(phase = new SynthOscGUIPhase(window->synth, this, y));
+	window->osc_subwindow->add_subwindow(freq = new SynthOscGUIFreq(window->synth, this, y));
 }
 
 
@@ -884,7 +1208,7 @@ int SynthDelOsc::handle_event()
 }
 
 
-SynthScroll::SynthScroll(Synth *synth, 
+OscScroll::OscScroll(Synth *synth, 
 	SynthWindow *window, 
 	int x, 
 	int y, 
@@ -895,19 +1219,48 @@ SynthScroll::SynthScroll(Synth *synth,
 	h, 
 	synth->config.oscillator_config.total * OSCILLATORHEIGHT, 
 	0, 
-	window->subwindow->get_h())
+	window->osc_subwindow->get_h())
 {
 	this->synth = synth;
 	this->window = window;
 }
 
-SynthScroll::~SynthScroll()
+OscScroll::~OscScroll()
 {
 }
 
-int SynthScroll::handle_event()
+int OscScroll::handle_event()
 {
-	window->update_gui();
+	window->update_oscillators();
+	return 1;
+}
+
+
+
+NoteScroll::NoteScroll(Synth *synth, 
+	SynthWindow *window, 
+	int x, 
+	int y, 
+	int w)
+ : BC_ScrollBar(x, 
+ 	y, 
+	SCROLL_HORIZ,
+	w, 
+	window->white_key[0]->get_w() * TOTALNOTES * 7 / 12 + window->white_key[0]->get_w(), 
+	0, 
+	window->note_subwindow->get_w())
+{
+	this->synth = synth;
+	this->window = window;
+}
+
+NoteScroll::~NoteScroll()
+{
+}
+
+int NoteScroll::handle_event()
+{
+	window->update_notes();
 	return 1;
 }
 
@@ -915,17 +1268,6 @@ int SynthScroll::handle_event()
 
 
 
-
-
-
-SynthSubWindow::SynthSubWindow(Synth *synth, int x, int y, int w, int h)
- : BC_SubWindow(x, y, w, h)
-{
-	this->synth = synth;
-}
-SynthSubWindow::~SynthSubWindow()
-{
-}
 
 
 
@@ -991,7 +1333,8 @@ SynthWaveFormItem::~SynthWaveFormItem()
 int SynthWaveFormItem::handle_event()
 {
 	synth->config.wavefunction = value;
-	synth->thread->window->canvas->update();
+	((SynthWindow*)synth->thread->window)->canvas->update();
+	get_popup_menu()->set_text(get_text());
 	synth->send_configure_change();
 	return 1;
 }
@@ -1020,6 +1363,7 @@ SynthFreqPot::SynthFreqPot(Synth *synth, SynthWindow *window, int x, int y)
  : BC_QPot(x, y, synth->config.base_freq)
 {
 	this->synth = synth;
+	this->window = window;
 }
 SynthFreqPot::~SynthFreqPot()
 {
@@ -1031,16 +1375,18 @@ int SynthFreqPot::handle_event()
 		synth->config.base_freq = get_value();
 		freq_text->update(get_value());
 		synth->send_configure_change();
+		window->update_note_selection();
 	}
 	return 1;
 }
 
 
 
-SynthBaseFreq::SynthBaseFreq(Synth *synth, int x, int y)
+SynthBaseFreq::SynthBaseFreq(Synth *synth, SynthWindow *window, int x, int y)
  : BC_TextBox(x, y, 70, 1, (int)synth->config.base_freq)
 {
 	this->synth = synth;
+	this->window = window;
 }
 SynthBaseFreq::~SynthBaseFreq()
 {
@@ -1048,12 +1394,13 @@ SynthBaseFreq::~SynthBaseFreq()
 int SynthBaseFreq::handle_event()
 {
 	int new_value = atol(get_text());
-	
-	if(new_value > 0 && new_value < 30000)
+// 0 is mute
+	if(/* new_value > 0 && */new_value < 30000)
 	{
 		synth->config.base_freq = new_value;
 		freq_pot->update(synth->config.base_freq);
 		synth->send_configure_change();
+		window->update_note_selection();
 	}
 	return 1;
 }
@@ -1131,7 +1478,7 @@ int SynthLevelZero::handle_event()
 		synth->config.oscillator_config.values[i]->level = INFINITYGAIN;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1152,7 +1499,7 @@ int SynthLevelMax::handle_event()
 	{
 		synth->config.oscillator_config.values[i]->level = 0;
 	}
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1189,7 +1536,7 @@ int SynthLevelNormalize::handle_event()
 		synth->config.oscillator_config.values[i]->level = new_value;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1213,7 +1560,7 @@ int SynthLevelSlope::handle_event()
 		synth->config.oscillator_config.values[i]->level = i * slope;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1235,7 +1582,7 @@ int SynthLevelRandom::handle_event()
 		synth->config.oscillator_config.values[i]->level = -(rand() % -INFINITYGAIN);
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1257,7 +1604,7 @@ int SynthLevelInvert::handle_event()
 			INFINITYGAIN - synth->config.oscillator_config.values[i]->level;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1282,7 +1629,7 @@ int SynthLevelSine::handle_event()
 		synth->config.oscillator_config.values[i]->level = new_value;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1306,7 +1653,7 @@ int SynthPhaseInvert::handle_event()
 			1 - synth->config.oscillator_config.values[i]->phase;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1327,7 +1674,7 @@ int SynthPhaseZero::handle_event()
 		synth->config.oscillator_config.values[i]->phase = 0;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1351,7 +1698,7 @@ int SynthPhaseSine::handle_event()
 		synth->config.oscillator_config.values[i]->phase = new_value;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1374,7 +1721,7 @@ int SynthPhaseRandom::handle_event()
 			(float)(rand() % 360) / 360;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1399,7 +1746,7 @@ int SynthFreqRandom::handle_event()
 		synth->config.oscillator_config.values[i]->freq_factor = rand() % 100;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1420,7 +1767,7 @@ int SynthFreqEnum::handle_event()
 		synth->config.oscillator_config.values[i]->freq_factor = (float)i + 1;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1444,7 +1791,7 @@ int SynthFreqEven::handle_event()
 		synth->config.oscillator_config.values[i]->freq_factor = (float)i * 2;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1463,7 +1810,7 @@ int SynthFreqOdd::handle_event()
 		synth->config.oscillator_config.values[i]->freq_factor = (float)1 + i * 2;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1488,7 +1835,7 @@ int SynthFreqFibonacci::handle_event()
 		last_value2 = synth->config.oscillator_config.values[i]->freq_factor;
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1511,7 +1858,7 @@ int SynthFreqPrime::handle_event()
 		number = get_next_prime(number);
 	}
 
-	synth->thread->window->update_gui();
+	((SynthWindow*)synth->thread->window)->update_gui();
 	synth->send_configure_change();
 	return 1;
 }
@@ -1705,7 +2052,7 @@ void SynthConfig::interpolate(SynthConfig &prev,
 
 	copy_from(prev);
 	wetness = (int)(prev.wetness * prev_scale + next.wetness * next_scale);
-	base_freq = (int)(prev.base_freq * prev_scale + next.base_freq * next_scale);
+//	base_freq = (int)(prev.base_freq * prev_scale + next.base_freq * next_scale);
 }
 
 

@@ -25,11 +25,15 @@
 
 class TimeAvgThread;
 class TimeAvgWindow;
-class TimeAvgAccum;
 class TimeAvgAvg;
-class TimeAvgOr;
+class TimeAvgAccum;
+class TimeAvgReplace;
+class TimeAvgGreater;
+class TimeAvgLess;
 class TimeAvgParanoid;
 class TimeAvgNoSubtract;
+class TimeThresholdSlider;
+class TimeBorderSlider;
 
 #include "guicast.h"
 #include "mutex.h"
@@ -45,12 +49,17 @@ public:
 	~TimeAvgWindow();
 	
 	void create_objects();
-	
+	void update_toggles();
+
 	TimeAvgMain *client;
 	TimeAvgSlider *total_frames;
-	TimeAvgAccum *accum;
+	TimeThresholdSlider *threshold;
+	TimeBorderSlider *border;
 	TimeAvgAvg *avg;
-	TimeAvgOr *inclusive_or;
+	TimeAvgAccum *accum;
+	TimeAvgReplace *replace;
+	TimeAvgGreater *greater;
+	TimeAvgLess *less;
 	TimeAvgParanoid *paranoid;
 	TimeAvgNoSubtract *no_subtract;
 };
@@ -65,13 +74,24 @@ public:
 	TimeAvgMain *client;
 };
 
-class TimeAvgAccum : public BC_Radial
+class TimeThresholdSlider : public BC_ISlider
 {
 public:
-	TimeAvgAccum(TimeAvgMain *client, TimeAvgWindow *gui, int x, int y);
+	TimeThresholdSlider(TimeAvgMain *client, int x, int y);
+	~TimeThresholdSlider();
 	int handle_event();
+
 	TimeAvgMain *client;
-	TimeAvgWindow *gui;
+};
+
+class TimeBorderSlider : public BC_ISlider
+{
+public:
+	TimeBorderSlider(TimeAvgMain *client, int x, int y);
+	~TimeBorderSlider();
+	int handle_event();
+
+	TimeAvgMain *client;
 };
 
 class TimeAvgAvg : public BC_Radial
@@ -83,10 +103,37 @@ public:
 	TimeAvgWindow *gui;
 };
 
-class TimeAvgOr : public BC_Radial
+class TimeAvgAccum : public BC_Radial
 {
 public:
-	TimeAvgOr(TimeAvgMain *client, TimeAvgWindow *gui, int x, int y);
+	TimeAvgAccum(TimeAvgMain *client, TimeAvgWindow *gui, int x, int y);
+	int handle_event();
+	TimeAvgMain *client;
+	TimeAvgWindow *gui;
+};
+
+class TimeAvgReplace : public BC_Radial
+{
+public:
+	TimeAvgReplace(TimeAvgMain *client, TimeAvgWindow *gui, int x, int y);
+	int handle_event();
+	TimeAvgMain *client;
+	TimeAvgWindow *gui;
+};
+
+class TimeAvgGreater : public BC_Radial
+{
+public:
+	TimeAvgGreater(TimeAvgMain *client, TimeAvgWindow *gui, int x, int y);
+	int handle_event();
+	TimeAvgMain *client;
+	TimeAvgWindow *gui;
+};
+
+class TimeAvgLess : public BC_Radial
+{
+public:
+	TimeAvgLess(TimeAvgMain *client, TimeAvgWindow *gui, int x, int y);
 	int handle_event();
 	TimeAvgMain *client;
 	TimeAvgWindow *gui;

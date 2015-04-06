@@ -616,7 +616,7 @@ SET_TRACE
 void ChromaKey::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("CHROMAKEY");
 	output.tag.set_property("RED", config.red);
 	output.tag.set_property("GREEN", config.green);
@@ -634,7 +634,7 @@ void ChromaKey::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	while(!input.read_tag())
 	{

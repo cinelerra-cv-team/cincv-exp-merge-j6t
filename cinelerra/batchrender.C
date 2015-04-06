@@ -221,21 +221,14 @@ BatchRenderThread::BatchRenderThread()
 void BatchRenderThread::handle_close_event(int result)
 {
 // Save settings
-TRACE("BatchRenderThread::handle_close_event 1");
+
 	char path[BCTEXTLEN];
-TRACE("BatchRenderThread::handle_close_event 1");
 	path[0] = 0;
-TRACE("BatchRenderThread::handle_close_event 1");
 	save_jobs(path);
-TRACE("BatchRenderThread::handle_close_event 1");
 	save_defaults(mwindow->defaults);
-TRACE("BatchRenderThread::handle_close_event 1");
 	delete default_job;
-TRACE("BatchRenderThread::handle_close_event 1");
 	default_job = 0;
-TRACE("BatchRenderThread::handle_close_event 1");
 	jobs.remove_all_objects();
-TRACE("BatchRenderThread::handle_close_event 100");
 }
 
 BC_Window* BatchRenderThread::new_gui()
@@ -662,12 +655,15 @@ BatchRenderGUI::BatchRenderGUI(MWindow *mwindow,
 
 BatchRenderGUI::~BatchRenderGUI()
 {
+	lock_window("BatchRenderGUI::~BatchRenderGUI");
 	delete format_tools;
+	unlock_window();
 }
 
 
 void BatchRenderGUI::create_objects()
 {
+	lock_window("BatchRenderGUI::create_objects");
 	mwindow->theme->get_batchrender_sizes(this, get_w(), get_h());
 	create_list(0);
 
@@ -685,6 +681,7 @@ void BatchRenderGUI::create_objects()
 	format_tools = new BatchFormat(mwindow,
 					this, 
 					thread->get_current_asset());
+	format_tools->set_w(get_w() / 2);
 	format_tools->create_objects(x, 
 						y, 
 						1, 
@@ -779,6 +776,7 @@ void BatchRenderGUI::create_objects()
 		y));
 
 	show_window();
+	unlock_window();
 }
 
 int BatchRenderGUI::resize_event(int w, int h)

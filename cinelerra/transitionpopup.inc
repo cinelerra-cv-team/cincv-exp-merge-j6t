@@ -22,6 +22,8 @@
 #ifndef TRANSITIONPOPUP_INC
 #define TRANSITIONPOPUP_INC
 
+class TransitionLengthThread;
 class TransitionPopup;
+
 
 #endif

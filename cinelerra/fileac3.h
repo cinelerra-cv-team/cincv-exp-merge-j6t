@@ -22,9 +22,6 @@
 #ifndef FILEAC3_H
 #define FILEAC3_H
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-};
 
 #include "filebase.h"
 #include <stdio.h>
@@ -48,8 +45,10 @@ public:
 	int write_samples(double **buffer, int64_t len);
 
 private:
-	AVCodec *codec;
-	AVCodecContext *codec_context;
+//	AVCodec *codec;
+//	AVCodecContext *codec_context;
+	void *codec;
+	void *codec_context;
 	FILE *fd;
 	int16_t *temp_raw;
 	int temp_raw_allocated;

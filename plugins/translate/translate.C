@@ -21,16 +21,14 @@
 
 #include "clip.h"
 #include "filexml.h"
+#include "language.h"
 #include "picon_png.h"
 #include "translate.h"
 #include "translatewin.h"
 
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
+
 
 
 REGISTER_PLUGIN(TranslateMain)
@@ -163,7 +161,7 @@ void TranslateMain::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 // Store data
 	output.tag.set_title("TRANSLATE");
@@ -187,7 +185,7 @@ void TranslateMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 

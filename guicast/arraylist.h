@@ -67,6 +67,8 @@ public:
 // deleted by delete [].
 	void set_array_delete();
 	void set_free();
+	int size();
+	TYPE get(int number);
 
 	void sort();
 
@@ -354,6 +356,23 @@ int ArrayList<TYPE>::number_of(TYPE object)
 	}
 	return 0;
 }
+
+template<class TYPE>
+int ArrayList<TYPE>::size()
+{
+	return total;
+}
+
+template<class TYPE>
+TYPE ArrayList<TYPE>::get(int number)
+{
+	if(number < total) return values[number];
+	printf("ArrayList<TYPE>::get number=%d total=%d\n",
+		number,
+		total);
+	return 0;
+}
+
 
 
 #endif

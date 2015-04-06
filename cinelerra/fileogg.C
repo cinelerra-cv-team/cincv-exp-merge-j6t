@@ -2057,6 +2057,7 @@ void OGGConfigAudio::create_objects()
 	int x1 = 150;
 	char string[BCTEXTLEN];
 
+	lock_window("OGGConfigAudio::create_objects");
 	add_tool(fixed_bitrate = new OGGVorbisFixedBitrate(x, y, this));
 	add_tool(variable_bitrate = new OGGVorbisVariableBitrate(x1, y, this));
 
@@ -2079,6 +2080,7 @@ void OGGConfigAudio::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
+	unlock_window();
 }
 
 int OGGConfigAudio::close_event()
@@ -2182,6 +2184,7 @@ void OGGConfigVideo::create_objects()
 	int x1 = x + 150;
 	int x2 = x + 300;
 
+	lock_window("OGGConfigVideo::create_objects");
 	add_subwindow(new BC_Title(x, y + 5, _("Bitrate:")));
 	add_subwindow(new OGGTheoraBitrate(x1, y, this));
 	add_subwindow(fixed_bitrate = new OGGTheoraFixedBitrate(x2, y, this));
@@ -2224,6 +2227,7 @@ void OGGConfigVideo::create_objects()
 	
 
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 

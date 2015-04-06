@@ -227,6 +227,12 @@ int EDL::load_xml(ArrayList<PluginServer*> *plugindb,
 			local_session->unset_outpoint();
 		}
 
+// This was originally in LocalSession::load_xml
+		if(load_flags & LOAD_SESSION)
+		{
+			local_session->clipboard_length = 0;
+		}
+
 		do{
 			result = file->read_tag();
 
@@ -242,7 +248,8 @@ int EDL::load_xml(ArrayList<PluginServer*> *plugindb,
 				else
 				if(file->tag.title_is("CLIPBOARD"))
 				{
-					local_session->clipboard_length = file->tag.get_property("LENGTH", 0);
+					local_session->clipboard_length = 
+						file->tag.get_property("LENGTH", (double)0);
 				}
 				else
 				if(file->tag.title_is("VIDEO"))
@@ -1120,38 +1127,49 @@ int EDL::next_id()
 }
 
 void EDL::get_shared_plugins(Track *source, 
-	ArrayList<SharedLocation*> *plugin_locations)
+	ArrayList<SharedLocation*> *plugin_locations,
+	int omit_recordable,
+	int data_type)
 {
 	for(Track *track = tracks->first; track; track = track->next)
 	{
-		if(track != source && 
-			track->data_type == source->data_type)
+		if(!track->record || !omit_recordable)
 		{
-			for(int i = 0; i < track->plugin_set.total; i++)
+			if(track != source && 
+				track->data_type == data_type)
 			{
-				Plugin *plugin = track->get_current_plugin(
-					local_session->get_selectionstart(1), 
-					i, 
-					PLAY_FORWARD, 
-					1,
-					0);
-				if(plugin && plugin->plugin_type == PLUGIN_STANDALONE)
+				for(int i = 0; i < track->plugin_set.total; i++)
 				{
-					plugin_locations->append(new SharedLocation(tracks->number_of(track), i));
+					Plugin *plugin = track->get_current_plugin(
+						local_session->get_selectionstart(1), 
+						i, 
+						PLAY_FORWARD, 
+						1,
+						0);
+					if(plugin && plugin->plugin_type == PLUGIN_STANDALONE)
+					{
+						plugin_locations->append(new SharedLocation(tracks->number_of(track), i));
+					}
 				}
 			}
 		}
 	}
 }
 
-void EDL::get_shared_tracks(Track *track, ArrayList<SharedLocation*> *module_locations)
+void EDL::get_shared_tracks(Track *track, 
+	ArrayList<SharedLocation*> *module_locations,
+	int omit_recordable,
+	int data_type)
 {
 	for(Track *current = tracks->first; current; current = NEXT)
 	{
-		if(current != track && 
-			current->data_type == track->data_type)
+		if(!omit_recordable || !current->record)
 		{
-			module_locations->append(new SharedLocation(tracks->number_of(current), 0));
+			if(current != track && 
+				current->data_type == data_type)
+			{
+				module_locations->append(new SharedLocation(tracks->number_of(current), 0));
+			}
 		}
 	}
 }

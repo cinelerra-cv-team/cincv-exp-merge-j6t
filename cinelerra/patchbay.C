@@ -317,11 +317,12 @@ int PatchBay::cursor_motion_event()
 							if(current->value != new_status)
 							{
 
+//								mwindow->undo->update_undo_before(_("keyframe"), this);
 								current = (IntAuto*)mute_autos->get_auto_for_editing(position);
 
 								current->value = new_status;
 
-								mwindow->undo->update_undo(_("keyframe"), LOAD_AUTOMATION);
+//								mwindow->undo->update_undo_after(_("keyframe"), LOAD_AUTOMATION);
 
 								mwindow->gui->unlock_window();
 								mwindow->restart_brender();

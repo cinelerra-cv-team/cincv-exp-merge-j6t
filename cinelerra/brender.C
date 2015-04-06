@@ -191,14 +191,11 @@ void BRender::run()
 // our position.
 void BRender::restart(EDL *edl)
 {
-//printf("BRender::restart 1\n");
 	BRenderCommand *new_command = new BRenderCommand;
 	map_valid = 0;
 	new_command->copy_edl(edl);
 	new_command->command = BRenderCommand::BRENDER_RESTART;
-//printf("BRender::restart 2\n");
 	thread->send_command(new_command);
-//printf("BRender::restart 3\n");
 // Map should be reallocated before this returns.
 }
 
@@ -439,6 +436,7 @@ void BRenderThread::run()
 		BRenderCommand *new_command = 0;
 		thread_lock->lock("BRenderThread::run 1");
 
+
 // Got new command
 		if(command_queue)
 		{
@@ -491,21 +489,16 @@ void BRenderThread::run()
 
 
 			stop();
-//printf("BRenderThread::run 4\n");
 			brender->completion_lock->lock("BRenderThread::run 4");
-//printf("BRenderThread::run 5\n");
 
 			if(new_command->edl->tracks->total_playable_vtracks())
 			{
 				if(command) delete command;
 				command = new_command;
-//printf("BRenderThread::run 6\n");
 				start();
-//printf("BRenderThread::run 7\n");
 			}
 			else
 			{
-//printf("BRenderThread::run 8 %p\n", farm_server);
 				delete new_command;
 				new_command = 0;
 			}

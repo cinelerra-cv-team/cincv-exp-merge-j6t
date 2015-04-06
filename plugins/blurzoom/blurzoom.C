@@ -22,6 +22,7 @@
 #include "clip.h"
 #include "colormodels.h"
 #include "filexml.h"
+#include "language.h"
 #include "picon_png.h"
 #include "blurzoom.h"
 #include "blurzoomwindow.h"
@@ -30,10 +31,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 PluginClient* new_plugin(PluginServer *server)
 {
@@ -58,23 +55,10 @@ BlurZoomConfig::BlurZoomConfig()
 BlurZoomMain::BlurZoomMain(PluginServer *server)
  : PluginVClient(server)
 {
-	thread = 0;
-	defaults = 0;
-	load_defaults();
 }
 
 BlurZoomMain::~BlurZoomMain()
 {
-	if(thread)
-	{
-// Set result to 0 to indicate a server side close
-		thread->window->set_done(0);
-		thread->completion.lock();
-		delete thread;
-	}
-
-	save_defaults();
-	if(defaults) delete defaults;
 }
 
 const char* BlurZoomMain::plugin_title() { return N_("RadioacTV"); }
@@ -84,6 +68,8 @@ VFrame* BlurZoomMain::new_picon()
 {
 	return new VFrame(picon_png);
 }
+
+NEW_WINDOW_MACRO(BlurZoomMain, BlurZoomWindow)
 
 int BlurZoomMain::load_defaults()
 {
@@ -95,8 +81,9 @@ int BlurZoomMain::save_defaults()
 	return 0;
 }
 
-void BlurZoomMain::load_configuration()
+int BlurZoomMain::load_configuration()
 {
+	return 1;
 }
 
 
@@ -259,28 +246,6 @@ int BlurZoomMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 	return 0;
 }
 
-int BlurZoomMain::show_gui()
-{
-	load_configuration();
-	thread = new BlurZoomThread(this);
-	thread->start();
-	return 0;
-}
-
-int BlurZoomMain::set_string()
-{
-	if(thread) thread->window->set_title(gui_string);
-	return 0;
-}
-
-void BlurZoomMain::raise_window()
-{
-	if(thread)
-	{
-		thread->window->raise_window();
-		thread->window->flush();
-	}
-}
 
 
 

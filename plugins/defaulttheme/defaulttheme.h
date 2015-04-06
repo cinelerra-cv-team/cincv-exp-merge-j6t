@@ -19,8 +19,8 @@
  * 
  */
 
-#ifndef BLONDTHEME_H
-#define BLONDTHEME_H
+#ifndef DEFAULTTHEME_H
+#define DEFAULTTHEME_H
 
 #include "new.inc"
 #include "plugintclient.h"

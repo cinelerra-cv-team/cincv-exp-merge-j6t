@@ -72,7 +72,6 @@ public:
 
 	Resample *resample;
 	double scale;
-	BC_Hash *defaults;
 	MainProgressBar *progress;
 	int64_t total_written;
 	int64_t current_position;

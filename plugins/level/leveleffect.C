@@ -24,6 +24,7 @@
 #include "bchash.h"
 #include "filesystem.h"
 #include "filexml.h"
+#include "language.h"
 #include "leveleffect.h"
 #include "picon_png.h"
 #include "units.h"
@@ -34,10 +35,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 
@@ -201,7 +198,7 @@ int SoundLevelEffect::is_realtime() { return 1; }
 void SoundLevelEffect::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 	while(!result)
@@ -221,7 +218,7 @@ void SoundLevelEffect::read_data(KeyFrame *keyframe)
 void SoundLevelEffect::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("SOUNDLEVEL");
 	output.tag.set_property("DURATION", config.duration);

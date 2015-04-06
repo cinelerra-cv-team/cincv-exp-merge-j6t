@@ -25,6 +25,7 @@
 class LoadMode;
 
 // Load modes for loading files, importing recordings, importing effects
+// Be sure to change mode_images in LoadMode::create_objects if you change this.
 #define LOAD_NOTHING 0
 #define LOAD_REPLACE 1
 #define LOAD_REPLACE_CONCATENATE 2
@@ -32,5 +33,6 @@ class LoadMode;
 #define LOAD_CONCATENATE 4
 #define LOAD_PASTE 5
 #define LOAD_RESOURCESONLY 6
+#define TOTAL_LOADMODES 7
 
 #endif

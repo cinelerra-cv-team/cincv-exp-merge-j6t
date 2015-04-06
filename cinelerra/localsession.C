@@ -24,6 +24,7 @@
 #include "bchash.h"
 #include "edl.h"
 #include "filexml.h"
+#include "floatauto.h"
 #include "localsession.h"
 
 
@@ -87,6 +88,7 @@ LocalSession::LocalSession(EDL *edl)
 	automation_maxs[AUTOGROUPTYPE_INT255] = 255;
 
 	zoombar_showautotype = AUTOGROUPTYPE_AUDIO_FADE;
+	floatauto_type = Auto::BEZIER;
 	red = green = blue = 0;
 }
 
@@ -119,6 +121,7 @@ void LocalSession::copy_from(LocalSession *that)
 		automation_mins[i] = that->automation_mins[i];
 		automation_maxs[i] = that->automation_maxs[i];
 	}
+	floatauto_type = that->floatauto_type;
 	blue = that->blue;
 }
 
@@ -161,6 +164,7 @@ void LocalSession::save_xml(FileXML *file, double start)
 			file->tag.set_property(xml_autogrouptypes_titlesmax[i],automation_maxs[i]);
 		}
 	}
+	file->tag.set_property("FLOATAUTO_TYPE", floatauto_type);
 	file->append_tag();
 	file->tag.set_title("/LOCALSESSION");
 	file->append_tag();
@@ -185,7 +189,8 @@ void LocalSession::load_xml(FileXML *file, unsigned long load_flags)
 {
 	if(load_flags & LOAD_SESSION)
 	{
-		clipboard_length = 0;
+// moved to EDL::load_xml for paste to fill silence.
+//		clipboard_length = 0;
 // Overwritten by MWindow::load_filenames	
 		file->tag.get_property("CLIP_TITLE", clip_title);
 		file->tag.get_property("CLIP_NOTES", clip_notes);
@@ -212,6 +217,7 @@ void LocalSession::load_xml(FileXML *file, unsigned long load_flags)
 				automation_maxs[i] = file->tag.get_property(xml_autogrouptypes_titlesmax[i],automation_maxs[i]);
 			}
 		}
+		floatauto_type = file->tag.get_property("FLOATAUTO_TYPE", floatauto_type);
 	}
 
 
@@ -260,6 +266,7 @@ int LocalSession::load_defaults(BC_Hash *defaults)
 		}
 	}
 
+	floatauto_type = defaults->get("FLOATAUTO_TYPE", floatauto_type);
 	return 0;
 }
 
@@ -286,6 +293,7 @@ int LocalSession::save_defaults(BC_Hash *defaults)
 		}
 	}
 
+	defaults->update("FLOATAUTO_TYPE", floatauto_type);
 	return 0;
 }
 

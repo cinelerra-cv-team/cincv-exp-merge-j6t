@@ -22,11 +22,11 @@
 #ifndef LOADFILE_H
 #define LOADFILE_H
 
+#include "bcdialog.h"
 #include "guicast.h"
 #include "loadmode.inc"
 #include "mainmenu.inc"
 #include "mwindow.inc"
-#include "thread.h"
 
 class LoadFileThread;
 class LoadFileWindow;
@@ -45,25 +45,22 @@ public:
 	LoadFileThread *thread;
 };
 
-class LoadFileThread : public Thread
+class LoadFileThread : public BC_DialogThread
 {
 public:
 	LoadFileThread(MWindow *mwindow, Load *menuitem);
 	~LoadFileThread();
 
-	void run();
+	
+	BC_Window* new_gui();
+	void handle_done_event(int result);
 
 	MWindow *mwindow;
 	Load *load;
 	int load_mode;
+	LoadFileWindow *window;
 };
 
-class NewTimeline;
-class NewConcatenate;
-class AppendNewTracks;
-class EndofTracks;
-class ResourcesOnly;
-class ReelWindow;
 class OverwriteReel;
 
 class LoadFileWindow : public BC_FileBox
@@ -80,51 +77,6 @@ public:
 	LoadFileThread *thread;
 	LoadMode *loadmode;
 	MWindow *mwindow;
-	NewTimeline *newtimeline;
-	NewConcatenate *newconcatenate;
-	AppendNewTracks *newtracks;
-	EndofTracks *concatenate;
-	ResourcesOnly *resourcesonly;
-};
-
-class NewTimeline : public BC_Radial
-{
-public:
-	NewTimeline(int x, int y, LoadFileWindow *window);
-	int handle_event();
-	LoadFileWindow *window;
-};
-
-class NewConcatenate : public BC_Radial
-{
-public:
-	NewConcatenate(int x, int y, LoadFileWindow *window);
-	int handle_event();
-	LoadFileWindow *window;
-};
-
-class AppendNewTracks : public BC_Radial
-{
-public:
-	AppendNewTracks(int x, int y, LoadFileWindow *window);
-	int handle_event();
-	LoadFileWindow *window;
-};
-
-class EndofTracks : public BC_Radial
-{
-public:
-	EndofTracks(int x, int y, LoadFileWindow *window);
-	int handle_event();
-	LoadFileWindow *window;
-};
-
-class ResourcesOnly : public BC_Radial
-{
-public:
-	ResourcesOnly(int x, int y, LoadFileWindow *window);
-	int handle_event();
-	LoadFileWindow *window;
 };
 
 

@@ -20,6 +20,7 @@
  */
 
 #include "auto.h"
+#include "bcsignals.h"
 #include "cache.h"
 #include "commonrender.h"
 #include "condition.h"

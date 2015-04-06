@@ -22,10 +22,12 @@
 #include "bcdisplayinfo.h"
 #include "bchash.h"
 #include "edl.inc"
+#include "filesystem.h"
 #include "filexml.h"
 #include "language.h"
 #include "overlayframe.h"
 #include "picon_png.h"
+#include "theme.h"
 #include "vframe.h"
 #include "shapewipe.h"
 
@@ -33,6 +35,8 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
+
+#define SHAPE_SEARCHPATH "/shapewipe"
 
 REGISTER_PLUGIN(ShapeWipeMain)
 
@@ -101,7 +105,7 @@ ShapeWipePreserveAspectRatio::ShapeWipePreserveAspectRatio(ShapeWipeMain *plugin
 	ShapeWipeWindow *window,
 	int x,
 	int y)
- : BC_CheckBox (x,y,plugin->preserve_aspect, _("Preserve shape aspect ratio"))
+ : BC_CheckBox (x, y, plugin->preserve_aspect, _("Preserve shape aspect ratio"))
 {
 	this->plugin = plugin;
 	this->window = window;
@@ -114,70 +118,135 @@ int ShapeWipePreserveAspectRatio::handle_event()
 	return 0;
 }
 
-ShapeWipeFilename::ShapeWipeFilename(
-	ShapeWipeMain *plugin,
-	ShapeWipeWindow *window,
-	char *value,
-	int x,
+// ShapeWipeFilename::ShapeWipeFilename(
+// 	ShapeWipeMain *plugin,
+// 	ShapeWipeWindow *window,
+// 	char *value,
+// 	int x,
+// 	int y)
+//  : BC_TextBox(x,y,180,1, value)
+// {
+// 	this->plugin = plugin;
+// 	this->window = window;
+// 	this->value = value;
+// }
+// 
+// int ShapeWipeFilename::handle_event()
+// {
+// 	value = get_text();
+// 	strcpy(plugin->filename, get_text());
+// 	plugin->send_configure_change();
+// 	return 0;
+// }
+// 
+// ShapeWipeBrowseButton::ShapeWipeBrowseButton(
+// 	ShapeWipeMain *plugin,
+// 	ShapeWipeWindow *window,
+// 	ShapeWipeFilename *filename,
+// 	int x,
+// 	int y)
+//  : BC_GenericButton(x,y,_("Browse..."))
+// {
+// 	this->plugin = plugin;
+// 	this->window = window;
+// 	this->filename = filename;
+// }
+// 
+// int ShapeWipeBrowseButton::handle_event()
+// {
+// 	int result;
+// 	ShapeWipeLoad window(filename, filename->get_text());
+// 	window.create_objects();
+// 	window.update_filter("*.png");
+// 	result = window.run_window();
+// 
+// 	if (!result)
+// 	{
+// 		filename->update(window.get_submitted_path());
+// 		strcpy(plugin->filename, window.get_submitted_path());
+// 		plugin->send_configure_change();
+// 	}
+// 
+// 	return 0;
+// }
+// 
+// ShapeWipeLoad::ShapeWipeLoad(
+// 	ShapeWipeFilename *filename, 
+// 	char *init_directory)
+//  : BC_FileBox(
+// 	1,
+// 	1,
+// 	init_directory, 
+// 	_("Choose Shape"), 
+// 	_("Choose a Wipe Shape"))
+// {
+//    this->filename = filename;
+// }
+// 
+// 
+
+
+
+
+ShapeWipeTumble::ShapeWipeTumble(ShapeWipeMain *client, 
+	ShapeWipeWindow *window, 
+	int x, 
 	int y)
- : BC_TextBox(x,y,180,1, value)
+ : BC_Tumbler(x, y)
 {
-	this->plugin = plugin;
+	this->client = client;
 	this->window = window;
-	this->value = value;
 }
 
-int ShapeWipeFilename::handle_event()
+int ShapeWipeTumble::handle_up_event()
 {
-	value = get_text();
-	strcpy(plugin->filename, get_text());
-	plugin->send_configure_change();
+	window->prev_shape();
+	return 1;
+}
+
+int ShapeWipeTumble::handle_down_event()
+{
+	window->next_shape();
 	return 0;
 }
 
-ShapeWipeBrowseButton::ShapeWipeBrowseButton(
-	ShapeWipeMain *plugin,
-	ShapeWipeWindow *window,
-	ShapeWipeFilename *filename,
-	int x,
-	int y)
- : BC_GenericButton(x,y,_("Browse..."))
+
+
+
+
+
+
+ShapeWipeShape::ShapeWipeShape(ShapeWipeMain *client, 
+	ShapeWipeWindow *window, 
+	int x, 
+	int y, 
+	int text_w,
+	int list_h)
+ : BC_PopupTextBox(window,
+ 	&window->shapes,
+	client->shape_name,
+	x,
+	y,
+	text_w,
+	list_h)
 {
-	this->plugin = plugin;
+	this->client = client;
 	this->window = window;
-	this->filename = filename;
 }
 
-int ShapeWipeBrowseButton::handle_event()
+int ShapeWipeShape::handle_event()
 {
-	int result;
-	ShapeWipeLoad window(filename, filename->get_text());
-	window.create_objects();
-	window.update_filter("*.png");
-	result = window.run_window();
-
-	if (!result)
-	{
-		filename->update(window.get_submitted_path());
-		strcpy(plugin->filename, window.get_submitted_path());
-		plugin->send_configure_change();
-	}
-
-	return 0;
+	strcpy(client->shape_name, get_text());
+	client->send_configure_change();
+	return 1;
 }
 
-ShapeWipeLoad::ShapeWipeLoad(
-	ShapeWipeFilename *filename, 
-	const char *init_directory)
- : BC_FileBox(
-	1,
-	1,
-	init_directory, 
-	_("Choose Shape"), 
-	_("Choose a Wipe Shape"))
-{
-   this->filename = filename;
-}
+
+
+
+
+
+
 
 ShapeWipeWindow::ShapeWipeWindow(ShapeWipeMain *plugin)
  : PluginClientWindow(plugin, 
@@ -187,75 +256,152 @@ ShapeWipeWindow::ShapeWipeWindow(ShapeWipeMain *plugin)
 	this->plugin = plugin;
 }
 
+ShapeWipeWindow::~ShapeWipeWindow()
+{
+	shapes.remove_all_objects();
+}
+
+
+
 void ShapeWipeWindow::create_objects()
 {
-	int x = 10, y = 10;
-	add_subwindow(new BC_Title(x, y, _("Direction:")));
-	x += 100;
+	BC_Title *title = 0;
+	int widget_border = plugin->get_theme()->widget_border;
+	int window_border = plugin->get_theme()->window_border;
+	int x = window_border, y = window_border;
+
+	plugin->init_shapes();
+	for(int i = 0; i < plugin->shape_titles.size(); i++)
+	{
+		shapes.append(new BC_ListBoxItem(plugin->shape_titles.get(i)));
+	}
+	
+	add_subwindow(title = new BC_Title(x, y, _("Direction:")));
+	x += title->get_w() + widget_border;
 	add_subwindow(left = new ShapeWipeW2B(plugin, 
 		this,
 		x,
 		y));
-	x += 200;
+	x += left->get_w() + widget_border;
 	add_subwindow(right = new ShapeWipeB2W(plugin, 
 		this,
 		x,
 		y));
-	x = 10; y += 25;
-	add_subwindow(new BC_Title(x, y, _("Shape:")));
-	x += 100;
+	x = window_border;
+	y += right->get_h() + widget_border;
 
-	add_subwindow(filename_widget = new 
-	ShapeWipeFilename(plugin, 
-		this,
-		plugin->filename,
-		x,
+
+	add_subwindow(title = new BC_Title(x, y, _("Shape:")));
+	x += title->get_w() + widget_border;
+
+// 	add_subwindow(filename_widget = new 
+// 	ShapeWipeFilename(plugin, 
+// 		this,
+// 		plugin->filename,
+// 		x,
+// 		y));
+// 	x += 200;
+// 	add_subwindow(new ShapeWipeBrowseButton(
+// 		plugin, 
+// 		this,
+// 		filename_widget,
+// 		x,
+// 		y));
+
+	shape_text = new ShapeWipeShape(plugin, 
+		this, 
+		x, 
+		y, 
+		150,
+		200);
+	shape_text->create_objects();
+	x += shape_text->get_w() + widget_border;
+	add_subwindow(new ShapeWipeTumble(plugin, 
+		this, 
+		x, 
 		y));
-	x += 200;
-	add_subwindow(new ShapeWipeBrowseButton(
+	x = window_border;
+	y += shape_text->get_h() + widget_border;
+
+	ShapeWipeAntiAlias *anti_alias;
+	add_subwindow(anti_alias = new ShapeWipeAntiAlias(
 		plugin, 
 		this,
-		filename_widget,
 		x,
 		y));
-	x = 110; y += 25;
-	add_subwindow(new ShapeWipeAntiAlias(
+	y += anti_alias->get_h() + widget_border;
+	ShapeWipePreserveAspectRatio *aspect_ratio;
+	add_subwindow(aspect_ratio = new ShapeWipePreserveAspectRatio(
 		plugin, 
 		this,
 		x,
 		y));
-	x = 110; y += 25;
-	add_subwindow(new ShapeWipePreserveAspectRatio(
-		plugin, 
-		this,
-		x,
-		y));
+	y += aspect_ratio->get_h() + widget_border;
+
 	show_window();
-	flush();
 }
+
+void ShapeWipeWindow::next_shape()
+{
+	for(int i = 0; i < plugin->shape_titles.size(); i++)
+	{
+		if(!strcmp(plugin->shape_titles.get(i), plugin->shape_name))
+		{
+			i++;
+			if(i >= plugin->shape_titles.size()) i = 0;
+			strcpy(plugin->shape_name, plugin->shape_titles.get(i));
+			shape_text->update(plugin->shape_name);
+			break;
+		}
+	}
+	client->send_configure_change();
+}
+
+void ShapeWipeWindow::prev_shape()
+{
+	for(int i = 0; i < plugin->shape_titles.size(); i++)
+	{
+		if(!strcmp(plugin->shape_titles.get(i), plugin->shape_name))
+		{
+			i--;
+			if(i < 0) i = plugin->shape_titles.size() - 1;
+			strcpy(plugin->shape_name, plugin->shape_titles.get(i));
+			shape_text->update(plugin->shape_name);
+			break;
+		}
+	}
+	client->send_configure_change();
+}
+
+
+
 
 
 ShapeWipeMain::ShapeWipeMain(PluginServer *server)
  : PluginVClient(server)
 {
 	direction = 0;
-	strcpy(filename, DEFAULT_SHAPE);	// is defined by a -D compiler instruction
+	filename[0] = 0;
 	last_read_filename[0] = '\0';
+	strcpy(shape_name, DEFAULT_SHAPE);
+	current_name[0] = 0;
 	pattern_image = NULL;
-	min_value = 255;
-	max_value = 0;
+	min_value = (unsigned char)255;
+	max_value = (unsigned char)0;
 	antialias = 0;
 	preserve_aspect = 0;
 	last_preserve_aspect = 0;
+	shapes_initialized = 0;
 }
 
 ShapeWipeMain::~ShapeWipeMain()
 {
 	reset_pattern_image();
+	shape_paths.remove_all_objects();
+	shape_titles.remove_all_objects();
 }
 
 const char* ShapeWipeMain::plugin_title() { return N_("Shape Wipe"); }
-int ShapeWipeMain::is_video() { return 1; }
 int ShapeWipeMain::is_transition() { return 1; }
 int ShapeWipeMain::uses_gui() { return 1; }
 
@@ -281,6 +427,7 @@ int ShapeWipeMain::load_defaults()
 	antialias = defaults->get("ANTIALIAS", antialias);
 	preserve_aspect = defaults->get("PRESERVE_ASPECT", preserve_aspect);
 	defaults->get("FILENAME", filename);
+	defaults->get("SHAPE_NAME", shape_name);
 	return 0;
 }
 
@@ -290,6 +437,7 @@ int ShapeWipeMain::save_defaults()
 	defaults->update("ANTIALIAS", antialias);
 	defaults->update("PRESERVE_ASPECT", preserve_aspect);
 	defaults->update("FILENAME", filename);
+	defaults->update("SHAPE_NAME", shape_name);
 	defaults->save();
 	return 0;
 }
@@ -297,12 +445,13 @@ int ShapeWipeMain::save_defaults()
 void ShapeWipeMain::save_data(KeyFrame *keyframe)
 {
 	FileXML output;
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("SHAPEWIPE");
 	output.tag.set_property("DIRECTION", direction);
 	output.tag.set_property("ANTIALIAS", antialias);
 	output.tag.set_property("PRESERVE_ASPECT", preserve_aspect);
 	output.tag.set_property("FILENAME", filename);
+	output.tag.set_property("SHAPE_NAME", shape_name);
 	output.append_tag();
 	output.tag.set_title("/SHAPEWIPE");
 	output.append_tag();
@@ -313,7 +462,7 @@ void ShapeWipeMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	while(!input.read_tag())
 	{
@@ -323,9 +472,38 @@ void ShapeWipeMain::read_data(KeyFrame *keyframe)
 			antialias = input.tag.get_property("ANTIALIAS", antialias);
 			preserve_aspect = input.tag.get_property("PRESERVE_ASPECT", preserve_aspect);
 			input.tag.get_property("FILENAME", filename);
+			input.tag.get_property("SHAPE_NAME", shape_name);
 		}
 	}
 }
+
+void ShapeWipeMain::init_shapes()
+{
+	if(!shapes_initialized)
+	{
+		FileSystem fs;
+		fs.set_filter("*.png");
+		char shape_path[BCTEXTLEN];
+		sprintf(shape_path, "%s%s", get_plugin_dir(), SHAPE_SEARCHPATH);
+		fs.update(shape_path);
+
+		for(int i = 0; i < fs.total_files(); i++)
+		{
+			FileItem *file_item = fs.get_entry(i);
+			if(!file_item->get_is_dir())
+			{
+				shape_paths.append(strdup(file_item->get_path()));
+				char *ptr = strdup(file_item->get_name());
+				char *ptr2 = strrchr(ptr, '.');
+				if(ptr2) *ptr2 = 0;
+				shape_titles.append(ptr);
+			}
+		}
+
+		shapes_initialized = 1;
+	}
+}
+
 
 int ShapeWipeMain::load_configuration()
 {
@@ -353,6 +531,16 @@ int ShapeWipeMain::read_pattern_image(int new_frame_width, int new_frame_height)
 	png_bytep *image;
 	frame_width = new_frame_width;
 	frame_height = new_frame_height;
+
+// Convert name to filename
+	for(int i = 0; i < shape_paths.size(); i++)
+	{
+		if(!strcmp(shape_titles.get(i), shape_name))
+		{
+			strcpy(filename, shape_paths.get(i));
+			break;
+		}
+	}
 
 	FILE *fp = fopen(filename, "rb");
 	if (!fp)
@@ -501,7 +689,8 @@ void ShapeWipeMain::reset_pattern_image()
 		}
 		free (pattern_image);
 		pattern_image = NULL;
-		min_value = 255, max_value = 0;	// are recalc'd in read_pattern_image
+		min_value = (unsigned char)255;
+		max_value = (unsigned char)0;	// are recalc'd in read_pattern_image
 	}
 }
 
@@ -656,20 +845,24 @@ int ShapeWipeMain::process_realtime(VFrame *incoming, VFrame *outgoing)
 	int i,j,k;
 	int opacity;
 
+	init_shapes();
 	load_configuration();
 
 	int w = incoming->get_w();
 	int h = incoming->get_h();
 
-	if (strncmp(filename,last_read_filename,BCTEXTLEN)
-		|| preserve_aspect != last_preserve_aspect)
+	if (strncmp(filename, last_read_filename, BCTEXTLEN) ||
+		strncmp(shape_name, current_name, BCTEXTLEN) ||
+		preserve_aspect != last_preserve_aspect)
 	{
 		reset_pattern_image();
 	}
 
-	if (!pattern_image) {
+	if (!pattern_image) 
+	{
 		read_pattern_image(w, h);
 		strncpy(last_read_filename, filename, BCTEXTLEN);
+		strncpy(current_name, shape_name, BCTEXTLEN);
 		last_preserve_aspect = preserve_aspect;
 	}
 

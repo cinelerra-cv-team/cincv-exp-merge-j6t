@@ -145,6 +145,11 @@ void BC_ListBoxItem::set_selected(int value)
 	this->selected = value;
 }
 
+int BC_ListBoxItem::get_selected()
+{
+	return selected;
+}
+
 void BC_ListBoxItem::set_searchable(int value)
 {
 	this->searchable = value;

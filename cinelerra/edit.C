@@ -191,6 +191,7 @@ int64_t Edit::get_source_end(int64_t default_)
 void Edit::insert_transition(char *title)
 {
 //printf("Edit::insert_transition this=%p title=%p title=%s\n", this, title, title);
+	detach_transition();
 	transition = new Transition(edl, 
 		this, 
 		title, 

@@ -43,11 +43,13 @@ AssetRemoveWindow::AssetRemoveWindow(MWindow *mwindow)
 void AssetRemoveWindow::create_objects()
 {
 	int x = 10, y = 10;
+	lock_window("AssetRemoveWindow::create_objects");
 	add_subwindow(new BC_Title(x, y, _("Permanently remove from disk?")));
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 	flush();
+	unlock_window();
 }
 
 

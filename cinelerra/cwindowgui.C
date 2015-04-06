@@ -95,7 +95,8 @@ CWindowGUI::CWindowGUI(MWindow *mwindow, CWindow *cwindow)
 	affected_x = 0;
 	affected_y = 0;
 	affected_z = 0;
-	affected_keyframe = 0;
+	mask_keyframe = 0;
+	orig_mask_keyframe = new MaskAuto(0, 0);
 	affected_point = 0;
 	x_offset = 0;
 	y_offset = 0;
@@ -124,6 +125,7 @@ CWindowGUI::~CWindowGUI()
 
 void CWindowGUI::create_objects()
 {
+	lock_window("CWindowGUI::create_objects");
 	set_icon(mwindow->theme->get_image("cwindow_icon"));
 
 	active = new BC_Pixmap(this, mwindow->theme->get_image("cwindow_active"));
@@ -151,7 +153,9 @@ void CWindowGUI::create_objects()
 	composite_panel->create_objects();
 
 	canvas = new CWindowCanvas(mwindow, this);
+
 	canvas->create_objects(mwindow->edl);
+
 
 
 	add_subwindow(timebar = new CTimeBar(mwindow,
@@ -200,13 +204,17 @@ void CWindowGUI::create_objects()
 // Must create after meter panel
 	tool_panel = new CWindowTool(mwindow, this);
 	tool_panel->Thread::start();
+
 	
 	set_operation(mwindow->edl->session->cwindow_operation);
 
 
+
 	canvas->draw_refresh();
 
+
 	draw_status();
+	unlock_window();
 }
 
 int CWindowGUI::translation_event()
@@ -378,9 +386,7 @@ void CWindowGUI::zoom_canvas(int do_auto, double value, int update_menu)
 }
 
 
-// TODO
-// Don't refresh the canvas in a load file operation which is going to
-// refresh it anyway.
+
 void CWindowGUI::set_operation(int value)
 {
 	mwindow->edl->session->cwindow_operation = value;
@@ -432,11 +438,25 @@ int CWindowGUI::keypress_event()
 				canvas->start_fullscreen();
 			lock_window("CWindowGUI::keypress_event 1");
 			break;
+		case 'x':
+			unlock_window();
+			mwindow->gui->lock_window("CWindowGUI::keypress_event 2");
+			mwindow->cut();
+			mwindow->gui->unlock_window();
+			lock_window("CWindowGUI::keypress_event 2");
+			break;
+		case BACKSPACE:
+			unlock_window();
+			mwindow->gui->lock_window("CWindowGUI::keypress_event 2");
+			mwindow->clear_entry();
+			mwindow->gui->unlock_window();
+			lock_window("CWindowGUI::keypress_event 3");
+			break;
 		case ESC:
 			unlock_window();
 			if(mwindow->session->cwindow_fullscreen)
 				canvas->stop_fullscreen();
-			lock_window("CWindowGUI::keypress_event 2");
+			lock_window("CWindowGUI::keypress_event 4");
 			break;
 		case LEFT:
 			if(!ctrl_down()) 
@@ -595,7 +615,7 @@ int CWindowGUI::drag_stop()
 			mwindow->save_backup();
 			mwindow->restart_brender();
 			mwindow->gui->update(1, 1, 1, 1, 0, 1, 0);
-			mwindow->undo->update_undo(_("insert assets"), LOAD_ALL);
+			mwindow->undo->update_undo_after(_("insert assets"), LOAD_ALL);
 			mwindow->gui->unlock_window();
 			mwindow->sync_parameters(LOAD_ALL);
 		}
@@ -754,11 +774,12 @@ int CWindowSlider::handle_event()
 {
 	unlock_window();
 	cwindow->playback_engine->interrupt_playback(1);
-	lock_window("CWindowSlider::handle_event 1");
-	
+
 	mwindow->gui->lock_window("CWindowSlider::handle_event 2");
 	mwindow->select_point((double)get_value());
 	mwindow->gui->unlock_window();
+
+	lock_window("CWindowSlider::handle_event 1");
 	return 1;
 }
 
@@ -771,7 +792,6 @@ void CWindowSlider::set_position()
 	if(mwindow->edl->local_session->preview_start > 
 		mwindow->edl->local_session->preview_end)
 		mwindow->edl->local_session->preview_start = 0;
-
 
 
 	update(mwindow->theme->cslider_w, 
@@ -987,6 +1007,11 @@ void CWindowCanvas::draw_crophandle(int x, int y)
 {
 	get_canvas()->draw_box(x, y, CROPHANDLE_W, CROPHANDLE_H);
 }
+
+
+
+
+
 
 #define CONTROL_W 10
 #define CONTROL_H 10
@@ -1293,10 +1318,63 @@ int CWindowCanvas::do_mask(int &redraw,
 		mwindow->edl->local_session->get_selectionstart(1),
 		0);
 	ArrayList<MaskPoint*> points;
-	mask_autos->get_points(&points, mwindow->edl->session->cwindow_mask,
-		position, 
-		PLAY_FORWARD);
-//printf("CWindowCanvas::do_mask 4\n");
+
+// Determine the points based on whether
+// new keyframes will be generated or drawing is performed.
+// If keyframe generation occurs, use the interpolated mask.
+// If no keyframe generation occurs, use the previous mask.
+	int use_interpolated = 0;
+	if(button_press || cursor_motion)
+	{
+#ifdef USE_KEYFRAME_SPANNING
+		double selection_start = mwindow->edl->local_session->get_selectionstart(0);
+		double selection_end = mwindow->edl->local_session->get_selectionend(0);
+
+		Auto *first = 0;
+		mask_autos->get_prev_auto(track->to_units(selection_start, 0),
+			PLAY_FORWARD,
+			first,
+			1);
+		Auto *last = 0;
+		mask_autos->get_prev_auto(track->to_units(selection_end, 0),
+			PLAY_FORWARD,
+			last,
+			1);
+
+		if(last == first && (!mwindow->edl->session->auto_keyframes))
+			use_interpolated = 0;
+		else
+// If keyframe spanning occurs, use the interpolated points.
+// If new keyframe is generated, use the interpolated points.
+			use_interpolated = 1;
+		
+#else
+		if(mwindow->edl->session->auto_keyframes)
+			use_interpolated = 1;
+#endif
+	}
+	else
+		use_interpolated = 1;
+
+	if(use_interpolated)
+	{
+// Interpolate the points to get exactly what is being rendered at this position.
+		mask_autos->get_points(&points, 
+			mwindow->edl->session->cwindow_mask,
+			position, 
+			PLAY_FORWARD);
+	}
+	else
+// Use the prev mask
+	{
+		Auto *prev = 0;
+		mask_autos->get_prev_auto(position,
+			PLAY_FORWARD,
+			prev,
+			1);
+		((MaskAuto*)prev)->get_points(&points, 
+			mwindow->edl->session->cwindow_mask);
+	}
 
 // Projector zooms relative to the center of the track output.
 	float half_track_w = (float)track->track_w / 2;
@@ -1631,15 +1709,28 @@ int CWindowCanvas::do_mask(int &redraw,
 	if(button_press && !result)
 	{
 		gui->affected_track = gui->cwindow->calculate_affected_track();
-// Get current keyframe
-		if(gui->affected_track)
-			gui->affected_keyframe = 
-				gui->cwindow->calculate_affected_auto(
-					gui->affected_track->automation->autos[AUTOMATION_MASK],
-					1);
 
-		MaskAuto *keyframe = (MaskAuto*)gui->affected_keyframe;
-		SubMask *mask = keyframe->get_submask(mwindow->edl->session->cwindow_mask);
+// Get keyframe outside the EDL to edit.  This must be rendered
+// instead of the EDL keyframes when it exists.  Then it must be
+// applied to the EDL keyframes on buttonrelease.
+		if(gui->affected_track)
+		{
+#ifdef USE_KEYFRAME_SPANNING
+// Make copy of current parameters in local keyframe
+			gui->mask_keyframe = 
+				(MaskAuto*)gui->cwindow->calculate_affected_auto(
+					mask_autos,
+					0);
+			gui->orig_mask_keyframe->copy_data(gui->mask_keyframe);
+#else
+
+			gui->mask_keyframe = 
+				(MaskAuto*)gui->cwindow->calculate_affected_auto(
+					mask_autos,
+					1);
+#endif
+		}
+		SubMask *mask = gui->mask_keyframe->get_submask(mwindow->edl->session->cwindow_mask);
 
 
 // Translate entire keyframe
@@ -1698,6 +1789,15 @@ int CWindowCanvas::do_mask(int &redraw,
 // Append to end of list
 			if(labs(shortest_point1 - shortest_point2) > 1)
 			{
+#ifdef USE_KEYFRAME_SPANNING
+
+				MaskPoint *new_point = new MaskPoint;
+				points.append(new_point);
+				*new_point = *point;
+				gui->affected_point = points.total - 1;
+
+#else
+
 // Need to apply the new point to every keyframe
 				for(MaskAuto *current = (MaskAuto*)mask_autos->default_auto;
 					current; )
@@ -1711,14 +1811,34 @@ int CWindowCanvas::do_mask(int &redraw,
 					else
 						current = (MaskAuto*)NEXT;
 				}
-
 				gui->affected_point = mask->points.total - 1;
+#endif
+
 				result = 1;
 			}
 			else
 // Insert between 2 points, shifting back point 2
 			if(shortest_point1 >= 0 && shortest_point2 >= 0)
 			{
+
+#ifdef USE_KEYFRAME_SPANNING
+// In case the keyframe point count isn't synchronized with the rest of the keyframes,
+// avoid a crash.
+				if(points.total >= shortest_point2)
+				{
+					MaskPoint *new_point = new MaskPoint;
+					points.append(0);
+					for(int i = points.total - 1; 
+						i > shortest_point2; 
+						i--)
+						points.values[i] = points.values[i - 1];
+					points.values[shortest_point2] = new_point;
+
+					*new_point = *point;
+				}
+
+#else
+
 				for(MaskAuto *current = (MaskAuto*)mask_autos->default_auto;
 					current; )
 				{
@@ -1743,6 +1863,7 @@ int CWindowCanvas::do_mask(int &redraw,
 					else
 						current = (MaskAuto*)NEXT;
 				}
+#endif
 
 
 				gui->affected_point = shortest_point2;
@@ -1757,10 +1878,15 @@ int CWindowCanvas::do_mask(int &redraw,
 
 
 
-// Create the first point.
 			if(!result)
 			{
 //printf("CWindowCanvas::do_mask 1\n");
+// Create the first point.
+#ifdef USE_KEYFRAME_SPANNING
+				MaskPoint *new_point = new MaskPoint;
+				points.append(new_point);
+				*new_point = *point;
+#else
 				for(MaskAuto *current = (MaskAuto*)mask_autos->default_auto;
 					current; )
 				{
@@ -1773,11 +1899,24 @@ int CWindowCanvas::do_mask(int &redraw,
 					else
 						current = (MaskAuto*)NEXT;
 				}
+#endif
 
 //printf("CWindowCanvas::do_mask 2\n");
 // Create a second point if none existed before
+#ifdef USE_KEYFRAME_SPANNING
+				if(points.total < 2)
+				{
+
+					MaskPoint *new_point = new MaskPoint;
+					points.append(new_point);
+					*new_point = *point;
+				}
+
+				gui->affected_point = points.total - 1;
+#else
 				if(mask->points.total < 2)
 				{
+
 					for(MaskAuto *current = (MaskAuto*)mask_autos->default_auto;
 						current; )
 					{
@@ -1791,7 +1930,10 @@ int CWindowCanvas::do_mask(int &redraw,
 							current = (MaskAuto*)NEXT;
 					}
 				}
+
 				gui->affected_point = mask->points.total - 1;
+#endif
+
 //printf("CWindowCanvas::do_mask 3 %d\n", mask->points.total);
 			}
 
@@ -1801,7 +1943,7 @@ int CWindowCanvas::do_mask(int &redraw,
 // Delete the template
 			delete point;
 //printf("CWindowGUI::do_mask 1\n");
-			mwindow->undo->update_undo(_("mask point"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("mask point"), LOAD_AUTOMATION);
 //printf("CWindowGUI::do_mask 10\n");
 
 		}
@@ -1813,8 +1955,17 @@ int CWindowCanvas::do_mask(int &redraw,
 
 	if(button_press && result)
 	{
-		MaskAuto *keyframe = (MaskAuto*)gui->affected_keyframe;
-		SubMask *mask = keyframe->get_submask(mwindow->edl->session->cwindow_mask);
+#ifdef USE_KEYFRAME_SPANNING
+		MaskPoint *point = points.values[gui->affected_point];
+		gui->center_x = point->x;
+		gui->center_y = point->y;
+		gui->control_in_x = point->control_x1;
+		gui->control_in_y = point->control_y1;
+		gui->control_out_x = point->control_x2;
+		gui->control_out_y = point->control_y2;
+		gui->tool_panel->raise_window();
+#else
+		SubMask *mask = gui->mask_keyframe->get_submask(mwindow->edl->session->cwindow_mask);
 		MaskPoint *point = mask->points.values[gui->affected_point];
 		gui->center_x = point->x;
 		gui->center_y = point->y;
@@ -1822,16 +1973,31 @@ int CWindowCanvas::do_mask(int &redraw,
 		gui->control_in_y = point->control_y1;
 		gui->control_out_x = point->control_x2;
 		gui->control_out_y = point->control_y2;
+		gui->tool_panel->raise_window();
+#endif
 	}
 
 //printf("CWindowCanvas::do_mask 8\n");
 	if(cursor_motion)
 	{
-		MaskAuto *keyframe = (MaskAuto*)gui->affected_keyframe;
-		SubMask *mask = keyframe->get_submask(mwindow->edl->session->cwindow_mask);
+
+#ifdef USE_KEYFRAME_SPANNING
+// Must update the reference keyframes for every cursor motion
+			gui->mask_keyframe = 
+				(MaskAuto*)gui->cwindow->calculate_affected_auto(
+					mask_autos,
+					0);
+			gui->orig_mask_keyframe->copy_data(gui->mask_keyframe);
+#endif
+
+		SubMask *mask = gui->mask_keyframe->get_submask(mwindow->edl->session->cwindow_mask);
 		if(gui->affected_point < mask->points.total)
 		{
-			MaskPoint *point = mask->points.values[gui->affected_point];
+#ifdef USE_KEYFRAME_SPANNING
+			MaskPoint *point = points.get(gui->affected_point);
+#else
+			MaskPoint *point = mask->points.get(gui->affected_point);
+#endif
 // 			float cursor_x = get_cursor_x();
 // 			float cursor_y = get_cursor_y();
 // 			canvas_to_output(mwindow->edl, 0, cursor_x, cursor_y);
@@ -1865,11 +2031,19 @@ int CWindowCanvas::do_mask(int &redraw,
 					break;
 
 				case CWINDOW_MASK_TRANSLATE:
+#ifdef USE_KEYFRAME_SPANNING
+					for(int i = 0; i < points.total; i++)
+					{
+						points.values[i]->x += cursor_x - gui->x_origin;
+						points.values[i]->y += cursor_y - gui->y_origin;
+					}
+#else
 					for(int i = 0; i < mask->points.total; i++)
 					{
 						mask->points.values[i]->x += cursor_x - gui->x_origin;
 						mask->points.values[i]->y += cursor_y - gui->y_origin;
 					}
+#endif
 					gui->x_origin = cursor_x;
 					gui->y_origin = cursor_y;
 					break;
@@ -1891,6 +2065,22 @@ int CWindowCanvas::do_mask(int &redraw,
 	}
 //printf("CWindowCanvas::do_mask 2 %d %d %d\n", result, rerender, redraw);
 
+
+#ifdef USE_KEYFRAME_SPANNING
+// Must commit change after operation.
+	if(rerender && track)
+	{
+// Swap EDL keyframe with original.
+// Apply new values to keyframe span
+		MaskAuto temp_keyframe(mwindow->edl, mask_autos);
+		temp_keyframe.copy_data(gui->mask_keyframe);
+// Apply interpolated points back to keyframe
+		temp_keyframe.set_points(&points, mwindow->edl->session->cwindow_mask);
+		gui->mask_keyframe->copy_data(gui->orig_mask_keyframe);
+		mask_autos->update_parameter(&temp_keyframe);
+	}
+#endif
+
 	points.remove_all_objects();
 //printf("CWindowCanvas::do_mask 20\n");
 	return result;
@@ -1907,6 +2097,7 @@ int CWindowCanvas::do_eyedrop(int &rerender, int button_press)
 	if(button_press)
 	{
 		gui->current_operation = CWINDOW_EYEDROP;
+		gui->tool_panel->raise_window();
 	}
 
 	if(gui->current_operation == CWINDOW_EYEDROP)
@@ -1992,6 +2183,7 @@ int CWindowCanvas::do_eyedrop(int &rerender, int button_press)
 // Can't rerender since the color value is from the output of any effect it
 // goes into.
 //		rerender = 1;
+		mwindow->undo->update_undo_after(_("Eyedrop"), LOAD_SESSION);
 	}
 
 	return result;
@@ -2054,6 +2246,7 @@ void CWindowCanvas::draw_overlays()
 		case CWINDOW_MASK:
 			do_mask(temp1, temp2, 0, 0, 1);
 			break;
+		
 		case CWINDOW_RULER:
 			do_ruler(1, 0, 0, 0);
 			break;
@@ -2221,6 +2414,7 @@ int CWindowCanvas::test_crop(int button_press, int &redraw)
 		gui->crop_handle = handle_selected;
 		gui->x_origin = cursor_x;
 		gui->y_origin = cursor_y;
+		gui->tool_panel->raise_window();
 		result = 1;
 
 		if(handle_selected < 0 && !gui->crop_translate) 
@@ -2320,7 +2514,7 @@ int CWindowCanvas::test_crop(int button_press, int &redraw)
 			!EQUIV(mwindow->edl->session->crop_y1, y1) ||
 			!EQUIV(mwindow->edl->session->crop_y2, y2))
 		{
-			if (x1 > x2) 
+			if (x1 > x2)
 			{
 				float tmp = x1;
 				x1 = x2;
@@ -2333,8 +2527,8 @@ int CWindowCanvas::test_crop(int button_press, int &redraw)
 					case 3:	gui->crop_handle = 2; break;
 					default: break;
 				}
-
 			}
+
 			if (y1 > y2) 
 			{
 				float tmp = y1;
@@ -2647,6 +2841,7 @@ int CWindowCanvas::test_bezier(int button_press,
 		{
 			gui->current_operation = 
 				mwindow->edl->session->cwindow_operation;
+			gui->tool_panel->raise_window();
 			result = 1;
 		}
 	}
@@ -2869,14 +3064,20 @@ int CWindowCanvas::cursor_motion_event()
 
 	if(redraw_canvas)
 	{
+		gui->unlock_window();
+	
+	
 		mwindow->gui->lock_window("CWindowCanvas::cursor_motion_event 1");
 		mwindow->gui->canvas->draw_overlays();
 		mwindow->gui->canvas->flash();
 		mwindow->gui->unlock_window();
+		
+		gui->lock_window("CWindowCanvas::cursor_motion_event 1");
 	}
 
 	if(rerender)
 	{
+		gui->unlock_window();
 		mwindow->restart_brender();
 		mwindow->sync_parameters(CHANGE_PARAMS);
 		gui->cwindow->playback_engine->que->send_command(CURRENT_FRAME, 
@@ -2884,6 +3085,7 @@ int CWindowCanvas::cursor_motion_event()
 			mwindow->edl,
 			1);
 		if(!redraw) gui->update_tool();
+		gui->lock_window("CWindowCanvas::cursor_motion_event 2");
 	}
 	return result;
 }
@@ -2952,12 +3154,23 @@ int CWindowCanvas::button_press_event()
 	if(redraw)
 	{
 		draw_refresh();
+		gui->unlock_window();
+	
+	
+		mwindow->gui->lock_window("CWindowCanvas::button_press_event 1");
+		mwindow->gui->canvas->draw_overlays();
+		mwindow->gui->canvas->flash();
+		mwindow->gui->unlock_window();
 		gui->update_tool();
+		
+		gui->lock_window("CWindowCanvas::button_press_event 1");
 	}
 
 // rerendering can also be caused by press event
 	if(rerender) 
 	{
+		gui->unlock_window();
+
 		mwindow->restart_brender();
 		mwindow->sync_parameters(CHANGE_PARAMS);
 		gui->cwindow->playback_engine->que->send_command(CURRENT_FRAME, 
@@ -2965,6 +3178,7 @@ int CWindowCanvas::button_press_event()
 			mwindow->edl,
 			1);
 		if(!redraw) gui->update_tool();
+		gui->lock_window("CWindowCanvas::button_press_event 2");
 	}
 	return result;
 }
@@ -2984,18 +3198,20 @@ int CWindowCanvas::button_release_event()
 			break;
 
 		case CWINDOW_CAMERA:
-			mwindow->undo->update_undo(_("camera"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("camera"), LOAD_AUTOMATION);
 			break;
 
 		case CWINDOW_PROJECTOR:
-			mwindow->undo->update_undo(_("projector"), LOAD_AUTOMATION);
+			mwindow->undo->update_undo_after(_("projector"), LOAD_AUTOMATION);
 			break;
 
 		case CWINDOW_MASK:
 		case CWINDOW_MASK_CONTROL_IN:
 		case CWINDOW_MASK_CONTROL_OUT:
 		case CWINDOW_MASK_TRANSLATE:
-			mwindow->undo->update_undo(_("mask point"), LOAD_AUTOMATION);
+// Finish mask operation
+			gui->mask_keyframe = 0;
+			mwindow->undo->update_undo_after(_("mask"), LOAD_AUTOMATION);
 			break;
 
 	}

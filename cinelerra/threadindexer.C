@@ -143,13 +143,15 @@ void ThreadIndexer::run()
 			}
 			else
 			{
-				if(current_asset->index_status == 1) current_asset->index_status = 0;   // index has been tested
+				if(current_asset->index_status == INDEX_NOTTESTED) 
+					current_asset->index_status = INDEX_READY;   // index has been tested
 				indexfile->close_index();
 			}
 		}
 	}
 
-	if(progress)     // progress box is only createdd when an index is built
+// progress box is only created when an index is built
+	if(progress)     
 	{	
 		progress->stop_progress();
 		delete progress;

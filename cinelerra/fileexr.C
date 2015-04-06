@@ -387,8 +387,6 @@ int FileEXR::read_frame(VFrame *frame, VFrame *data)
 	file.setFrameBuffer(framebuffer);
 	file.readPixels (dw.min.y, dw.max.y);
 
-
-
 	if(is_yuv)
 	{
 // Convert to RGB using crazy ILM equations
@@ -592,6 +590,7 @@ EXRConfigVideo::~EXRConfigVideo()
 
 void EXRConfigVideo::create_objects()
 {
+	lock_window("EXRConfigVideo::create_objects");
 	int x = 10, y = 10;
 	add_subwindow(new EXRUseAlpha(this, x, y));
 	y += 30;
@@ -601,6 +600,7 @@ void EXRConfigVideo::create_objects()
 	add_subwindow(menu = new EXRCompression(this, x, y, 100));
 	menu->create_objects();
 	add_subwindow(new BC_OKButton(this));
+	unlock_window();
 }
 
 int EXRConfigVideo::close_event()

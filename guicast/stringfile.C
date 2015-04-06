@@ -152,7 +152,8 @@ int StringFile::readline(char *arg1, char *arg2)
 	len = 0; max = 1024;
 	
 	while(string[pointer] == ' ') pointer++; // skip indent
-	arg1[0] = 0;    arg2[0] = 0;
+	arg1[0] = 0;
+	arg2[0] = 0;
 	
 	for(i = 0; string[pointer] != ' ' && string[pointer] != '\n' && len < max; i++, pointer++)
 	{     // get title

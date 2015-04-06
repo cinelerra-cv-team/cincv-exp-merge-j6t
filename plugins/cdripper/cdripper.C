@@ -24,6 +24,7 @@
 #include "cdripper.h"
 #include "cdripwindow.h"
 #include "bchash.h"
+#include "language.h"
 #include "mainprogress.h"
 #include "mwindow.inc"
 
@@ -32,10 +33,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 PluginClient* new_plugin(PluginServer *server)
 {
@@ -46,13 +43,10 @@ PluginClient* new_plugin(PluginServer *server)
 CDRipMain::CDRipMain(PluginServer *server)
  : PluginAClient(server)
 {
-	load_defaults();
 }
 
 CDRipMain::~CDRipMain()
 {
-	save_defaults();
-	delete defaults;
 }
 
 const char* CDRipMain::plugin_title() { return N_("CD Ripper"); }
@@ -318,7 +312,7 @@ int CDRipMain::stop_loop()
 int CDRipMain::process_loop(double **plugin_buffer, int64_t &write_length)
 {
 	int result = 0;
-//printf("CDRipMain::process_loop 1\n");
+printf("CDRipMain::process_loop 1\n");
 
 // render it
 	if(arg.addr.lba < endlba && !endofselection)
@@ -329,7 +323,7 @@ int CDRipMain::process_loop(double **plugin_buffer, int64_t &write_length)
 			fragment_length *= NFRAMES * FRAMESIZE;
 			endofselection = 1;
 		}
-//printf("CDRipMain::process_loop 2 %d %d\n", arg.addr.lba, endlba);
+printf("CDRipMain::process_loop 2 %d %d\n", arg.addr.lba, endlba);
 
 		for(i = 0; i < fragment_length; 
 			i += NFRAMES * FRAMESIZE,
@@ -346,7 +340,7 @@ int CDRipMain::process_loop(double **plugin_buffer, int64_t &write_length)
 				if(attempts == 2 && !previewing) printf("Can't read CD audio.\n");
 			}
 		}
-//printf("CDRipMain::process_loop 3\n");
+printf("CDRipMain::process_loop 3\n");
 
 		if(arg.addr.lba > startlba)
 		{
@@ -365,22 +359,22 @@ int CDRipMain::process_loop(double **plugin_buffer, int64_t &write_length)
 
 			write_length = fragment_samples;
 		}
-//printf("CDRipMain::process_loop 5 %d\n", interactive);
+printf("CDRipMain::process_loop 5 %d\n", interactive);
 
 		currentlength++;
 		if(interactive)
 		{
 			if(!result) result = progress->update(currentlength);
 		}
-//printf("CDRipMain::process_loop 6\n");
+printf("CDRipMain::process_loop 6\n");
 	}
 	else
 	{
-//printf("CDRipMain::process_loop 7\n");
+printf("CDRipMain::process_loop 7\n");
 		endofselection = 1;
 		write_length = 0;
 	}
 
-//printf("CDRipMain::process_loop 8 %d %d\n", endofselection, result);
+printf("CDRipMain::process_loop 8 %d %d\n", endofselection, result);
 	return endofselection || result;
 }

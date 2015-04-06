@@ -37,7 +37,7 @@ public:
 	
 	FILE* get_stdin();
 	void run();
-	void start_command(char *command_line, int pipe_stdin);
+	void start_command(const char *command_line, int pipe_stdin);
 	
 	static void* entrypoint(void *ptr);
 	
@@ -50,7 +50,7 @@ private:
 	int total_arguments;
 	FILE *stdin_fd;
 	pthread_mutex_t start_lock;
-	char *command_line;
+	const char *command_line;
 	int pipe_stdin;
 };
 

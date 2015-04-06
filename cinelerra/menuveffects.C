@@ -39,7 +39,7 @@
 MenuVEffects::MenuVEffects(MWindow *mwindow)
  : MenuEffects(mwindow)
 {
-	thread = new MenuVEffectThread(mwindow);
+	thread = new MenuVEffectThread(mwindow, this);
 }
 
 MenuVEffects::~MenuVEffects()
@@ -47,8 +47,8 @@ MenuVEffects::~MenuVEffects()
 	delete thread;
 }
 
-MenuVEffectThread::MenuVEffectThread(MWindow *mwindow)
- : MenuEffectThread(mwindow)
+MenuVEffectThread::MenuVEffectThread(MWindow *mwindow, MenuVEffects *menu_item)
+ : MenuEffectThread(mwindow, menu_item)
 {
 }
 

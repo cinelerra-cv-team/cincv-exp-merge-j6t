@@ -42,7 +42,7 @@ RecConfirmDelete::~RecConfirmDelete()
 {
 }
 
-int RecConfirmDelete::create_objects(char *string)
+void RecConfirmDelete::create_objects(char *string)
 {
 	char string2[256];
 	int x = 10, y = 10;
@@ -52,7 +52,6 @@ int RecConfirmDelete::create_objects(char *string)
 	add_subwindow(new BC_OKButton(x, y));
 	x = get_w() - 100;
 	add_subwindow(new BC_CancelButton(x, y));
-	return 0;
 }
 
 

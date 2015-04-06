@@ -464,6 +464,8 @@ void BC_FPot::update(float value)
 {
 	if(value != this->value)
 	{
+		if(value < minvalue) value = minvalue;
+		if(value > maxvalue) value = maxvalue;
 		this->value = value;
 		draw();
 	}
@@ -550,6 +552,8 @@ void BC_IPot::update(int64_t value)
 {
 	if(this->value != value)
 	{
+		if(value < minvalue) value = minvalue;
+		if(value > maxvalue) value = maxvalue;
 		this->value = value;
 		draw();
 	}
@@ -630,9 +634,12 @@ int64_t BC_QPot::get_value()
 
 void BC_QPot::update(int64_t value)
 {
+	value = Freq::fromfreq(value);
 	if(this->value != value)
 	{
-		this->value = Freq::fromfreq(value);
+		if(value < minvalue) value = minvalue;
+		if(value > maxvalue) value = maxvalue;
+//		this->value = Freq::fromfreq(value);
 		draw();
 	}
 }
@@ -705,6 +712,8 @@ void BC_PercentagePot::update(float value)
 {
 	if(this->value != value)
 	{
+		if(value < minvalue) value = minvalue;
+		if(value > maxvalue) value = maxvalue;
 		this->value = value;
 		draw();
 	}

@@ -373,7 +373,7 @@ void VirtualVNode::render_mask(VFrame *output_temp,
 		(MaskAutos*)track->automation->autos[AUTOMATION_MASK];
 
 	Auto *current = 0;
-	MaskAuto *default_auto = (MaskAuto*)keyframe_set->default_auto;
+//	MaskAuto *default_auto = (MaskAuto*)keyframe_set->default_auto;
 	MaskAuto *keyframe = (MaskAuto*)keyframe_set->get_prev_auto(start_position_project, 
 		PLAY_FORWARD,
 		current);
@@ -389,13 +389,13 @@ void VirtualVNode::render_mask(VFrame *output_temp,
 //printf("VirtualVNode::render_mask 1 %d %d\n", total_points, keyframe->value);
 // Ignore certain masks
 	if(total_points <= 2 || 
-		(keyframe->value == 0 && default_auto->mode == MASK_SUBTRACT_ALPHA))
+		(keyframe->value == 0 && keyframe->mode == MASK_SUBTRACT_ALPHA))
 	{
 		return;
 	}
 
 // Fake certain masks
-	if(keyframe->value == 0 && default_auto->mode == MASK_MULTIPLY_ALPHA)
+	if(keyframe->value == 0 && keyframe->mode == MASK_MULTIPLY_ALPHA)
 	{
 		output_temp->clear_frame();
 		return;
@@ -408,7 +408,7 @@ void VirtualVNode::render_mask(VFrame *output_temp,
 			start_position_project,
 			keyframe_set, 
 			keyframe,
-			default_auto);
+			keyframe);
 	}
 	else
 	{
@@ -440,8 +440,8 @@ int VirtualVNode::render_projector(VFrame *input,
 		frame_rate);
 	VRender *vrender = ((VirtualVConsole*)vconsole)->vrender;
 	if(vconsole->debug_tree) 
-		printf("  VirtualVNode::render_projector input=%p output=%p title=%s\n", 
-			input, output, track->title);
+		printf("  VirtualVNode::render_projector input=%p output=%p cmodel=%d title=%s\n", 
+			input, output, output->get_color_model(), track->title);
 
 	if(output)
 	{

@@ -34,7 +34,6 @@ class LensEngine;
 class LensGUI;
 class LensMain;
 class LensText;
-class LensThread;
 
 #define FOV_CHANNELS 4
 
@@ -281,15 +280,11 @@ public:
 		double frame_rate);
 	int is_realtime();
 	void update_gui();
-
-	// These three methods are part of the PluginClient class in
-	// Cinelerra HV 4.5
+	void save_data(KeyFrame *keyframe);
+	void read_data(KeyFrame *keyframe);
 	int load_defaults();
 	int save_defaults();
 	int is_defaults();
-
-	void save_data(KeyFrame *keyframe);
-	void read_data(KeyFrame *keyframe);
 	void load_presets();
 	void save_presets();
 	int handle_opengl();
@@ -301,6 +296,7 @@ public:
 private:
 	int using_defaults;
 };
+
 
 
 #endif

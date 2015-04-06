@@ -144,6 +144,9 @@ public:
 	int labels_follow_edits;
 	int mpeg4_deblock;
 	int plugins_follow_edits;
+// For main menu plugin attaching, 
+// attach 1 standalone on the first track and share it with other tracks
+	int single_standalone;
 	int meter_format;
 	int min_meter_db;
 	int max_meter_db;

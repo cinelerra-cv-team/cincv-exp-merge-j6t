@@ -69,6 +69,7 @@ public:
 	void set_searchable(int value);
 	int get_color();
 	void set_selected(int value);
+	int get_selected();
 	int set_autoplace_icon(int value);
 	int set_autoplace_text(int value);
 	void set_selectable(int value);

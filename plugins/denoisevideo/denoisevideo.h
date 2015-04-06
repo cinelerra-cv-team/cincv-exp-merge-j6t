@@ -47,6 +47,7 @@ public:
 
 	int frames;
 	float threshold;
+	int count_changed;
 	int do_r, do_g, do_b, do_a;
 };
 
@@ -62,10 +63,13 @@ public:
 };
 
 
-class DenoiseVideoThreshold : public BC_TextBox
+class DenoiseVideoThreshold : public BC_TumbleTextBox
 {
 public:
-	DenoiseVideoThreshold(DenoiseVideo *plugin, int x, int y);
+	DenoiseVideoThreshold(DenoiseVideo *plugin, 
+		DenoiseVideoWindow *gui,
+		int x, 
+		int y);
 	int handle_event();
 	DenoiseVideo *plugin;
 };
@@ -84,6 +88,29 @@ public:
 	int *output;
 };
 
+class DenoiseVideoCountChanged : public BC_Radial
+{
+public:
+	DenoiseVideoCountChanged(DenoiseVideo *plugin, 
+		DenoiseVideoWindow *gui, 
+		int x, 
+		int y);
+	int handle_event();
+	DenoiseVideo *plugin;
+	DenoiseVideoWindow *gui;
+};
+
+class DenoiseVideoCountSame : public BC_Radial
+{
+public:
+	DenoiseVideoCountSame(DenoiseVideo *plugin, 
+		DenoiseVideoWindow *gui, 
+		int x, 
+		int y);
+	int handle_event();
+	DenoiseVideo *plugin;
+	DenoiseVideoWindow *gui;
+};
 
 class DenoiseVideoWindow : public PluginClientWindow
 {
@@ -96,6 +123,8 @@ public:
 	DenoiseVideoFrames *frames;
 	DenoiseVideoThreshold *threshold;
 	DenoiseVideoToggle *do_r, *do_g, *do_b, *do_a;
+	DenoiseVideoCountChanged *count_changed;
+	DenoiseVideoCountSame *count_same;
 };
 
 

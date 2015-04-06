@@ -29,6 +29,7 @@
 #include "edl.h"
 #include "edlsession.h"
 #include "floatautos.h"
+#include "keyframes.h"
 #include "localsession.h"
 #include "mainprogress.h"
 #include "mainundo.h"
@@ -145,12 +146,15 @@ int PluginServer::reset_parameters()
 	realtime = multichannel = fileio = 0;
 	synthesis = 0;
 	start_auto = end_auto = 0;
-	picon = 0;
 	transition = 0;
 	new_plugin = 0;
 	client = 0;
 	use_opengl = 0;
 	vdevice = 0;
+	modules = 0;
+	nodes = 0;
+	picon = 0;
+	
 
 	is_lad = 0;
 	lad_descriptor_function = 0;
@@ -271,7 +275,10 @@ int PluginServer::open_plugin(int master,
 			if(!lad_descriptor_function)
 			{
 // Not a recognized plugin
-				fprintf(stderr, "PluginServer::open_plugin: new_plugin undefined in %s\n", path);
+				fprintf(stderr, 
+					"PluginServer::open_plugin %d: new_plugin undefined in %s\n", 
+					__LINE__,
+					path);
 				dlclose(plugin_fd);
 				plugin_fd = 0;
 				return PLUGINSERVER_NOT_RECOGNIZED;
@@ -323,7 +330,7 @@ int PluginServer::open_plugin(int master,
 	transition = client->is_transition();
 	set_title(client->plugin_title());
 
-	if(master)
+	if(master && (realtime || transition))
 	{
 		picon = client->new_picon();
 	}
@@ -496,10 +503,12 @@ void PluginServer::process_buffer(double **buffer,
 	aclient->source_position = current_position;
 	aclient->total_len = total_len;
 	aclient->sample_rate = sample_rate;
+
 	if(plugin)
 		aclient->source_start = plugin->startproject * 
 			sample_rate /
 			aclient->project_sample_rate;
+
 	aclient->direction = direction;
 	if(multichannel)
 		aclient->process_buffer(fragment_size, 
@@ -808,6 +817,7 @@ void PluginServer::show_gui()
 			mwindow->edl->local_session->get_selectionstart(1) * 
 				mwindow->edl->session->sample_rate);
 	}
+
 	client->update_display_title();
 	client->show_gui();
 }
@@ -1017,13 +1027,34 @@ KeyFrame* PluginServer::get_next_keyframe(int64_t position)
 	return result;
 }
 
+// Called for
 KeyFrame* PluginServer::get_keyframe()
 {
 	if(plugin)
+// Realtime plugin case
 		return plugin->get_keyframe();
 	else
+// Rendered plugin case
 		return keyframe;
 }
+
+
+void PluginServer::apply_keyframe(KeyFrame *src)
+{
+	if(!plugin)
+	{
+		keyframe->copy_data(src);
+	}
+	else
+	{
+// Span keyframes
+		plugin->keyframes->update_parameter(src);
+	}
+}
+
+
+
+
 
 void PluginServer::get_camera(float *x, float *y, float *z,
 	int64_t position, int direction)
@@ -1066,6 +1097,7 @@ void PluginServer::sync_parameters()
 {
 	if(video) mwindow->restart_brender();
 	mwindow->sync_parameters();
+	mwindow->update_keyframe_guis();
 	if(mwindow->edl->session->auto_conf->plugins)
 	{
 		mwindow->gui->lock_window("PluginServer::sync_parameters");

@@ -20,6 +20,7 @@
  */
 
 #include "asset.h"
+#include "bcsignals.h"
 #include "byteorder.h"
 #include "clip.h"
 #include "file.h"
@@ -71,32 +72,37 @@ int FileVorbis::check_sig(Asset *asset)
 	OggVorbis_File vf;
 
 // Test for Quicktime since OGG misinterprets it
-	fseek(fd, 4, SEEK_SET);
-	char data[4];
-	fread(data, 4, 1, fd);
-	if(data[0] == 'm' &&
-		data[1] == 'd' &&
-		data[2] == 'a' &&
-		data[3] == 't')
+	if(fd)
 	{
-		fclose(fd);
-		return 0;
-	}
-	
-	fseek(fd, 0, SEEK_SET);
+		fseek(fd, 4, SEEK_SET);
+		char data[4];
+		fread(data, 4, 1, fd);
+		if(data[0] == 'm' &&
+			data[1] == 'd' &&
+			data[2] == 'a' &&
+			data[3] == 't')
+		{
+			fclose(fd);
+			return 0;
+		}
 
-	if(ov_open(fd, &vf, NULL, 0) < 0)
-	{
-// OGG failed.  Close file handle manually.
-		ov_clear(&vf);
-		if(fd) fclose(fd);
-		return 0;
+		fseek(fd, 0, SEEK_SET);
+
+		if(ov_open(fd, &vf, NULL, 0) < 0)
+		{
+	// OGG failed.  Close file handle manually.
+			ov_clear(&vf);
+			if(fd) fclose(fd);
+			return 0;
+		}
+		else
+		{
+			ov_clear(&vf);
+			return 1;
+		}
 	}
-	else
-	{
-		ov_clear(&vf);
-		return 1;
-	}
+
+	return 0;
 */
 }
 
@@ -104,15 +110,12 @@ int FileVorbis::reset_parameters_derived()
 {
 	fd = 0;
 	bzero(&vf, sizeof(vf));
-	pcm_history = 0;
-	pcm_history_float = 0;
 }
 
 
-// Just create the Quicktime objects since this routine is also called
-// for reopening.
 int FileVorbis::open_file(int rd, int wr)
 {
+
 	int result = 0;
 	this->rd = rd;
 	this->wr = wr;
@@ -241,7 +244,7 @@ while(vorbis_analysis_blockout(&vd, &vb) == 1) \
 }
 
 
-int FileVorbis::close_file()
+int FileVorbis::close_file_derived()
 {
 	if(fd)
 	{
@@ -265,22 +268,6 @@ int FileVorbis::close_file()
 		}
 		fd = 0;
 	}
-
-	if(pcm_history)
-	{
-		for(int i = 0; i < asset->channels; i++)
-			delete [] pcm_history[i];
-		delete [] pcm_history;
-	}
-	if(pcm_history_float)
-	{
-		for(int i = 0; i < asset->channels; i++)
-			delete [] pcm_history_float[i];
-		delete [] pcm_history_float;
-	}
-
-	reset_parameters();
-	FileBase::close_file();
 	return 0;
 }
 
@@ -319,64 +306,16 @@ int FileVorbis::read_samples(double *buffer, int64_t len)
 	float **vorbis_output;
 	int bitstream;
 	int accumulation = 0;
-//printf("FileVorbis::read_samples 1\n");
-	int decode_start = 0;
-	int decode_len = 0;
 
-	if(len > 0x100000)
-	{
-		eprintf("FileVorbis::read_samples max samples=%d\n", HISTORY_MAX);
-		return 1;
-	}
 
-	if(!pcm_history)
-	{
-		pcm_history = new double*[asset->channels];
-		for(int i = 0; i < asset->channels; i++)
-			pcm_history[i] = new double[HISTORY_MAX];
-		history_start = 0;
-		history_size = 0;
-	}
-
-// Restart history.  Don't bother shifting history back.
-	if(file->current_sample < history_start ||
-		file->current_sample > history_start + history_size)
-	{
-		history_size = 0;
-		history_start = file->current_sample;
-		decode_start = file->current_sample;
-		decode_len = len;
-	}
-	else
-// Shift history forward to make room for new samples
-	if(file->current_sample + len > history_start + history_size)
-	{
-		if(file->current_sample + len > history_start + HISTORY_MAX)
-		{
-			int diff = file->current_sample + len - (history_start + HISTORY_MAX);
-			for(int i = 0; i < asset->channels; i++)
-			{
-				double *temp = pcm_history[i];
-				for(int j = 0; j < HISTORY_MAX - diff; j++)
-				{
-					temp[j] = temp[j + diff];
-				}
-			}
-			history_start += diff;
-			history_size -= diff;
-		}
-
-// Decode more data
-		decode_start = history_start + history_size;
-		decode_len = file->current_sample + len - (history_start + history_size);
-	}
+	update_pcm_history(len);
 
 
 // Fill history buffer
-	if(history_start + history_size != ov_pcm_tell(&vf))
+	if(decode_start != decode_end)
 	{
-//printf("FileVorbis::read_samples %d %d\n", history_start + history_size, ov_pcm_tell(&vf));
-		ov_pcm_seek(&vf, history_start + history_size);
+		ov_pcm_seek(&vf, decode_start);
+		decode_end = decode_start;
 	}
 
 	while(accumulation < decode_len)
@@ -388,147 +327,15 @@ int FileVorbis::read_samples(double *buffer, int64_t len)
 //printf("FileVorbis::read_samples 1 %d %d %d\n", result, len, accumulation);
 		if(!result) break;
 
-		for(int i = 0; i < asset->channels; i++)
-		{
-			double *output = pcm_history[i] + history_size;
-			float *input = vorbis_output[i];
-			for(int j = 0; j < result; j++)
-				output[j] = input[j];
-		}
-		history_size += result;
+		append_history(vorbis_output, result);
 		accumulation += result;
 	}
 
 
-// printf("FileVorbis::read_samples 1 %d %d\n", 
-// file->current_sample,
-// history_start);
-
-	double *input = pcm_history[file->current_channel] + 
-		file->current_sample - 
-		history_start;
-	for(int i = 0; i < len; i++)
-		buffer[i] = input[i];
-
-// printf("FileVorbis::read_samples 2 %d %d %d %d\n", 
-// history_start, 
-// history_size,
-// file->current_sample,
-// len);
-
-	return 0;
-}
-
-int FileVorbis::prefer_samples_float() 
-{
-	return 1;
-}
-
-int FileVorbis::read_samples_float(float *buffer, int64_t len)
-{
-	if(!fd) return 0;
-
-// printf("FileVorbis::read_samples 1 %d %d %d %d\n", 
-// history_start, 
-// history_size,
-// file->current_sample,
-// len);
-	float **vorbis_output;
-	int bitstream;
-	int accumulation = 0;
-//printf("FileVorbis::read_samples 1\n");
-	int decode_start = 0;
-	int decode_len = 0;
-
-	if(len > 0x100000)
-	{
-		eprintf("FileVorbis::read_samples max samples=%d\n", HISTORY_MAX);
-		return 1;
-	}
-
-	if(!pcm_history_float)
-	{
-		pcm_history_float = new float*[asset->channels];
-		for(int i = 0; i < asset->channels; i++)
-			pcm_history_float[i] = new float[HISTORY_MAX];
-		history_start = 0;
-		history_size = 0;
-	}
-
-// Restart history.  Don't bother shifting history back.
-	if(file->current_sample < history_start ||
-		file->current_sample > history_start + history_size)
-	{
-		history_size = 0;
-		history_start = file->current_sample;
-		decode_start = file->current_sample;
-		decode_len = len;
-	}
-	else
-// Shift history forward to make room for new samples
-	if(file->current_sample + len > history_start + history_size)
-	{
-		if(file->current_sample + len > history_start + HISTORY_MAX)
-		{
-			int diff = file->current_sample + len - (history_start + HISTORY_MAX);
-			for(int i = 0; i < asset->channels; i++)
-			{
-				float *temp = pcm_history_float[i];
-//				for(int j = 0; j < HISTORY_MAX - diff; j++)
-//				{
-//					temp[j] = temp[j + diff];
-//				}
-				bcopy(temp, temp + diff, (HISTORY_MAX - diff) * sizeof(float));
-			}
-			history_start += diff;
-			history_size -= diff;
-		}
-
-// Decode more data
-		decode_start = history_start + history_size;
-		decode_len = file->current_sample + len - (history_start + history_size);
-	}
-
-
-// Fill history buffer
-	if(history_start + history_size != ov_pcm_tell(&vf))
-	{
-//printf("FileVorbis::read_samples %d %d\n", history_start + history_size, ov_pcm_tell(&vf));
-		ov_pcm_seek(&vf, history_start + history_size);
-	}
-
-	while(accumulation < decode_len)
-	{
-		int result = ov_read_float(&vf,
-			&vorbis_output,
-			decode_len - accumulation,
-			&bitstream);
-//printf("FileVorbis::read_samples 1 %d %d %d\n", result, len, accumulation);
-		if(!result) break;
-
-		for(int i = 0; i < asset->channels; i++)
-		{
-			float *output = pcm_history_float[i] + history_size;
-			float *input = vorbis_output[i];
-//			for(int j = 0; j < result; j++)
-//				output[j] = input[j];
-			bcopy(input, output, result * sizeof(float));
-		}
-		history_size += result;
-		accumulation += result;
-	}
-
-
-// printf("FileVorbis::read_samples 1 %d %d\n", 
-// file->current_sample,
-// history_start);
-
-	float *input = pcm_history_float[file->current_channel] + 
-		file->current_sample - 
-		history_start;
-//	for(int i = 0; i < len; i++)
-//		buffer[i] = input[i];
-	bcopy(input, buffer, len * sizeof(float));
+	read_history(buffer, 
+		file->current_sample, 
+		file->current_channel,
+		len);
 
 // printf("FileVorbis::read_samples 2 %d %d %d %d\n", 
 // history_start, 
@@ -575,6 +382,7 @@ void VorbisConfigAudio::create_objects()
 	int x1 = 150;
 	char string[BCTEXTLEN];
 
+	lock_window("VorbisConfigAudio::create_objects");
 	add_tool(fixed_bitrate = new VorbisFixedBitrate(x, y, this));
 	add_tool(variable_bitrate = new VorbisVariableBitrate(x1, y, this));
 
@@ -597,6 +405,7 @@ void VorbisConfigAudio::create_objects()
 	add_subwindow(new BC_OKButton(this));
 	show_window();
 	flush();
+	unlock_window();
 }
 
 int VorbisConfigAudio::close_event()

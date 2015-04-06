@@ -35,7 +35,7 @@ public:
 	ConfirmQuitWindow(MWindow *mwindow);
 	~ConfirmQuitWindow();
 
-	int create_objects(char *string);
+	void create_objects(char *string);
 
 	MWindow *mwindow;
 };

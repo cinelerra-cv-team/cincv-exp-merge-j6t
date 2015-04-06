@@ -126,6 +126,7 @@ void ResizeTrackWindow::create_objects()
 {
 	int x = 10, y = 10;
 
+	lock_window("ResizeTrackWindow::create_objects");
 	add_subwindow(new BC_Title(x, y, _("Size:")));
 	x += 50;
 	add_subwindow(w = new ResizeTrackWidth(this, 
@@ -171,6 +172,7 @@ void ResizeTrackWindow::create_objects()
 
 	show_window();
 	flush();
+	unlock_window();
 }
 
 void ResizeTrackWindow::update(int changed_scale, 

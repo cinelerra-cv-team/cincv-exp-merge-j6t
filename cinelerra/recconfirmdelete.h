@@ -31,7 +31,7 @@ public:
 	RecConfirmDelete(MWindow *mwindow);
 	~RecConfirmDelete();
 	
-	int create_objects(char *string);
+	void create_objects(char *string);
 };
 
 

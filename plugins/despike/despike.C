@@ -24,6 +24,7 @@
 #include "bchash.h"
 #include "errorbox.h"
 #include "filexml.h"
+#include "language.h"
 #include "picon_png.h"
 #include "despike.h"
 #include "despikewindow.h"
@@ -32,10 +33,6 @@
 
 #include <string.h>
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 REGISTER_PLUGIN(Despike)
@@ -123,7 +120,7 @@ void Despike::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause xml file to store data directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("DESPIKE");
 	output.tag.set_property("LEVEL", config.level);
@@ -139,7 +136,7 @@ void Despike::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 // cause xml file to read directly from text
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 	int result = 0;
 
 	result = input.read_tag();

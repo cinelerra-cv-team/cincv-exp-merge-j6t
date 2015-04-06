@@ -527,7 +527,7 @@ void DenoiseMJPEG::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("DENOISE_VIDEO2");
 	output.tag.set_property("RADIUS", config.radius);
 	output.tag.set_property("THRESHOLD", config.threshold);
@@ -548,7 +548,7 @@ void DenoiseMJPEG::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 

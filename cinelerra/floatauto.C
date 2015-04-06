@@ -35,8 +35,6 @@ FloatAuto::FloatAuto(EDL *edl, FloatAutos *autos)
 	value = 0;
 	control_in_value = 0;
 	control_out_value = 0;
-	control_in_position = 0;
-	control_out_position = 0;
 	pos_valid    = -1; //"dirty"
 	tangent_mode = SMOOTH;
 //  note: in most cases the tangent_mode-value is set   
@@ -72,7 +70,7 @@ inline
 bool FloatAuto::is_floatauto_node(Auto *candidate)
 {
 	return (candidate && candidate->autos &&
-		AUTOMATION_TYPE_FLOAT == candidate->autos->get_type());
+		Autos::AUTOMATION_TYPE_FLOAT == candidate->autos->get_type());
 }
 
 
@@ -111,8 +109,6 @@ void FloatAuto::copy_from(FloatAuto *that)
 	this->value = that->value;
 	this->control_in_value = that->control_in_value;
 	this->control_out_value = that->control_out_value;
-	this->control_in_position = that->control_in_position;
-	this->control_out_position = that->control_out_position;
 	this->tangent_mode = that->tangent_mode;
 // note: literate copy, no recalculations    
 }

@@ -420,7 +420,7 @@ void WhirlEffect::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 
 	output.tag.set_title("WHIRL");
 	output.tag.set_property("ANGLE", config.angle);
@@ -437,7 +437,7 @@ void WhirlEffect::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 
@@ -479,11 +479,10 @@ int WhirlEffect::process_realtime(VFrame *input, VFrame *output)
 				input->get_color_model());
 			temp_frame->copy_from(input);
 			this->input = temp_frame;
-//printf("WhirlEffect::process_realtime 1\n");
 		}
 
 		if(!engine) engine = new WhirlEngine(this, PluginClient::smp + 1);
-		
+
 		engine->process_packages();
 	}
 	return 0;
@@ -604,14 +603,20 @@ static float bilinear(double x, double y, double *values)
 #define WHIRL_MACRO(type, max, components) \
 { \
 	type **input_rows = (type**)plugin->input->get_rows(); \
-	double values[components]; \
-	for(int row = pkg->row1; row <= (pkg->row2 + pkg->row1) / 2; row++) \
+/* Compiler error requires separate arrays */ \
+	double top_values[components]; \
+	double bot_values[components]; \
+	for(int row = pkg->row1 / 2; row <= (pkg->row2 + pkg->row1) / 2; row++) \
 	{ \
 		type *top_row = (type*)plugin->output->get_rows()[row]; \
 		type *bot_row = (type*)plugin->output->get_rows()[h - row - 1]; \
 		type *top_p = top_row; \
 		type *bot_p = bot_row + components * w - components; \
-		 \
+		type *pixel1; \
+		type *pixel2; \
+		type *pixel3; \
+		type *pixel4; \
+ \
 		for(int col = 0; col < w; col++) \
 		{ \
 			if(calc_undistorted_coords(cen_x, \
@@ -640,36 +645,36 @@ static float bilinear(double x, double y, double *values)
 				else \
 					iy = -((int)-cy + 1); \
  \
-				type *pixel1 = GET_PIXEL(components, ix,     iy,     input_rows); \
-				type *pixel2 = GET_PIXEL(components, ix + 1, iy,     input_rows); \
-				type *pixel3 = GET_PIXEL(components, ix,     iy + 1, input_rows); \
-				type *pixel4 = GET_PIXEL(components, ix + 1, iy + 1, input_rows); \
+				pixel1 = GET_PIXEL(components, ix,     iy,     input_rows); \
+				pixel2 = GET_PIXEL(components, ix + 1, iy,     input_rows); \
+				pixel3 = GET_PIXEL(components, ix,     iy + 1, input_rows); \
+				pixel4 = GET_PIXEL(components, ix + 1, iy + 1, input_rows); \
  \
-				values[0] = pixel1[0]; \
-				values[1] = pixel2[0]; \
-				values[2] = pixel3[0]; \
-				values[3] = pixel4[0]; \
-				top_p[0] = (type)bilinear(cx, cy, values); \
+				top_values[0] = pixel1[0]; \
+				top_values[1] = pixel2[0]; \
+				top_values[2] = pixel3[0]; \
+				top_values[3] = pixel4[0]; \
+				top_p[0] = (type)bilinear(cx, cy, top_values); \
  \
-				values[0] = pixel1[1]; \
-				values[1] = pixel2[1]; \
-				values[2] = pixel3[1]; \
-				values[3] = pixel4[1]; \
-				top_p[1] = (type)bilinear(cx, cy, values); \
+				top_values[0] = pixel1[1]; \
+				top_values[1] = pixel2[1]; \
+				top_values[2] = pixel3[1]; \
+				top_values[3] = pixel4[1]; \
+				top_p[1] = (type)bilinear(cx, cy, top_values); \
  \
-				values[0] = pixel1[2]; \
-				values[1] = pixel2[2]; \
-				values[2] = pixel3[2]; \
-				values[3] = pixel4[2]; \
-				top_p[2] = (type)bilinear(cx, cy, values); \
+				top_values[0] = pixel1[2]; \
+				top_values[1] = pixel2[2]; \
+				top_values[2] = pixel3[2]; \
+				top_values[3] = pixel4[2]; \
+				top_p[2] = (type)bilinear(cx, cy, top_values); \
  \
 				if(components == 4) \
 				{ \
-					values[0] = pixel1[3]; \
-					values[1] = pixel2[3]; \
-					values[2] = pixel3[3]; \
-					values[3] = pixel4[3]; \
-					top_p[3] = (type)bilinear(cx, cy, values); \
+					top_values[0] = pixel1[3]; \
+					top_values[1] = pixel2[3]; \
+					top_values[2] = pixel3[3]; \
+					top_values[3] = pixel4[3]; \
+					top_p[3] = (type)bilinear(cx, cy, top_values); \
 				} \
  \
 				top_p += components; \
@@ -695,31 +700,31 @@ static float bilinear(double x, double y, double *values)
  \
  \
  \
-				values[0] = pixel1[0]; \
-				values[1] = pixel2[0]; \
-				values[2] = pixel3[0]; \
-				values[3] = pixel4[0]; \
-				bot_p[0] = (type)bilinear(cx, cy, values); \
+				bot_values[0] = pixel1[0]; \
+				bot_values[1] = pixel2[0]; \
+				bot_values[2] = pixel3[0]; \
+				bot_values[3] = pixel4[0]; \
+				bot_p[0] = (type)bilinear(cx, cy, bot_values); \
  \
-				values[0] = pixel1[1]; \
-				values[1] = pixel2[1]; \
-				values[2] = pixel3[1]; \
-				values[3] = pixel4[1]; \
-				bot_p[1] = (type)bilinear(cx, cy, values); \
+				bot_values[0] = pixel1[1]; \
+				bot_values[1] = pixel2[1]; \
+				bot_values[2] = pixel3[1]; \
+				bot_values[3] = pixel4[1]; \
+				bot_p[1] = (type)bilinear(cx, cy, bot_values); \
  \
-				values[0] = pixel1[2]; \
-				values[1] = pixel2[2]; \
-				values[2] = pixel3[2]; \
-				values[3] = pixel4[2]; \
-				bot_p[2] = (type)bilinear(cx, cy, values); \
+				bot_values[0] = pixel1[2]; \
+				bot_values[1] = pixel2[2]; \
+				bot_values[2] = pixel3[2]; \
+				bot_values[3] = pixel4[2]; \
+				bot_p[2] = (type)bilinear(cx, cy, bot_values); \
  \
 				if(components == 4) \
 				{ \
-					values[0] = pixel1[3]; \
-					values[1] = pixel2[3]; \
-					values[2] = pixel3[3]; \
-					values[3] = pixel4[3]; \
-					bot_p[3] = (type)bilinear(cx, cy, values); \
+					bot_values[0] = pixel1[3]; \
+					bot_values[1] = pixel2[3]; \
+					bot_values[2] = pixel3[3]; \
+					bot_values[3] = pixel4[3]; \
+					bot_p[3] = (type)bilinear(cx, cy, bot_values); \
 				} \
  \
 				bot_p -= components; \
@@ -825,6 +830,7 @@ void WhirlUnit::process_package(LoadPackage *package)
 
 
 WhirlEngine::WhirlEngine(WhirlEffect *plugin, int cpus)
+// : LoadServer(1, 1)
  : LoadServer(cpus, cpus)
 {
 	this->plugin = plugin;

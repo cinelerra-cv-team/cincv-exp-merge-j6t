@@ -109,6 +109,8 @@ public:
 	int reallocate_string(long new_available);     // change size of string to accomodate new output
 	int set_shared_string(char *shared_string, long available);    // force writing to a message buffer
 	int rewind();
+// Get current pointer in the string
+	char* get_ptr();
 
 	char *string;      // string that contains the actual file
 	long position;    // current position in string file
@@ -120,7 +122,7 @@ public:
 	long output_length;
 	char *output;       // for reading text
 	char left_delimiter, right_delimiter;
-	char filename[1024];  // Filename used in the last read_from_file or write_to_file
+	char filename[MAX_TITLE];  // Filename used in the last read_from_file or write_to_file
 };
 
 #endif

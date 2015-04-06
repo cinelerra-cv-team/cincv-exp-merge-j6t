@@ -178,7 +178,6 @@ int Device1394Input::open(const char *path,
 
 
 		audio_buffer = new char[INPUT_SAMPLES * 2 * channels];
-
 		audio_lock = new Condition(0, "Device1394Input::audio_lock");
 		video_lock = new Condition(0, "Device1394Input::video_lock");
 		buffer_lock = new Mutex("Device1394Input::buffer_lock");
@@ -196,6 +195,7 @@ void Device1394Input::run()
 	{
 // Wait for frame to arrive
 		struct dv1394_status status;
+printf("Device1394Input::run %d done=%d\n", __LINE__, done);
 
 		Thread::enable_cancel();
 		if(ioctl(fd, DV1394_IOC_WAIT_FRAMES, 1))

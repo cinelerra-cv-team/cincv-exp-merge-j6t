@@ -26,6 +26,7 @@
 #include "maskautos.h"
 #include "maskengine.h"
 #include "mutex.h"
+#include "transportque.inc"
 #include "vframe.h"
 
 #include <math.h>
@@ -1074,9 +1075,14 @@ SET_TRACE
 		}
 	}
 
+	int new_value = keyframe_set->get_value(start_position_project, 
+		PLAY_FORWARD);
+	float new_feather = keyframe_set->get_feather(start_position_project, 
+		PLAY_FORWARD);
+
 	if(recalculate ||
-		!EQUIV(keyframe->feather, feather) ||
-		!EQUIV(keyframe->value, value))
+		!EQUIV(new_feather, feather) ||
+		!EQUIV(new_value, value))
 	{
 		recalculate = 1;
 		if(!mask) 
@@ -1090,7 +1096,7 @@ SET_TRACE
 					output->get_h(),
 					new_color_model);
 		}
-		if(keyframe->feather > 0)
+		if(new_feather > 0)
 			temp_mask->clear_frame();
 		else
 			mask->clear_frame();
@@ -1120,8 +1126,8 @@ SET_TRACE
 
 	this->output = output;
 	this->mode = default_auto->mode;
-	this->feather = keyframe->feather;
-	this->value = keyframe->value;
+	this->feather = new_feather;
+	this->value = new_value;
 
 
 // Run units

@@ -46,7 +46,11 @@ typedef struct
 	int icon_type;
 } suffix_to_type_t;
 
-
+typedef struct
+{
+	char path[BCTEXTLEN];
+	int id;
+} filebox_history_t;
 
 class BC_Resources
 {
@@ -54,10 +58,14 @@ public:
 	BC_Resources(); // The window parameter is used to get the display information initially
 	~BC_Resources();
 
+	friend class BC_WindowBase;
+
 	int initialize_display(BC_WindowBase *window);
 
 // Get unique ID
 	int get_id();
+// Get ID for filebox history.  Persistent.
+	int get_filebox_id();
 	int get_bg_color();          // window backgrounds
 	int get_bg_shadow1();        // border for windows
 	int get_bg_shadow2();
@@ -266,7 +274,7 @@ public:
 // Filter currently used in filebox
 	char filebox_filter[BCTEXTLEN];
 // History of submitted files
-	char filebox_history[FILEBOX_HISTORY_SIZE][BCTEXTLEN];
+	filebox_history_t filebox_history[FILEBOX_HISTORY_SIZE];
 // filebox size
 	int filebox_w;
 	int filebox_h;
@@ -370,6 +378,7 @@ private:
 	BC_Synchronous *synchronous;
 
 	int id;
+	int filebox_id;
 };
 
 

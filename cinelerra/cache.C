@@ -231,9 +231,9 @@ void CICache::age()
 	{
 		memory_usage = get_memory_usage(1);
 		
+//printf("CICache::age 3 %p %lld %lld\n", this, memory_usage, preferences->cache_size);
 		if(memory_usage > preferences->cache_size)
 		{
-//printf("CICache::age 3 %p %lld %lld\n", this, memory_usage, preferences->cache_size);
 			result = delete_oldest();
 		}
 		prev_memory_usage = memory_usage;
@@ -295,9 +295,9 @@ int CICache::delete_oldest()
 
 	if(oldest)
 	{
-// Got the oldest file.  Try requesting cache purge.
+// Got the oldest file.  Try requesting cache purge from it.
 
-		if(!oldest->file || oldest->file->purge_cache())
+		if(!oldest->file || (oldest->file->purge_cache() && total() > 1))
 		{
 
 // Delete the file if cache already empty and not checked out.
@@ -319,7 +319,7 @@ int CICache::delete_oldest()
 	else
 	{
 		total_lock->unlock();
-// nothing was old enough to delete
+// nothing was old enough to delete or only 1 file
 		return 1;   
 	}
 }

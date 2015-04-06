@@ -58,7 +58,7 @@ public:
 	int save(FileXML *xml);
 	int load(FileXML *xml);
 
-	int create_objects(char *text, int pixel); // linked list doesn't allow parameters in append()
+	void create_objects(char *text, int pixel); // linked list doesn't allow parameters in append()
 	int set_pixel(int pixel);
 	int set_title(char *new_title);
 	int flip_vertical();

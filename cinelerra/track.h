@@ -97,13 +97,17 @@ public:
 		double start,
 		double length,
 		int plugin_type);
-	void insert_plugin_set(Track *track, double position);
+	void insert_plugin_set(Track *track, 
+		int64_t position,
+		int64_t min_length);
 	void detach_effect(Plugin *plugin);
 // Insert a track from another EDL
 	void insert_track(Track *track, 
 		double position, 
 		int replace_default,
-		int edit_plugins);
+		int edit_plugins,
+// Pad pasted sections to a minimum of this length.
+		double edl_length);
 // Optimize editing
 	void optimize();
 	int is_muted(int64_t position, int direction);  // Test muting status
@@ -163,14 +167,15 @@ public:
 
 
 	virtual int copy_settings(Track *track);
-	void shift_keyframes(double position, double length, int convert_units);
-	void shift_effects(double position, double length, int convert_units);
+	void shift_keyframes(int64_t position, int64_t length);
+	void shift_effects(int64_t position, int64_t length);
 	void change_plugins(SharedLocation &old_location, 
 		SharedLocation &new_location, 
 		int do_swap);
 	void change_modules(int old_location, 
 		int new_location, 
 		int do_swap);
+	int plugin_exists(Plugin *plugin);
 
 	EDL *edl;
 	Tracks *tracks;
@@ -246,8 +251,9 @@ public:
 		double selectionend, 
 		int shift_autos   /* = 1 */,
 		int default_only  /* = 0 */);
-	void straighten_automation(double selectionstart, 
-		double selectionend);
+	void set_automation_mode(double selectionstart, 
+		double selectionend,
+		int mode);
 	virtual int clear_automation_derived(AutoConf *auto_conf, 
 		double selectionstart, 
 		double selectionend, 
@@ -259,7 +265,7 @@ public:
 		double selectionend, 
 		FileXML *file,
 		int default_only,
-		int autos_only);
+		int active_only);
 	virtual int copy_automation_derived(AutoConf *auto_conf, 
 		double selectionstart, 
 		double selectionend, 
@@ -269,7 +275,8 @@ public:
 		double frame_rate,
 		int64_t sample_rate,
 		FileXML *file,
-		int default_only);
+		int default_only,
+		int active_only);
 	virtual int paste_automation_derived(double selectionstart, 
 		double selectionend, 
 		double total_length, 

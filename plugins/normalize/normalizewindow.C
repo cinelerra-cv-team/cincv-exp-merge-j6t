@@ -19,13 +19,10 @@
  * 
  */
 
+#include "language.h"
 #include "mwindow.inc"
 #include "normalizewindow.h"
 
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 NormalizeWindow::NormalizeWindow(NormalizeMain *plugin)
  : PluginClientWindow(plugin,
@@ -38,7 +35,7 @@ NormalizeWindow::~NormalizeWindow()
 {
 }
 
-int NormalizeWindow::create_objects(float *db_over, int *separate_tracks)
+void NormalizeWindow::create_objects(float *db_over, int *separate_tracks)
 {
 	int x = 10, y = 10;
 	this->db_over = db_over;
@@ -52,7 +49,6 @@ int NormalizeWindow::create_objects(float *db_over, int *separate_tracks)
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
 	flush();
-	return 0;
 }
 
 NormalizeWindowOverload::NormalizeWindowOverload(int x, int y, float *db_over)
