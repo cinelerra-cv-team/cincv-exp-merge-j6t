@@ -83,63 +83,63 @@ int AssetEdit::set_asset(Asset *asset)
 
 void AssetEdit::run()
 {
-	if(asset)
+	if(!asset)
+		return;
+
+	new_asset = new Asset(asset->path);
+	*new_asset = *asset;
+	int result = 0;
+
+	window = new AssetEditWindow(mwindow, this);
+	window->create_objects();
+	window->raise_window();
+	result = window->run_window();
+
+	if(!result)
 	{
-		new_asset = new Asset(asset->path);
-		*new_asset = *asset;
-		int result = 0;
-
-		window = new AssetEditWindow(mwindow, this);
-		window->create_objects();
-		window->raise_window();
-		result = window->run_window();
-
- 		if(!result)
- 		{
- 			if(!asset->equivalent(*new_asset, 1, 1))
- 			{
-				mwindow->gui->lock_window();
-				mwindow->remove_asset_from_caches(asset);
+		if(!asset->equivalent(*new_asset, 1, 1))
+		{
+			mwindow->gui->lock_window();
+			mwindow->remove_asset_from_caches(asset);
 // Omit index status from copy since an index rebuild may have been
 // happening when new_asset was created but not be happening anymore.
-				asset->copy_from(new_asset, 0);
+			asset->copy_from(new_asset, 0);
 
-				mwindow->gui->update(0,
-					2,
-					0,
-					0,
-					0, 
-					0,
-					0);
+			mwindow->gui->update(0,
+				2,
+				0,
+				0,
+				0, 
+				0,
+				0);
 
 // Start index rebuilding
-				if(asset->audio_data)
-				{
-					char source_filename[BCTEXTLEN];
-					char index_filename[BCTEXTLEN];
-					IndexFile::get_index_filename(source_filename, 
-						mwindow->preferences->index_directory,
-						index_filename, 
-						asset->path);
-					remove(index_filename);
-					asset->index_status = INDEX_NOTTESTED;
-					mwindow->mainindexes->add_next_asset(0, asset);
-					mwindow->mainindexes->start_build();
-				}
-				mwindow->gui->unlock_window();
+			if(asset->audio_data)
+			{
+				char source_filename[BCTEXTLEN];
+				char index_filename[BCTEXTLEN];
+				IndexFile::get_index_filename(source_filename, 
+					mwindow->preferences->index_directory,
+					index_filename, 
+					asset->path);
+				remove(index_filename);
+				asset->index_status = INDEX_NOTTESTED;
+				mwindow->mainindexes->add_next_asset(0, asset);
+				mwindow->mainindexes->start_build();
+			}
+			mwindow->gui->unlock_window();
 
 
-				mwindow->awindow->gui->async_update_assets();
+			mwindow->awindow->gui->async_update_assets();
 
-				mwindow->restart_brender();
-				mwindow->sync_parameters(CHANGE_ALL);
- 			}
- 		}
-
-		Garbage::delete_object(new_asset);
-		delete window;
-		window = 0;
+			mwindow->restart_brender();
+			mwindow->sync_parameters(CHANGE_ALL);
+		}
 	}
+
+	Garbage::delete_object(new_asset);
+	delete window;
+	window = 0;
 }
 
 
@@ -191,6 +191,7 @@ void AssetEditWindow::create_objects()
 	int hmargin1 = 180, hmargin2 = 290;
 	FileSystem fs;
 	BC_Title *title;
+	int subtitle_tracks = 0;
 	BC_TextBox  *textboxw;
 	BC_CheckBox *chkboxw;
 	BC_ListBox  *listboxw;
@@ -211,51 +212,55 @@ void AssetEditWindow::create_objects()
 		PROGRAM_NAME ": Asset path", _("Select a file for this asset:")));
 	y += 30;
 
-	add_subwindow(new BC_Title(x, y, _("File format:")));
-	x = x2;
-	add_subwindow(new BC_Title(x, y, File::formattostr(mwindow->plugindb, asset->format), MEDIUMFONT, mwindow->theme->edit_font_color));
-	x = x1;
-	y += 20;
+	{
+		add_subwindow(new BC_Title(x, y, _("File format:")));
+		x = x2;
+		add_subwindow(new BC_Title(x, y, File::formattostr(mwindow->plugindb, 
+				asset->format), 
+			MEDIUMFONT, 
+			mwindow->theme->edit_font_color));
+		x = x1;
+		y += 20;
 
-	int64_t bytes = 1;
-	int subtitle_tracks = 0;
-	if(asset->format == FILE_MPEG &&
-		asset->video_data)
-	{
+		int64_t bytes = 1;
+		if(asset->format == FILE_MPEG &&
+			asset->video_data)
+		{
 // Get length from TOC
-		FileMPEG::get_info(asset, &bytes, &subtitle_tracks);
-	}
-	else
-	{
-		bytes = fs.get_size(asset->path);
-	}
-	add_subwindow(new BC_Title(x, y, _("Bytes:")));
-	sprintf(string, "%lld", bytes);
-	Units::punctuate(string);
+			FileMPEG::get_info(asset, &bytes, &subtitle_tracks);
+		}
+		else
+		{
+			bytes = fs.get_size(asset->path);
+		}
+		add_subwindow(new BC_Title(x, y, _("Bytes:")));
+		sprintf(string, "%lld", bytes);
+		Units::punctuate(string);
 	
 
-	add_subwindow(new BC_Title(x2, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
-	y += 20;
-	x = x1;
+		add_subwindow(new BC_Title(x2, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+		y += 20;
+		x = x1;
 
-	double length;
-	if(asset->audio_length > 0)
-		length = (double)asset->audio_length / asset->sample_rate;
-	if(asset->video_length > 0)
-		length = MAX(length, (double)asset->video_length / asset->frame_rate);
-	int64_t bitrate;
-	if(!EQUIV(length, 0))
-		bitrate = (int64_t)(bytes * 8 / length);
-	else
-		bitrate = bytes;
-	add_subwindow(new BC_Title(x, y, _("Bitrate (bits/sec):")));
-	sprintf(string, "%lld", bitrate);
+		double length;
+		if(asset->audio_length > 0)
+			length = (double)asset->audio_length / asset->sample_rate;
+		if(asset->video_length > 0)
+			length = MAX(length, (double)asset->video_length / asset->frame_rate);
+		int64_t bitrate;
+		if(!EQUIV(length, 0))
+			bitrate = (int64_t)(bytes * 8 / length);
+		else
+			bitrate = bytes;
+		add_subwindow(new BC_Title(x, y, _("Bitrate (bits/sec):")));
+		sprintf(string, "%lld", bitrate);
 
-	Units::punctuate(string);
-	add_subwindow(new BC_Title(x2, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+		Units::punctuate(string);
+		add_subwindow(new BC_Title(x2, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
 
-	y += 30;
-	x = x1;
+		y += 30;
+		x = x1;
+	}
 
 	if(asset->audio_data)
 	{
@@ -266,17 +271,19 @@ void AssetEditWindow::create_objects()
 
 		y += 30;
 
-		if(asset->get_compression_text(1, 0))
 		{
-			add_subwindow(new BC_Title(x, y, _("Compression:")));
-			x = x2;
-			add_subwindow(new BC_Title(x, 
-				y, 
-				asset->get_compression_text(1, 0), 
-				MEDIUMFONT, 
-				mwindow->theme->edit_font_color));
-			y += vmargin;
-			x = x1;
+			if(asset->get_compression_text(1, 0))
+			{
+				add_subwindow(new BC_Title(x, y, _("Compression:")));
+				x = x2;
+				add_subwindow(new BC_Title(x, 
+					y, 
+					asset->get_compression_text(1, 0), 
+					MEDIUMFONT, 
+					mwindow->theme->edit_font_color));
+				y += vmargin;
+				x = x1;
+			}
 		}
 
 		add_subwindow(new BC_Title(x, y, _("Channels:")));
@@ -285,7 +292,10 @@ void AssetEditWindow::create_objects()
 		x = x2;
 		if(allow_edits)
 		{
-			BC_TumbleTextBox *textbox = new AssetEditChannels(this, string, x, y);
+			BC_TumbleTextBox *textbox = new AssetEditChannels(this, 
+				string, 
+				x, 
+				y);
 			textbox->create_objects();
 			y += vmargin;
 		}
@@ -316,227 +326,229 @@ void AssetEditWindow::create_objects()
 		y += 30;
 		x = x1;
 
-		add_subwindow(new BC_Title(x, y, _("Bits:")));
-		x = x2;
-		if(allow_edits)
 		{
-			bitspopup = new BitsPopup(this, 
-				x, 
-				y, 
-				&asset->bits, 
-				1, 
-				1, 
-				1,
-				0,
-				1);
-			bitspopup->create_objects();
-		}
-		else
-			add_subwindow(new BC_Title(x, y, File::bitstostr(asset->bits), MEDIUMFONT, mwindow->theme->edit_font_color));
+			add_subwindow(new BC_Title(x, y, _("Bits:")));
+			x = x2;
+			if(allow_edits)
+			{
+				bitspopup = new BitsPopup(this, 
+					x, 
+					y, 
+					&asset->bits, 
+					1, 
+					1, 
+					1,
+					0,
+					1);
+				bitspopup->create_objects();
+			}
+			else
+				add_subwindow(new BC_Title(x, y, File::bitstostr(asset->bits), MEDIUMFONT, mwindow->theme->edit_font_color));
 
+
+			x = x1;
+			y += vmargin;
+			add_subwindow(new BC_Title(x, y, _("Header length:")));
+			sprintf(string, "%d", asset->header);
+
+			x = x2;
+			if(allow_edits)
+				add_subwindow(new AssetEditHeader(this, string, x, y));
+			else
+				add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+
+			y += vmargin;
+			x = x1;
+
+			add_subwindow(new BC_Title(x, y, _("Byte order:")));
+
+			if(allow_edits)
+			{
+				x = x2;
+
+				add_subwindow(lohi = new AssetEditByteOrderLOHI(this, 
+					asset->byte_order, 
+					x, 
+					y));
+				x += 70;
+				add_subwindow(hilo = new AssetEditByteOrderHILO(this, 
+					!asset->byte_order, 
+					x, 
+					y));
+				y += vmargin;
+			}
+			else
+			{
+				x = x2;
+				if(asset->byte_order)
+					add_subwindow(new BC_Title(x, y, _("Lo-Hi"), MEDIUMFONT, mwindow->theme->edit_font_color));
+				else
+					add_subwindow(new BC_Title(x, y, _("Hi-Lo"), MEDIUMFONT, mwindow->theme->edit_font_color));
+				y += vmargin;
+			}
+
+
+			x = x1;
+			if(allow_edits)
+			{
+	//			add_subwindow(new BC_Title(x, y, _("Values are signed:")));
+				add_subwindow(new AssetEditSigned(this, asset->signed_, x, y));
+			}
+			else
+			{
+				if(!asset->signed_ && asset->bits == 8)
+					add_subwindow(new BC_Title(x, y, _("Values are unsigned")));
+				else
+					add_subwindow(new BC_Title(x, y, _("Values are signed")));
+			}
+
+			y += 30;
+		}
+	}
 
 		x = x1;
-		y += vmargin;
-		add_subwindow(new BC_Title(x, y, _("Header length:")));
-		sprintf(string, "%d", asset->header);
+		if(asset->video_data)
+		{
+			add_subwindow(new BC_Bar(x, y, get_w() - x * 2));
+			y += 5;
 
-		x = x2;
-		if(allow_edits)
-			add_subwindow(new AssetEditHeader(this, string, x, y));
-		else
+			add_subwindow(new BC_Title(x, y, _("Video:"), LARGEFONT, RED));
+
+
+			y += 30;
+			x = x1;
+			if(asset->get_compression_text(0,1))
+			{
+				add_subwindow(new BC_Title(x, y, _("Compression:")));
+				x = x2;
+				add_subwindow(new BC_Title(x, 
+					y, 
+					asset->get_compression_text(0,1), 
+					MEDIUMFONT, 
+					mwindow->theme->edit_font_color));
+				y += vmargin;
+				x = x1;
+			}
+
+			add_subwindow(new BC_Title(x, y, _("Frame rate:")));
+			x = x2;
+			sprintf(string, "%.2f", asset->frame_rate);
+			BC_TextBox *framerate;
+			add_subwindow(framerate = new AssetEditFRate(this, string, x, y));
+			x += 105;
+			add_subwindow(new FrameRatePulldown(mwindow, framerate, x, y));
+			
+			y += 30;
+			x = x1;
+			add_subwindow(new BC_Title(x, y, _("Width:")));
+			x = x2;
+			sprintf(string, "%d", asset->width);
 			add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
 
-		y += vmargin;
-		x = x1;
-
-		add_subwindow(new BC_Title(x, y, _("Byte order:")));
-
-		if(allow_edits)
-		{
-			x = x2;
-
-			add_subwindow(lohi = new AssetEditByteOrderLOHI(this, 
-				asset->byte_order, 
-				x, 
-				y));
-			x += 70;
-			add_subwindow(hilo = new AssetEditByteOrderHILO(this, 
-				!asset->byte_order, 
-				x, 
-				y));
-			y += vmargin;
-		}
-		else
-		{
-			x = x2;
-			if(asset->byte_order)
-				add_subwindow(new BC_Title(x, y, _("Lo-Hi"), MEDIUMFONT, mwindow->theme->edit_font_color));
-			else
-				add_subwindow(new BC_Title(x, y, _("Hi-Lo"), MEDIUMFONT, mwindow->theme->edit_font_color));
-			y += vmargin;
-		}
-
-
-		x = x1;
-		if(allow_edits)
-		{
-//			add_subwindow(new BC_Title(x, y, _("Values are signed:")));
-			add_subwindow(new AssetEditSigned(this, asset->signed_, x, y));
-		}
-		else
-		{
-			if(!asset->signed_ && asset->bits == 8)
-				add_subwindow(new BC_Title(x, y, _("Values are unsigned")));
-			else
-				add_subwindow(new BC_Title(x, y, _("Values are signed")));
-		}
-
-		y += 30;
-	}
-
-	x = x1;
-	if(asset->video_data)
-	{
-		add_subwindow(new BC_Bar(x, y, get_w() - x * 2));
-		y += 5;
-
-		add_subwindow(new BC_Title(x, y, _("Video:"), LARGEFONT, RED));
-
-
-		y += 30;
-		x = x1;
-		if(asset->get_compression_text(0,1))
-		{
-			add_subwindow(new BC_Title(x, y, _("Compression:")));
-			x = x2;
-			add_subwindow(new BC_Title(x, 
-				y, 
-				asset->get_compression_text(0,1), 
-				MEDIUMFONT, 
-				mwindow->theme->edit_font_color));
 			y += vmargin;
 			x = x1;
-		}
-
-		add_subwindow(new BC_Title(x, y, _("Frame rate:")));
-		x = x2;
-		sprintf(string, "%.2f", asset->frame_rate);
-		BC_TextBox *framerate;
-		add_subwindow(framerate = new AssetEditFRate(this, string, x, y));
-		x += 105;
-		add_subwindow(new FrameRatePulldown(mwindow, framerate, x, y));
-		
-		y += 30;
-		x = x1;
-		add_subwindow(new BC_Title(x, y, _("Width:")));
-		x = x2;
-		sprintf(string, "%d", asset->width);
-		add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
-		
-		y += vmargin;
-		x = x1;
-		add_subwindow(new BC_Title(x, y, _("Height:")));
-		x = x2;
-		sprintf(string, "%d", asset->height);
-		add_subwindow(title = new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
-		y += title->get_h() + 5;
-
-		if(asset->format == FILE_MPEG)
-		{
-			x = x1;
-			add_subwindow(new BC_Title(x, y, _("Subtitle tracks:")));
+			add_subwindow(new BC_Title(x, y, _("Height:")));
 			x = x2;
-			sprintf(string, "%d", subtitle_tracks);
+			sprintf(string, "%d", asset->height);
 			add_subwindow(title = new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
 			y += title->get_h() + 5;
+
+			if(asset->format == FILE_MPEG)
+			{
+				x = x1;
+				add_subwindow(new BC_Title(x, y, _("Subtitle tracks:")));
+				x = x2;
+				sprintf(string, "%d", subtitle_tracks);
+				add_subwindow(title = new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+				y += title->get_h() + 5;
+			}
+
+			// --------------------
+			add_subwindow(title = new BC_Title(x1, y, _("Fix interlacing:")));
+			add_subwindow(ilacefixoption_chkboxw = new Interlaceautofix(mwindow,this, x2, y));
+			y += ilacefixoption_chkboxw->get_h() + 5;
+
+			// --------------------
+			add_subwindow(title = new BC_Title(x1, y, _("Asset's interlacing:")));
+			add_subwindow(textboxw = new AssetEditILacemode(this, "", BC_ILACE_ASSET_MODEDEFAULT, x2, y, 200));
+			ilacefixoption_chkboxw->ilacemode_textbox = textboxw;
+			add_subwindow(listboxw = new AssetEditInterlacemodePulldown(mwindow,
+								textboxw, 
+								&asset->interlace_mode,
+								(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_modes,
+								ilacefixoption_chkboxw,
+								x2 + textboxw->get_w(), 
+								y)); 
+			ilacefixoption_chkboxw->ilacemode_listbox = listboxw;
+			y += textboxw->get_h() + 5;
+
+			// --------------------
+			add_subwindow(title = new BC_Title(x1, y, _("Interlace correction:")));
+			add_subwindow(textboxw = new AssetEditILacefixmethod(this, "", BC_ILACE_FIXDEFAULT, x2, y, 200));
+			ilacefixoption_chkboxw->ilacefixmethod_textbox = textboxw;
+			add_subwindow(listboxw = new InterlacefixmethodPulldown(mwindow, 
+								textboxw,
+								&asset->interlace_fixmethod,
+								(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_fixmethods,
+								x2 + textboxw->get_w(), 
+								y)); 
+			ilacefixoption_chkboxw->ilacefixmethod_listbox = listboxw;
+			ilacefixoption_chkboxw->showhideotherwidgets();
+			y += textboxw->get_h() + 5;
+			
+			x = x1;
+			add_subwindow(new BC_Title(x, y, _("Reel Name:")));
+			x = x2;
+			add_subwindow(new AssetEditReelName(this, x, y));
+			y += 30;
+			
+			x = x1;
+			add_subwindow(new BC_Title(x, y, _("Reel Number:")));
+			x = x2;
+			add_subwindow(new AssetEditReelNumber(this, x, y));
+			y += 30;
+			
+			x = x1;
+			add_subwindow(new BC_Title(x, y, _("Time Code Start:")));
+			x = x2;
+
+	// Calculate values to enter into textboxes
+			char tc[12];
+			
+			Units::totext(tc,
+				asset->tcstart / asset->frame_rate,
+				TIME_HMSF,
+				asset->sample_rate,
+				asset->frame_rate);
+			
+			char *tc_hours = tc;
+			char *tc_minutes = strchr(tc, ':') + 1;
+			*(tc_minutes - 1) = 0;
+			char *tc_seconds = strchr(tc_minutes, ':') + 1;
+			*(tc_seconds - 1) = 0;
+			char *tc_rest = strchr(tc_seconds, ':') + 1;
+			*(tc_rest - 1) = 0;
+			
+			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_hours), x, y,
+				(int) (asset->frame_rate * 60 * 60)));
+			x += 30;
+			add_subwindow(new BC_Title(x, y, ":"));
+			x += 10;
+			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_minutes), x, y,
+				(int) (asset->frame_rate * 60)));
+			x += 30;
+			add_subwindow(new BC_Title(x, y, ":"));
+			x += 10;
+			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_seconds), x, y,
+				(int) (asset->frame_rate)));
+			x += 30;
+			add_subwindow(new BC_Title(x, y, ":"));
+			x += 10;
+			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_rest), x, y, 1));
+
+
+			y += 30;
 		}
-
-		// --------------------
-		add_subwindow(title = new BC_Title(x1, y, _("Fix interlacing:")));
-		add_subwindow(ilacefixoption_chkboxw = new Interlaceautofix(mwindow,this, x2, y));
-		y += ilacefixoption_chkboxw->get_h() + 5;
-
-		// --------------------
-		add_subwindow(title = new BC_Title(x1, y, _("Asset's interlacing:")));
-		add_subwindow(textboxw = new AssetEditILacemode(this, "", BC_ILACE_ASSET_MODEDEFAULT, x2, y, 200));
-		ilacefixoption_chkboxw->ilacemode_textbox = textboxw;
-		add_subwindow(listboxw = new AssetEditInterlacemodePulldown(mwindow,
-							textboxw, 
-							&asset->interlace_mode,
-							(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_modes,
-							ilacefixoption_chkboxw,
-							x2 + textboxw->get_w(), 
-							y)); 
-		ilacefixoption_chkboxw->ilacemode_listbox = listboxw;
-		y += textboxw->get_h() + 5;
-
-		// --------------------
-		add_subwindow(title = new BC_Title(x1, y, _("Interlace correction:")));
-		add_subwindow(textboxw = new AssetEditILacefixmethod(this, "", BC_ILACE_FIXDEFAULT, x2, y, 200));
-		ilacefixoption_chkboxw->ilacefixmethod_textbox = textboxw;
-		add_subwindow(listboxw = new InterlacefixmethodPulldown(mwindow, 
-							textboxw,
-							&asset->interlace_fixmethod,
-							(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_fixmethods,
-							x2 + textboxw->get_w(), 
-							y)); 
-		ilacefixoption_chkboxw->ilacefixmethod_listbox = listboxw;
-		ilacefixoption_chkboxw->showhideotherwidgets();
-		y += textboxw->get_h() + 5;
-		
-		x = x1;
-		add_subwindow(new BC_Title(x, y, _("Reel Name:")));
-		x = x2;
-		add_subwindow(new AssetEditReelName(this, x, y));
-		y += 30;
-		
-		x = x1;
-		add_subwindow(new BC_Title(x, y, _("Reel Number:")));
-		x = x2;
-		add_subwindow(new AssetEditReelNumber(this, x, y));
-		y += 30;
-		
-		x = x1;
-		add_subwindow(new BC_Title(x, y, _("Time Code Start:")));
-		x = x2;
-
-// Calculate values to enter into textboxes
-		char tc[12];
-		
-		Units::totext(tc,
-			asset->tcstart / asset->frame_rate,
-			TIME_HMSF,
-			asset->sample_rate,
-			asset->frame_rate);
-		
-		char *tc_hours = tc;
-		char *tc_minutes = strchr(tc, ':') + 1;
-		*(tc_minutes - 1) = 0;
-		char *tc_seconds = strchr(tc_minutes, ':') + 1;
-		*(tc_seconds - 1) = 0;
-		char *tc_rest = strchr(tc_seconds, ':') + 1;
-		*(tc_rest - 1) = 0;
-		
-		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_hours), x, y,
-			(int) (asset->frame_rate * 60 * 60)));
-		x += 30;
-		add_subwindow(new BC_Title(x, y, ":"));
-		x += 10;
-		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_minutes), x, y,
-			(int) (asset->frame_rate * 60)));
-		x += 30;
-		add_subwindow(new BC_Title(x, y, ":"));
-		x += 10;
-		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_seconds), x, y,
-			(int) (asset->frame_rate)));
-		x += 30;
-		add_subwindow(new BC_Title(x, y, ":"));
-		x += 10;
-		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_rest), x, y, 1));
-
-
-		y += 30;
-	}
 
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
