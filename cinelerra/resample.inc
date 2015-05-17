@@ -23,8 +23,7 @@
 #define RESAMPLE_INC
 
 class Resample;
-class Resample_float;
 
-#define RESAMPLE_CHUNKSIZE 0x10000
+#define RESAMPLE_CHUNKSIZE 0x40000
 
 #endif

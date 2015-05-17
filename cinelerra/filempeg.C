@@ -1374,41 +1374,6 @@ int FileMPEG::read_samples(double *buffer, int64_t len)
 	return 0;
 }
 
-int FileMPEG::prefer_samples_float()
-{
-	return 1;
-}
-
-int FileMPEG::read_samples_float(float *buffer, int64_t len)
-{
-	if(!fd) return 0;
-
-// Translate pure channel to a stream and a channel in the mpeg stream
-	int stream, channel;
-	to_streamchannel(file->current_channel, stream, channel);
-	
-	
-//printf("FileMPEG::read_samples 1 current_sample=%ld len=%ld channel=%d\n", file->current_sample, len, channel);
-
-	mpeg3_set_sample(fd, 
-		file->current_sample,
-		stream);
-	mpeg3_read_audio(fd, 
-		buffer,      	/* Pointer to pre-allocated buffer of floats */
-		0,		/* Pointer to pre-allocated buffer of int16's */
-		channel,          /* Channel to decode */
-		len,         /* Number of samples to decode */
-		stream);          /* Stream containing the channel */
-
-
-//	last_sample = file->current_sample;
-
-//printf("FileMPEG::read_samples 100\n");
-	return 0;
-}
-
-
-
 const char* FileMPEG::strtocompression(char *string)
 {
 	return "";

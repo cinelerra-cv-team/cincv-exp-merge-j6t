@@ -89,8 +89,6 @@ public:
 
 	int read_frame(VFrame *frame);
 	int read_samples(double *buffer, int64_t len);
-	int read_samples_float(float *buffer, int64_t len);
-	int prefer_samples_float();
 	int from_mpeg_colormodel(int cmodel);
 	int to_mpeg_colormodel(int cmodel);
 

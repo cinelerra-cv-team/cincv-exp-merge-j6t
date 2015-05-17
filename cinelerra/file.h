@@ -167,7 +167,7 @@ public:
 // is the length in floats from the offset.
 // advances file pointer
 // return 1 if failed
-	int read_samples(double *buffer, int64_t len, int64_t base_samplerate, float *buffer_float = 0);
+	int read_samples(double *buffer, int64_t len, int64_t base_samplerate);
 
 
 // set layer for video read
@@ -234,7 +234,6 @@ public:
 
 // Resampling engine
 	Resample *resample;
-	Resample_float *resample_float;
 
 // Lock writes while recording video and audio.
 // A binary lock won't do.  We need a FIFO lock.

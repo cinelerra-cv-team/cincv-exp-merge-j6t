@@ -95,10 +95,6 @@ public:
 // Doubles are used to allow resampling
 	virtual int read_samples(double *buffer, int64_t len) { return 0; };
 
-
-	virtual int prefer_samples_float() {return 0;};
-	virtual int read_samples_float(float *buffer, int64_t len) { return 0; };
-
 	virtual int read_frame(VFrame *frame) { return 1; };
 
 // Return either the argument or another colormodel which read_frame should

@@ -113,7 +113,6 @@ void File::reset_parameters()
 	normalized_sample = 0;
 	normalized_sample_rate = 0;
 	resample = 0;
-	resample_float = 0;
 	use_cache = 0;
 	preferences = 0;
 	playback_subtitle = -1;
@@ -670,7 +669,6 @@ int File::close_file(int ignore_thread)
 	}
 
 	if(resample) delete resample;
-	if(resample_float) delete resample_float;
 
 
 	reset_parameters();
@@ -1024,7 +1022,7 @@ VFrame*** File::get_video_buffer()
 }
 
 
-int File::read_samples(double *buffer, int64_t len, int64_t base_samplerate, float *buffer_float)
+int File::read_samples(double *buffer, int64_t len, int64_t base_samplerate)
 {
 	int result = 0;
 	if(len < 0) return 0;
@@ -1044,55 +1042,27 @@ int File::read_samples(double *buffer, int64_t len, int64_t base_samplerate, flo
 		if(base_samplerate != asset->sample_rate)
 		{
 //printf("File::read_samples 3\n");
-//struct timeval start_time;
-//gettimeofday(&start_time, 0);
-			if (!file->prefer_samples_float())
+			if(!resample)
 			{
-				if(!resample)
-				{
-	//printf("File::read_samples 4\n");
-					resample = new Resample(this, asset->channels);
-				}
-
-	//printf("File::read_samples 5\n");
-				current_sample += resample->resample(buffer, 
-					len, 
-					asset->sample_rate, 
-					base_samplerate,
-					current_channel,
-					current_sample,
-					normalized_sample);
-	//printf("File::read_samples 6\n");
-			} else
-			{
-				if(!resample_float)
-				{
-	//printf("File::read_samples 4\n");
-					resample_float = new Resample_float(this, asset->channels);
-				}
-
-	//printf("File::read_samples 5\n");
-				current_sample += resample_float->resample(buffer, 
-					len, 
-					asset->sample_rate, 
-					base_samplerate,
-					current_channel,
-					current_sample,
-					normalized_sample);
-	//printf("File::read_samples 6\n");
-
+//printf("File::read_samples 4\n");
+				resample = new Resample(this, asset->channels);
 			}
-//printf("diff2: %lli\n", get_difference(&start_time));
 
+//printf("File::read_samples 5\n");
+			current_sample += resample->resample(buffer, 
+				len, 
+				asset->sample_rate, 
+				base_samplerate,
+				current_channel,
+				current_sample,
+				normalized_sample);
+//printf("File::read_samples 6\n");
 		}
 		else
 // Load directly
 		{
 //printf("File::read_samples 7\n");
-			if (buffer_float && file->prefer_samples_float())
-				result = file->read_samples_float(buffer_float, len);
-			else
-				result = file->read_samples(buffer, len);
+			result = file->read_samples(buffer, len);
 //printf("File::read_samples 8\n");
 			current_sample += len;
 		}
