@@ -288,6 +288,7 @@ PNGS = \
 	loadmode_checkedhi.png \
 	loadmode_dn.png \
 	loadmode_hi.png \
+	loadmode_nested.png \
 	loadmode_new.png \
 	loadmode_newcat.png \
 	loadmode_newtracks.png \
@@ -333,6 +334,7 @@ PNGS = \
 	mode_dn.png \
 	mode_hi.png \
 	mode_max.png \
+	mode_min.png \
 	mode_multiply.png \
 	mode_normal.png \
 	mode_replace.png \

@@ -175,7 +175,7 @@ int YUVStream::make_index() {
 
 	// NOTE: make_index() must be called after read_header().
 
-	VFrame *frame = new VFrame(0, get_width(), get_height(), BC_YUV420P);
+	VFrame *frame = new VFrame(0, -1, get_width(), get_height(), BC_YUV420P, -1);
 	yuv[0] = frame->get_y();
 	yuv[1] = frame->get_u();
 	yuv[2] = frame->get_v();

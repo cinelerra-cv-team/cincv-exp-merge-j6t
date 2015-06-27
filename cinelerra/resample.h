@@ -59,13 +59,13 @@ public:
 	static void reverse_buffer(double *buffer, int64_t len);
 
 
-private:
+//private:
 // Reset after seeking
 	void reset();
 	double blackman(int i, double offset, double fcn, int l);
 // Query output temp
 	int get_output_size();
-//	void read_output(Samples *output, int size);
+	void read_output(Samples *output, int size);
 // Resamples input and dumps it to output_temp
 	void resample_chunk(Samples *input,
 		int64_t in_len,

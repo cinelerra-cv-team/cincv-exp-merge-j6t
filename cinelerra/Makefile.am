@@ -32,7 +32,7 @@ if BUILDINFO_CUST
 
 endif
 endif
-	echo '#define COPYRIGHTTEXT1 "(C) 2008 Adam Williams"' >> versioninfo.h
+	echo '#define COPYRIGHTTEXT1 "(C) 2009 Adam Williams\n\nheroinewarrior.com"' >> versioninfo.h
 	echo '#define COPYRIGHTTEXT2 "(C) 2006-2015 The CinelerraCV Community"' >> versioninfo.h
 	echo '#define COMPILEDATE "Compiled on $(BUILDDATE)"' >> versioninfo.h
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h
@@ -124,6 +124,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    dvbtune.C \
 		    edit.C \
 		    edithandles.C \
+		    editlength.C \
 		    editpanel.C \
 		    editpopup.C \
 		    edits.C \
@@ -168,7 +169,9 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    garbage.C \
 		    gwindow.C \
 		    gwindowgui.C \
+		    indexable.C \
 		    indexfile.C \
+		    indexstate.C \
 		    indexthread.C \
 		    intauto.C \
 		    intautos.C \
@@ -204,6 +207,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    menuaeffects.C \
 		    menuattacheffect.C \
 		    menuattachtransition.C \
+		    menueditlength.C \
 		    menueffects.C \
 		    menutransitionlength.C \
 		    menuveffects.C \
@@ -214,6 +218,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    mwindowedit.C \
 		    mwindowgui.C \
 		    mwindowmove.C \
+		    nestededls.C \
 		    new.C \
 		    newfolder.C \
 		    overlayframe.C \
@@ -274,6 +279,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    resizetrackthread.C \
 		    resourcepixmap.C \
 		    resourcethread.C \
+		    samples.C \
 		    samplescroll.C \
 		    savefile.C \
 		    setformat.C \
@@ -285,7 +291,6 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    theme.C \
 		    threadexec.C \
 		    threadfork.C \
-		    threadindexer.C \
 		    threadloader.C \
 		    timebar.C \
 		    timeentry.C \
@@ -441,6 +446,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 dvbtune.h \
 		 edit.h \
 		 edithandles.h \
+		 editlength.h \
 		 editpanel.h \
 		 editpopup.h \
 		 edits.h \
@@ -489,7 +495,9 @@ noinst_HEADERS = aattachmentpoint.h \
 		 iec61883input.h \
 		 iec61883output.h \
 		 ieee1394-ioctl.h \
+		 indexable.h \
 		 indexfile.h \
+		 indexstate.h \
 		 indexthread.h \
 		 intauto.h \
 		 intautos.h \
@@ -529,6 +537,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 menuattacheffect.h \
 		 menuattachtransition.h \
 		 menueffects.h \
+		 menueditlength.h \
 		 menutransitionlength.h \
 		 menuveffects.h \
 		 messages.h \
@@ -537,6 +546,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 mtimebar.h \
 		 mwindowgui.h \
 		 mwindow.h \
+		 nestededls.h \
 		 newfolder.h \
 		 new.h \
 		 newpresets.h \
@@ -604,6 +614,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 resizetrackthread.h \
 		 resourcepixmap.h \
 		 resourcethread.h \
+		 samples.h \
 		 samplescroll.h \
 		 savefile.h \
 		 scale.h \
@@ -617,7 +628,6 @@ noinst_HEADERS = aattachmentpoint.h \
 		 theme.h \
 		 threadexec.h \
 		 threadfork.h \
-		 threadindexer.h \
 		 threadloader.h \
 		 timebar.h \
 		 timebomb.h \

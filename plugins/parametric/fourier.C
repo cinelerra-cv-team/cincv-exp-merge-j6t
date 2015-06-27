@@ -477,7 +477,7 @@ void smbFft(double *fftBuffer, long fftFrameSize, long sign);
 
 int CrossfadeFFT::process_buffer_oversample(int64_t output_sample, 
 	long size, 
-	double *output_ptr,
+	Samples *output_ptr,
 	int direction)
 {
 	if (oversample <= 0)
@@ -567,22 +567,26 @@ int CrossfadeFFT::process_buffer_oversample(int64_t output_sample,
 		if (read_start + read_len * step< 0)
 		{
 // completely outside the track	
-			memset (input_buffer + write_pos, 0, read_len * sizeof(double));
+			memset (input_buffer->get_data() + write_pos, 0, read_len * sizeof(double));
 			result = 1;
 		} else
 		if (read_start < 0)
 		{
 // special case for reading before the track - in general it would be sensible that this behaviour is done by read_samples()
-			memset (input_buffer + write_pos, 0, - read_start * sizeof(double));
+			memset (input_buffer->get_data() + write_pos, 0, - read_start * sizeof(double));
+			input_buffer->set_offset(- read_start + write_pos);
 			result = read_samples(0,
 				read_start + read_len,
-				input_buffer - read_start + write_pos);
+				input_buffer);
+			input_buffer->set_offset(0);
 		} else
 		{
 //printf("Readstart: %lli, read len: %i, write pos: %i\n", read_start, read_len, write_pos);
+			input_buffer->set_offset(write_pos);
 			result = read_samples(read_start,
 				read_len,
-				input_buffer + write_pos);
+				input_buffer);
+			input_buffer->set_offset(0);
 		}
 
 
@@ -620,9 +624,9 @@ int CrossfadeFFT::process_buffer_oversample(int64_t output_sample,
 
 // Shift input buffer
 		if (step == 1) 
-			memmove(input_buffer, input_buffer + overlap_size, (window_size - overlap_size) * sizeof(double));
+			memmove(input_buffer->get_data(), input_buffer->get_data() + overlap_size, (window_size - overlap_size) * sizeof(double));
 		else
-			memmove(input_buffer + overlap_size, input_buffer, (window_size - overlap_size) * sizeof(double));
+			memmove(input_buffer->get_data() + overlap_size, input_buffer->get_data(), (window_size - overlap_size) * sizeof(double));
 		
 		this->input_sample += step * overlap_size;
 
@@ -632,7 +636,7 @@ int CrossfadeFFT::process_buffer_oversample(int64_t output_sample,
 
 	if (step == 1)
 	{
-		memcpy(output_ptr, output_buffer + start_skip , size * sizeof(double));
+		memcpy(output_ptr->get_data(), output_buffer + start_skip , size * sizeof(double));
 		samples_ready -= total_size;
 
 		memmove(output_buffer, 
@@ -642,7 +646,7 @@ int CrossfadeFFT::process_buffer_oversample(int64_t output_sample,
 		
 	} else
 	{
-		memcpy(output_ptr, output_buffer + output_allocation - total_size , size * sizeof(double));
+		memcpy(output_ptr->get_data(), output_buffer + output_allocation - total_size , size * sizeof(double));
 		samples_ready -= total_size;
 
 		memmove(output_buffer + output_allocation - (samples_ready + window_size - overlap_size),

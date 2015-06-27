@@ -275,7 +275,7 @@ void Color3WayPoint::draw_face(int flash, int flush)
 // Draw the color wheel
 	if(!bg_image)
 	{
-		VFrame frame(0, /* -1,*/ radius * 2, radius * 2, BC_RGB888, -1);
+		VFrame frame(0, -1, radius * 2, radius * 2, BC_RGB888, -1);
 		for(int i = 0; i < radius * 2; i++)
 		{
 			unsigned char *row = frame.get_rows()[i];

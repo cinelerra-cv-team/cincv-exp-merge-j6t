@@ -320,10 +320,10 @@ int SvgMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 			temp_frame = 0;
 		}
 		if (!temp_frame)			
-			temp_frame = new VFrame(0, 
+			temp_frame = new VFrame(0, -1,
 				        raw_data->width,
 					raw_data->height,
-					output_ptr->get_color_model());
+					output_ptr->get_color_model(), -1);
 
 		// temp_frame is ready by now, we can do the loading
 		unsigned char ** raw_rows;

@@ -356,7 +356,7 @@ void FileYUV::ensure_temp(int width, int height)
 	// create a correct temp frame if we don't have one
 	if (temp == 0) 
 	{
-		temp = new VFrame(0, width, height, BC_YUV420P);
+		temp = new VFrame(0, -1, width, height, BC_YUV420P, -1);
 	}
 }
 

@@ -2528,9 +2528,7 @@ int PackagingEngineOGG::packages_are_done()
 		audio_file_gen->open_file(preferences, 
 			audio_asset, 
 			1, //rd 
-			0, //wr
-			0, //base sample rate
-			0); // base_frame rate
+			0); //wr
 		audio_file = (FileOGG*) audio_file_gen->file;
 		ogg_stream_init(&audio_in_stream, audio_file->tf->vo.serialno);
 		audio_file->ogg_seek_to_databegin(audio_file->tf->audiosync, audio_file->tf->vo.serialno);
@@ -2545,9 +2543,7 @@ int PackagingEngineOGG::packages_are_done()
 		video_file_gen->open_file(preferences, 
 			video_asset, 
 			1, //rd 
-			0, //wr
-			0, //base sample rate
-			0); // base_frame rate
+			0); //wr
 		video_file = (FileOGG*) video_file_gen->file;
 		ogg_stream_init(&video_in_stream, video_file->tf->to.serialno);
 		video_file->ogg_seek_to_databegin(video_file->tf->videosync, video_file->tf->to.serialno);
@@ -2558,9 +2554,7 @@ int PackagingEngineOGG::packages_are_done()
 	output_file_gen->open_file(preferences,
 		default_asset,
 		0,
-		1,
-		default_asset->sample_rate, 
-		default_asset->frame_rate);
+		1);
 	FileOGG *output_file = (FileOGG*) output_file_gen->file;
 
 	ogg_page og;    /* one Ogg bitstream page.  Vorbis packets are inside */
@@ -2596,9 +2590,7 @@ int PackagingEngineOGG::packages_are_done()
 						video_file_gen->open_file(preferences, 
 							video_asset, 
 							1, //rd 
-							0, //wr
-							0, //base sample rate
-							0); // base_frame rate
+							0); //wr
 						video_file = (FileOGG*) video_file_gen->file;
 						ogg_stream_init(&video_in_stream, video_file->tf->to.serialno);
 						int64_t fp   = 0;

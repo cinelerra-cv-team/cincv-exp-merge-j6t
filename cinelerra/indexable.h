@@ -51,6 +51,8 @@ public:
 
 	void copy_indexable(Indexable *src);
 
+	double total_length_framealigned(double fps);
+
 	IndexState *index_state;
 
 // In an Asset, the path to the file.

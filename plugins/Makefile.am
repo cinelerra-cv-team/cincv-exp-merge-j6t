@@ -34,6 +34,7 @@ SUBDIRS= \
 	color3way \
 	compressor \
 	crossfade \
+	dcoffset \
 	decimate \
 	deinterlace \
 	delayaudio \
@@ -114,6 +115,7 @@ SUBDIRS= \
 	whirl \
 	wipe \
 	yuv \
+	zoom \
 	zoomblur \
 	$(MAYBE_FINDOBJECT)
 

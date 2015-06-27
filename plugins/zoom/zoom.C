@@ -76,10 +76,7 @@ int ZoomLimit::handle_event()
 ZoomWindow::ZoomWindow(ZoomMain *plugin)
  : PluginClientWindow(plugin, 
 	250, 
-	125, 
-	250,
-	125,
-	0)
+	125)
 {
 	this->plugin = plugin;
 }

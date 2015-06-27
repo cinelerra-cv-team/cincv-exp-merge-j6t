@@ -133,7 +133,6 @@ public:
 	int write_index(FileXML *xml);
 	int update_path(char *new_path);
 
-	double total_length_framealigned(double fps);
 
 // Pipe command
 	char pipe[BCTEXTLEN];

@@ -20,9 +20,11 @@
  */
 
 #include "bcsignals.h"
+#include "clip.h"
 #include "edl.h"
 #include "indexable.h"
 
+#include <math.h>
 #include <string.h>
 
 Indexable::Indexable(int is_asset) : Garbage(is_asset ? "Asset" : "EDL")
@@ -96,6 +98,21 @@ int Indexable::get_video_layers()
 int64_t Indexable::get_video_frames()
 {
 	return 0;
+}
+
+double Indexable::total_length_framealigned(double fps)
+{
+	if (have_video() && have_audio()) {
+		double aud = floor(( (double)get_audio_samples() / get_sample_rate()) * fps) / fps;
+		double vid = floor(( (double)get_video_frames() / get_frame_rate()) * fps) / fps;
+		return MIN(aud,vid);
+	}
+
+	if (have_audio())
+		return (double)get_audio_samples() / get_sample_rate();
+
+	if (have_video())
+		return (double)get_video_frames() / get_frame_rate();
 }
 
 

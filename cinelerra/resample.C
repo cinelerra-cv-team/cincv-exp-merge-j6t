@@ -52,7 +52,6 @@ Resample::Resample()
 Resample::~Resample()
 {
 	delete [] old;
-	delete [] resample_init;
 	delete [] output_temp;
 	delete input;
 }
@@ -104,14 +103,14 @@ int Resample::get_output_size()
 	return output_size;
 }
 
-// void Resample::read_output(double *output, int size)
-// {
-// 	memcpy(output, output_temp, size * sizeof(double));
-// // Shift leftover forward
-// 	for(int i = size; i < output_size; i++)
-// 		output_temp[i - size] = output_temp[i];
-// 	output_size -= size;
-// }
+void Resample::read_output(Samples *output, int size)
+{
+	memcpy(output->get_data(), output_temp, size * sizeof(double));
+// Shift leftover forward
+	for(int i = size; i < output_size; i++)
+		output_temp[i - size] = output_temp[i];
+	output_size -= size;
+}
 
 
 

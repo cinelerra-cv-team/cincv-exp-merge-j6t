@@ -4,6 +4,10 @@
 extern "C" {
 #include <swscale.h>
 }
+#else
+extern "C" {
+#include <libavcodec/imgconvert.h>
+}
 #endif
 
 
@@ -288,8 +292,8 @@ int FFMPEG::convert_cmodel(AVPicture *picture_in, PixelFormat pix_fmt_in,
 		}
 
 		// NOTE: choose RGBA8888 as a hopefully non-lossy colormodel
-		VFrame *temp_frame = new VFrame(0, width_in, height_in, 
-						BC_RGBA8888);
+		VFrame *temp_frame = new VFrame(0, -1, width_in, height_in,
+						BC_RGBA8888, -1);
 		if (convert_cmodel(picture_in, pix_fmt_in,
 				  width_in, height_in, temp_frame)) {
 			delete temp_frame;

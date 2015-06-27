@@ -723,6 +723,7 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/color3way/Makefile \
 	plugins/compressor/Makefile \
 	plugins/crossfade/Makefile \
+	plugins/dcoffset/Makefile \
 	plugins/decimate/Makefile \
 	plugins/deinterlace/Makefile \
 	plugins/delayaudio/Makefile \
@@ -806,6 +807,7 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/linearblur/Makefile \
 	plugins/perspective/Makefile \
 	plugins/radialblur/Makefile \
+	plugins/zoom/Makefile \
 	plugins/zoomblur/Makefile \
 	plugins/timefront/Makefile \
 	plugins/svg/Makefile \

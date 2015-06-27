@@ -99,7 +99,7 @@ public:
 
 	int process_buffer_oversample(int64_t output_sample,
 		long size, 
-		double *output_ptr,
+		Samples *output_ptr,
 		int direction);
 
 // Called by process_buffer to read samples from input.
