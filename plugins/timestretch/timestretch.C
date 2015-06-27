@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2009 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "mainprogress.h"
 #include "picon_png.h"
 #include "resample.h"
+#include "samples.h"
 #include "timestretch.h"
 #include "timestretchengine.h"
 #include "transportque.inc"
@@ -65,7 +66,7 @@ PitchEngine::PitchEngine(TimeStretch *plugin)
 PitchEngine::~PitchEngine()
 {
 	if(input_buffer) delete [] input_buffer;
-	if(temp) delete [] temp;
+	if(temp) delete temp;
 	delete [] last_phase;
 	delete [] new_freq;
 	delete [] new_magn;
@@ -76,9 +77,16 @@ PitchEngine::~PitchEngine()
 
 int PitchEngine::read_samples(int64_t output_sample, 
 	int samples, 
-	double *buffer)
+	Samples *buffer)
 {
+	plugin->resample->resample(buffer,
+		samples,
+		1000000,
+		(int)(1000000 * plugin->config.scale),
+		output_sample,
+		PLAY_FORWARD);
 
+#if 0
 // FIXME, make sure this is set at the beginning, always
 // FIXME: we need to do backward play also
 	if (current_output_sample != output_sample)
@@ -93,7 +101,7 @@ int PitchEngine::read_samples(int64_t output_sample,
 	while(input_size < samples)
 	{
 		double scale = plugin->config.scale;
-		if(!temp) temp = new double[INPUT_SIZE];
+		if(!temp) temp = new Samples(INPUT_SIZE);
 
 		plugin->read_samples(temp, 
 			0, 
@@ -105,10 +113,9 @@ int PitchEngine::read_samples(int64_t output_sample,
 		plugin->resample->resample_chunk(temp,
 			INPUT_SIZE,
 			1000000,
-			(int)(1000000 * scale),
-			0);
+			(int)(1000000 * scale));
 
-		int fragment_size = plugin->resample->get_output_size(0);
+		int fragment_size = plugin->resample->get_output_size();
 
 		if(input_size + fragment_size > input_allocated)
 		{
@@ -125,17 +132,17 @@ int PitchEngine::read_samples(int64_t output_sample,
 
 
 		plugin->resample->read_output(input_buffer + input_size,
-			0,
 			fragment_size);
 		input_size += fragment_size;
 	}
-	memcpy(buffer, input_buffer, samples * sizeof(int64_t));
+	memcpy(buffer->get_data(), input_buffer, samples * sizeof(int64_t));
 	memcpy(input_buffer, 
 		input_buffer + samples, 
 		sizeof(int64_t) * (input_size - samples));
 	input_size -= samples;
 	current_output_sample += samples;
 	return 0;
+#endif
 }
 
 int PitchEngine::signal_process_oversample(int reset)
@@ -304,6 +311,26 @@ int PitchEngine::signal_process_oversample(int reset)
 
 
 
+TimeStretchResample::TimeStretchResample(TimeStretch *plugin)
+{
+	this->plugin = plugin;
+}
+
+
+int TimeStretchResample::read_samples(Samples *buffer, 
+	int64_t start, 
+	int64_t len)
+{
+	return plugin->read_samples(buffer, 
+		0, 
+		start + plugin->get_source_start(), 
+		len);
+}
+
+
+
+
+
 
 
 
@@ -325,7 +352,7 @@ TimeStretch::TimeStretch(PluginServer *server)
 TimeStretch::~TimeStretch()
 {
 	if(temp) delete [] temp;
-	if(input) delete [] input;
+	if(input) delete input;
 	if(pitch) delete pitch;
 	if(resample) delete resample;
 	if(stretch) delete stretch;
@@ -457,7 +484,7 @@ int TimeStretch::get_parameters()
 
 //int TimeStretch::process_loop(double *buffer, int64_t &write_length)
 int TimeStretch::process_buffer(int64_t size, 
-		double *buffer,
+		Samples *buffer,
 		int64_t start_position,
 		int sample_rate)
 {
@@ -470,7 +497,7 @@ int TimeStretch::process_buffer(int64_t size,
 		pitch = new PitchEngine(this);
 		pitch->initialize(WINDOW_SIZE);
 		pitch->set_oversample(OVERSAMPLE);
-		resample = new Resample(0, 1);
+		resample = new TimeStretchResample(this);
 
 	}
 

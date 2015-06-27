@@ -40,6 +40,8 @@ void NormalizeWindow::create_objects(float *db_over, int *separate_tracks)
 	int x = 10, y = 10;
 	this->db_over = db_over;
 	this->separate_tracks = separate_tracks;
+	
+	lock_window("NormalizeWindow::create_objects");
 	add_subwindow(new BC_Title(x, y, _("Enter the DB to overload by:")));
 	y += 20;
 	add_subwindow(new NormalizeWindowOverload(x, y, this->db_over));
@@ -48,7 +50,7 @@ void NormalizeWindow::create_objects(float *db_over, int *separate_tracks)
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));
 	show_window();
-	flush();
+	unlock_window();
 }
 
 NormalizeWindowOverload::NormalizeWindowOverload(int x, int y, float *db_over)

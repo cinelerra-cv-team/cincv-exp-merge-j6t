@@ -183,11 +183,8 @@ BC_WindowBase::~BC_WindowBase()
 			XCloseDisplay(display);
 		}
 
-SET_TRACE
 		clipboard->stop_clipboard();
-SET_TRACE
 		delete clipboard;
-SET_TRACE
 #endif // SINGLE_THREAD
 	}
 	else
@@ -219,6 +216,7 @@ SET_TRACE
 	delete event_lock;
 	delete event_condition;
 #else
+	top_level->window_lock = 0;
 	BC_Display::unlock_display();
 #endif
 
@@ -1227,7 +1225,6 @@ int BC_WindowBase::dispatch_motion_event()
 	{
 		result = subwindows->values[i]->dispatch_motion_event();
 	}
-
 
 	if(!result) result = cursor_motion_event();    // give to user
 	return result;
@@ -2957,6 +2954,14 @@ int BC_WindowBase::unlock_window()
 	if(top_level)
 	{
 		UNSET_LOCK(this);
+
+
+// 		if(!top_level->window_lock)
+// 		{
+// 			printf("BC_WindowBase::unlock_window %d %s already unlocked\n", 
+// 				__LINE__,
+// 				title);
+// 		}
 		top_level->window_lock = 0;
 #ifdef SINGLE_THREAD
 		BC_Display::unlock_display();

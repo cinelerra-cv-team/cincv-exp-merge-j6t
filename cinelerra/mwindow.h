@@ -44,6 +44,7 @@
 #include "filexml.inc"
 #include "framecache.inc"
 #include "gwindow.inc"
+#include "indexable.inc"
 #include "keyframegui.inc"
 #include "levelwindow.inc"
 #include "loadmode.inc"
@@ -125,7 +126,13 @@ public:
 	void show_gwindow();
 	void tile_windows();
 	void set_titles(int value);
-	int asset_to_edl(EDL *new_edl, Asset *new_asset, RecordLabels *labels = 0);
+	int asset_to_edl(EDL *new_edl, 
+		Asset *new_asset, 
+		RecordLabels *labels = 0);
+// Convert nested_edl to a nested EDL in new_edl 
+// suitable for pasting in paste_edls
+	int edl_to_nested(EDL *new_edl, 
+		EDL *nested_edl);
 
 // Entry point to insert assets and insert edls.  Called by TrackCanvas 
 // and AssetPopup when assets are dragged in from AWindow.
@@ -137,7 +144,7 @@ public:
 // Insert the assets at a point in the EDL.  Called by menueffects,
 // render, and CWindow drop but recording calls paste_edls directly for
 // labels.
-	void load_assets(ArrayList<Asset*> *new_assets, 
+	void load_assets(ArrayList<Indexable*> *new_assets, 
 		double position, 
 		int load_mode,
 		Track *first_track /* = 0 */,
@@ -163,15 +170,15 @@ public:
 	void shrink_autos(int changeall, int domin, int domax);
 // move the window to include the cursor
 	void find_cursor();
-// Append a plugindb with pointers to the master plugindb
-	void create_plugindb(int do_audio, 
+// Search plugindb and put results in argument
+	static void search_plugindb(int do_audio, 
 		int do_video, 
 		int is_realtime, 
 		int is_transition,
 		int is_theme,
-		ArrayList<PluginServer*> &plugindb);
+		ArrayList<PluginServer*> &results);
 // Find the plugin whose title matches title and return it
-	PluginServer* scan_plugindb(char *title,
+	static PluginServer* scan_plugindb(char *title,
 		int data_type);
 	void dump_plugins();
 
@@ -179,7 +186,7 @@ public:
 
 	
 	int load_filenames(ArrayList<char*> *filenames, 
-		int load_mode = LOAD_REPLACE,
+		int load_mode = LOADMODE_REPLACE,
 // Cause the project filename on the top of the window to be updated.
 // Not wanted for loading backups.
 		int update_filename = 1,
@@ -389,6 +396,7 @@ public:
 // Attach default transition to single edit
 	void paste_audio_transition();
 	void paste_video_transition();
+	void set_edit_length(double length);
 // Set length of single transition
 	void set_transition_length(Transition *transition, double length);
 // Set length in seconds of all transitions in active range
@@ -404,7 +412,7 @@ public:
 	
 	void set_automation_mode(int mode);
 	void set_keyframe_type(int mode);
-	void set_auto_keyframes(int value);
+	void set_auto_keyframes(int value, int lock_mwindow, int lock_cwindow);
 	void set_labels_follow_edits(int value);
 
 // Update the editing mode
@@ -493,8 +501,8 @@ public:
 
 // ====================================== plugins ==============================
 
-// Contain file descriptors for all the dlopens
-	ArrayList<PluginServer*> *plugindb;
+// Contains file descriptors for all the dlopens
+	static ArrayList<PluginServer*> *plugindb;
 // Currently visible plugins
 	ArrayList<PluginServer*> *plugin_guis;
 // GUI Plugins to delete
@@ -576,10 +584,8 @@ public:
 	void init_tipwindow();
 // Used by MWindow and RenderFarmClient
 	static void init_plugins(Preferences *preferences, 
-		ArrayList<PluginServer*>* &plugindb,
 		SplashGUI *splash_window);
 	static void init_plugin_path(Preferences *preferences, 
-		ArrayList<PluginServer*>* &plugindb,
 		FileSystem *fs,
 		SplashGUI *splash_window,
 		int *counter);
@@ -603,3 +609,6 @@ public:
 };
 
 #endif
+
+
+

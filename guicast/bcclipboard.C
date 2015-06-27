@@ -103,9 +103,7 @@ int BC_Clipboard::stop_clipboard()
 	XFlush(display);
 	XCloseDisplay(display);
 
-SET_TRACE
 	Thread::join();
-SET_TRACE
 	return 0;
 }
 

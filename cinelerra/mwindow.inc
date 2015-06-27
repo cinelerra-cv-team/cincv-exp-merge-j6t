@@ -27,8 +27,6 @@
 #define CONFIG_FILE "Cinelerra_rc"
 #define PRESETS_FILE "Cinelerra_presets"
 
-// What to call silence in the EDL
-#define SILENCE "SILENCE"
 
 // Behavior of region selections
 #define SELECTION_SAMPLES 0

@@ -30,6 +30,7 @@
 #include "awindowmenu.inc"
 #include "edl.inc"
 #include "guicast.h"
+#include "indexable.inc"
 #include "labels.h"
 #include "mwindow.inc"
 #include "newfolder.inc"
@@ -57,7 +58,7 @@ class AWindowGUI;
 class AssetPicon : public BC_ListBoxItem
 {
 public:
-	AssetPicon(MWindow *mwindow, AWindowGUI *gui, Asset *asset);
+	AssetPicon(MWindow *mwindow, AWindowGUI *gui, Indexable *indexable);
 	AssetPicon(MWindow *mwindow, AWindowGUI *gui, EDL *edl);
 	AssetPicon(MWindow *mwindow, AWindowGUI *gui, PluginServer *plugin);
 	AssetPicon(MWindow *mwindow, AWindowGUI *gui, Label *plugin);
@@ -76,7 +77,7 @@ public:
 
 // Check ID first.  Update these next before dereferencing
 // Asset if asset
-	Asset *asset;
+	Indexable *indexable;
 // EDL if clip
 	EDL *edl;
 
@@ -121,7 +122,7 @@ public:
 	void sort_picons(ArrayList<BC_ListBoxItem*> *src, 
 		char *folder);
 // Return the selected asset in asset_list
-	Asset* selected_asset();
+	Indexable* selected_asset();
 	PluginServer* selected_plugin();
 	AssetPicon* selected_folder();
 

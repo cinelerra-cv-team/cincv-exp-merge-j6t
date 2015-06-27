@@ -501,6 +501,34 @@ int cmodel_from_text(const char *text)
 	return BC_RGB888;
 }
 
+int cmodel_has_alpha(int colormodel)
+{
+	switch(colormodel)
+	{
+		case BC_A8:
+		case BC_A16:
+		case BC_A_FLOAT:
+		case BC_YUVA8888:
+		case BC_YUVA16161616:
+		case BC_RGBA8888:
+		case BC_RGBA16161616:
+		case BC_RGBA_FLOAT:
+			return 1;
+	}
+	return 0;
+}
+
+int cmodel_is_float(int colormodel)
+{
+	switch(colormodel)
+	{
+		case BC_RGB_FLOAT:
+		case BC_RGBA_FLOAT:
+			return 1;
+	}
+	return 0;
+}
+
 int cmodel_is_yuv(int colormodel)
 {
 	switch(colormodel)
@@ -517,27 +545,6 @@ int cmodel_is_yuv(int colormodel)
 			return 1;
 			break;
 		
-		default:
-			return 0;
-			break;
-	}
-}
-
-int cmodel_has_alpha(int colormodel)
-{
-	switch(colormodel)
-	{
-		case BC_A8:
-		case BC_A16:
-		case BC_A_FLOAT:
-		case BC_RGBA8888:
-		case BC_RGBA16161616:
-		case BC_YUVA8888:
-		case BC_YUVA16161616:
-		case BC_RGBA_FLOAT:
-			return 1;
-			break;
-
 		default:
 			return 0;
 			break;

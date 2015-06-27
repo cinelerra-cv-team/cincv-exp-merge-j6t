@@ -1088,13 +1088,17 @@ SET_TRACE
 		if(!mask) 
 		{
 			mask = new VFrame(0, 
+					-1,
 					output->get_w(), 
 					output->get_h(),
-					new_color_model);
+					new_color_model,
+					-1);
 			temp_mask = new VFrame(0, 
+					-1,
 					output->get_w(), 
 					output->get_h(),
-					new_color_model);
+					new_color_model,
+					-1);
 		}
 		if(new_feather > 0)
 			temp_mask->clear_frame();

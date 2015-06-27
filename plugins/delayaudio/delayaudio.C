@@ -26,6 +26,7 @@
 #include "filexml.h"
 #include "language.h"
 #include "picon_png.h"
+#include "samples.h"
 #include "vframe.h"
 #include <algorithm>
 #include <string.h>
@@ -125,8 +126,10 @@ void DelayAudio::save_data(KeyFrame *keyframe)
 	output.terminate_string();
 }
 
-int DelayAudio::process_realtime(int64_t size, double *input_ptr, double *output_ptr)
+int DelayAudio::process_realtime(int64_t size, Samples *input, Samples *output)
 {
+	double *input_ptr = input->get_data();
+	double *output_ptr = output->get_data();
 
 	load_configuration();
 	int64_t num_delayed = int64_t(config.length * PluginAClient::project_sample_rate + 0.5);

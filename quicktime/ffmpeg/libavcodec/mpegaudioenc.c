@@ -1,6 +1,6 @@
 /*
  * The simplest mpeg audio layer 2 encoder
- * Copyright (c) 2000, 2001 Fabrice Bellard.
+ * Copyright (c) 2000, 2001 Fabrice Bellard
  *
  * This file is part of FFmpeg.
  *
@@ -20,12 +20,15 @@
  */
 
 /**
- * @file mpegaudio.c
+ * @file libavcodec/mpegaudio.c
  * The simplest mpeg audio layer 2 encoder.
  */
 
 #include "avcodec.h"
 #include "bitstream.h"
+
+#undef  CONFIG_MPEGAUDIO_HP
+#define CONFIG_MPEGAUDIO_HP 0
 #include "mpegaudio.h"
 
 /* currently, cannot change these constants (need to modify
@@ -387,7 +390,7 @@ static void compute_scale_factors(unsigned char scale_code[SBLIMIT],
                     vmax = v;
             }
             /* compute the scale factor index using log 2 computations */
-            if (vmax > 0) {
+            if (vmax > 1) {
                 n = av_log2(vmax);
                 /* n is the position of the MSB of vmax. now
                    use at most 2 compares to find the index */
@@ -796,7 +799,8 @@ AVCodec mp2_encoder = {
     MPA_encode_frame,
     MPA_encode_close,
     NULL,
-    .long_name = "MP2 (MPEG audio layer 2)",
+    .sample_fmts = (enum SampleFormat[]){SAMPLE_FMT_S16,SAMPLE_FMT_NONE},
+    .long_name = NULL_IF_CONFIG_SMALL("MP2 (MPEG audio layer 2)"),
 };
 
 #undef FIX

@@ -3187,6 +3187,7 @@ int BC_ListBox::button_release_event()
 
 	if(do_event) handle_event();
 
+//printf("BC_ListBox::button_release_event %d %d\n", __LINE__, get_window_lock());
 	return result;
 }
 

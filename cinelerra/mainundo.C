@@ -29,6 +29,7 @@
 #include "mainundo.h"
 #include "mwindow.h"
 #include "mwindowgui.h"
+#include "nestededls.h"
 #include "undostackitem.h"
 #include "tracks.h"
 #include <string.h>
@@ -121,8 +122,7 @@ void MainUndo::push_undo_item(UndoStackItem *item)
 void MainUndo::capture_state()
 {
 	FileXML file;
-	mwindow->edl->save_xml(mwindow->plugindb, 
-		&file, 
+	mwindow->edl->save_xml(&file, 
 		"",
 		0,
 		0);
@@ -295,12 +295,18 @@ int MainUndoStackItem::get_size()
 void MainUndoStackItem::load_from_undo(FileXML *file, uint32_t load_flags)
 {
 	MWindow* mwindow = main_undo->mwindow;
-	mwindow->edl->load_xml(mwindow->plugindb, file, load_flags);
+	mwindow->edl->load_xml(file, load_flags);
 	for(Asset *asset = mwindow->edl->assets->first;
 		asset;
 		asset = asset->next)
 	{
 		mwindow->mainindexes->add_next_asset(0, asset);
+	}
+	
+	for(int i = 0; i < mwindow->edl->nested_edls->size(); i++)
+	{
+		EDL *nested_edl = mwindow->edl->nested_edls->get(i);
+		mwindow->mainindexes->add_next_asset(0, nested_edl);
 	}
 	mwindow->mainindexes->start_build();
 }

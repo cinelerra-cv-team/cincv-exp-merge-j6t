@@ -142,7 +142,7 @@ SET_TRACE
 
 	if(use_keyframe)
 	{
-		subwindow->add_subwindow(keyframe = new KeyFrameButton(mwindow, x1, y1));
+		subwindow->add_subwindow(keyframe = new KeyFrameButton(mwindow, this, x1, y1));
 		x1 += keyframe->get_w();
 	}
 
@@ -1196,7 +1196,7 @@ int IBeamButton::handle_event()
 	return 1;
 }
 
-KeyFrameButton::KeyFrameButton(MWindow *mwindow, int x, int y)
+KeyFrameButton::KeyFrameButton(MWindow *mwindow, EditPanel *panel, int x, int y)
  : BC_Toggle(x, 
  	y, 
 	mwindow->theme->get_image_set("autokeyframe"),
@@ -1207,12 +1207,15 @@ KeyFrameButton::KeyFrameButton(MWindow *mwindow, int x, int y)
 	0)
 {
 	this->mwindow = mwindow;
+	this->panel = panel;
 	set_tooltip(_("Generate keyframes while tweeking"));
 }
 
 int KeyFrameButton::handle_event()
 {
-	mwindow->set_auto_keyframes(get_value());
+	mwindow->set_auto_keyframes(get_value(), 
+		!panel->is_mwindow, 
+		panel->is_mwindow);
 	return 1;
 }
 

@@ -208,7 +208,7 @@ FormatPresetItem::FormatPresetItem(MWindow *mwindow,
 
 FormatPresetItem::~FormatPresetItem()
 {
-	delete edl;
+	edl->Garbage::remove_user();
 }
 
 

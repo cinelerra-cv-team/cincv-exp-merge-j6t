@@ -340,7 +340,7 @@ int OverlayFrame::overlay(VFrame *output, VFrame *input,
 
 		if(!temp_frame)
 		{
-			temp_frame = new VFrame(0, temp_w, temp_h,
+			temp_frame = new VFrame(0, -1, temp_w, temp_h,
 				input->get_color_model(), -1);
 		}
 
@@ -458,6 +458,7 @@ int OverlayFrame::overlay(VFrame *output, VFrame *input,
 		g = (g * opacity + output[1] * transparency) / max; \
 		b = (b * opacity + output[2] * transparency) / max; \
 		break; \
+	case TRANSFER_MIN: \
 	case TRANSFER_MAX: \
 	{ \
 		r = (temp_type)MAX(input1, output[0]); \
@@ -583,6 +584,7 @@ int OverlayFrame::overlay(VFrame *output, VFrame *input,
 		g = (g * pixel_opacity + output2 * pixel_transparency) / max / max; \
 		b = (b * pixel_opacity + output3 * pixel_transparency) / max / max; \
 		break; \
+	case TRANSFER_MIN: \
 	case TRANSFER_MAX: \
 	{ \
 		r = (temp_type)MAX(input1, output1); \

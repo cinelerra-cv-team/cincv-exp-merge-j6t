@@ -23,6 +23,7 @@
 #define FOURIER_H
 
 
+#include "samples.inc"
 
 #include <stdint.h>
 #include <fftw3.h>
@@ -93,7 +94,7 @@ public:
 // direction - PLAY_FORWARD or PLAY_REVERSE
 	int process_buffer(int64_t output_sample,
 		long size, 
-		double *output_ptr,
+		Samples *output_ptr,
 		int direction);
 
 	int process_buffer_oversample(int64_t output_sample,
@@ -105,7 +106,7 @@ public:
 // Returns 1 on error or 0 on success.
 	virtual int read_samples(int64_t output_sample, 
 		int samples, 
-		double *buffer);
+		Samples *buffer);
 
 // Process a window in the frequency domain, called by process_buffer()
 	virtual int signal_process();        
@@ -127,7 +128,7 @@ public:
 private:
 
 // input for complete windows
-	double *input_buffer;
+	Samples *input_buffer;
 // output for crossfaded windows with overflow
 	double *output_buffer;
 

@@ -24,6 +24,7 @@
 
 class PackageRenderer;
 class Render;
+class RenderThread;
 class RenderItem;
 class RenderJob;
 class RenderWindow;
@@ -43,3 +44,5 @@ class RenderWindow;
 #define RANGE_INOUT		3
 
 #endif
+
+

@@ -23,6 +23,7 @@
 #include "bcsignals.h"
 #include "bitspopup.h"
 #include "byteorder.h"
+#include "clip.h"
 #include "condition.h"
 #include "edit.h"
 #include "file.h"
@@ -213,7 +214,6 @@ int FileMOV::reset_parameters_derived()
 // for reopening.
 int FileMOV::open_file(int rd, int wr)
 {
-
 	this->rd = rd;
 	this->wr = wr;
 
@@ -432,7 +432,7 @@ void FileMOV::format_to_asset()
 		asset->height = quicktime_video_height(fd, 0);
 		asset->video_length = quicktime_video_length(fd, 0);
 // Don't want a user configured frame rate to get destroyed
-		if(!asset->frame_rate)
+		if(EQUIV(asset->frame_rate, 0))
 			asset->frame_rate = quicktime_frame_rate(fd, 0);
 		if(!asset->interlace_mode)
 			asset->interlace_mode = quicktime_video_interlacemode(fd, 0);
@@ -445,7 +445,7 @@ void FileMOV::format_to_asset()
 		{
 			char tc[12];
 			dv_decoder_t *tmp_decoder = dv_decoder_new(0,0,0);
-			VFrame *frame = new VFrame(0, 0, 0, BC_COMPRESSED);
+			VFrame *frame = new VFrame(0, -1, 0, 0, BC_COMPRESSED, -1);
 			
 			read_frame(frame);
 			set_video_position(0);
@@ -594,28 +594,28 @@ int FileMOV::get_best_colormodel(Asset *asset, int driver)
 	return BC_RGB888;
 }
 
-int FileMOV::can_copy_from(Edit *edit, int64_t position)
+int FileMOV::can_copy_from(Asset *asset, int64_t position)
 {
 	if(!fd) return 0;
 
-//printf("FileMOV::can_copy_from 1 %d %s %s\n", edit->asset->format, edit->asset->vcodec, this->asset->vcodec);
-	if(edit->asset->format == FILE_JPEG_LIST && 
+//printf("FileMOV::can_copy_from 1 %d %s %s\n", asset->format, asset->vcodec, this->asset->vcodec);
+	if(asset->format == FILE_JPEG_LIST && 
 		match4(this->asset->vcodec, QUICKTIME_JPEG))
 		return 1;
 	else
-	if((edit->asset->format == FILE_MOV || 
-		edit->asset->format == FILE_AVI))
+	if((asset->format == FILE_MOV || 
+		asset->format == FILE_AVI))
 	{
-//printf("FileMOV::can_copy_from %s %s\n", edit->asset->vcodec, this->asset->vcodec);
-		if(match4(edit->asset->vcodec, this->asset->vcodec))
+//printf("FileMOV::can_copy_from %s %s\n", asset->vcodec, this->asset->vcodec);
+		if(match4(asset->vcodec, this->asset->vcodec))
 			return 1;
 // there are combinations where the same codec has multiple fourcc codes
 // check for DV...
 		int is_edit_dv = 0;
 		int is_this_dv = 0;
-		if (match4(edit->asset->vcodec, QUICKTIME_DV) || 
-			match4(edit->asset->vcodec, QUICKTIME_DVSD) || 
-			match4(edit->asset->vcodec, QUICKTIME_DVCP))
+		if (match4(asset->vcodec, QUICKTIME_DV) || 
+			match4(asset->vcodec, QUICKTIME_DVSD) || 
+			match4(asset->vcodec, QUICKTIME_DVCP))
 			is_edit_dv = 1;
 		if (match4(this->asset->vcodec, QUICKTIME_DV) || 
 			match4(this->asset->vcodec, QUICKTIME_DVSD) || 
@@ -625,7 +625,7 @@ int FileMOV::can_copy_from(Edit *edit, int64_t position)
 			return 1;
 	}
 	else
-	if(edit->asset->format == FILE_RAWDV)
+	if(asset->format == FILE_RAWDV)
 	{
 		if(match4(this->asset->vcodec, QUICKTIME_DV) || 
 			match4(this->asset->vcodec, QUICKTIME_DVSD) || 
@@ -1031,7 +1031,7 @@ int FileMOV::read_frame(VFrame *frame)
 	int result = 0;
 	const int debug = 0;
 
-//printf("FileMOV::read_frame %lld\n", file->current_frame);
+if(debug) printf("FileMOV::read_frame %d %lld\n", __LINE__, file->current_frame);
 	switch(frame->get_color_model())
 	{
 		case BC_COMPRESSED:
@@ -1040,7 +1040,11 @@ int FileMOV::read_frame(VFrame *frame)
 			frame->set_keyframe((quicktime_get_keyframe_before(fd, 
 				file->current_frame, 
 				file->current_layer) == file->current_frame));
-//printf("FileMOV::read_frame 1 %lld %d\n", file->current_frame, frame->get_keyframe());
+// printf("FileMOV::read_frame 1 %lld %d %p %d\n", 
+// file->current_frame, 
+// frame->get_keyframe(),
+// frame->get_data(),
+// frame->get_compressed_size());
 			result = !quicktime_read_frame(fd, 
 				frame->get_data(), 
 				file->current_layer);
@@ -1075,6 +1079,7 @@ int FileMOV::read_frame(VFrame *frame)
 		eprintf("quicktime_read_frame/quicktime_decode_video failed, result:\n");
 	}
 
+if(debug) printf("FileMOV::read_frame %d\n", __LINE__);
 
 
 	return result;
@@ -1725,10 +1730,15 @@ MOVConfigVideo::MOVConfigVideo(BC_WindowBase *parent_window,
 
 MOVConfigVideo::~MOVConfigVideo()
 {
+SET_TRACE
 	lock_window("MOVConfigVideo::~MOVConfigVideo");
+SET_TRACE
 	if(compression_popup) delete compression_popup;
+SET_TRACE
 	compression_items.remove_all_objects();
+SET_TRACE
 	unlock_window();
+SET_TRACE
 }
 
 void MOVConfigVideo::create_objects()

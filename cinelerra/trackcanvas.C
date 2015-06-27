@@ -37,6 +37,7 @@
 #include "edlsession.h"
 #include "floatauto.h"
 #include "floatautos.h"
+#include "indexstate.h"
 #include "intauto.h"
 #include "keyframe.h"
 #include "keyframepopup.h"
@@ -502,12 +503,12 @@ int TrackCanvas::drag_stop()
 				if(mwindow->session->current_operation == DRAG_ASSET &&
 					mwindow->session->drag_assets->total)
 				{
-					Asset *asset = mwindow->session->drag_assets->values[0];
+					Indexable *asset = mwindow->session->drag_assets->values[0];
 					// we use video if we are over video and audio if we are over audio
-					if (asset->video_data && mwindow->session->track_highlighted->data_type == TRACK_VIDEO)
+					if (asset->have_video() && mwindow->session->track_highlighted->data_type == TRACK_VIDEO)
 					{
 						// Images have length -1
-						double video_length = asset->video_length;
+						double video_length = asset->get_video_frames();
 						if (video_length < 0)
 						{
 							if(mwindow->edl->session->si_useduration)
@@ -515,10 +516,10 @@ int TrackCanvas::drag_stop()
 							else	
 								video_length = 1.0 / mwindow->edl->session->frame_rate ; 
 						}
-						asset_length_float = video_length / asset->frame_rate;
+						asset_length_float = video_length / asset->get_frame_rate();
 					}
-					else if (asset->audio_data && mwindow->session->track_highlighted->data_type == TRACK_AUDIO)
-						asset_length_float = asset->audio_length / asset->sample_rate;
+					else if (asset->have_audio() && mwindow->session->track_highlighted->data_type == TRACK_AUDIO)
+						asset_length_float = asset->get_audio_samples() / asset->get_sample_rate();
 					else
 					{
 						result = 1;
@@ -807,13 +808,18 @@ void TrackCanvas::test_timer()
 }
 
 
-void TrackCanvas::draw_indexes(Asset *asset)
+void TrackCanvas::draw_indexes(Indexable *indexable)
 {
 // Don't redraw raw samples
-	if(asset->index_zoom > mwindow->edl->local_session->zoom_sample)
+	IndexState *index_state = 0;
+	index_state = indexable->index_state;
+
+
+	if(index_state->index_zoom > mwindow->edl->local_session->zoom_sample)
 		return;
 
-	draw_resources(0, 1, asset);
+
+	draw_resources(0, 1, indexable);
 
 	draw_overlays();
 	draw_automation();
@@ -823,9 +829,10 @@ void TrackCanvas::draw_indexes(Asset *asset)
 
 void TrackCanvas::draw_resources(int mode, 
 	int indexes_only, 
-	Asset *index_asset)
+	Indexable *indexable)
 {
 	if(!mwindow->edl->session->show_assets) return;
+
 
 	if(mode != 3 && !indexes_only)
 		resource_thread->stop_draw(!indexes_only);
@@ -848,12 +855,18 @@ void TrackCanvas::draw_resources(int mode,
 	{
 		for(Edit *edit = current->edits->first; edit; edit = edit->next)
 		{
-			if(!edit->asset) continue;
+			if(!edit->asset && !edit->nested_edl) continue;
 			if(indexes_only)
 			{
 				if(edit->track->data_type != TRACK_AUDIO) continue;
-				if(!edit->asset->test_path(index_asset->path)) continue;
+
+				if(edit->nested_edl && 
+					strcmp(indexable->path, edit->nested_edl->path)) continue;
+					
+				if(edit->asset &&
+					strcmp(indexable->path, edit->asset->path)) continue;
 			}
+
 
 			int64_t edit_x, edit_y, edit_w, edit_h;
 			edit_dimensions(edit, edit_x, edit_y, edit_w, edit_h);
@@ -917,6 +930,7 @@ void TrackCanvas::draw_resources(int mode,
 						pixmap->pixmap_w,
 						edit_h);
 				}
+
 			}
 		}
 	}
@@ -960,12 +974,13 @@ ResourcePixmap* TrackCanvas::create_pixmap(Edit *edit,
 
 	if(!result)
 	{
-//printf("TrackCanvas::create_pixmap 2\n");
+//SET_TRACE
 		result = new ResourcePixmap(mwindow, 
 			this, 
 			edit, 
 			pixmap_w, 
 			pixmap_h);
+//SET_TRACE
 		resource_pixmaps.append(result);
 	}
 
@@ -1093,17 +1108,17 @@ void TrackCanvas::draw_paste_destination()
 			mwindow->session->drag_edits->total))
 	{
 
-		Asset *asset = 0;
+		Indexable *indexable = 0;
 		EDL *clip = 0;
 		int draw_box = 0;
 
 		if(mwindow->session->current_operation == DRAG_ASSET &&
-			mwindow->session->drag_assets->total)
-			asset = mwindow->session->drag_assets->values[0];
+			mwindow->session->drag_assets->size())
+			indexable = mwindow->session->drag_assets->get(0);
 
 		if(mwindow->session->current_operation == DRAG_ASSET &&
-			mwindow->session->drag_clips->total)
-			clip = mwindow->session->drag_clips->values[0];
+			mwindow->session->drag_clips->size())
+			clip = mwindow->session->drag_clips->get(0);
 
 // 'Align cursor of frame' lengths calculations
 		double paste_audio_length, paste_video_length;
@@ -1111,34 +1126,34 @@ void TrackCanvas::draw_paste_destination()
 		double desta_position = 0;
 		double destv_position = 0;
 
-		if (asset)
+		if (indexable)
 		{
-			double asset_length_ac = asset->total_length_framealigned(mwindow->edl->session->frame_rate);
+			double asset_length_ac = indexable->total_length_framealigned(mwindow->edl->session->frame_rate);
 			if (mwindow->edl->session->cursor_on_frames)
 			{
 				paste_video_length = paste_audio_length = asset_length_ac;
 			} 
 			else 
 			{
-				paste_audio_length = (double)asset->audio_length / asset->sample_rate;
-				paste_video_length = (double)asset->video_length / asset->frame_rate;
+				paste_audio_length = (double)indexable->get_audio_samples() / indexable->get_sample_rate();
+				paste_video_length = (double)indexable->get_video_frames() / indexable->get_frame_rate();
 			}
 
 			// Images have length -1 (they are a single image!!)
-			if (asset->video_data && asset->video_length < 0)
+			if (indexable->have_video() && indexable->get_video_frames() < 0)
 			{
 				if(mwindow->edl->session->si_useduration)
-					paste_video_length = mwindow->edl->session->si_duration / asset->frame_rate;
+					paste_video_length = mwindow->edl->session->si_duration / indexable->get_frame_rate();
 				else	
-					paste_video_length = 1.0 / asset->frame_rate;  // bit confused!! (this is 1 frame)
+					paste_video_length = 1.0 / indexable->get_frame_rate();  // bit confused!! (this is 1 frame)
 			}
 
 			int64_t asset_length = 0;
 
-			if(asset->audio_data)
+			if(indexable->have_audio())
 			{
 				// we use video if we are over video and audio if we are over audio
-				if(asset->video_data && mwindow->session->track_highlighted->data_type == TRACK_VIDEO)
+				if(indexable->have_video() && mwindow->session->track_highlighted->data_type == TRACK_VIDEO)
 					asset_length = mwindow->session->track_highlighted->to_units(paste_video_length, 1);
 				else
 					asset_length = mwindow->session->track_highlighted->to_units(paste_audio_length, 1);
@@ -1146,7 +1161,7 @@ void TrackCanvas::draw_paste_destination()
 				desta_position = mwindow->session->track_highlighted->from_units(get_drop_position(&insertion, NULL, asset_length));
 			}
 
-			if(asset->video_data)
+			if(indexable->have_video())
 			{
 				asset_length = mwindow->session->track_highlighted->to_units((double)paste_video_length, 1);
 				destv_position = mwindow->session->track_highlighted->from_units(get_drop_position(&insertion, NULL, asset_length));
@@ -1188,7 +1203,7 @@ void TrackCanvas::draw_paste_destination()
 
 				if(dest->data_type == TRACK_AUDIO)
 				{
-					if( (asset && current_atrack < asset->channels)
+					if( (indexable && current_atrack < indexable->get_audio_channels())
 				|| (clip  && current_atrack < clip->tracks->total_audio_tracks()) )
 					{
 						w = Units::to_int64(paste_audio_length *
@@ -1233,7 +1248,7 @@ void TrackCanvas::draw_paste_destination()
 				if(dest->data_type == TRACK_VIDEO)
 				{
 //printf("draw_paste_destination 1\n");
-					if( (asset && current_vtrack < asset->layers)
+					if( (indexable && current_vtrack < indexable->get_video_layers())
 					|| (clip && current_vtrack < clip->tracks->total_video_tracks()) )
 					{
 						// Images have length -1
@@ -5519,9 +5534,7 @@ int TrackCanvas::button_press_event()
 // Highlight selection
 				else
 				{
-SET_TRACE
 					rerender = start_selection(position);
-SET_TRACE
 					mwindow->session->current_operation = SELECT_REGION;
 					update_cursor = 1;
 				}
@@ -5531,7 +5544,6 @@ SET_TRACE
 		}
 
 
-SET_TRACE
 		if(rerender)
 		{
 			gui->unlock_window();
@@ -5543,14 +5555,12 @@ SET_TRACE
 			gui->patchbay->update();
 		}
 
-SET_TRACE
 		if(update_overlay)
 		{
 			draw_overlays();
 			flash();
 		}
 
-SET_TRACE
 		if(update_cursor)
 		{
 			gui->timebar->update_highlights();
@@ -5561,7 +5571,6 @@ SET_TRACE
 			result = 1;
 		}
 
-SET_TRACE
 
 
 	}

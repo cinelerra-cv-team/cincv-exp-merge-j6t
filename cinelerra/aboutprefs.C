@@ -78,18 +78,18 @@ void AboutPrefs::create_objects()
 
 	y += get_text_height(MEDIUMFONT) * 4;
 
-	char versions[BCTEXTLEN];
-	sprintf(versions, 
-_("Quicktime version %d.%d.%d (%s)\n"
-"Libmpeg3 version %d.%d.%d\n"),
-quicktime_major(),
-quicktime_minor(),
-quicktime_release(),
-FFMPEG_EXTERNALTEXT,
-mpeg3_major(),
-mpeg3_minor(),
-mpeg3_release());
-	draw_text(x, y, versions);
+// 	char versions[BCTEXTLEN];
+// 	sprintf(versions, 
+// _("Quicktime version %d.%d.%d (%s)\n"
+// "Libmpeg3 version %d.%d.%d\n"),
+// quicktime_major(),
+// quicktime_minor(),
+// quicktime_release(),
+// FFMPEG_EXTERNALTEXT,
+// mpeg3_major(),
+// mpeg3_minor(),
+// mpeg3_release());
+// 	draw_text(x, y, versions);
 
 
 

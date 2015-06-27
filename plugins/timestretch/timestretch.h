@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2009 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,11 +88,11 @@ public:
 
 	int read_samples(int64_t output_sample, 
 		int samples, 
-		double *buffer);
+		Samples *buffer);
 	int signal_process_oversample(int reset);
 
 	TimeStretch *plugin;
-	double *temp;
+	Samples *temp;
 	double *input_buffer;
 	int input_size;
 	int input_allocated;
@@ -109,6 +109,18 @@ public:
 
 };
 
+class TimeStretchResample : public Resample
+{
+public:
+	TimeStretchResample(TimeStretch *plugin);
+
+	int read_samples(Samples *buffer, int64_t start, int64_t len);
+	
+	TimeStretch *plugin;
+};
+
+
+
 class TimeStretch : public PluginAClient
 {
 public:
@@ -123,7 +135,7 @@ public:
 	void save_data(KeyFrame *keyframe);
 
 	int process_buffer(int64_t size, 
-		double *buffer,
+		Samples *buffer,
 		int64_t start_position,
 		int sample_rate);
 
@@ -138,10 +150,10 @@ public:
 	
 
 	PitchEngine *pitch;
-	Resample *resample;
+	TimeStretchResample *resample;
 	double *temp;
 	int temp_allocated;
-	double *input;
+	Samples *input;
 	int input_allocated;
 
 	TimeStretchEngine *stretch;

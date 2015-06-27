@@ -372,9 +372,10 @@ public:
 class KeyFrameButton : public BC_Toggle
 {
 public:
-	KeyFrameButton(MWindow *mwindow, int x, int y);
+	KeyFrameButton(MWindow *mwindow, EditPanel *panel, int x, int y);
 	int handle_event();
 	MWindow *mwindow;
+	EditPanel *panel;
 };
 
 class LockLabelsButton : public BC_Toggle

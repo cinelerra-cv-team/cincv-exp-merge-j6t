@@ -349,6 +349,9 @@ public:
 
 	static int find_font_by_char(FT_ULong char_code, char *path_new, const FT_Face oldface);
 
+// Make VFrame use shm
+	int vframe_shm;
+
 // Available display extensions
 	int use_shm;
 	static int error;

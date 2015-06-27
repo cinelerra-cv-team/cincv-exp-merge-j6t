@@ -28,6 +28,7 @@
 #include "filexml.h"
 #include "language.h"
 #include "picon_png.h"
+#include "samples.h"
 #include "units.h"
 #include "vframe.h"
 
@@ -88,7 +89,7 @@ void CompressorEffect::delete_dsp()
 	if(input_buffer)
 	{
 		for(int i = 0; i < PluginClient::total_in_buffers; i++)
-			delete [] input_buffer[i];
+			delete input_buffer[i];
 		delete [] input_buffer;
 	}
 
@@ -258,7 +259,7 @@ NEW_WINDOW_MACRO(CompressorEffect, CompressorWindow)
 
 
 int CompressorEffect::process_buffer(int64_t size, 
-		double **buffer,
+		Samples **buffer,
 		int64_t start_position,
 		int sample_rate)
 {
@@ -303,7 +304,7 @@ int CompressorEffect::process_buffer(int64_t size,
 
 		double current_slope = (next_target - previous_target) / 
 			reaction_samples;
-		double *trigger_buffer = buffer[trigger];
+		double *trigger_buffer = buffer[trigger]->get_data();
 		for(int i = 0; i < size; i++)
 		{
 // Get slope required to reach current sample from smoothed sample over reaction
@@ -316,7 +317,7 @@ int CompressorEffect::process_buffer(int64_t size,
 					double max = 0;
 					for(int j = 0; j < total_buffers; j++)
 					{
-						sample = fabs(buffer[j][i]);
+						sample = fabs(buffer[j]->get_data()[i]);
 						if(sample > max) max = sample;
 					}
 					sample = max;
@@ -332,7 +333,7 @@ int CompressorEffect::process_buffer(int64_t size,
 					double max = 0;
 					for(int j = 0; j < total_buffers; j++)
 					{
-						sample = fabs(buffer[j][i]);
+						sample = fabs(buffer[j]->get_data()[i]);
 						max += sample;
 					}
 					sample = max;
@@ -383,14 +384,14 @@ int CompressorEffect::process_buffer(int64_t size,
 			if(config.smoothing_only)
 			{
 				for(int j = 0; j < total_buffers; j++)
-					buffer[j][i] = current_value;
+					buffer[j]->get_data()[i] = current_value;
 			}
 			else
 			{
 				double gain = calculate_gain(current_value);
 				for(int j = 0; j < total_buffers; j++)
 				{
-					buffer[j][i] *= gain;
+					buffer[j]->get_data()[i] *= gain;
 				}
 			}
 		}
@@ -417,8 +418,8 @@ int CompressorEffect::process_buffer(int64_t size,
 				int len = input_start + input_size - start_position;
 				for(int i = 0; i < total_buffers; i++)
 				{
-					memcpy(input_buffer[i],
-						input_buffer[i] + (start_position - input_start),
+					memcpy(input_buffer[i]->get_data(),
+						input_buffer[i]->get_data() + (start_position - input_start),
 						len * sizeof(double));
 				}
 				input_size = len;
@@ -429,16 +430,16 @@ int CompressorEffect::process_buffer(int64_t size,
 // Expand buffer to handle preview size
 		if(size + preview_samples > input_allocated)
 		{
-			double **new_input_buffer = new double*[total_buffers];
+			Samples **new_input_buffer = new Samples*[total_buffers];
 			for(int i = 0; i < total_buffers; i++)
 			{
-				new_input_buffer[i] = new double[size + preview_samples];
+				new_input_buffer[i] = new Samples(size + preview_samples);
 				if(input_buffer)
 				{
-					memcpy(new_input_buffer[i], 
-						input_buffer[i], 
+					memcpy(new_input_buffer[i]->get_data(), 
+						input_buffer[i]->get_data(), 
 						input_size * sizeof(double));
-					delete [] input_buffer[i];
+					delete input_buffer[i];
 				}
 			}
 			if(input_buffer) delete [] input_buffer;
@@ -456,11 +457,14 @@ int CompressorEffect::process_buffer(int64_t size,
 				fragment_size = size + preview_samples - input_size;
 			for(int i = 0; i < total_buffers; i++)
 			{
-				read_samples(input_buffer[i] + input_size,
+				input_buffer[i]->set_offset(input_size);
+//printf("CompressorEffect::process_buffer %d %p %d\n", __LINE__, input_buffer[i], input_size);
+				read_samples(input_buffer[i],
 					i,
 					sample_rate,
 					input_start + input_size,
 					fragment_size);
+				input_buffer[i]->set_offset(0);
 			}
 			input_size += fragment_size;
 		}
@@ -468,7 +472,7 @@ int CompressorEffect::process_buffer(int64_t size,
 
 		double current_slope = (next_target - previous_target) /
 			target_samples;
-		double *trigger_buffer = input_buffer[trigger];
+		double *trigger_buffer = input_buffer[trigger]->get_data();
 		for(int i = 0; i < size; i++)
 		{
 // Get slope from current sample to every sample in preview_samples.
@@ -493,7 +497,7 @@ int CompressorEffect::process_buffer(int64_t size,
 						double max = 0;
 						for(int k = 0; k < total_buffers; k++)
 						{
-							sample = fabs(input_buffer[k][i + j]);
+							sample = fabs(input_buffer[k]->get_data()[i + j]);
 							if(sample > max) max = sample;
 						}
 						sample = max;
@@ -509,7 +513,7 @@ int CompressorEffect::process_buffer(int64_t size,
 						double max = 0;
 						for(int k = 0; k < total_buffers; k++)
 						{
-							sample = fabs(input_buffer[k][i + j]);
+							sample = fabs(input_buffer[k]->get_data()[i + j]);
 							max += sample;
 						}
 						sample = max;
@@ -567,14 +571,16 @@ int CompressorEffect::process_buffer(int64_t size,
 			if(config.smoothing_only)
 			{
 				for(int j = 0; j < total_buffers; j++)
-					buffer[j][i] = current_value;
+				{
+					buffer[j]->get_data()[i] = current_value;
+				}
 			}
 			else
 			{
 				double gain = calculate_gain(current_value);
 				for(int j = 0; j < total_buffers; j++)
 				{
-					buffer[j][i] = input_buffer[j][i] * gain;
+					buffer[j]->get_data()[i] = input_buffer[j]->get_data()[i] * gain;
 				}
 			}
 		}

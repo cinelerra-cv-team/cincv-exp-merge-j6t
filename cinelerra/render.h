@@ -25,6 +25,7 @@
 
 #include "asset.inc"
 #include "batchrender.inc"
+#include "bcdialog.h"
 #include "bitspopup.h"
 #include "browsebutton.h"
 #include "cache.inc"
@@ -98,7 +99,7 @@ public:
 class RenderWindow;
 
 
-class Render : public Thread
+class Render : public BC_DialogThread
 {
 public:
 	Render(MWindow *mwindow);
@@ -112,19 +113,13 @@ public:
 // The batches are processed in the foreground in non interactive mode.
 	void start_batches(ArrayList<BatchRenderJob*> *jobs,
 		BC_Hash *boot_defaults,
-		Preferences *preferences,
-		ArrayList<PluginServer*> *plugindb);
+		Preferences *preferences);
 // Called by BatchRender to stop the operation.
 	void stop_operation();
-	void run();
+	BC_Window* new_gui();
 
-
-// Render single job.  Used by run.
-	int render(int test_overwrite, 
-		Asset *asset,
-		EDL *edl,
-		int strategy,
-		int range_type);
+	void handle_close_event(int result);
+	void start_render();
 
 	int load_defaults(Asset *asset);
 	int save_defaults(Asset *asset);
@@ -172,31 +167,30 @@ public:
 // Background compression must be disabled when direct frame copying and reenabled afterwards
 	int direct_frame_copying;
 
-	CICache *audio_cache, *video_cache;
+// Copy of mwindow preferences or pointer to another preferences object
+	Preferences *preferences;
 	VFrame *compressed_output;
 	MainProgressBar *progress;
 	RenderProgress *render_progress;
+	RenderThread *thread;
 	MWindow *mwindow;
 	PlayableTracks *playable_tracks;
 	PackageDispatcher *packages;
 	Mutex *package_lock, *counter_lock;
-// Copy of mwindow preferences
-	Preferences *preferences;
-// For use in non interactive mode
-	ArrayList<PluginServer*> *plugindb;
 	int strategy;
 	int range_type;
 // Total selection to render in seconds
 	double total_start, total_end;
 // External Render farm checks this every frame.
 	int result;
+	int format_error;
 	Asset *default_asset;
-	TransportCommand *command;
+// Asset containing the file format
+	Asset *asset;
 // Jobs pointer passed to start_batches
 	ArrayList<BatchRenderJob*> *jobs;
 // Used by batch rendering to wait until rendering is finished
 	Condition *completion;
-
 
 // Total samples updated by the render farm and the local renderer.
 // This avoids rounding errors and complies with the use of samples for
@@ -214,6 +208,25 @@ public:
 	int64_t progress_max;
 	Timer *progress_timer;
 	int64_t last_eta;
+};
+
+
+class RenderThread : public Thread
+{
+public:
+	RenderThread(MWindow *mwindow, Render *render);
+	~RenderThread();
+	
+	void run();
+
+	void render_single(int test_overwrite, 
+		Asset *asset,
+		EDL *edl,
+		int strategy,
+		int range_type);
+
+	MWindow *mwindow;
+	Render *render;
 };
 
 class RenderToTracks;

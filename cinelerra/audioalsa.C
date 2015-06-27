@@ -354,6 +354,7 @@ int AudioALSA::open_output()
 
 	translate_name(pcm_name, device->out_config->alsa_out_device);
 
+//printf("AudioALSA::open_output %s\n", pcm_name);
 	err = snd_pcm_open(&dsp_out, device->out_config->alsa_out_device, stream, open_mode);
 
 	if(err < 0)

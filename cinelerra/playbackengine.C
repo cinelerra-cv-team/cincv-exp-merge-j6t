@@ -126,10 +126,10 @@ int PlaybackEngine::create_render_engine()
 
 	render_engine = new RenderEngine(this,
 		preferences, 
-		command, 
 		output,
-		mwindow->plugindb,
-		get_channeldb());  
+		get_channeldb(),
+		0);
+//printf("PlaybackEngine::create_render_engine %d\n", __LINE__);
 	return 0;
 }
 
@@ -143,11 +143,8 @@ void PlaybackEngine::delete_render_engine()
 
 void PlaybackEngine::arm_render_engine()
 {
-	int current_achannel = 0, current_vchannel = 0;
 	if(render_engine)
-		render_engine->arm_command(command,
-			current_achannel,
-			current_vchannel);
+		render_engine->arm_command(command);
 }
 
 void PlaybackEngine::start_render_engine()
@@ -170,9 +167,9 @@ void PlaybackEngine::create_cache()
 	if(video_cache) delete video_cache;
 	video_cache = 0;
 	if(!audio_cache) 
-		audio_cache = new CICache(preferences, mwindow->plugindb);
+		audio_cache = new CICache(preferences);
 	if(!video_cache) 
-		video_cache = new CICache(preferences, mwindow->plugindb);
+		video_cache = new CICache(preferences);
 }
 
 
@@ -187,7 +184,7 @@ void PlaybackEngine::perform_change()
 		case CHANGE_PARAMS:
 			if(command->change_type != CHANGE_EDL &&
 				command->change_type != CHANGE_ALL)
-				render_engine->edl->synchronize_params(command->get_edl());
+				render_engine->get_edl()->synchronize_params(command->get_edl());
 		case CHANGE_NONE:
 			break;
 	}
@@ -197,7 +194,7 @@ void PlaybackEngine::sync_parameters(EDL *edl)
 {
 // TODO: lock out render engine from keyframe deletions
 	command->get_edl()->synchronize_params(edl);
-	if(render_engine) render_engine->edl->synchronize_params(edl);
+	if(render_engine) render_engine->get_edl()->synchronize_params(edl);
 }
 
 

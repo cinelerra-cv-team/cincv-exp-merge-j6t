@@ -23,6 +23,7 @@
 #include "audioconfig.h"
 #include "audiodevice.inc"
 #include "bcmeter.inc"
+#include "bcsignals.h"
 #include "cache.inc"
 #include "clip.h"
 #include "bchash.h"
@@ -93,7 +94,7 @@ Preferences::Preferences()
 
 Preferences::~Preferences()
 {
-	Garbage::delete_object(brender_asset);
+	brender_asset->Garbage::remove_user();
 	delete preferences_lock;
 }
 
@@ -173,7 +174,7 @@ void Preferences::copy_from(Preferences *that)
 	renderfarm_consolidate = that->renderfarm_consolidate;
 	use_brender = that->use_brender;
 	brender_fragment = that->brender_fragment;
-	*brender_asset = *that->brender_asset;
+	brender_asset->copy_from(that->brender_asset, 0);
 
 // Check boundaries
 

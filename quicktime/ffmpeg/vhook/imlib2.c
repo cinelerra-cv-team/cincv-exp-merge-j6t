@@ -53,6 +53,7 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #undef time
 #include <sys/time.h>
@@ -145,12 +146,12 @@ int Configure(void **ctxp, int argc, char *argv[])
     int c;
     ContextInfo *ci;
     char *rgbtxt = 0;
-    char *font = "LucidaSansDemiBold/16";
+    const char *font = "LucidaSansDemiBold/16";
     char *fp = getenv("FONTPATH");
     char *color = 0;
     FILE *f;
     char *p;
-    char *error;
+    const char *error;
 
     *ctxp = av_mallocz(sizeof(ContextInfo));
     ci = (ContextInfo *) *ctxp;
@@ -164,7 +165,7 @@ int Configure(void **ctxp, int argc, char *argv[])
 
     /* Use ':' to split FONTPATH */
     if (fp)
-        while (p = strchr(fp, ':')) {
+        while ((p = strchr(fp, ':'))) {
             *p = 0;
             imlib_add_path_to_font_path(fp);
             fp = p + 1;
@@ -215,21 +216,21 @@ int Configure(void **ctxp, int argc, char *argv[])
                 ci->fileImage = av_strdup(optarg);
                 break;
             case '?':
-                fprintf(stderr, "Unrecognized argument '%s'\n", argv[optind]);
+                av_log(NULL, AV_LOG_ERROR, "Unrecognized argument '%s'\n", argv[optind]);
                 return -1;
         }
     }
 
     if (ci->eval_colors && !(ci->expr_R && ci->expr_G && ci->expr_B))
     {
-        fprintf(stderr, "You must specify expressions for all or no colors.\n");
+        av_log(NULL, AV_LOG_ERROR, "You must specify expressions for all or no colors.\n");
         return -1;
     }
 
     if (ci->text || ci->file) {
         ci->fn = imlib_load_font(font);
         if (!ci->fn) {
-            fprintf(stderr, "Failed to load font '%s'\n", font);
+            av_log(NULL, AV_LOG_ERROR, "Failed to load font '%s'\n", font);
             return -1;
         }
         imlib_context_set_font(ci->fn);
@@ -242,7 +243,7 @@ int Configure(void **ctxp, int argc, char *argv[])
 
         if (ci->eval_colors)
         {
-            fprintf(stderr, "You must not specify both a color name and expressions for the colors.\n");
+            av_log(NULL, AV_LOG_ERROR, "You must not specify both a color name and expressions for the colors.\n");
             return -1;
         }
 
@@ -255,7 +256,7 @@ int Configure(void **ctxp, int argc, char *argv[])
                 f = fopen("/usr/lib/X11/rgb.txt", "r");
         }
         if (!f) {
-            fprintf(stderr, "Failed to find RGB color names file\n");
+            av_log(NULL, AV_LOG_ERROR, "Failed to find RGB color names file\n");
             return -1;
         }
         while (fgets(buff, sizeof(buff), f)) {
@@ -274,7 +275,7 @@ int Configure(void **ctxp, int argc, char *argv[])
         }
         fclose(f);
         if (!done) {
-            fprintf(stderr, "Unable to find color '%s' in rgb.txt\n", color);
+            av_log(NULL, AV_LOG_ERROR, "Unable to find color '%s' in rgb.txt\n", color);
             return -1;
         }
     } else if (ci->eval_colors) {
@@ -394,7 +395,7 @@ void Process(void *ctx, AVPicture *picture, enum PixelFormat pix_fmt, int width,
         int wid, hig, h_a, v_a;
         char buff[1000];
         char tbuff[1000];
-        char *tbp = ci->text;
+        const char *tbp = ci->text;
         time_t now = time(0);
         char *p, *q;
         int y;

@@ -889,9 +889,11 @@ int PerspectiveMain::process_buffer(VFrame *frame,
 		if(!temp)
 		{
 			temp = new VFrame(0,
+					-1,
 					w * AFFINE_OVERSAMPLE,
 					h * AFFINE_OVERSAMPLE,
-					color_model);
+					color_model,
+					-1);
 		}
 		temp->clear_frame();
 	}
@@ -904,9 +906,11 @@ int PerspectiveMain::process_buffer(VFrame *frame,
 			if(!temp) 
 			{
 				temp = new VFrame(0,
+					-1,
 					w,
 					h,
-					color_model);
+					color_model,
+					-1);
 			}
 			temp->copy_from(input);
 			input = temp;

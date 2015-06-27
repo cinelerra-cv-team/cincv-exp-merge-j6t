@@ -68,6 +68,7 @@
 #include "mutex.h"
 #include "mwindowgui.h"
 #include "mwindow.h"
+#include "nestededls.h"
 #include "new.h"
 #include "patchbay.h"
 #include "playback3d.h"
@@ -141,6 +142,10 @@ extern "C"
 // 
 
 }
+
+
+
+ArrayList<PluginServer*>* MWindow::plugindb = 0;
 
 
 
@@ -322,7 +327,6 @@ void MWindow::init_defaults(BC_Hash* &defaults, char *config_path)
 }
 
 void MWindow::init_plugin_path(Preferences *preferences, 
-	ArrayList<PluginServer*>* &plugindb,
 	FileSystem *fs,
 	SplashGUI *splash_window,
 	int *counter)
@@ -397,10 +401,9 @@ void MWindow::init_plugin_path(Preferences *preferences,
 }
 
 void MWindow::init_plugins(Preferences *preferences, 
-	ArrayList<PluginServer*>* &plugindb,
 	SplashGUI *splash_window)
 {
-	plugindb = new ArrayList<PluginServer*>;
+	if(!plugindb) plugindb = new ArrayList<PluginServer*>;
 
 
 
@@ -475,7 +478,6 @@ void MWindow::init_plugins(Preferences *preferences,
 // Cinelerra
 #ifndef DO_STATIC
 	init_plugin_path(preferences,
-		plugindb,
 		&cinelerra_fs,
 		splash_window,
 		&counter);
@@ -486,7 +488,6 @@ void MWindow::init_plugins(Preferences *preferences,
 // LAD
 	for(int i = 0; i < lad_fs.total; i++)
 		init_plugin_path(preferences,
-			plugindb,
 			lad_fs.values[i],
 			splash_window,
 			&counter);
@@ -501,26 +502,27 @@ void MWindow::delete_plugins()
 		delete plugindb->values[i];
 	}
 	delete plugindb;
+	plugindb = 0;
 }
 
-void MWindow::create_plugindb(int do_audio, 
+void MWindow::search_plugindb(int do_audio, 
 		int do_video, 
 		int is_realtime, 
 		int is_transition,
 		int is_theme,
-		ArrayList<PluginServer*> &plugindb)
+		ArrayList<PluginServer*> &results)
 {
 // Get plugins
-	for(int i = 0; i < this->plugindb->total; i++)
+	for(int i = 0; i < MWindow::plugindb->total; i++)
 	{
-		PluginServer *current = this->plugindb->values[i];
+		PluginServer *current = MWindow::plugindb->values[i];
 
 		if(current->audio == do_audio &&
 			current->video == do_video &&
 			(current->realtime == is_realtime || is_realtime < 0) &&
 			current->transition == is_transition &&
 			current->theme == is_theme)
-			plugindb.append(current);
+			results.append(current);
 	}
 
 // Alphabetize list by title
@@ -529,15 +531,15 @@ void MWindow::create_plugindb(int do_audio,
 	{
 		done = 1;
 		
-		for(int i = 0; i < plugindb.total - 1; i++)
+		for(int i = 0; i < results.total - 1; i++)
 		{
-			PluginServer *value1 = plugindb.values[i];
-			PluginServer *value2 = plugindb.values[i + 1];
+			PluginServer *value1 = results.values[i];
+			PluginServer *value2 = results.values[i + 1];
 			if(strcmp(_(value1->title), _(value2->title)) > 0)
 			{
 				done = 0;
-				plugindb.values[i] = value2;
-				plugindb.values[i + 1] = value1;
+				results.values[i] = value2;
+				results.values[i + 1] = value1;
 			}
 		}
 	}
@@ -762,8 +764,8 @@ void MWindow::init_viewer()
 
 void MWindow::init_cache()
 {
-	audio_cache = new CICache(preferences, plugindb);
-	video_cache = new CICache(preferences, plugindb);
+	audio_cache = new CICache(preferences);
+	video_cache = new CICache(preferences);
 	frame_cache = new FrameCache;
 	wave_cache = new WaveCache;
 }
@@ -937,6 +939,7 @@ int MWindow::load_filenames(ArrayList<char*> *filenames,
 	ArrayList<EDL*> new_edls;
 	ArrayList<Asset*> new_assets;
 	ArrayList<File*> new_files;
+SET_TRACE
 
 //	save_defaults();
 	gui->start_hourglass();
@@ -955,6 +958,7 @@ int MWindow::load_filenames(ArrayList<char*> *filenames,
 	vwindow->playback_engine->interrupt_playback(0);
 
 
+SET_TRACE
 
 // Define new_edls and new_assets to load
 	int result = 0;
@@ -983,7 +987,7 @@ int MWindow::load_filenames(ArrayList<char*> *filenames,
 				index_filename,
 				new_asset->path);
 			remove(index_filename);
-			new_asset->index_status = INDEX_NOTTESTED;
+			new_asset->index_state->index_status = INDEX_NOTTESTED;
 		}
 		
 		new_edl->create_objects();
@@ -992,7 +996,7 @@ int MWindow::load_filenames(ArrayList<char*> *filenames,
 		sprintf(string, "Loading %s", new_asset->path);
 		gui->show_message(string);
 
-		result = new_file->open_file(preferences, new_asset, 1, 0, 0, 0);
+		result = new_file->open_file(preferences, new_asset, 1, 0);
 
 
 		switch(result)
@@ -1013,14 +1017,14 @@ int MWindow::load_filenames(ArrayList<char*> *filenames,
 				}
 
 
-				if(load_mode != LOAD_RESOURCESONLY)
+				if(load_mode != LOADMODE_RESOURCESONLY)
 				{
 SET_TRACE
 					asset_to_edl(new_edl, new_asset);
 SET_TRACE
 					new_edls.append(new_edl);
 SET_TRACE
-					Garbage::delete_object(new_asset);
+					new_asset->Garbage::remove_user();
 					new_asset = 0;
 SET_TRACE
 				}
@@ -1030,8 +1034,8 @@ SET_TRACE
 				}
 
 // Set filename to nothing for assets since save EDL would overwrite them.
-				if(load_mode == LOAD_REPLACE || 
-					load_mode == LOAD_REPLACE_CONCATENATE)
+				if(load_mode == LOADMODE_REPLACE || 
+					load_mode == LOADMODE_REPLACE_CONCATENATE)
 				{
 					set_filename("");
 // Reset timeline position
@@ -1053,8 +1057,8 @@ SET_TRACE
 			case FILE_UNRECOGNIZED_CODEC:
 			{
 // Test index file
-				IndexFile indexfile(this);
-				result = indexfile.open_index(this, new_asset);
+				IndexFile indexfile(this, new_asset);
+				result = indexfile.open_index();
 				if(!result)
 				{
 					indexfile.close_index();
@@ -1122,13 +1126,13 @@ SET_TRACE
 // Recalculate length
 					delete new_file;
 					new_file = new File;
-					result = new_file->open_file(preferences, new_asset, 1, 0, 0, 0);
+					result = new_file->open_file(preferences, new_asset, 1, 0);
 
-					if(load_mode != LOAD_RESOURCESONLY)
+					if(load_mode != LOADMODE_RESOURCESONLY)
 					{
 						asset_to_edl(new_edl, new_asset);
 						new_edls.append(new_edl);
-						Garbage::delete_object(new_asset);
+						new_asset->Garbage::remove_user();
 						new_asset = 0;
 					}
 					else
@@ -1147,23 +1151,38 @@ SET_TRACE
 			{
 				FileXML xml_file;
 				xml_file.read_from_file(filenames->values[i]);
+
+				if(load_mode == LOADMODE_NESTED)
+				{
+// Load temporary EDL for nesting.
+					EDL *nested_edl = new EDL;
+					nested_edl->create_objects();
+					nested_edl->set_path(filenames->values[i]);
+					nested_edl->load_xml(&xml_file, LOAD_ALL);
+//printf("MWindow::load_filenames %p %s\n", nested_edl, nested_edl->project_path);
+					edl_to_nested(new_edl, nested_edl);
+					nested_edl->Garbage::remove_user();
+				}
+				else
+				{
 // Load EDL for pasting
-				new_edl->load_xml(plugindb, &xml_file, LOAD_ALL);
-				test_plugins(new_edl, filenames->values[i]);
+					new_edl->load_xml(&xml_file, LOAD_ALL);
+					test_plugins(new_edl, filenames->values[i]);
 
 // We don't want a valid reel name/number for projects
-				strcpy(new_asset->reel_name, "");
-				reel_number = -1;
+					strcpy(new_asset->reel_name, "");
+					reel_number = -1;
 
-				if(load_mode == LOAD_REPLACE || 
-					load_mode == LOAD_REPLACE_CONCATENATE)
-				{
-					strcpy(session->filename, filenames->values[i]);
-					strcpy(new_edl->local_session->clip_title, 
-						filenames->values[i]);
-					if(update_filename)
-						set_filename(new_edl->local_session->clip_title);
-				}
+					if(load_mode == LOADMODE_REPLACE || 
+						load_mode == LOADMODE_REPLACE_CONCATENATE)
+					{
+						strcpy(session->filename, filenames->values[i]);
+						strcpy(new_edl->local_session->clip_title, 
+							filenames->values[i]);
+						if(update_filename)
+							set_filename(new_edl->local_session->clip_title);
+					}
+				}		
 
 				new_edls.append(new_edl);
 				result = 0;
@@ -1175,7 +1194,7 @@ SET_TRACE
 		if(result)
 		{
 			delete new_edl;
-			Garbage::delete_object(new_asset);
+			new_asset->Garbage::remove_user();
 			new_edl = 0;
 			new_asset = 0;
 		}
@@ -1190,6 +1209,7 @@ SET_TRACE
 
 	if(!result) gui->statusbar->default_message();
 
+SET_TRACE
 
 
 
@@ -1202,7 +1222,8 @@ SET_TRACE
 	if(new_edls.total)
 	{
 // For pasting, clear the active region
-		if(load_mode == LOAD_PASTE)
+		if(load_mode == LOADMODE_PASTE ||
+			load_mode == LOADMODE_NESTED)
 		{
 			double start = edl->local_session->get_selectionstart();
 			double end = edl->local_session->get_selectionend();
@@ -1213,6 +1234,7 @@ SET_TRACE
 					edl->session->plugins_follow_edits);
 		}
 
+SET_TRACE
 		paste_edls(&new_edls, 
 			load_mode,
 			0,
@@ -1220,15 +1242,28 @@ SET_TRACE
 			edl->session->labels_follow_edits, 
 			edl->session->plugins_follow_edits,
 			0); // overwrite
+SET_TRACE
 	}
 
 
 
-
+SET_TRACE
 
 
 // Add new assets to EDL and schedule assets for index building.
-// Used for loading resources only.
+	int got_indexes = 0;
+	for(int i = 0; i < new_edls.size(); i++)
+	{
+		EDL *new_edl = new_edls.get(i);
+		for(int j = 0; j < new_edl->nested_edls->size(); j++)
+		{
+			mainindexes->add_next_asset(0, 
+				new_edl->nested_edls->get(j));
+			got_indexes = 1;
+			edl->nested_edls->update_index(new_edl->nested_edls->get(j));
+		}
+	}
+
 	if(new_assets.total)
 	{
 		for(int i = 0; i < new_assets.total; i++)
@@ -1250,22 +1285,35 @@ SET_TRACE
 
 			mainindexes->add_next_asset(got_it ? new_file : 0, 
 				new_asset);
+			got_indexes = 1;
 			edl->assets->update(new_asset);
 
 		}
 
 
-// Start examining next batch of index files
-		mainindexes->start_build();
 	}
 
+SET_TRACE
+// Start examining next batch of index files
+	if(got_indexes) mainindexes->start_build();
+
+SET_TRACE
 	update_project(load_mode);
+SET_TRACE
 
 
+	for(int i = 0; i < new_edls.size(); i++)
+	{
+		new_edls.get(i)->remove_user();
+	}
 
-	new_edls.remove_all_objects();
-	for(int i = 0; i < new_assets.total; i++)
-		Garbage::delete_object(new_assets.values[i]);
+	new_edls.remove_all();
+
+	for(int i = 0; i < new_assets.size(); i++)
+	{
+		new_assets.get(i)->Garbage::remove_user();
+	}
+
 	new_assets.remove_all();
 	new_files.remove_all_objects();
 
@@ -1273,6 +1321,7 @@ SET_TRACE
 
 
 	gui->stop_hourglass();
+SET_TRACE
 
 	return 0;
 }
@@ -1409,7 +1458,7 @@ void MWindow::create_objects(int want_gui,
 	init_defaults(defaults, config_path);
 	default_standard = default_std();
 	init_preferences();
-	init_plugins(preferences, plugindb, splash_window);
+	init_plugins(preferences, splash_window);
 	if(splash_window) splash_window->operation->update(_("Initializing GUI"));
 	init_theme();
 
@@ -1493,6 +1542,8 @@ void MWindow::create_objects(int want_gui,
 	hide_splash();
 	init_shm();
 
+
+	BC_WindowBase::get_resources()->vframe_shm = 1;
 }
 
 
@@ -1616,17 +1667,18 @@ void MWindow::set_titles(int value)
 	trackmovement(edl->local_session->track_start);
 }
 
-void MWindow::set_auto_keyframes(int value)
+void MWindow::set_auto_keyframes(int value, int lock_mwindow, int lock_cwindow)
 {
-	gui->lock_window("MWindow::set_auto_keyframes");
+	if(lock_mwindow) gui->lock_window("MWindow::set_auto_keyframes");
 	edl->session->auto_keyframes = value;
 	gui->mbuttons->edit_panel->keyframe->update(value);
 	gui->flush();
-	gui->unlock_window();
-	cwindow->gui->lock_window("MWindow::set_auto_keyframes");
+	if(lock_mwindow) gui->unlock_window();
+
+	if(lock_cwindow) cwindow->gui->lock_window("MWindow::set_auto_keyframes");
 	cwindow->gui->edit_panel->keyframe->update(value);
 	cwindow->gui->flush();
-	cwindow->gui->unlock_window();
+	if(lock_cwindow) cwindow->gui->unlock_window();
 }
 
 void MWindow::set_keyframe_type(int mode)
@@ -2078,22 +2130,21 @@ int MWindow::asset_to_edl(EDL *new_edl,
 	Asset *new_asset, 
 	RecordLabels *labels)
 {
-//printf("MWindow::asset_to_edl 1\n");
-//	new_edl->load_defaults(defaults);
-
+const int debug = 0;
+if(debug) printf("MWindow::asset_to_edl %d new_asset->layers=%d\n", 
+__LINE__,
+new_asset->layers);
 // Keep frame rate, sample rate, and output size unchanged.
 // These parameters would revert the project if VWindow displayed an asset
 // of different size than the project.
 	if(new_asset->video_data)
 	{
 		new_edl->session->video_tracks = new_asset->layers;
-//		new_edl->session->frame_rate = new_asset->frame_rate;
-//		new_edl->session->output_w = new_asset->width;
-//		new_edl->session->output_h = new_asset->height;
 	}
 	else
 		new_edl->session->video_tracks = 0;
 
+if(debug) printf("MWindow::asset_to_edl %d\n", __LINE__);
 
 
 
@@ -2102,32 +2153,26 @@ int MWindow::asset_to_edl(EDL *new_edl,
 	if(new_asset->audio_data)
 	{
 		new_edl->session->audio_tracks = new_asset->channels;
-//		new_edl->session->sample_rate = new_asset->sample_rate;
 	}
 	else
 		new_edl->session->audio_tracks = 0;
 //printf("MWindow::asset_to_edl 2 %d %d\n", new_edl->session->video_tracks, new_edl->session->audio_tracks);
 
+if(debug) printf("MWindow::asset_to_edl %d\n", __LINE__);
 	new_edl->create_default_tracks();
 //printf("MWindow::asset_to_edl 2 %d %d\n", new_edl->session->video_tracks, new_edl->session->audio_tracks);
-
-// Disable drawing if the file format isn't fast enough.
-// MPEG is now faster than most other codecs.
-// 	if(new_asset->format == FILE_MPEG)
-// 	{
-// 		for(Track *current = new_edl->tracks->first;
-// 			current;
-// 			current = NEXT)
-// 		{
-// 			if(current->data_type == TRACK_VIDEO) current->draw = 0;
-// 		}
-// 	}
+if(debug) printf("MWindow::asset_to_edl %d\n", __LINE__);
 
 
 
 //printf("MWindow::asset_to_edl 3\n");
-	new_edl->insert_asset(new_asset, 0, 0, labels);
+	new_edl->insert_asset(new_asset,
+		0,
+		0, 
+		0, 
+		labels);
 //printf("MWindow::asset_to_edl 3\n");
+if(debug) printf("MWindow::asset_to_edl %d\n", __LINE__);
 
 // Align cursor on frames:: clip the new_edl to the minimum of the last joint frame.
 	if(edl->session->cursor_on_frames)
@@ -2147,8 +2192,41 @@ int MWindow::asset_to_edl(EDL *new_edl,
 
 	strcpy(new_edl->local_session->clip_title, string);
 //printf("MWindow::asset_to_edl 4 %s\n", string);
+if(debug) printf("MWindow::asset_to_edl %d\n", __LINE__);
 
-//	new_edl->dump();
+	return 0;
+}
+
+int MWindow::edl_to_nested(EDL *new_edl, 
+	EDL *nested_edl)
+{
+
+// Keep frame rate, sample rate, and output size unchanged.
+// These parameters would revert the project if VWindow displayed an asset
+// of different size than the project.
+
+
+
+// Nest all video & audio outputs
+	new_edl->session->video_tracks = 1;
+	new_edl->session->audio_tracks = nested_edl->session->audio_channels;
+	new_edl->create_default_tracks();
+
+
+
+	new_edl->insert_asset(0,
+		nested_edl,
+		0, 
+		0, 
+		0);
+
+	char string[BCTEXTLEN];
+	FileSystem fs;
+	fs.extract_name(string, nested_edl->path);
+//printf("MWindow::edl_to_nested %p %s\n", nested_edl, nested_edl->path);
+
+	strcpy(new_edl->local_session->clip_title, string);
+
 	return 0;
 }
 
@@ -2158,7 +2236,6 @@ void MWindow::update_project(int load_mode)
 	restart_brender();
 	edl->tracks->update_y_pixels(theme);
 
-
 	gui->update(1, 1, 1, 1, 1, 1, 1);
 	gui->unlock_window();
 
@@ -2167,8 +2244,9 @@ void MWindow::update_project(int load_mode)
 	cwindow->gui->unlock_window();
 
 
-	if(load_mode == LOAD_REPLACE ||
-		load_mode == LOAD_REPLACE_CONCATENATE)
+
+	if(load_mode == LOADMODE_REPLACE ||
+		load_mode == LOADMODE_REPLACE_CONCATENATE)
 	{
 		vwindow->change_source();
 	}
@@ -2188,6 +2266,7 @@ void MWindow::update_project(int load_mode)
 		CHANGE_ALL,
 		edl,
 		1);
+
 
 	awindow->gui->async_update_assets();
 
@@ -2210,7 +2289,8 @@ void MWindow::rebuild_indices()
 			session->drag_assets->values[i]->path);
 		remove(index_filename);
 // Schedule index build
-		session->drag_assets->values[i]->index_status = INDEX_NOTTESTED;
+		IndexState *index_state = session->drag_assets->values[i]->index_state;
+		index_state->index_status = INDEX_NOTTESTED;
 		mainindexes->add_next_asset(0, session->drag_assets->values[i]);
 	}
 	mainindexes->start_build();
@@ -2220,9 +2300,8 @@ void MWindow::rebuild_indices()
 void MWindow::save_backup()
 {
 	FileXML file;
-	edl->set_project_path(session->filename);
-	edl->save_xml(plugindb, 
-		&file, 
+	edl->set_path(session->filename);
+	edl->save_xml(&file, 
 		BACKUP_PATH,
 		0,
 		0);
@@ -2296,8 +2375,8 @@ void MWindow::remove_assets_from_project(int push_undo)
 {
 	for(int i = 0; i < session->drag_assets->total; i++)
 	{
-		Asset *asset = session->drag_assets->values[i];
-		remove_asset_from_caches(asset);
+		Indexable *indexable = session->drag_assets->values[i];
+		if(indexable->is_asset) remove_asset_from_caches((Asset*)indexable);
 	}
 
 // Remove from VWindow.
@@ -2311,9 +2390,9 @@ void MWindow::remove_assets_from_project(int push_undo)
 		}
 	}
 	
-	for(int i = 0; i < session->drag_assets->total; i++)
+	for(int i = 0; i < session->drag_assets->size(); i++)
 	{
-		if(session->drag_assets->values[i] == vwindow->get_asset())
+		if(session->drag_assets->get(i) == vwindow->get_source())
 		{
 			vwindow->gui->lock_window("MWindow::remove_assets_from_project 2");
 			vwindow->remove_source();
@@ -2492,6 +2571,9 @@ void MWindow::time_format_common()
 int MWindow::set_filename(const char *filename)
 {
 	strcpy(session->filename, filename);
+	strcpy(edl->path, filename);
+
+
 	if(gui)
 	{
 		if(filename[0] == 0)
