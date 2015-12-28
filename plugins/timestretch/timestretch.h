@@ -93,7 +93,7 @@ public:
 
 	TimeStretch *plugin;
 	Samples *temp;
-	double *input_buffer;
+	Samples *input_buffer;
 	int input_size;
 	int input_allocated;
 	int64_t current_input_sample;
@@ -108,18 +108,6 @@ public:
 
 
 };
-
-class TimeStretchResample : public Resample
-{
-public:
-	TimeStretchResample(TimeStretch *plugin);
-
-	int read_samples(Samples *buffer, int64_t start, int64_t len);
-	
-	TimeStretch *plugin;
-};
-
-
 
 class TimeStretch : public PluginAClient
 {
@@ -150,10 +138,10 @@ public:
 	
 
 	PitchEngine *pitch;
-	TimeStretchResample *resample;
+	Resample *resample;
 	double *temp;
 	int temp_allocated;
-	Samples *input;
+	double *input;
 	int input_allocated;
 
 	TimeStretchEngine *stretch;

@@ -65,7 +65,7 @@ PitchEngine::PitchEngine(TimeStretch *plugin)
 
 PitchEngine::~PitchEngine()
 {
-	if(input_buffer) delete [] input_buffer;
+	if(input_buffer) delete input_buffer;
 	if(temp) delete temp;
 	delete [] last_phase;
 	delete [] new_freq;
@@ -79,6 +79,7 @@ int PitchEngine::read_samples(int64_t output_sample,
 	int samples, 
 	Samples *buffer)
 {
+#if 0
 	plugin->resample->resample(buffer,
 		samples,
 		1000000,
@@ -86,7 +87,7 @@ int PitchEngine::read_samples(int64_t output_sample,
 		output_sample,
 		PLAY_FORWARD);
 
-#if 0
+#else
 // FIXME, make sure this is set at the beginning, always
 // FIXME: we need to do backward play also
 	if (current_output_sample != output_sample)
@@ -120,24 +121,26 @@ int PitchEngine::read_samples(int64_t output_sample,
 		if(input_size + fragment_size > input_allocated)
 		{
 			int new_allocated = input_size + fragment_size;
-			double *new_buffer = new double[new_allocated];
+			Samples *new_buffer = new Samples(new_allocated);
 			if(input_buffer)
 			{
-				memcpy(new_buffer, input_buffer, input_size * sizeof(double));
-				delete [] input_buffer;
+				memcpy(new_buffer->get_data(), input_buffer->get_data(), input_size * sizeof(double));
+				delete input_buffer;
 			}
 			input_buffer = new_buffer;
 			input_allocated = new_allocated;
 		}
 
 
-		plugin->resample->read_output(input_buffer + input_size,
+		input_buffer->set_offset(input_size);
+		plugin->resample->read_output(input_buffer,
 			fragment_size);
+		input_buffer->set_offset(0);
 		input_size += fragment_size;
 	}
-	memcpy(buffer->get_data(), input_buffer, samples * sizeof(int64_t));
-	memcpy(input_buffer, 
-		input_buffer + samples, 
+	memcpy(buffer->get_data(), input_buffer->get_data(), samples * sizeof(int64_t));
+	memcpy(input_buffer->get_data(),
+		input_buffer->get_data() + samples,
 		sizeof(int64_t) * (input_size - samples));
 	input_size -= samples;
 	current_output_sample += samples;
@@ -311,26 +314,6 @@ int PitchEngine::signal_process_oversample(int reset)
 
 
 
-TimeStretchResample::TimeStretchResample(TimeStretch *plugin)
-{
-	this->plugin = plugin;
-}
-
-
-int TimeStretchResample::read_samples(Samples *buffer, 
-	int64_t start, 
-	int64_t len)
-{
-	return plugin->read_samples(buffer, 
-		0, 
-		start + plugin->get_source_start(), 
-		len);
-}
-
-
-
-
-
 
 
 
@@ -497,7 +480,7 @@ int TimeStretch::process_buffer(int64_t size,
 		pitch = new PitchEngine(this);
 		pitch->initialize(WINDOW_SIZE);
 		pitch->set_oversample(OVERSAMPLE);
-		resample = new TimeStretchResample(this);
+		resample = new Resample();
 
 	}
 
