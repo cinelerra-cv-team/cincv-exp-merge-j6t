@@ -29,19 +29,17 @@ class GreyCStorationWindow;
 #include "greycstorationplugin.h"
 #include "mutex.h"
 #include "pluginvclient.h"
-#include "pluginwindow.h"
 
-PLUGIN_THREAD_HEADER(GreyCStorationMain, GreyCStorationThread, GreyCStorationWindow)
 
 class GreyCAmpSlider;
 class GreyCSharpSlider;
 class GreyCAniSlider;
 class GreyCNoiseSlider;
 
-class GreyCStorationWindow : public PluginWindow
+class GreyCStorationWindow : public PluginClientWindow
 {
 public:
-	GreyCStorationWindow(GreyCStorationMain *client, int x, int y);
+	GreyCStorationWindow(GreyCStorationMain *client);
 	~GreyCStorationWindow();
 
 	void create_objects();

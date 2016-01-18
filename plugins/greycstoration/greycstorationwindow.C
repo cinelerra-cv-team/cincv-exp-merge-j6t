@@ -28,13 +28,10 @@
 #define N_(String) gettext_noop (String)
 
 
-PLUGIN_THREAD_OBJECT(GreyCStorationMain, GreyCStorationThread, GreyCStorationWindow)
 
 // configuration window
-GreyCStorationWindow::GreyCStorationWindow(GreyCStorationMain *client, int x, int y)
- : PluginWindow(client->get_gui_string(),
-	x,
-	y,
+GreyCStorationWindow::GreyCStorationWindow(GreyCStorationMain *client)
+ : PluginClientWindow(client,
 	300,
 	180)
 {

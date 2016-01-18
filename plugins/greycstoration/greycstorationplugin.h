@@ -53,7 +53,7 @@ public:
 	GreyCStorationMain(PluginServer *server);
 	~GreyCStorationMain();
 
-	PLUGIN_CLASS_MEMBERS(GreyCStorationConfig, GreyCStorationThread);
+	PLUGIN_CLASS_MEMBERS(GreyCStorationConfig);
 	template<typename T> void GREYCSTORATION(VFrame *frame, int h, int w, int components);
 
 // required for all realtime plugins

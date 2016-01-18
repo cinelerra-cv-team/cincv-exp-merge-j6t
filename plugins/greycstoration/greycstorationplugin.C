@@ -84,12 +84,10 @@ void GreyCStorationConfig::interpolate(GreyCStorationConfig &prev,
 GreyCStorationMain::GreyCStorationMain(PluginServer *server)
  : PluginVClient(server)
 {
-	PLUGIN_CONSTRUCTOR_MACRO
 }
 
 GreyCStorationMain::~GreyCStorationMain()
 {
-	PLUGIN_DESTRUCTOR_MACRO
 }
 
 const char* GreyCStorationMain::plugin_title() { return N_("GreyCStoration"); }
@@ -219,11 +217,7 @@ int GreyCStorationMain::process_buffer(VFrame *frame,
 }
 
 
-SHOW_GUI_MACRO(GreyCStorationMain, GreyCStorationThread)
-
-RAISE_WINDOW_MACRO(GreyCStorationMain)
-
-SET_STRING_MACRO(GreyCStorationMain)
+NEW_WINDOW_MACRO(GreyCStorationMain, GreyCStorationWindow)
 
 NEW_PICON_MACRO(GreyCStorationMain)
 
@@ -234,12 +228,12 @@ void GreyCStorationMain::update_gui()
 	if(thread)
 	{
 		load_configuration();
-		thread->window->lock_window();
-		thread->window->greycamp_slider->update((int)config.amplitude);
-		thread->window->greycsharp_slider->update((int)config.sharpness);
-		thread->window->greycani_slider->update((int)config.anisotropy);
-		thread->window->greycnoise_slider->update((int)config.noise_scale);
-		thread->window->unlock_window();
+		((GreyCStorationWindow*)thread->window)->lock_window();
+		((GreyCStorationWindow*)thread->window)->greycamp_slider->update((int)config.amplitude);
+		((GreyCStorationWindow*)thread->window)->greycsharp_slider->update((int)config.sharpness);
+		((GreyCStorationWindow*)thread->window)->greycani_slider->update((int)config.anisotropy);
+		((GreyCStorationWindow*)thread->window)->greycnoise_slider->update((int)config.noise_scale);
+		((GreyCStorationWindow*)thread->window)->unlock_window();
 	}
 }
 
@@ -249,7 +243,7 @@ void GreyCStorationMain::save_data(KeyFrame *keyframe)
 	FileXML output;
 
 // cause data to be stored directly in text
-	output.set_shared_string(keyframe->data, MESSAGESIZE);
+	output.set_shared_string(keyframe->get_data(), MESSAGESIZE);
 	output.tag.set_title("GREYCSTORATION");
 
 	output.tag.set_property("AMPLITUDE", config.amplitude);
@@ -268,7 +262,7 @@ void GreyCStorationMain::read_data(KeyFrame *keyframe)
 {
 	FileXML input;
 
-	input.set_shared_string(keyframe->data, strlen(keyframe->data));
+	input.set_shared_string(keyframe->get_data(), strlen(keyframe->get_data()));
 
 	int result = 0;
 
