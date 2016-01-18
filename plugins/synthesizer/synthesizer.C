@@ -295,6 +295,7 @@ double Synth::solve_eqn(double *output,
 			}
 			break;
 	}
+	return 0;
 }
 
 double Synth::get_point(float x, double normalize_constant)

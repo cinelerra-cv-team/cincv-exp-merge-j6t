@@ -1,3 +1,5 @@
 *.gmo
-cinelerra.pot
+*.pot
 POTFILES
+Makefile.in.in
+stamp-it

@@ -206,6 +206,10 @@ BatchRenderThread::BatchRenderThread(MWindow *mwindow)
 	rendering_job = -1;
 	is_rendering = 0;
 	default_job = 0;
+	plugindb = 0;
+	boot_defaults = 0;
+	preferences = 0;
+	render = 0;
 }
 
 BatchRenderThread::BatchRenderThread()
@@ -216,6 +220,18 @@ BatchRenderThread::BatchRenderThread()
 	rendering_job = -1;
 	is_rendering = 0;
 	default_job = 0;
+	plugindb = 0;
+	boot_defaults = 0;
+	preferences = 0;
+	render = 0;
+}
+
+BatchRenderThread::~BatchRenderThread()
+{
+	delete plugindb;
+	delete boot_defaults;
+	delete preferences;
+	delete render;
 }
 
 void BatchRenderThread::handle_close_event(int result)
@@ -486,9 +502,7 @@ void BatchRenderThread::calculate_dest_paths(ArrayList<char*> *paths,
 void BatchRenderThread::start_rendering(char *config_path,
 	char *batch_path)
 {
-	BC_Hash *boot_defaults;
-	Preferences *preferences;
-	Render *render;
+	char string[BCTEXTLEN];
 
 PRINT_TRACE
 // Initialize stuff which MWindow does.
@@ -498,6 +512,9 @@ PRINT_TRACE
 	preferences->load_defaults(boot_defaults);
 	MWindow::init_plugins(preferences, 0);
 	BC_WindowBase::get_resources()->vframe_shm = 1;
+	strcpy(string, preferences->plugin_dir);
+	strcat(string, "/" FONT_SEARCHPATH);
+	BC_Resources::init_fontconfig(string);
 
 
 PRINT_TRACE

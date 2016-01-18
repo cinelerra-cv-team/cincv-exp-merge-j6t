@@ -25,8 +25,8 @@
 #include "color3way.h"
 #include "bchash.h"
 #include "language.h"
+#include "picon_png.h"
 #include "playback3d.h"
-#include "bchash.h"
 #include "bcdisplayinfo.h"
 
 #include "aggregated.h"
@@ -454,6 +454,7 @@ void Color3WayMain::calculate_factors(float *r, float *g, float *b, int section)
 }
 
 
+NEW_PICON_MACRO(Color3WayMain)
 NEW_WINDOW_MACRO(Color3WayMain, Color3WayWindow)
 LOAD_CONFIGURATION_MACRO(Color3WayMain, Color3WayConfig)
 
@@ -496,8 +497,6 @@ int Color3WayMain::process_buffer(VFrame *frame,
 
 	return 0;
 }
-
-VFrame* Color3WayMain::new_picon() { return NULL; }
 
 void Color3WayMain::update_gui()
 {

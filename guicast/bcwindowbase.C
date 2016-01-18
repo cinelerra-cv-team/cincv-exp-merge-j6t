@@ -205,7 +205,7 @@ BC_WindowBase::~BC_WindowBase()
 #endif
 
 	if(wide_text != wide_buffer)
-		delete [] wide_buffer;
+		delete [] wide_text;
 
 	delete [] tooltip_wtext;
 
@@ -947,7 +947,6 @@ __LINE__, title, event);
 // event->xany.window,
 // win);
 // dump_windows();
-			get_key_masks(event);
 			XTranslateCoordinates(top_level->display, 
 				top_level->win, 
 				top_level->rootwin, 

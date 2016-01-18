@@ -1430,8 +1430,6 @@ void MWindow::init_shm()
 	}
 }
 
-#define FONT_SEARCHPATH "fonts"
-
 void MWindow::create_objects(int want_gui, 
 	int want_new,
 	char *config_path)

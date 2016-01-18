@@ -71,7 +71,6 @@ class YUVConfigVideo : public BC_Window
  public:
 	YUVConfigVideo(BC_WindowBase *parent_window, Asset *asset,
 		       FormatTools *format);
-	~YUVConfigVideo();
 
 	void create_objects();
 	int close_event();

@@ -177,7 +177,7 @@ void TitleConfig::interpolate(TitleConfig &prev,
 void TitleConfig::text_to_ucs4(const char *from_enc)
 {
 	wtext_length = BC_Resources::encode(from_enc, BC_Resources::wide_encoding,
-		text, (char *)wtext, sizeof(wtext) / sizeof(wchar_t)) / sizeof(wchar_t);
+		text, (char *)wtext, sizeof(wtext)) / sizeof(wchar_t);
 }
 
 
@@ -1046,14 +1046,20 @@ int TitleMain::load_freetype_face(FT_Library &freetype_library,
 BC_FontEntry* TitleMain::get_font()
 {
 	int style = 0;
-	int mask;
+	int mask, pref;
 
-	style |= (config.style & FONT_ITALIC) ? FL_SLANT_ITALIC : FL_SLANT_ROMAN;
-	style |= (config.style & FONT_BOLD) ? FL_WEIGHT_BOLD : FL_WEIGHT_NORMAL;
+	style |= (config.style & FONT_ITALIC) ?
+		FL_SLANT_ITALIC | FL_SLANT_OBLIQUE : FL_SLANT_ROMAN;
+	style |= (config.style & FONT_BOLD) ?
+		FL_WEIGHT_BOLD | FL_WEIGHT_DEMIBOLD |
+		FL_WEIGHT_EXTRABOLD| FL_WEIGHT_BLACK | FL_WEIGHT_EXTRABLACK :
+		FL_WEIGHT_BOOK | FL_WEIGHT_NORMAL | FL_WEIGHT_MEDIUM |
+		FL_WEIGHT_LIGHT | FL_WEIGHT_EXTRALIGHT | FL_WEIGHT_THIN;
 
+	pref = style & (FL_SLANT_ITALIC | FL_WEIGHT_BOLD | FL_WEIGHT_NORMAL);
 	mask = FL_WEIGHT_MASK | FL_SLANT_MASK;
 
-	return find_fontentry(config.font, style, mask);
+	return find_fontentry(config.font, style, mask, pref);
 }
 
 int TitleMain::get_char_height()
@@ -1616,13 +1622,14 @@ int TitleMain::process_realtime(VFrame *input_ptr, VFrame *output_ptr)
 				0,
 				PluginVClient::project_frame_rate, 
 				0);
+		config.text_to_ucs4(DEFAULT_ENCODING);
 		need_reconfigure = 1;
 	}
 
 // Check boundaries
 	if(config.size <= 0 || config.size >= 2048) config.size = 72;
-	if(!strlen(config.text)) return 0;
-	if(!strlen(config.encoding)) strcpy(config.encoding, DEFAULT_ENCODING);
+	if(!config.wtext_length) return 0;
+	if(!config.encoding) strcpy(config.encoding, DEFAULT_ENCODING);
 
 //printf("TitleMain::process_realtime 10\n");
 

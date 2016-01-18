@@ -89,6 +89,8 @@
 
 #include <stdint.h>
 
+#define FONT_SEARCHPATH "fonts"
+
 // All entry points for commands except for window locking should be here.
 // This allows scriptability.
 

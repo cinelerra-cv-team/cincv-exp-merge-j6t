@@ -33,7 +33,7 @@ if BUILDINFO_CUST
 endif
 endif
 	echo '#define COPYRIGHTTEXT1 "(C) 2009 Adam Williams\n\nheroinewarrior.com"' >> versioninfo.h
-	echo '#define COPYRIGHTTEXT2 "(C) 2006-2015 The CinelerraCV Community"' >> versioninfo.h
+	echo '#define COPYRIGHTTEXT2 "(C) 2006-2016 The CinelerraCV Community"' >> versioninfo.h
 	echo '#define COMPILEDATE "Compiled on $(BUILDDATE)"' >> versioninfo.h
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h
 
@@ -74,7 +74,6 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    atrack.C \
 		    attachmentpoint.C \
 		    audioalsa.C \
-		    audiocine.C \
 		    audiodevice.C \
 		    audiodvb.C \
 		    audioesound.C \
@@ -387,7 +386,6 @@ noinst_HEADERS = aattachmentpoint.h \
 		 attachmentpoint.h \
 		 audio1394.h \
 		 audioalsa.h \
-		 audiocine.h \
 		 audioconfig.h \
 		 audiodevice.h \
 		 audiodvb.h \

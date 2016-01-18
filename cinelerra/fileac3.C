@@ -156,6 +156,7 @@ int FileAC3::close_file()
 	}
 	reset_parameters();
 	FileBase::close_file();
+	return 0;
 }
 
 // Channel conversion matrices because ffmpeg encodes a

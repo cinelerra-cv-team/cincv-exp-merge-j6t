@@ -83,7 +83,6 @@ void FloatAutos::draw_joining_line(BC_SubWindow *canvas, int vertical, int cente
 		canvas->draw_line(x1, center_pixel + y1, x2, center_pixel + y2);
 }
 
-
 Auto* FloatAutos::new_auto()
 {
 	FloatAuto *result = new FloatAuto(edl, this);

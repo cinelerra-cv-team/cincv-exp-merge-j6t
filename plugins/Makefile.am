@@ -58,6 +58,7 @@ SUBDIRS= \
 	gain \
 	gamma \
 	gradient \
+	greycstoration \
 	histogram \
 	holo \
 	huesaturation \

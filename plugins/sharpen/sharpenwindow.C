@@ -35,7 +35,7 @@
 SharpenWindow::SharpenWindow(SharpenMain *client)
  : PluginClientWindow(client,
 	210, 
-	120)
+	150)
 { 
 	this->client = client; 
 }

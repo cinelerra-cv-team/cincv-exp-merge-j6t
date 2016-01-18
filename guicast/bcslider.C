@@ -286,6 +286,7 @@ int BC_Slider::activate()
 {
 	top_level->active_subwindow = this;
 	active = 1;
+	return 0;
 }
 
 void BC_Slider::enable()
@@ -493,7 +494,7 @@ int BC_ISlider::increase_value()
 
 int BC_ISlider::decrease_value()
 {
-	value-=10;
+	value--;
 	if(value < minvalue) value = minvalue;
 	button_pixel = value_to_pixel();
 	return 0;
@@ -509,7 +510,7 @@ int BC_ISlider::increase_value_big()
 
 int BC_ISlider::decrease_value_big()
 {
-	value--;
+	value-=10;
 	if(value < minvalue) value = minvalue;
 	button_pixel = value_to_pixel();
 	return 0;

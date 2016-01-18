@@ -817,6 +817,7 @@ SET_TRACE
 	glDisable(GL_BLEND);
 SET_TRACE
 #endif
+	return 0;
 }
 
 

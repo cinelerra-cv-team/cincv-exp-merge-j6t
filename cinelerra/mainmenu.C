@@ -1046,7 +1046,7 @@ int DeleteTrack::handle_event()
 }
 
 MoveTracksUp::MoveTracksUp(MWindow *mwindow)
- : BC_MenuItem(_("Move tracks up"))
+ : BC_MenuItem(_("Move tracks up"), "Shift+Up", UP)
 {
 	set_shift(); this->mwindow = mwindow;
 }
@@ -1058,7 +1058,7 @@ int MoveTracksUp::handle_event()
 }
 
 MoveTracksDown::MoveTracksDown(MWindow *mwindow)
- : BC_MenuItem(_("Move tracks down"))
+ : BC_MenuItem(_("Move tracks down"), "Shift+Down", DOWN)
 {
 	set_shift(); this->mwindow = mwindow;
 }

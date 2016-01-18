@@ -177,6 +177,7 @@ int FileMPEG::reset_parameters_derived()
 	lame_output_allocation = 0;
 	lame_fd = 0;
 	lame_started = 0;
+	return 0;
 }
 
 
@@ -868,7 +869,6 @@ int FileMPEG::get_index(char *index_path)
 
 int FileMPEG::can_copy_from(Asset *asset, int64_t position)
 {
-	if(!fd) return 0;
 	return 0;
 }
 

@@ -262,7 +262,7 @@ int mpeg3video_delete_struct(mpeg3video_t *video)
 int mpeg3video_read_frame_backend(mpeg3video_t *video, int skip_bframes)
 {
 	int result = 0;
-	int got_top = 0, got_bottom = 0;
+	int got_bottom = 0;
 	int i = 0;
 	mpeg3_vtrack_t *track = video->track;
 	mpeg3_t *file = (mpeg3_t*)video->file;
@@ -287,12 +287,6 @@ if(debug) printf("mpeg3video_read_frame_backend %d\n", __LINE__);
 		if(!result)
 			result = mpeg3video_getpicture(video, video->framenum);
 
-
-		if(video->pict_struct == TOP_FIELD)
-		{
-			got_top == 1;
-		}
-		else
 		if(video->pict_struct == BOTTOM_FIELD)
 		{
 			got_bottom = 1;
@@ -301,7 +295,7 @@ if(debug) printf("mpeg3video_read_frame_backend %d\n", __LINE__);
 		else
 		if(video->pict_struct == FRAME_PICTURE)
 		{
-			got_top = got_bottom = 1;
+			got_bottom = 1;
 		}
 if(debug) printf("mpeg3video_read_frame_backend %d\n", __LINE__);
 

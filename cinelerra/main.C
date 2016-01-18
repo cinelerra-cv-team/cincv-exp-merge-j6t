@@ -73,8 +73,8 @@ int main(int argc, char *argv[])
 	deamon_path[0] = 0;
 	EDL::id_lock = new Mutex("EDL::id_lock");
 
-	bindtextdomain (PACKAGE, LOCALE_DIR);
-	textdomain (PACKAGE);
+	bindtextdomain (GETTEXT_PACKAGE, LOCALE_DIR);
+	textdomain (GETTEXT_PACKAGE);
 	setlocale (LC_MESSAGES, "");
 #ifdef X_HAVE_UTF8_STRING
 	if(char *loc = setlocale(LC_CTYPE, ""))

@@ -1,4 +1,4 @@
-AC_INIT(cinelerra-cv, 2.2)
+AC_INIT(cinelerra-cv, 2.3)
 
 AC_CANONICAL_SYSTEM
 
@@ -8,10 +8,12 @@ AC_PREREQ(2.57)
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 AC_CONFIG_HEADER(config.h)
-AM_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION(0.12.1)
-AM_ICONV
 AC_CONFIG_MACRO_DIR([m4])
+IT_PROG_INTLTOOL
+GETTEXT_PACKAGE="AC_PACKAGE_NAME"
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The prefix for our gettext translation domains])
+AM_ICONV
 AM_PROG_AS
 
 AC_LANG_CPLUSPLUS
@@ -125,12 +127,6 @@ AC_ARG_WITH(plugindir,
 						[ plugindir=$withval ],
 						[ plugindir="\${exec_prefix}/lib/cinelerra" ])
 AC_SUBST(plugindir)
-
-AC_ARG_WITH(fontsdir,
-						AC_HELP_STRING([--with-fontsdir], [sets the directory where the fonts should be installed]),
-						[ fontsdir=$withval ],
-						[ fontsdir="\${plugindir}/fonts" ])
-AC_SUBST(fontsdir)
 ############## END OF SPECIAL DIRECTORIES
 
 ############## XLIB
@@ -266,8 +262,8 @@ AC_CHECK_LIB(tiff,TIFFOpen,[libtiff=yes])
 # OpenCV is used by the findobj plugin.  Check if the needed libraries
 # exist.  The functions to look for are picked by random from the
 # libraries, and might not be the exact ones the findobj plugin need.
-AC_CHECK_HEADER(opencv2/legacy/legacy.hpp)
-AC_CHECK_HEADER(opencv2/legacy/compat.hpp)
+AC_CHECK_HEADER(opencv2/legacy/legacy.hpp, [opencvhlegacy=yes])
+AC_CHECK_HEADER(opencv2/legacy/compat.hpp, [], [opencvhlegacy=no])
 AC_CHECK_HEADER(opencv2/core/core_c.h, [opencvh=yes])
 AC_CHECK_LIB(opencv_legacy, cvChangeDetection)
 AC_CHECK_LIB(opencv_objdetect, cvLoadLatentSvmDetector)
@@ -297,7 +293,7 @@ else
 fi
 AC_DEFINE_UNQUOTED(HAVE_OPENCV_SURF, $HAVE_OPENCV_SURF,
 	[define if SURF support is compiled into opencv])
-if test "x$opencv" = "xyes" && test "x$opencvh" = "xyes" ; then
+if test "x$opencv" = "xyes" && test "x$opencvh" = "xyes" && test "x$opencvhlegacy" = "xyes"; then
 	enable_findobject=ok
 fi
 AM_CONDITIONAL(ENABLE_FINDOBJECT,test "x$enable_findobject" = "xok")
@@ -743,6 +739,7 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/freezeframe/Makefile \
 	plugins/gain/Makefile \
 	plugins/gamma/Makefile \
+	plugins/greycstoration/Makefile \
 	plugins/holo/Makefile \
 	plugins/huesaturation/Makefile \
 	plugins/interpolate/Makefile \
@@ -883,6 +880,7 @@ ORPT(enable_opengl,Hardware acceleration using OpenGL 2.0,--disable-opengl,
 ORPT(enable_findobject,findobject plugin using OpenCV 2.0,--disable-findobject,
 	RPT(opencv,opencv libraries)
 	RPT(opencvh,opencv headers)
+	RPT(opencvhlegacy, opencv legacy headers)
 )
 
 if test "x$mandatory" = "xno"; then

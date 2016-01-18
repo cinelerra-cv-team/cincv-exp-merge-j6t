@@ -231,6 +231,7 @@ int VTrack::get_dimensions(double &view_start,
 	view_units = 0;
 //	view_units = Units::toframes(tracks->view_samples(), mwindow->session->sample_rate, mwindow->session->frame_rate);
 	zoom_units = edl->local_session->zoom_sample / edl->session->sample_rate * edl->session->frame_rate;
+	return 0;
 }
 
 int VTrack::copy_derived(int64_t start, int64_t end, FileXML *xml)
@@ -544,8 +545,8 @@ void VTrack::translate(float offset_x, float offset_y, int do_camera)
 		subscript = AUTOMATION_PROJECTOR_X;
 	
 // Translate default keyframe
-	addto_value((FloatAuto*)automation->autos[subscript], offset_x);
-	addto_value((FloatAuto*)automation->autos[subscript + 1], offset_y);
+	addto_value((FloatAuto*)automation->autos[subscript]->default_auto, offset_x);
+	addto_value((FloatAuto*)automation->autos[subscript + 1]->default_auto, offset_y);
 
 // Translate everyone else
 	for(Auto *current = automation->autos[subscript]->first; 
