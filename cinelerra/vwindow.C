@@ -159,7 +159,7 @@ void VWindow::change_source(Indexable *indexable)
 	if(indexable->is_asset)
 	{
 		this->indexable = asset = new Asset;
-		asset->copy_from((Asset*)this->indexable, 0);
+		asset->copy_from((Asset*)indexable, 0);
 	}
 	else
 	{
