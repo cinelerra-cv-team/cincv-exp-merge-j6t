@@ -32,6 +32,12 @@
 #define TEXTBOXLEN (BCTEXTLEN - 1)
 
 
+
+class BC_TextBoxSuggestions;
+
+
+
+
 class BC_TextBox : public BC_SubWindow
 {
 public:
@@ -74,6 +80,10 @@ public:
 		int font = MEDIUMFONT,
 		int precision = 4);
 	virtual ~BC_TextBox();
+
+
+	friend class BC_TextBoxSuggestions;
+
 
 // Whenever the contents of the text change
 	virtual int handle_event() { return 0; };
@@ -135,6 +145,14 @@ public:
 	int select_whole_text(int select);
 	void cycle_textboxes(int amout);
 	
+
+// User computes suggestions after handle_event.
+// The array is copied to a local variable.
+// A highlighted extension is added if 1 suggestion or a popup appears
+// if multiple suggestions.
+// column - starting column to replace
+	void set_suggestions(ArrayList<char*> *suggestions, int column);
+
 private:
 	void convert_number();
 	int reset_parameters(int rows, int has_border, int font);
@@ -187,6 +205,24 @@ private:
 // Used for custom formatting text boxes
 	int last_keypress;
 	const char *separators;
+	ArrayList<BC_ListBoxItem*> *suggestions;
+	BC_TextBoxSuggestions *suggestions_popup;
+	int suggestion_column;
+};
+
+
+
+class BC_TextBoxSuggestions : public BC_ListBox
+{
+public:
+	BC_TextBoxSuggestions(BC_TextBox *text_box, int x, int y);
+	virtual ~BC_TextBoxSuggestions();
+
+	int selection_changed();
+	int handle_event();
+
+	
+	BC_TextBox *text_box;
 };
 
 
