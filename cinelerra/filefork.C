@@ -222,7 +222,7 @@ int FileFork::handle_command()
 
 
 		case START_VIDEO_DECODE_THREAD:
-			result = file->start_video_decode_thread();
+			file->start_video_decode_thread();
 			send_result(result, 0, 0);
 			break;
 

@@ -145,12 +145,14 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    fileexr.C \
 		    fileffmpeg.C \
 		    fileflac.C \
+		    filefork.C \
 		    fileformat.C \
 		    filejpeg.C \
 		    filelist.C \
 		    filemov.C \
 		    filempeg.C \
 		    filepng.C \
+		    fileserver.C \
 		    filesndfile.C \
 		    filetga.C \
 		    filethread.C \
@@ -160,6 +162,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    fileyuv.C \
 		    floatauto.C \
 		    floatautos.C \
+		    forkwrapper.C \
 		    formatcheck.C \
 		    formatpopup.C \
 		    formatpresets.C \
@@ -466,11 +469,13 @@ noinst_HEADERS = aattachmentpoint.h \
 		 fileexr.h \
 		 fileffmpeg.h \
 		 fileflac.h \
+		 filefork.h \
 		 filejpeg.h \
 		 filelist.h \
 		 filemov.h \
 		 filempeg.h \
 		 filepng.h \
+		 fileserver.h \
 		 filesndfile.h \
 		 filetga.h \
 		 filethread.h \
@@ -480,6 +485,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 fileyuv.h \
 		 floatauto.h \
 		 floatautos.h \
+		 forkwrapper.h \
 		 formatcheck.h \
 		 formatpopup.h \
 		 formatpresets.h \
