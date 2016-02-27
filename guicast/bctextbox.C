@@ -170,7 +170,9 @@ int BC_TextBox::reset_parameters(int rows, int has_border, int font)
 	highlight_letter3 = highlight_letter4 = 0;
 	ibeam_letter = 0;
 	active = 0;
-	text_selected = word_selected = 0;
+	text_selected = 0;
+	word_selected = 0;
+	line_selected = 0;
 	text_x = 0;
 	enabled = 1;
 	highlighted = 0;
@@ -698,6 +700,17 @@ int BC_TextBox::button_press_event()
 		}
 
 		cursor_letter = get_cursor_letter(top_level->cursor_x, top_level->cursor_y);
+		if(get_triple_click())
+		{
+//printf("BC_TextBox::button_press_event %d\n", __LINE__);
+			line_selected = 1;
+			select_line(highlight_letter1, highlight_letter2, cursor_letter);
+			highlight_letter3 = highlight_letter1;
+			highlight_letter4 = highlight_letter2;
+			ibeam_letter = highlight_letter2;
+			copy_selection(PRIMARY_SELECTION);
+		}
+		else
 		if(get_double_click())
 		{
 			word_selected = 1;
@@ -744,10 +757,11 @@ int BC_TextBox::button_release_event()
 	if(active)
 	{
 		hide_tooltip();
-		if(text_selected || word_selected)
+		if(text_selected || word_selected || line_selected)
 		{
 			text_selected = 0;
 			word_selected = 0;
+			line_selected = 0;
 		}
 	}
 	return 0;
@@ -758,9 +772,16 @@ int BC_TextBox::cursor_motion_event()
 	int cursor_letter, letter1, letter2;
 	if(active)
 	{
-		if(text_selected || word_selected)
+		if(text_selected || word_selected || line_selected)
 		{
-			cursor_letter = get_cursor_letter(top_level->cursor_x, top_level->cursor_y);
+			cursor_letter = get_cursor_letter(top_level->cursor_x, 
+				top_level->cursor_y);
+
+			if(line_selected)
+			{
+				select_line(letter1, letter2, cursor_letter);
+			}
+			else
 			if(word_selected)
 			{
 				select_word(letter1, letter2, cursor_letter);
@@ -925,7 +946,12 @@ int BC_TextBox::keypress_event()
 			}
 			break;
 
+
+
+
+
 		case RETURN:
+//printf("BC_TextBox::keypress_event %d\n", __LINE__);
 			if(rows == 1)
 			{
 				top_level->deactivate();
@@ -937,12 +963,17 @@ int BC_TextBox::keypress_event()
 				default_keypress(dispatch_event, result);
 			}
 			break;
-// Handle like a default keypress
 
+
+
+
+// Handle like a default keypress
 		case TAB:
 			cycle_textboxes(1);
 			result = 1;
 			break;
+
+
 
 		case LEFTTAB:
 			cycle_textboxes(-1);
@@ -1624,7 +1655,8 @@ void BC_TextBox::find_ibeam(int dispatch_event)
 
 int BC_TextBox::get_cursor_letter(int cursor_x, int cursor_y)
 {
-	int i, j, k, l, row_begin, row_end, result = 0, done = 0;
+	int i, j, k, row_begin, row_end, result = 0, done = 0;
+	int column1, column2;
 
 	if(cursor_y < text_y)
 	{
@@ -1640,14 +1672,17 @@ int BC_TextBox::get_cursor_letter(int cursor_x, int cursor_y)
 
 		if(cursor_y >= k && cursor_y < k + text_height)
 		{
+			column1 = 0;
+			column2 = 0;
 			for(j = 0; j <= row_end - row_begin && !done; j++)
 			{
-				l = get_text_width(font, &wide_text[row_begin], j) + text_x;
-				if(l > cursor_x)
+				column2 = get_text_width(font, &wide_text[row_begin], j) + text_x;
+				if((column2 + column1) / 2 >= cursor_x)
 				{
 					result = row_begin + j - 1;
 					done = 1;
 				}
+				column1 = column2;
 			}
 			if(!done)
 			{
@@ -1669,6 +1704,8 @@ int BC_TextBox::get_cursor_letter(int cursor_x, int cursor_y)
 
 void BC_TextBox::select_word(int &letter1, int &letter2, int ibeam_letter)
 {
+	if(!wtext_len) return;
+
 	letter1 = letter2 = ibeam_letter;
 	do
 	{
@@ -1681,6 +1718,32 @@ void BC_TextBox::select_word(int &letter1, int &letter2, int ibeam_letter)
 		if(iswalnum(wide_text[letter2])) letter2++;
 	}while(letter2 < wtext_len && iswalnum(wide_text[letter2]));
 	if(letter2 < wtext_len && wide_text[letter2] == ' ') letter2++;
+
+	if(letter1 < 0) letter1 = 0;
+	if(letter2 < 0) letter2 = 0;
+	if(letter1 > wtext_len) letter1 = wtext_len;
+	if(letter2 > wtext_len) letter2 = wtext_len;
+}
+
+void BC_TextBox::select_line(int &letter1, int &letter2, int ibeam_letter)
+{
+	if(!wtext_len) return;
+
+	letter1 = letter2 = ibeam_letter;
+
+// Rewind to previous linefeed
+	do
+	{
+		if(wide_text[letter1] != '\n') letter1--;
+	}while(letter1 > 0 && wide_text[letter1] != '\n');
+	if(wide_text[letter1] == '\n') letter1++;
+
+// Advance to next linefeed
+	do
+	{
+		if(wide_text[letter2] != '\n') letter2++;
+	}while(letter2 < wtext_len && wide_text[letter2] != '\n');
+	if(letter2 < wtext_len && wide_text[letter2] == '\n') letter2++;
 
 	if(letter1 < 0) letter1 = 0;
 	if(letter2 < 0) letter2 = 0;
@@ -2223,6 +2286,7 @@ int BC_TumbleTextBoxText::button_press_event()
 	if(is_event_win())
 	{
 		if(get_buttonpress() < 4) return BC_TextBox::button_press_event();
+
 		if(get_buttonpress() == 4)
 		{
 			popup->tumbler->handle_up_event();

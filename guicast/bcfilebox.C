@@ -420,6 +420,7 @@ BC_FileBoxOK::~BC_FileBoxOK()
 
 int BC_FileBoxOK::handle_event()
 {
+//printf("BC_FileBoxOK::handle_event %d\n", __LINE__);
 	filebox->submit_file(filebox->textbox->get_text());
 	return 1;
 }

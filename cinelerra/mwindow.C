@@ -1,4 +1,4 @@
-
+;
 /*
  * CINELERRA
  * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
@@ -44,6 +44,7 @@
 #include "errorbox.h"
 #include "fileformat.h"
 #include "file.h"
+#include "fileserver.h"
 #include "filesystem.h"
 #include "filexml.h"
 #include "framecache.h"
@@ -146,7 +147,7 @@ extern "C"
 
 
 ArrayList<PluginServer*>* MWindow::plugindb = 0;
-
+FileServer* MWindow::file_server = 0;
 
 
 MWindow::MWindow()
@@ -186,16 +187,12 @@ MWindow::~MWindow()
 	}
 	plugin_gui_lock->unlock();
 
-SET_TRACE
 	clean_indexes();
-SET_TRACE
 
 	save_defaults();
-SET_TRACE
 // Give up and go to a movie
 	exit(0);
 
-SET_TRACE
 	delete mainprogress;
 	delete audio_cache;             // delete the cache after the assets
 	delete video_cache;             // delete the cache after the assets
@@ -584,13 +581,11 @@ void MWindow::clean_indexes()
 	char string2[BCTEXTLEN];
 
 // Delete extra indexes
-SET_TRACE
 	fs.set_filter("*.idx");
 	fs.complete_path(preferences->index_directory);
 	fs.update(preferences->index_directory);
 //printf("MWindow::clean_indexes 1 %d\n", fs.dir_list.total);
 
-SET_TRACE
 // Eliminate directories
 	result = 1;
 	while(result)
@@ -609,11 +604,9 @@ SET_TRACE
 	}
 	total_excess = fs.dir_list.total - preferences->index_count;
 
-SET_TRACE
 //printf("MWindow::clean_indexes 2 %d\n", fs.dir_list.total);
 	while(total_excess > 0)
 	{
-SET_TRACE
 // Get oldest
 		for(int i = 0; i < fs.dir_list.total; i++)
 		{
@@ -626,7 +619,6 @@ SET_TRACE
 			}
 		}
 
-SET_TRACE
 		if(oldest_item >= 0)
 		{
 // Remove index file
@@ -650,10 +642,8 @@ SET_TRACE
 			}
 		}
 
-SET_TRACE
 		total_excess--;
 	}
-SET_TRACE
 }
 
 void MWindow::init_awindow()
@@ -939,7 +929,6 @@ int MWindow::load_filenames(ArrayList<char*> *filenames,
 	ArrayList<EDL*> new_edls;
 	ArrayList<Asset*> new_assets;
 	ArrayList<File*> new_files;
-SET_TRACE
 
 //	save_defaults();
 	gui->start_hourglass();
@@ -957,8 +946,6 @@ SET_TRACE
 	cwindow->playback_engine->interrupt_playback(0);
 	vwindow->playback_engine->interrupt_playback(0);
 
-
-SET_TRACE
 
 // Define new_edls and new_assets to load
 	int result = 0;
@@ -1019,14 +1006,10 @@ SET_TRACE
 
 				if(load_mode != LOADMODE_RESOURCESONLY)
 				{
-SET_TRACE
 					asset_to_edl(new_edl, new_asset);
-SET_TRACE
 					new_edls.append(new_edl);
-SET_TRACE
 					new_asset->Garbage::remove_user();
 					new_asset = 0;
-SET_TRACE
 				}
 				else
 				{
@@ -1190,26 +1173,22 @@ SET_TRACE
 			}
 		}
 
-SET_TRACE
 		if(result)
 		{
-			delete new_edl;
+			new_edl->Garbage::remove_user();
 			new_asset->Garbage::remove_user();
 			new_edl = 0;
 			new_asset = 0;
 		}
-SET_TRACE
 
 // Store for testing index
 		new_files.append(new_file);
-SET_TRACE
 	}
 
 
 
 	if(!result) gui->statusbar->default_message();
 
-SET_TRACE
 
 
 
@@ -1234,7 +1213,6 @@ SET_TRACE
 					edl->session->plugins_follow_edits);
 		}
 
-SET_TRACE
 		paste_edls(&new_edls, 
 			load_mode,
 			0,
@@ -1242,12 +1220,10 @@ SET_TRACE
 			edl->session->labels_follow_edits, 
 			edl->session->plugins_follow_edits,
 			0); // overwrite
-SET_TRACE
 	}
 
 
 
-SET_TRACE
 
 
 // Add new assets to EDL and schedule assets for index building.
@@ -1293,13 +1269,10 @@ SET_TRACE
 
 	}
 
-SET_TRACE
 // Start examining next batch of index files
 	if(got_indexes) mainindexes->start_build();
 
-SET_TRACE
 	update_project(load_mode);
-SET_TRACE
 
 
 	for(int i = 0; i < new_edls.size(); i++)
@@ -1321,7 +1294,6 @@ SET_TRACE
 
 
 	gui->stop_hourglass();
-SET_TRACE
 
 	return 0;
 }
@@ -1430,6 +1402,15 @@ void MWindow::init_shm()
 	}
 }
 
+
+void MWindow::init_fileserver(Preferences *preferences)
+{
+#ifdef USE_FILEFORK
+	file_server = new FileServer(preferences);
+	file_server->start();
+#endif
+}
+
 void MWindow::create_objects(int want_gui, 
 	int want_new,
 	char *config_path)
@@ -1444,7 +1425,12 @@ void MWindow::create_objects(int want_gui,
 // get trapped.
 	init_signals();
 
+
+
 	init_3d();
+
+
+
 	remove_thread = new RemoveThread;
 	remove_thread->create_objects();
 //	show_splash();
@@ -1456,6 +1442,7 @@ void MWindow::create_objects(int want_gui,
 	init_defaults(defaults, config_path);
 	default_standard = default_std();
 	init_preferences();
+
 	init_plugins(preferences, splash_window);
 	if(splash_window) splash_window->operation->update(_("Initializing GUI"));
 	init_theme();
@@ -1463,6 +1450,10 @@ void MWindow::create_objects(int want_gui,
 	strcpy(string, preferences->plugin_dir);
 	strcat(string, "/" FONT_SEARCHPATH);
 	BC_Resources::init_fontconfig(string);
+
+// Initialize before too much else is running
+// Preferences & theme are required for MPEG
+	init_fileserver(preferences);
 
 // Default project created here
 	init_edl();
@@ -1535,13 +1526,13 @@ void MWindow::create_objects(int want_gui,
 
 	if(preferences->use_tipwindow)
 		init_tipwindow();
-		
+
 
 	hide_splash();
 	init_shm();
 
-
 	BC_WindowBase::get_resources()->vframe_shm = 1;
+
 }
 
 
@@ -1567,21 +1558,13 @@ void MWindow::hide_splash()
 void MWindow::start()
 {
 ENABLE_BUFFER
-//SET_TRACE
 	vwindow->start();
-//SET_TRACE
 	awindow->start();
-//SET_TRACE
 	cwindow->start();
-//SET_TRACE
 	lwindow->start();
-//SET_TRACE
 	gwindow->start();
-//SET_TRACE
 	Thread::start();
-//SET_TRACE
 	playback_3d->start();
-//SET_TRACE
 }
 
 void MWindow::run()
@@ -1687,18 +1670,20 @@ void MWindow::set_keyframe_type(int mode)
 	gui->unlock_window();
 }
 
-int MWindow::set_editing_mode(int new_editing_mode)
+int MWindow::set_editing_mode(int new_editing_mode, int lock_mwindow, int lock_cwindow)
 {
-	gui->lock_window("MWindow::set_editing_mode");
+	if(lock_mwindow) gui->lock_window("MWindow::set_editing_mode");
 	edl->session->editing_mode = new_editing_mode;
 	gui->mbuttons->edit_panel->editing_mode = edl->session->editing_mode;
 	gui->mbuttons->edit_panel->update();
 	gui->canvas->update_cursor();
-	gui->unlock_window();
-	cwindow->gui->lock_window("MWindow::set_editing_mode");
+	if(lock_mwindow) gui->unlock_window();
+
+
+	if(lock_cwindow) cwindow->gui->lock_window("MWindow::set_editing_mode");
 	cwindow->gui->edit_panel->update();
 	cwindow->gui->edit_panel->editing_mode = edl->session->editing_mode;
-	cwindow->gui->unlock_window();
+	if(lock_cwindow) cwindow->gui->unlock_window();
 	return 0;
 }
 
@@ -1706,9 +1691,9 @@ void MWindow::toggle_editing_mode()
 {
 	int mode = edl->session->editing_mode;
 	if( mode == EDITING_ARROW )
-		set_editing_mode(EDITING_IBEAM);
+		set_editing_mode(EDITING_IBEAM, 0, 0);
 	else
-		set_editing_mode(EDITING_ARROW);
+		set_editing_mode(EDITING_ARROW, 0, 0);
 }
 
 
@@ -1767,6 +1752,7 @@ void MWindow::age_caches()
 	int64_t prev_memory_usage;
 	int64_t memory_usage;
 	int result = 0;
+
 	do
 	{
 		memory_usage = audio_cache->get_memory_usage(1) +
@@ -1774,6 +1760,7 @@ void MWindow::age_caches()
 			frame_cache->get_memory_usage() +
 			wave_cache->get_memory_usage();
 
+//printf("MWindow::age_caches %d %lld %lld\n", __LINE__, memory_usage, preferences->cache_size);
 		if(memory_usage > preferences->cache_size)
 		{
 			int target = 1;
@@ -1784,6 +1771,9 @@ void MWindow::age_caches()
 			if(oldest3 < oldest1 && oldest3 < oldest2) target = 3;
 			int oldest4 = wave_cache->get_oldest();
 			if(oldest4 < oldest3 && oldest4 < oldest2 && oldest4 < oldest1) target = 4;
+
+//printf("MWindow::age_caches %d %d\n", __LINE__, target);
+
 			switch(target)
 			{
 				case 1: audio_cache->delete_oldest(); break;
@@ -1842,7 +1832,6 @@ void MWindow::show_keyframe_gui(Plugin *plugin)
 
 void MWindow::show_plugin(Plugin *plugin)
 {
-//SET_TRACE
 	int done = 0;
 
 SET_TRACE
@@ -1896,44 +1885,34 @@ SET_TRACE
 //printf("MWindow::show_plugin %d\n", __LINE__);
 SET_TRACE
 //sleep(1);
-//SET_TRACE
 //printf("MWindow::show_plugin 2\n");
 }
 
 void MWindow::hide_plugin(Plugin *plugin, int lock)
 {
-SET_TRACE
 	plugin->show = 0;
 // Update the toggle
 	gui->lock_window("MWindow::hide_plugin");
 	gui->update(0, 1, 0, 0, 0, 0, 0);
 	gui->unlock_window();
-SET_TRACE
 
 	if(lock) plugin_gui_lock->lock("MWindow::hide_plugin");
 	for(int i = 0; i < plugin_guis->total; i++)
 	{
 		if(plugin_guis->values[i]->plugin == plugin)
 		{
-SET_TRACE
 			PluginServer *ptr = plugin_guis->values[i];
-SET_TRACE
 			plugin_guis->remove(ptr);
-SET_TRACE
 			if(lock) plugin_gui_lock->unlock();
 // Last command executed in client side close
-SET_TRACE
 // Schedule for deletion
 			ptr->hide_gui();
 			delete_plugin(ptr);
-SET_TRACE
 //sleep(1);
-//SET_TRACE
-			return;
+//			return;
 		}
 	}
 	if(lock) plugin_gui_lock->unlock();
-SET_TRACE
 }
 
 void MWindow::delete_plugin(PluginServer *plugin)
@@ -2075,7 +2054,6 @@ void MWindow::render_plugin_gui(void *data, int size, Plugin *plugin)
 
 void MWindow::update_plugin_states()
 {
-SET_TRACE
 	plugin_gui_lock->lock("MWindow::update_plugin_states");
 	for(int i = 0; i < plugin_guis->total; i++)
 	{

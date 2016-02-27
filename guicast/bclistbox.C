@@ -366,6 +366,7 @@ BC_ListBox::BC_ListBox(int x,
 	bg_surface = 0;
  	bg_pixmap = 0;
 
+
  	current_operation = NO_OPERATION;
 	button_highlighted = 0;
 
@@ -555,6 +556,7 @@ int BC_ListBox::initialize()
 
 		gui = 0;
 		current_operation = NO_OPERATION;
+		
 	}
 	else
 	{
@@ -4092,6 +4094,7 @@ int BC_ListBox::keypress_event()
 	{
 		selection_changed();
 	}
+
 	return result;
 }
 

@@ -79,6 +79,8 @@ RenderFarmClient::RenderFarmClient(int port,
 	strcpy(string, boot_preferences->plugin_dir);
 	strcat(string, "/" FONT_SEARCHPATH);
 	BC_Resources::init_fontconfig(string);
+
+	MWindow::init_fileserver(boot_preferences);
 }
 
 

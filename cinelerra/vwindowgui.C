@@ -83,6 +83,7 @@ void VWindowGUI::change_source(EDL *edl, const char *title)
 {
 	update_sources(title);
 	char string[BCTEXTLEN];
+
 	if(title[0]) 
 		sprintf(string, PROGRAM_NAME ": %s", title);
 	else
@@ -552,14 +553,14 @@ void VWindowEditing::prev_label()
 		{
 			edl->local_session->set_selectionstart(0);
 			edl->local_session->set_selectionend(0);
-			vwindow->update_position(CHANGE_NONE, 0, 1);
+			vwindow->update_position(CHANGE_NONE, 0, 1, 0);
 			vwindow->gui->timebar->update();
 		}
 		else
 		{
 			edl->local_session->set_selectionstart(current->position);
 			edl->local_session->set_selectionend(current->position);
-			vwindow->update_position(CHANGE_NONE, 0, 1);
+			vwindow->update_position(CHANGE_NONE, 0, 1, 0);
 			vwindow->gui->timebar->update();
 		}
 	}
@@ -581,7 +582,7 @@ void VWindowEditing::next_label()
 			double position = edl->tracks->total_length();
 			edl->local_session->set_selectionstart(position);
 			edl->local_session->set_selectionend(position);
-			vwindow->update_position(CHANGE_NONE, 0, 1);
+			vwindow->update_position(CHANGE_NONE, 0, 1, 0);
 			vwindow->gui->timebar->update();
 		}
 		else
@@ -592,7 +593,7 @@ void VWindowEditing::next_label()
 
 			edl->local_session->set_selectionstart(current->position);
 			edl->local_session->set_selectionend(current->position);
-			vwindow->update_position(CHANGE_NONE, 0, 1);
+			vwindow->update_position(CHANGE_NONE, 0, 1, 0);
 			vwindow->gui->timebar->update();
 		}
 	}
@@ -709,7 +710,7 @@ int VWindowSlider::handle_event()
 	vwindow->playback_engine->interrupt_playback(1);
 	lock_window("VWindowSlider::handle_event");
 
-	vwindow->update_position(CHANGE_NONE, 1, 0);
+	vwindow->update_position(CHANGE_NONE, 1, 0, 0);
 	gui->timebar->update();
 	return 1;
 }
@@ -1125,7 +1126,7 @@ int VWindowInPoint::handle_event()
 		gui->timebar->update();
 
 // Que the VWindow
-		mwindow->vwindow->update_position(CHANGE_NONE, 0, 1);
+		mwindow->vwindow->update_position(CHANGE_NONE, 0, 1, 0);
 	}
 	return 1;
 }
@@ -1158,7 +1159,7 @@ int VWindowOutPoint::handle_event()
 		gui->timebar->update();
 
 // Que the VWindow
-		mwindow->vwindow->update_position(CHANGE_NONE, 0, 1);
+		mwindow->vwindow->update_position(CHANGE_NONE, 0, 1, 0);
 	}
 
 	return 1;

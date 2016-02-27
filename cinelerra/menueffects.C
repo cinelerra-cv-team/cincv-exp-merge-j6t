@@ -446,6 +446,7 @@ void MenuEffectThread::run()
 		{
 // open output file in write mode
 			file->set_processors(mwindow->preferences->processors);
+			file->set_cache(mwindow->preferences->cache_size);
 			if(file->open_file(mwindow->preferences, 
 				asset, 
 				0, 
@@ -504,6 +505,8 @@ void MenuEffectThread::run()
 
 		if(load_mode == LOADMODE_PASTE)
 			mwindow->clear(0);
+
+
 		mwindow->load_assets(&assets,
 			-1,
 			load_mode,

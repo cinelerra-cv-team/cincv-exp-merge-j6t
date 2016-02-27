@@ -479,7 +479,7 @@ int quicktime_ffmpeg_decode(quicktime_ffmpeg_t *ffmpeg,
  */
 			while(frame1 <= frame2)
 			{
-//printf("quicktime_ffmpeg_decode %d\n", __LINE__);
+//printf("quicktime_ffmpeg_decode %d frame1=%d\n", __LINE__, frame1);
 				result = decode_wrapper(file, 
 					vtrack, 
 					ffmpeg, 

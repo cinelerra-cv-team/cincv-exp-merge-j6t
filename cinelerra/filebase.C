@@ -223,7 +223,6 @@ void FileBase::reset_parameters()
 	prev_layer = -1;
 	ulawtofloat_table = 0;
 	floattoulaw_table = 0;
-	rd = wr = 0;
 	pcm_history = 0;
 	history_start = 0;
 	history_size = 0;
@@ -322,6 +321,7 @@ int FileBase::search_render_strategies(ArrayList<int>* render_strategies, int re
 
 int64_t FileBase::get_memory_usage()
 {
+//printf("FileBase::get_memory_usage %d\n", __LINE__);
 	if(pcm_history) 
 		return history_allocated * 
 			history_channels * 

@@ -1,7 +1,6 @@
-
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +39,7 @@
 #include "edl.inc"
 #include "edlsession.inc"
 #include "exportedl.inc"
+#include "fileserver.inc"
 #include "filesystem.inc"
 #include "filexml.inc"
 #include "framecache.inc"
@@ -398,6 +398,8 @@ public:
 // Attach default transition to single edit
 	void paste_audio_transition();
 	void paste_video_transition();
+	void shuffle_edits();
+	void align_edits();
 	void set_edit_length(double length);
 // Set length of single transition
 	void set_transition_length(Transition *transition, double length);
@@ -418,7 +420,7 @@ public:
 	void set_labels_follow_edits(int value);
 
 // Update the editing mode
-	int set_editing_mode(int new_editing_mode);
+	int set_editing_mode(int new_editing_mode, int lock_mwindow, int lock_cwindow);
 	void toggle_editing_mode();
 	void set_inpoint(int is_mwindow);
 	void set_outpoint(int is_mwindow);
@@ -501,6 +503,8 @@ public:
 	ChannelDB *channeldb_buz;
 	ChannelDB *channeldb_v4l2jpeg;
 
+	static FileServer *file_server;
+
 // ====================================== plugins ==============================
 
 // Contains file descriptors for all the dlopens
@@ -557,6 +561,7 @@ public:
 
 // Initialize shared memory
 	void init_shm();
+	static void init_fileserver(Preferences *preferences);
 
 // Initialize channel DB's for playback
 	void init_channeldb();

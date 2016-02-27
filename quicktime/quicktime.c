@@ -278,6 +278,8 @@ int quicktime_set_video(quicktime_t *file,
 		}
 	}
 
+	quicktime_set_cache_max(file, file->cache_size);
+
 	return 0;
 }
 
@@ -1041,6 +1043,22 @@ int64_t quicktime_memory_usage(quicktime_t *file)
 	return result;
 }
 
+void quicktime_set_cache_max(quicktime_t *file, int bytes)
+{
+	int i;
+	file->cache_size = bytes;
+
+
+//printf("quicktime_set_cache_max %d %d %d\n", __LINE__, bytes, file->total_vtracks);
+	for(i = 0; i < file->total_vtracks; i++)
+	{
+		quicktime_cache_max(file->vtracks[i].frame_cache, bytes);
+	}
+}
+
+
+
+
 
 int quicktime_init_audio_map(quicktime_audio_map_t *atrack, quicktime_trak_t *trak)
 {
@@ -1084,6 +1102,8 @@ void quicktime_init_maps(quicktime_t *file)
 
 		quicktime_init_video_map(&(file->vtracks[i]), file->moov.trak[track]);
 	}
+
+	quicktime_set_cache_max(file, file->cache_size);
 }
 
 int quicktime_read_info(quicktime_t *file)

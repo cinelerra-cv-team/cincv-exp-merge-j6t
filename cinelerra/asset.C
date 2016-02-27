@@ -1,7 +1,6 @@
-
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +70,6 @@ Asset::~Asset()
 
 int Asset::init_values()
 {
-
 	path[0] = 0;
 //	format = FILE_MOV;
 // Has to be unknown for file probing to succeed
@@ -542,21 +540,11 @@ int Asset::read_audio(FileXML *file)
 	header = file->tag.get_property("HEADER", 0);
 	dither = file->tag.get_property("DITHER", 0);
 
-	audio_length = file->tag.get_property("AUDIO_LENGTH", 0);
+	audio_length = file->tag.get_property("AUDIO_LENGTH", (int64_t)0);
 	acodec[0] = 0;
 	file->tag.get_property("ACODEC", acodec);
 	
 
-
-// 	ampeg_bitrate = file->tag.get_property("AMPEG_BITRATE", ampeg_bitrate);
-// 	ampeg_derivative = file->tag.get_property("AMPEG_DERIVATIVE", ampeg_derivative);
-// 
-// 	vorbis_vbr = file->tag.get_property("VORBIS_VBR", vorbis_vbr);
-// 	vorbis_min_bitrate = file->tag.get_property("VORBIS_MIN_BITRATE", vorbis_min_bitrate);
-// 	vorbis_bitrate = file->tag.get_property("VORBIS_BITRATE", vorbis_bitrate);
-// 	vorbis_max_bitrate = file->tag.get_property("VORBIS_MAX_BITRATE", vorbis_max_bitrate);
-// 
-// 	mp3_bitrate = file->tag.get_property("MP3_BITRATE", mp3_bitrate);
 
 	if(!video_data)
 	{
@@ -582,7 +570,7 @@ int Asset::read_video(FileXML *file)
 	vcodec[0] = 0;
 	file->tag.get_property("VCODEC", vcodec);
 
-	video_length = file->tag.get_property("VIDEO_LENGTH", 0);
+	video_length = file->tag.get_property("VIDEO_LENGTH", (int64_t)0);
 
 	interlace_autofixoption = file->tag.get_property("INTERLACE_AUTOFIX",0);
 
@@ -821,6 +809,7 @@ void Asset::load_defaults(BC_Hash *defaults,
 	if(do_format)
 	{
 		format = GET_DEFAULT("FORMAT", format);
+		use_header = GET_DEFAULT("USE_HEADER", use_header);
 	}
 
 	if(do_data_types)
@@ -835,6 +824,22 @@ void Asset::load_defaults(BC_Hash *defaults,
 		dither = GET_DEFAULT("DITHER", 0);
 		signed_ = GET_DEFAULT("SIGNED", 1);
 		byte_order = GET_DEFAULT("BYTE_ORDER", 1);
+
+
+
+// Used by filefork
+		channels = GET_DEFAULT("CHANNELS", 2);
+		if(!sample_rate) sample_rate = GET_DEFAULT("RATE", 44100);
+		header = GET_DEFAULT("HEADER", 0);
+		audio_length = GET_DEFAULT("AUDIO_LENGTH", (int64_t)0);
+
+
+
+		height = GET_DEFAULT("HEIGHT", height);
+		width = GET_DEFAULT("WIDTH", width);
+		layers = GET_DEFAULT("LAYERS", layers);
+		if(EQUIV(frame_rate, 0)) frame_rate = GET_DEFAULT("FRAMERATE", frame_rate);
+		video_length = GET_DEFAULT("VIDEO_LENGTH", (int64_t)0);
 	}
 
 	ampeg_bitrate = GET_DEFAULT("AMPEG_BITRATE", ampeg_bitrate);
@@ -942,9 +947,13 @@ void Asset::save_defaults(BC_Hash *defaults,
 
 	UPDATE_DEFAULT("PATH", path);
 
+
+
+
 	if(do_format)
 	{
 		UPDATE_DEFAULT("FORMAT", format);
+		UPDATE_DEFAULT("USE_HEADER", use_header);
 	}
 
 	if(do_data_types)
@@ -1044,6 +1053,26 @@ void Asset::save_defaults(BC_Hash *defaults,
 		UPDATE_DEFAULT("DITHER", dither);
 		UPDATE_DEFAULT("SIGNED", signed_);
 		UPDATE_DEFAULT("BYTE_ORDER", byte_order);
+
+
+
+
+
+
+// Used by filefork
+		UPDATE_DEFAULT("CHANNELS", channels);
+		UPDATE_DEFAULT("RATE", sample_rate);
+		UPDATE_DEFAULT("HEADER", header);
+		UPDATE_DEFAULT("AUDIO_LENGTH", audio_length);
+
+
+
+		UPDATE_DEFAULT("HEIGHT", height);
+		UPDATE_DEFAULT("WIDTH", width);
+		UPDATE_DEFAULT("LAYERS", layers);
+		UPDATE_DEFAULT("FRAMERATE", frame_rate);
+		UPDATE_DEFAULT("VIDEO_LENGTH", video_length);
+
 	}
 
 	UPDATE_DEFAULT("REEL_NAME", reel_name);
@@ -1105,6 +1134,13 @@ int Asset::dump()
 	printf("   video_data %d layers %d framerate %f width %d height %d vcodec %c%c%c%c aspect_ratio %f interlace_mode %s\n",
 	       video_data, layers, frame_rate, width, height, vcodec[0], vcodec[1], vcodec[2], vcodec[3], aspect_ratio, string);
 	printf("   video_length %lld \n", video_length);
+	printf("   ms_bitrate_tolerance=%d\n", ms_bitrate_tolerance);
+	printf("   ms_quantization=%d\n", ms_quantization);
+	printf("   ms_fix_bitrate=%d\n", ms_fix_bitrate);
+	printf("   ms_interlaced=%d\n", ms_interlaced);
+	printf("   h264_bitrate=%d\n", h264_bitrate);
+	printf("   h264_quantizer=%d\n", h264_quantizer);
+	printf("   h264_fix_bitrate=%d\n", h264_fix_bitrate);
 	printf("   reel_name %s reel_number %i tcstart %jd tcend %jd tcf %d\n",
 		reel_name, reel_number, tcstart, tcend, tcformat);
 	

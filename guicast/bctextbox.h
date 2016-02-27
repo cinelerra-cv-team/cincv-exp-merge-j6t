@@ -170,6 +170,7 @@ private:
 	void get_ibeam_position(int &x, int &y);
 	void find_ibeam(int dispatch_event);
 	void select_word(int &letter1, int &letter2, int ibeam_letter);
+	void select_line(int &letter1, int &letter2, int ibeam_letter);
 	int get_cursor_letter(int cursor_x, int cursor_y);
 	int get_row_h(int rows);
 	void default_keypress(int &dispatch_event, int &result);
@@ -183,7 +184,8 @@ private:
 	int ibeam_letter;
 	int highlight_letter1, highlight_letter2;
 	int highlight_letter3, highlight_letter4;
-	int text_x1, text_start, text_end, text_selected, word_selected;
+	int text_x1, text_start, text_end;
+	int text_selected, word_selected, line_selected;
 	int text_ascent, text_descent, text_height;
 	int left_margin, right_margin, top_margin, bottom_margin;
 	int has_border;

@@ -118,8 +118,6 @@ int FileVorbis::open_file(int rd, int wr)
 {
 
 	int result = 0;
-	this->rd = rd;
-	this->wr = wr;
 
 //printf("FileVorbis::open_file 1\n");
 	if(rd)
@@ -249,7 +247,7 @@ int FileVorbis::close_file_derived()
 {
 	if(fd)
 	{
-		if(wr)
+		if(file->wr)
 		{
 			vorbis_analysis_wrote(&vd, 0);
 			FLUSH_VORBIS
@@ -262,7 +260,7 @@ int FileVorbis::close_file_derived()
 			fclose(fd);
 		}
 		
-		if(rd)
+		if(file->rd)
 		{
 // This also closes the file handle.
 			ov_clear(&vf);

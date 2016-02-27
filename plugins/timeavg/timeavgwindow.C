@@ -52,6 +52,8 @@ void TimeAvgWindow::create_objects()
 	y += 30;
 	add_tool(paranoid = new TimeAvgParanoid(client, x, y));
 	y += 30;
+	add_tool(no_subtract = new TimeAvgNoSubtract(client, x, y));
+	y += 30;
 	add_tool(bar = new BC_Bar(x, y, get_w() - x * 2));
 	y += bar->get_h() + 5;
 
@@ -60,8 +62,6 @@ void TimeAvgWindow::create_objects()
 	add_tool(avg = new TimeAvgAvg(client, this, x, y));
 	y += 30;
 	add_tool(accum = new TimeAvgAccum(client, this, x, y));
-	y += 30;
-	add_tool(no_subtract = new TimeAvgNoSubtract(client, x, y));
 	y += 30;
 	add_tool(bar = new BC_Bar(x, y, get_w() - x * 2));
 	y += bar->get_h() + 5;
@@ -103,15 +103,15 @@ void TimeAvgWindow::update_toggles()
 	greater->update(client->config.mode == TimeAvgConfig::GREATER);
 	less->update(client->config.mode == TimeAvgConfig::LESS);
 
-	if(client->config.mode == TimeAvgConfig::AVERAGE ||
-		client->config.mode == TimeAvgConfig::ACCUMULATE)
-	{
-		no_subtract->enable();
-	}
-	else
-	{
-		no_subtract->disable();
-	}
+// 	if(client->config.mode == TimeAvgConfig::AVERAGE ||
+// 		client->config.mode == TimeAvgConfig::ACCUMULATE)
+// 	{
+// 		no_subtract->enable();
+// 	}
+// 	else
+// 	{
+// 		no_subtract->disable();
+// 	}
 
 	if(client->config.mode == TimeAvgConfig::REPLACE)
 	{
@@ -317,7 +317,7 @@ TimeAvgParanoid::TimeAvgParanoid(TimeAvgMain *client, int x, int y)
  : BC_CheckBox(x, 
  	y, 
 	client->config.paranoid,
-	_("Accumulate sequence again"))
+	_("Restart for every frame"))
 {
 	this->client = client;
 }
@@ -337,7 +337,7 @@ TimeAvgNoSubtract::TimeAvgNoSubtract(TimeAvgMain *client, int x, int y)
  : BC_CheckBox(x, 
  	y, 
 	client->config.nosubtract,
-	_("Accumulate only"))
+	_("Don't buffer frames"))
 {
 	this->client = client;
 }

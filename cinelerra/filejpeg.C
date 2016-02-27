@@ -164,9 +164,10 @@ int FileJPEG::write_frame(VFrame *frame, VFrame *data, FrameWriterUnit *unit)
 		jpeg_unit->compressor = mjpeg_new(asset->width, 
 			asset->height, 
 			1);
+
 	mjpeg_set_quality((mjpeg_t*)jpeg_unit->compressor, asset->jpeg_quality);
-	
-	
+
+
 	mjpeg_compress((mjpeg_t*)jpeg_unit->compressor, 
 		frame->get_rows(), 
 		frame->get_y(), 
@@ -174,13 +175,13 @@ int FileJPEG::write_frame(VFrame *frame, VFrame *data, FrameWriterUnit *unit)
 		frame->get_v(),
 		frame->get_color_model(),
 		1);
-	
+
 	data->allocate_compressed_data(mjpeg_output_size((mjpeg_t*)jpeg_unit->compressor));
 	data->set_compressed_size(mjpeg_output_size((mjpeg_t*)jpeg_unit->compressor));
 	memcpy(data->get_data(), 
 		mjpeg_output_buffer((mjpeg_t*)jpeg_unit->compressor), 
 		mjpeg_output_size((mjpeg_t*)jpeg_unit->compressor));
-	
+
 	return result;
 }
 
@@ -206,6 +207,13 @@ int FileJPEG::read_frame_header(char *path)
 		return 1;
 	}
 	
+
+	unsigned char test[2];
+	fread(test, 2, 1, stream);
+	fseek(stream, 0, SEEK_SET);
+	if(test[0] != 0xff ||
+		test[1] != 0xd8)
+		return 1;
 	
 
 	struct jpeg_decompress_struct jpeg_decompress;
@@ -224,9 +232,7 @@ int FileJPEG::read_frame_header(char *path)
 
 	jpeg_destroy((j_common_ptr)&jpeg_decompress);
 	fclose(stream);
-	
-	
-	
+
 	return result;
 }
 
@@ -234,6 +240,11 @@ int FileJPEG::read_frame_header(char *path)
 
 int FileJPEG::read_frame(VFrame *output, VFrame *input)
 {
+	if(input->get_compressed_size() < 2 ||
+		input->get_data()[0] != 0xff ||
+		input->get_data()[1] != 0xd8)
+		return 1;
+	
 	if(!decompressor) decompressor = mjpeg_new(asset->width, 
 		asset->height, 
 		1);
