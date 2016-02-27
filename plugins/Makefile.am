@@ -103,6 +103,7 @@ SUBDIRS= \
 	spectrogram \
 	svg \
 	swapchannels \
+	swapframes \
 	synthesizer \
 	threshold \
 	timeavg \

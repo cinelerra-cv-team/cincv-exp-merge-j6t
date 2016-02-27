@@ -159,10 +159,7 @@ int SwapFramesOdd::handle_event()
 SwapFramesWindow::SwapFramesWindow(SwapFrames *plugin)
  : PluginClientWindow(plugin, 
 	260, 
-	130, 
-	260, 
-	130, 
-	0)
+	130)
 {
 	this->plugin = plugin;
 }

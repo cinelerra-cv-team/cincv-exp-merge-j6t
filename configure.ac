@@ -785,6 +785,7 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/defaulttheme/Makefile \
 	plugins/defaulttheme/data/Makefile \
 	plugins/swapchannels/Makefile \
+	plugins/swapframes/Makefile \
 	plugins/synthesizer/Makefile \
 	plugins/threshold/Makefile \
 	plugins/timeavg/Makefile \
