@@ -35,6 +35,9 @@ extern "C"
 
 #include <string.h>
 
+// Different ffmpeg versions
+#define FFMPEG_2010
+
 Mutex* FileFFMPEG::ffmpeg_lock = new Mutex("FileFFMPEG::ffmpeg_lock");
 
 FileFFMPEG::FileFFMPEG(Asset *asset, File *file)
@@ -589,9 +592,12 @@ int FileFFMPEG::read_frame(VFrame *frame)
 			case PIX_FMT_YUV420P:
 				input_cmodel = BC_YUV420P;
 				break;
+#ifndef FFMPEG_2010
 			case PIX_FMT_YUV422:
 				input_cmodel = BC_YUV422;
 				break;
+#endif
+
 			case PIX_FMT_YUV422P:
 				input_cmodel = BC_YUV422P;
 				break;

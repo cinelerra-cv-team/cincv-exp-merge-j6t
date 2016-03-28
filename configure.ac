@@ -545,9 +545,10 @@ if test "x$with_external_ffmpeg" = "xyes"; then
      FFMPEG_EXTERNALTEXT="External ffmpeg"
 else
      FFMPEG_FOLDER=ffmpeg
-     FFMPEG_CFLAGS="-I\$(top_srcdir)/quicktime/ffmpeg"
+     FFMPEG_CFLAGS="-I\$(top_srcdir)/quicktime/ffmpeg -DHAVE_SWSCALER"
      FFMPEG_LIBS="-L\$(top_builddir)/quicktime/ffmpeg/libavformat -lavformat-cinelerra \
 		-L\$(top_builddir)/quicktime/ffmpeg/libavcodec -lavcodec-cinelerra \
+		-L\$(top_builddir)/quicktime/ffmpeg/libswscale -lswscale-cinelerra \
 		-L\$(top_builddir)/quicktime/ffmpeg/libavutil -lavutil-cinelerra"
      FFMPEG_EXTERNALTEXT="Internal ffmpeg"
 fi
@@ -564,6 +565,7 @@ if test "x$with_external_ffmpeg" = "xyes"; then
 	echo Using external ffmpeg - no configuration needed
 else
 	ff_conf_args="--disable-ffmpeg --disable-ffserver --disable-ffplay \
+		--disable-ffprobe --enable-gpl \
 		--disable-static --enable-shared --build-suffix=-cinelerra"
 
 	if test "x$enable_mmx" = "xno"; then
