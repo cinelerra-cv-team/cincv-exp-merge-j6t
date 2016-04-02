@@ -142,7 +142,7 @@ void ResizeTrackWindow::create_objects()
 		y));
 	x += h->get_w() + 5;
 	FrameSizePulldown *pulldown;
-	add_subwindow(pulldown = new FrameSizePulldown(mwindow, 
+	add_subwindow(pulldown = new FrameSizePulldown(mwindow->theme, 
 		w, 
 		h, 
 		x, 

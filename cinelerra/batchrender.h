@@ -131,6 +131,7 @@ public:
 // job being rendered
 	int rendering_job;
 	int is_rendering;
+	ArrayList<BC_ListBoxItem*> *file_entries;
 };
 
 

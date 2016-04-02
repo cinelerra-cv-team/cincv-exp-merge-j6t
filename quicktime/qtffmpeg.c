@@ -140,11 +140,13 @@ quicktime_ffmpeg_t* quicktime_new_ffmpeg(int cpus,
 //		context->height = h;
 		context->extradata = fake_data;
 		context->extradata_size = 0;
+
 		if(esds->mpeg4_header && esds->mpeg4_header_size) 
 		{
 			context->extradata = esds->mpeg4_header;
 			context->extradata_size = esds->mpeg4_header_size;
 		}
+
 		if(avcc->data && avcc->data_size)
 		{
 			context->extradata = avcc->data;
@@ -166,11 +168,29 @@ quicktime_ffmpeg_t* quicktime_new_ffmpeg(int cpus,
 		if(avcodec_open(context, 
 			ptr->decoder[i]) < 0)
 		{
-			printf("quicktime_new_ffmpeg: avcodec_open failed.\n");
-			quicktime_delete_ffmpeg(ptr);
-			ptr = NULL;
-			break;
+			int error = 1;
+// Try again with 1 thread
+			if(cpus > 1)
+			{
+				avcodec_thread_init(context, 1);
+				if(avcodec_open(context, 
+					ptr->decoder[i]) >= 0)
+				{
+					error = 0;
+				}
+			}
+
+			if(error)
+			{
+				printf("quicktime_new_ffmpeg: avcodec_open failed.\n");
+				quicktime_delete_ffmpeg(ptr);
+				ptr = NULL;
+				break;
+			}
 		}
+		
+		
+		
 		ptr->last_frame[i] = -1;
 	}
 	pthread_mutex_unlock(&ffmpeg_lock);

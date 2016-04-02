@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,6 +80,8 @@ void AssetEdit::edit_asset(Indexable *indexable)
 
 	this->indexable = indexable;
 	this->indexable->add_user();
+
+// Copy asset parameters into temporary storage for editing.
 	if(indexable->is_asset)
 	{
 		changed_params->copy_from((Asset*)indexable, 0);
@@ -87,8 +89,15 @@ void AssetEdit::edit_asset(Indexable *indexable)
 	else
 	{
 		EDL *nested_edl = (EDL*)indexable;
+
+        strcpy(changed_params->path, nested_edl->path);
 		changed_params->sample_rate = nested_edl->session->sample_rate;
+        changed_params->channels = nested_edl->session->audio_channels;
+
+//printf("AssetEdit::edit_asset %d %f\n", __LINE__, nested_edl->session->frame_rate);
 		changed_params->frame_rate = nested_edl->session->frame_rate;
+        changed_params->width = nested_edl->session->output_w;
+        changed_params->height = nested_edl->session->output_h;
 	}
 
 	BC_DialogThread::start();
@@ -111,28 +120,37 @@ void AssetEdit::handle_close_event(int result)
 		else
 		{
 			nested_edl = (EDL*)indexable;
-			if(changed_params->sample_rate != nested_edl->session->sample_rate ||
-				!EQUIV(changed_params->frame_rate, changed_params->frame_rate))
+			if(strcmp(changed_params->path, nested_edl->path) 
+//                ||
+//                changed_params->sample_rate != nested_edl->session->sample_rate ||
+//				!EQUIV(changed_params->frame_rate, nested_edl->session->frame_rate)
+                )
 				changed = 1;
 		}
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 
  		if(changed)
  		{
 			mwindow->gui->lock_window();
-			mwindow->remove_asset_from_caches(asset);
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 
 // Omit index status from copy since an index rebuild may have been
 // happening when new_asset was created but not be happening anymore.
 			if(asset)
 			{
+	    		mwindow->remove_asset_from_caches(asset);
 //printf("AssetEdit::handle_close_event %d %f\n", __LINE__, asset->get_frame_rate());
 				asset->copy_from(changed_params, 0);
-//printf("AssetEdit::handle_close_event %d %f\n", __LINE__, asset->get_frame_rate());
+//printf("AssetEdit::handle_close_event %d %d %d\n", __LINE__, changed_params->bits, asset->bits);
 			}
 			else
 			{
 				strcpy(nested_edl->path, changed_params->path);
+// Other parameters can't be changed because they're defined in the other EDL
+//                nested_edl->session->frame_rate = changed_params->frame_rate;
+//                nested_edl->session->sample_rate = changed_params->sample_rate;
 			}
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 
 			mwindow->gui->update(0,
 				2,
@@ -141,6 +159,7 @@ void AssetEdit::handle_close_event(int result)
 				0, 
 				0,
 				0);
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 
 // Start index rebuilding
 			if(asset && asset->audio_data ||
@@ -158,17 +177,21 @@ void AssetEdit::handle_close_event(int result)
 				mwindow->mainindexes->start_build();
 			}
 			mwindow->gui->unlock_window();
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 
 
 			mwindow->awindow->gui->async_update_assets();
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 
 			mwindow->restart_brender();
 			mwindow->sync_parameters(CHANGE_ALL);
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
  		}
  	}
 
 	this->indexable->remove_user();
 	this->indexable = 0;
+//printf("AssetEdit::handle_close_event %d\n", __LINE__);
 }
 
 BC_Window* AssetEdit::new_gui()
@@ -339,7 +362,7 @@ void AssetEditWindow::create_objects()
 		}
 
 		add_subwindow(new BC_Title(x, y, _("Channels:")));
-		sprintf(string, "%d", asset_edit->indexable->get_audio_channels());
+		sprintf(string, "%d", asset_edit->changed_params->channels);
 
 		x = x2;
 		if(allow_edits)
@@ -359,7 +382,7 @@ void AssetEditWindow::create_objects()
 
 		x = x1;
 		add_subwindow(new BC_Title(x, y, _("Sample rate:")));
-		sprintf(string, "%d", asset_edit->indexable->get_sample_rate());
+		sprintf(string, "%d", asset_edit->changed_params->sample_rate);
 
 		x = x2;
 		if(asset)
@@ -386,7 +409,7 @@ void AssetEditWindow::create_objects()
 				bitspopup = new BitsPopup(this, 
 					x, 
 					y, 
-					&asset->bits, 
+					&asset_edit->changed_params->bits, 
 					1, 
 					1, 
 					1,
@@ -458,160 +481,158 @@ void AssetEditWindow::create_objects()
 		}
 	}
 
+	x = x1;
+	if(asset && asset->video_data || nested_edl)
+	{
+		add_subwindow(new BC_Bar(x, y, get_w() - x * 2));
+		y += 5;
+
+		add_subwindow(new BC_Title(x, y, _("Video:"), LARGEFONT, RED));
+		y += 30;
 		x = x1;
-		if(asset && asset->video_data || nested_edl)
+
+
+		if(asset && asset->get_compression_text(0,1))
 		{
-			add_subwindow(new BC_Bar(x, y, get_w() - x * 2));
-			y += 5;
-
-			add_subwindow(new BC_Title(x, y, _("Video:"), LARGEFONT, RED));
-			y += 30;
-			x = x1;
-
-
-			if(asset && asset->get_compression_text(0,1))
-			{
-				add_subwindow(new BC_Title(x, y, _("Compression:")));
-				x = x2;
-				add_subwindow(new BC_Title(x, 
-					y, 
-					asset->get_compression_text(0,1), 
-					MEDIUMFONT, 
-					mwindow->theme->edit_font_color));
-				y += vmargin;
-				x = x1;
-			}
-
-			add_subwindow(new BC_Title(x, y, _("Frame rate:")));
+			add_subwindow(new BC_Title(x, y, _("Compression:")));
 			x = x2;
-			sprintf(string, "%.2f", 
-				asset ? asset->frame_rate : nested_edl->session->frame_rate);
-			
-			if(asset)
-			{
-				BC_TextBox *framerate;
-				add_subwindow(framerate = new AssetEditFRate(this, string, x, y));
-				x += 105;
-				add_subwindow(new FrameRatePulldown(mwindow, framerate, x, y));
-			}
-			else
-			{
-				add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
-			}
-
-			y += 30;
-			x = x1;
-			add_subwindow(new BC_Title(x, y, _("Width:")));
-			x = x2;
-			sprintf(string, "%d", 
-				asset ? asset->width : nested_edl->session->output_w);
-			add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
-
+			add_subwindow(new BC_Title(x, 
+				y, 
+				asset->get_compression_text(0,1), 
+				MEDIUMFONT, 
+				mwindow->theme->edit_font_color));
 			y += vmargin;
 			x = x1;
-			add_subwindow(new BC_Title(x, y, _("Height:")));
+		}
+
+		add_subwindow(new BC_Title(x, y, _("Frame rate:")));
+		x = x2;
+		sprintf(string, "%.2f", asset_edit->changed_params->frame_rate);
+
+//printf("AssetEditWindow::create_objects %d %f\n", __LINE__, asset_edit->changed_params->frame_rate);
+		if(asset)
+		{
+			BC_TextBox *framerate;
+			add_subwindow(framerate = new AssetEditFRate(this, string, x, y));
+			x += 105;
+			add_subwindow(new FrameRatePulldown(mwindow, framerate, x, y));
+		}
+		else
+		{
+			add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+		}
+
+		y += 30;
+		x = x1;
+		add_subwindow(new BC_Title(x, y, _("Width:")));
+		x = x2;
+		sprintf(string, "%d", asset_edit->changed_params->width);
+		add_subwindow(new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+
+		y += vmargin;
+		x = x1;
+		add_subwindow(new BC_Title(x, y, _("Height:")));
+		x = x2;
+		sprintf(string, "%d", asset_edit->changed_params->height);
+		add_subwindow(title = new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
+		y += title->get_h() + 5;
+
+		if(asset && asset->format == FILE_MPEG)
+		{
+			x = x1;
+			add_subwindow(new BC_Title(x, y, _("Subtitle tracks:")));
 			x = x2;
-			sprintf(string, "%d", 
-				asset ? asset->height : nested_edl->session->output_h);
+			sprintf(string, "%d", subtitle_tracks);
 			add_subwindow(title = new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
 			y += title->get_h() + 5;
-
-			if(asset && asset->format == FILE_MPEG)
-			{
-				x = x1;
-				add_subwindow(new BC_Title(x, y, _("Subtitle tracks:")));
-				x = x2;
-				sprintf(string, "%d", subtitle_tracks);
-				add_subwindow(title = new BC_Title(x, y, string, MEDIUMFONT, mwindow->theme->edit_font_color));
-				y += title->get_h() + 5;
-			}
-
-			// --------------------
-			add_subwindow(title = new BC_Title(x1, y, _("Fix interlacing:")));
-			add_subwindow(ilacefixoption_chkboxw = new Interlaceautofix(mwindow,this, x2, y));
-			y += ilacefixoption_chkboxw->get_h() + 5;
-
-			// --------------------
-			add_subwindow(title = new BC_Title(x1, y, _("Asset's interlacing:")));
-			add_subwindow(textboxw = new AssetEditILacemode(this, "", BC_ILACE_ASSET_MODEDEFAULT, x2, y, 200));
-			ilacefixoption_chkboxw->ilacemode_textbox = textboxw;
-			add_subwindow(listboxw = new AssetEditInterlacemodePulldown(mwindow,
-								textboxw, 
-								&asset->interlace_mode,
-								(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_modes,
-								ilacefixoption_chkboxw,
-								x2 + textboxw->get_w(), 
-								y)); 
-			ilacefixoption_chkboxw->ilacemode_listbox = listboxw;
-			y += textboxw->get_h() + 5;
-
-			// --------------------
-			add_subwindow(title = new BC_Title(x1, y, _("Interlace correction:")));
-			add_subwindow(textboxw = new AssetEditILacefixmethod(this, "", BC_ILACE_FIXDEFAULT, x2, y, 200));
-			ilacefixoption_chkboxw->ilacefixmethod_textbox = textboxw;
-			add_subwindow(listboxw = new InterlacefixmethodPulldown(mwindow, 
-								textboxw,
-								&asset->interlace_fixmethod,
-								(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_fixmethods,
-								x2 + textboxw->get_w(), 
-								y)); 
-			ilacefixoption_chkboxw->ilacefixmethod_listbox = listboxw;
-			ilacefixoption_chkboxw->showhideotherwidgets();
-			y += textboxw->get_h() + 5;
-			
-			x = x1;
-			add_subwindow(new BC_Title(x, y, _("Reel Name:")));
-			x = x2;
-			add_subwindow(new AssetEditReelName(this, x, y));
-			y += 30;
-			
-			x = x1;
-			add_subwindow(new BC_Title(x, y, _("Reel Number:")));
-			x = x2;
-			add_subwindow(new AssetEditReelNumber(this, x, y));
-			y += 30;
-			
-			x = x1;
-			add_subwindow(new BC_Title(x, y, _("Time Code Start:")));
-			x = x2;
-
-	// Calculate values to enter into textboxes
-			char tc[12];
-			
-			Units::totext(tc,
-				asset->tcstart / asset->frame_rate,
-				TIME_HMSF,
-				asset->sample_rate,
-				asset->frame_rate);
-			
-			char *tc_hours = tc;
-			char *tc_minutes = strchr(tc, ':') + 1;
-			*(tc_minutes - 1) = 0;
-			char *tc_seconds = strchr(tc_minutes, ':') + 1;
-			*(tc_seconds - 1) = 0;
-			char *tc_rest = strchr(tc_seconds, ':') + 1;
-			*(tc_rest - 1) = 0;
-			
-			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_hours), x, y,
-				(int) (asset->frame_rate * 60 * 60)));
-			x += 30;
-			add_subwindow(new BC_Title(x, y, ":"));
-			x += 10;
-			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_minutes), x, y,
-				(int) (asset->frame_rate * 60)));
-			x += 30;
-			add_subwindow(new BC_Title(x, y, ":"));
-			x += 10;
-			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_seconds), x, y,
-				(int) (asset->frame_rate)));
-			x += 30;
-			add_subwindow(new BC_Title(x, y, ":"));
-			x += 10;
-			add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_rest), x, y, 1));
-
-
-			y += 30;
 		}
+
+		// --------------------
+		add_subwindow(title = new BC_Title(x1, y, _("Fix interlacing:")));
+		add_subwindow(ilacefixoption_chkboxw = new Interlaceautofix(mwindow,this, x2, y));
+		y += ilacefixoption_chkboxw->get_h() + 5;
+
+		// --------------------
+		add_subwindow(title = new BC_Title(x1, y, _("Asset's interlacing:")));
+		add_subwindow(textboxw = new AssetEditILacemode(this, "", BC_ILACE_ASSET_MODEDEFAULT, x2, y, 200));
+		ilacefixoption_chkboxw->ilacemode_textbox = textboxw;
+		add_subwindow(listboxw = new AssetEditInterlacemodePulldown(mwindow,
+							textboxw, 
+							&asset->interlace_mode,
+							(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_modes,
+							ilacefixoption_chkboxw,
+							x2 + textboxw->get_w(), 
+							y)); 
+		ilacefixoption_chkboxw->ilacemode_listbox = listboxw;
+		y += textboxw->get_h() + 5;
+
+		// --------------------
+		add_subwindow(title = new BC_Title(x1, y, _("Interlace correction:")));
+		add_subwindow(textboxw = new AssetEditILacefixmethod(this, "", BC_ILACE_FIXDEFAULT, x2, y, 200));
+		ilacefixoption_chkboxw->ilacefixmethod_textbox = textboxw;
+		add_subwindow(listboxw = new InterlacefixmethodPulldown(mwindow, 
+							textboxw,
+							&asset->interlace_fixmethod,
+							(ArrayList<BC_ListBoxItem*>*)&mwindow->interlace_asset_fixmethods,
+							x2 + textboxw->get_w(), 
+							y)); 
+		ilacefixoption_chkboxw->ilacefixmethod_listbox = listboxw;
+		ilacefixoption_chkboxw->showhideotherwidgets();
+		y += textboxw->get_h() + 5;
+		
+		x = x1;
+		add_subwindow(new BC_Title(x, y, _("Reel Name:")));
+		x = x2;
+		add_subwindow(new AssetEditReelName(this, x, y));
+		y += 30;
+		
+		x = x1;
+		add_subwindow(new BC_Title(x, y, _("Reel Number:")));
+		x = x2;
+		add_subwindow(new AssetEditReelNumber(this, x, y));
+		y += 30;
+		
+		x = x1;
+		add_subwindow(new BC_Title(x, y, _("Time Code Start:")));
+		x = x2;
+
+// Calculate values to enter into textboxes
+		char tc[12];
+		
+		Units::totext(tc,
+			asset->tcstart / asset->frame_rate,
+			TIME_HMSF,
+			asset->sample_rate,
+			asset->frame_rate);
+		
+		char *tc_hours = tc;
+		char *tc_minutes = strchr(tc, ':') + 1;
+		*(tc_minutes - 1) = 0;
+		char *tc_seconds = strchr(tc_minutes, ':') + 1;
+		*(tc_seconds - 1) = 0;
+		char *tc_rest = strchr(tc_seconds, ':') + 1;
+		*(tc_rest - 1) = 0;
+		
+		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_hours), x, y,
+			(int) (asset->frame_rate * 60 * 60)));
+		x += 30;
+		add_subwindow(new BC_Title(x, y, ":"));
+		x += 10;
+		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_minutes), x, y,
+			(int) (asset->frame_rate * 60)));
+		x += 30;
+		add_subwindow(new BC_Title(x, y, ":"));
+		x += 10;
+		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_seconds), x, y,
+			(int) (asset->frame_rate)));
+		x += 30;
+		add_subwindow(new BC_Title(x, y, ":"));
+		x += 10;
+		add_subwindow(new AssetEditTCStartTextBox(this, atoi(tc_rest), x, y, 1));
+
+
+		y += 30;
+	}
 
 	add_subwindow(new BC_OKButton(this));
 	add_subwindow(new BC_CancelButton(this));

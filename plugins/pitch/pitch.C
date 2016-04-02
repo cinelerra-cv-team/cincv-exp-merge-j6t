@@ -139,10 +139,12 @@ void PitchEffect::update_gui()
 {
 	if(thread)
 	{
-		load_configuration();
-		thread->window->lock_window("PitchEffect::update_gui");
-		((PitchWindow*)thread->window)->update();
-		thread->window->unlock_window();
+		if(load_configuration())
+		{
+			thread->window->lock_window("PitchEffect::update_gui");
+			((PitchWindow*)thread->window)->update();
+			thread->window->unlock_window();
+		}
 	}
 }
 
@@ -153,6 +155,7 @@ int PitchEffect::process_buffer(int64_t size,
 		int64_t start_position,
 		int sample_rate)
 {
+//printf("PitchEffect::process_buffer %d\n", __LINE__);
 	load_configuration();
 
 

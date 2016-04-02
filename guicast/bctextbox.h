@@ -38,6 +38,12 @@ class BC_TextBoxSuggestions;
 
 
 
+
+class BC_TextBoxSuggestions;
+
+
+
+
 class BC_TextBox : public BC_SubWindow
 {
 public:
@@ -145,6 +151,10 @@ public:
 	int select_whole_text(int select);
 	void cycle_textboxes(int amout);
 	
+
+// Compute suggestions for a path
+	int calculate_suggestions(ArrayList<BC_ListBoxItem*> *entries);
+
 
 // User computes suggestions after handle_event.
 // The array is copied to a local variable.

@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@
  */
 
 #include "asset.h"
+#include "awindow.h"
+#include "awindowgui.h"
 #include "clip.h"
 #include "confirmsave.h"
 #include "bchash.h"
@@ -533,6 +535,11 @@ void MenuEffectThread::run()
 			0);
 		mwindow->sync_parameters(CHANGE_ALL);
 		mwindow->gui->unlock_window();
+
+
+		mwindow->awindow->gui->async_update_assets();
+
+
 	}
 
 	for(int i = 0; i < assets.total; i++)

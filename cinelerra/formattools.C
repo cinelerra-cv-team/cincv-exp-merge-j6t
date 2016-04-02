@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include "clip.h"
 #include "guicast.h"
 #include "file.h"
+#include "filesystem.h"
 #include "formattools.h"
 #include "language.h"
 #include "maxchannels.h"
@@ -33,6 +34,7 @@
 #include "theme.h"
 #include "videodevice.inc"
 #include <string.h>
+#include <unistd.h>
 #include "pipe.h"
 
 
@@ -54,6 +56,7 @@ FormatTools::FormatTools(MWindow *mwindow,
 	path_button = 0;
 	path_recent = 0;
 	w = window->get_w();
+	file_entries = 0;
 }
 
 FormatTools::~FormatTools()
@@ -77,6 +80,11 @@ SET_TRACE
 SET_TRACE
 	if(channels_tumbler) delete channels_tumbler;
 SET_TRACE
+	if(file_entries)
+	{
+		file_entries->remove_all_objects();
+		delete file_entries;
+	}
 }
 
 void FormatTools::create_objects(int &init_x, 
@@ -107,6 +115,19 @@ void FormatTools::create_objects(int &init_x,
 	this->prompt_video = prompt_video;
 	this->prompt_video_compression = prompt_video_compression;
 	this->strategy = strategy;
+
+
+	file_entries = new ArrayList<BC_ListBoxItem*>;
+	FileSystem fs;
+	char string[BCTEXTLEN];
+// Load current directory
+	fs.update(getcwd(string, BCTEXTLEN));
+	for(int i = 0; i < fs.total_files(); i++)
+	{
+		file_entries->append(
+			new BC_ListBoxItem(
+				fs.get_entry(i)->get_name()));
+	}
 
 //printf("FormatTools::create_objects 1\n");
 
@@ -662,8 +683,14 @@ FormatPathText::~FormatPathText()
 }
 int FormatPathText::handle_event() 
 {
+// Suggestions
+	calculate_suggestions(format->file_entries);
+
+
+
 	strcpy(format->asset->path, get_text());
 	format->handle_event();
+
 	return 1;
 }
 

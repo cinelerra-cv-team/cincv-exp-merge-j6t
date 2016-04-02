@@ -53,6 +53,10 @@ public:
 	int keypress_event();
 	void update_toggles(int use_lock);
 	void update_mwindow();
+	int cursor_motion_event();
+
+	int drag_operation;
+	int new_status;
 
 	MWindow *mwindow;
 	GWindowToggle *toggles[NONAUTOTOGGLES_COUNT + AUTOMATION_TOTAL];
@@ -70,6 +74,9 @@ public:
 	void update();
 
 	static int* get_main_value(MWindow *mwindow, toggleinfo toggleinf);
+
+	int button_press_event();
+	int button_release_event();
 
 	MWindow *mwindow;
 	GWindowGUI *gui;

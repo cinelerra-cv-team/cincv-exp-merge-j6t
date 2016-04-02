@@ -40,6 +40,7 @@ public:
 
 	TYPE append(TYPE value);
 	TYPE append();
+// Insert before item number
 	TYPE insert(TYPE value, int number);
 
 // allocate

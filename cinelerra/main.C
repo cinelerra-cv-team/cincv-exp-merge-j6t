@@ -1,7 +1,6 @@
-
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +23,7 @@
 #include "bcsignals.h"
 #include "edl.h"
 #include "filexml.h"
+#include "fileserver.h"
 #include "filesystem.h"
 #include "language.h"
 #include "loadfile.inc"
@@ -54,6 +54,24 @@ enum
 };
 
 #include "thread.h"
+
+void get_exe_path(char *result)
+{
+// Get executable path
+	pid_t pid = getpid();
+	char proc_path[BCTEXTLEN];
+	int len = 0;
+	result[0] = 0;
+	sprintf(proc_path, "/proc/%d/exe", pid);
+	if((len = readlink(proc_path, result, BCTEXTLEN)) >= 0)
+	{
+		result[len] = 0;
+//printf("Preferences::Preferences %d %s\n", __LINE__, result);
+		char *ptr = strrchr(result, '/');
+		if(ptr) *ptr = 0;
+	}
+
+}
 
 int main(int argc, char *argv[])
 {
@@ -282,6 +300,7 @@ PROGRAM_NAME " is free software, covered by the GNU General Public License,\n"
 			BatchRenderThread *thread = new BatchRenderThread;
 			thread->start_rendering(config_path, 
 				batch_path);
+			delete MWindow::file_server;
 			break;
 		}
 

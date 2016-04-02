@@ -237,6 +237,9 @@ int VDevicePrefs::create_lml_objs()
 
 int VDevicePrefs::create_buz_objs()
 {
+#ifdef HAVE_VIDEO4LINUX
+
+
 	char *output_char;
 	int x1 = x + menu->get_w() + 5;
 	int x2 = x1 + 210;
@@ -274,6 +277,8 @@ int VDevicePrefs::create_buz_objs()
 			y1);
 		channel_picker->create_objects();
 	}
+#endif // HAVE_VIDEO4LINUX
+
 	return 0;
 }
 
@@ -370,12 +375,18 @@ int VDevicePrefs::create_firewire_objs()
 
 int VDevicePrefs::create_v4l_objs()
 {
+#ifdef HAVE_VIDEO4LINUX
+
+
 	char *output_char;
 	BC_Resources *resources = BC_WindowBase::get_resources();
 	int x1 = x + menu->get_w() + 5;
 	output_char = pwindow->thread->edl->session->vconfig_in->v4l_in_device;
 	dialog->add_subwindow(device_title = new BC_Title(x1, y, _("Device path:"), MEDIUMFONT, resources->text_default));
 	dialog->add_subwindow(device_text = new VDeviceTextBox(x1, y + 20, output_char));
+
+
+#endif // HAVE_VIDEO4LINUX
 	return 0;
 }
 
@@ -515,13 +526,20 @@ void VDriverMenu::create_objects()
 {
 	if(do_input)
 	{
+#ifdef HAVE_VIDEO4LINUX
 		add_item(new VDriverItem(this, VIDEO4LINUX_TITLE, VIDEO4LINUX));
+#endif
+
 #ifdef HAVE_VIDEO4LINUX2
 		add_item(new VDriverItem(this, VIDEO4LINUX2_TITLE, VIDEO4LINUX2));
 		add_item(new VDriverItem(this, VIDEO4LINUX2JPEG_TITLE, VIDEO4LINUX2JPEG));
 #endif
+
 		add_item(new VDriverItem(this, SCREENCAPTURE_TITLE, SCREENCAPTURE));
+#ifdef HAVE_VIDEO4LINUX
 		add_item(new VDriverItem(this, CAPTURE_BUZ_TITLE, CAPTURE_BUZ));
+#endif
+
 #ifdef HAVE_FIREWIRE
 		add_item(new VDriverItem(this, CAPTURE_FIREWIRE_TITLE, CAPTURE_FIREWIRE));
 		add_item(new VDriverItem(this, CAPTURE_IEC61883_TITLE, CAPTURE_IEC61883));

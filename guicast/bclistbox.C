@@ -356,6 +356,7 @@ BC_ListBox::BC_ListBox(int x,
 	view_w = 0;
 	title_h = 0;
 	active = 0;
+	is_suggestions = 0;
 	new_value = 0;
 	need_xscroll = 0;
 	need_yscroll = 0;
@@ -856,6 +857,11 @@ void BC_ListBox::calculate_item_coords_recursive(
 				0);
 		}
 	}
+}
+
+void BC_ListBox::set_is_suggestions(int value)
+{
+	this->is_suggestions = value;
 }
 
 void BC_ListBox::set_use_button(int value)
@@ -1402,6 +1408,7 @@ BC_ListBoxItem* BC_ListBox::get_selection_recursive(
 		BC_ListBoxItem *item = data[master_column].values[i];
 		if(item->selected)
 		{
+//printf("BC_ListBox::get_selection_recursive %d\n", __LINE__);
 			selection_number--;
 			if(selection_number < 0)
 			{
@@ -1418,6 +1425,7 @@ BC_ListBoxItem* BC_ListBox::get_selection_recursive(
 			if(result) return result;
 		}
 	}
+
 	return 0;
 }
 
@@ -2828,13 +2836,21 @@ int BC_ListBox::button_press_event()
 	BC_ListBoxItem *current_item = 0;
 	int new_cursor;
 	int do_selection_change = 0;
+	const int debug = 0;
 
 	hide_tooltip();
-
+	if(debug) printf("BC_ListBox::button_press_event %d this=%p event_win=%p %p %p %p\n", 
+		__LINE__,
+		this, 
+		top_level->event_win,
+		gui ? gui->win : 0,
+		win,
+		parent_window->win);
 
 // Pressed in button
 	if(is_popup && top_level->event_win == win)
 	{
+		if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
 		current_operation = BUTTON_DN;
 		draw_button();
 
@@ -2852,17 +2868,24 @@ int BC_ListBox::button_press_event()
 	if((xscrollbar && top_level->event_win == xscrollbar->win) ||
 		(yscrollbar && top_level->event_win == yscrollbar->win))
 	{
+		if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
 		result = 0;
 	}
 	else
 // Pressed in items
 	if(gui && top_level->event_win == gui->win)
 	{
+		if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
+
 // Activate list items
+// If it is a suggestion popup, it is visible without being active
 		if(!active)
 		{
-			top_level->deactivate();
+			if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
+			if(!is_suggestions) top_level->deactivate();
+			if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
 			activate();
+			if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
 		}
 
 // Wheel mouse pressed
@@ -2942,6 +2965,8 @@ int BC_ListBox::button_press_event()
 					gui->get_cursor_y(),
 					&current_item)) >= 0)
 		{
+			if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
+
 // Get item button was pressed over
 			selection_number2 = selection_number1;
 			selection_number1 = selection_number;
@@ -3045,14 +3070,20 @@ int BC_ListBox::button_press_event()
 		reset_query();
 	}
 	else
-	if(is_popup && active)
+// Suggestion box is not active but visible, so lie to get it to deactivate
+	if(is_popup && (active || is_suggestions && gui))
 	{
+		active = 1;
+		if(debug) printf("BC_ListBox::button_press_event %d\n", __LINE__);
 		deactivate();
 		result = 1;
 	}
 
 
 	if(do_selection_change) selection_changed();
+	if(debug) printf("BC_ListBox::button_press_event %d %d\n", 
+		__LINE__,
+		result);
 
 	return result;
 }
@@ -3891,25 +3922,38 @@ int BC_ListBox::reposition_window(int x, int y, int w, int h)
 
 int BC_ListBox::deactivate()
 {
+// printf("BC_ListBox::deactivate %d this=%p gui=%p active=%d\n", 
+// __LINE__, 
+// this, 
+// gui, 
+// active);
 	if(active)
 	{
-		active = 0;
+
 		if(is_popup)
 		{
+//printf("BC_ListBox::deactivate %d this=%p gui=%p\n", __LINE__, this, gui);
 			if(gui) delete gui;
+			gui = 0;
 			xscrollbar = 0;
 			yscrollbar = 0;
-			gui = 0;
 			highlighted_item = -1;
 			highlighted_ptr = 0;
+//sleep(1);
 		}
+
+
+//printf("BC_ListBox::deactivate %d this=%p\n", __LINE__, this);
+		active = 0;
 		top_level->active_subwindow = 0;
 	}
+
 	return 0;
 }
 
 int BC_ListBox::activate(int take_focus)
 {
+//printf("BC_ListBox::activate %d %p\n", __LINE__, this);
 	if(!active)
 	{
 		if(take_focus)
@@ -3955,7 +3999,6 @@ int BC_ListBox::activate(int take_focus)
 				new_y = 2;
 
 
-//printf("BC_ListBox::activate %d %d\n", popup_w, popup_h);
 			add_subwindow(gui = new BC_Popup(this, 
 				new_x, 
 				new_y, 
@@ -3964,8 +4007,11 @@ int BC_ListBox::activate(int take_focus)
 				-1,
 				0,
 				0));
+//printf("BC_ListBox::activate %d this=%p %p\n", __LINE__, this, gui->win);
 			draw_items(1);
 		}
+//printf("BC_ListBox::activate %d %p\n", __LINE__, this);
+//sleep(1);
 	}
 	return 0;
 }
@@ -3974,6 +4020,7 @@ int BC_ListBox::keypress_event()
 {
 	if(!active) return 0;
 
+//printf("BC_ListBox::keypress_event %d\n", __LINE__);
 
 	int result = 0, redraw = 0, done, view_items = view_h / get_text_height(MEDIUMFONT);
 	int new_item = -1, new_selection = -1;
@@ -3982,14 +4029,16 @@ int BC_ListBox::keypress_event()
 	{
 		case ESC:
 		case RETURN:
+		case BACKSPACE:
 			top_level->deactivate();
 
-//printf("BC_ListBox::keypress_event %d\n", __LINE__);
 // If user is manipulating popup with keyboard, don't pass on event.
 			if(is_popup)
 			{
+//printf("BC_ListBox::keypress_event %d %p\n", __LINE__, get_selection(0, 0));
 				if(top_level->get_keypress() == RETURN)
 					handle_event();
+//printf("BC_ListBox::keypress_event %d %p\n", __LINE__, get_selection(0, 0));
 				result = 1;
 			}
 			else
@@ -4089,10 +4138,13 @@ int BC_ListBox::keypress_event()
 		draw_items(1);
 		update_scrollbars();
 	}
-	
-	if(new_selection >= 0)
+
+//printf("BC_ListBox::keypress_event %d new_selection=%d\n", __LINE__, new_selection);
+	if(new_selection >= 0 && !is_suggestions)
 	{
+//printf("BC_ListBox::keypress_event %d\n", __LINE__);
 		selection_changed();
+//printf("BC_ListBox::keypress_event %d\n", __LINE__);
 	}
 
 	return result;

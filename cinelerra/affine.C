@@ -572,7 +572,7 @@ void AffineUnit::process_package(LoadPackage *package)
 					border_color[1] = 0.5;
 					border_color[2] = 0.5;
 				}
-				if(!cmodel_has_alpha(server->output->get_color_model()))
+				if(!BC_CModels::has_alpha(server->output->get_color_model()))
 				{
 					border_color[3] = 1.0;
 				}

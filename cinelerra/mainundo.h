@@ -40,6 +40,9 @@ public:
 	MainUndo(MWindow *mwindow);
 	~MainUndo();
 
+
+
+
    // Use this function for UndoStackItem subclasses with custom
    // undo and redo functions.  All fields including description must
    // be populated before calling this function.

@@ -33,6 +33,7 @@
 #define FILE_IS_XML 3
 
 // Numeric codes for each file format
+// They're stored in XML files, so they have to be fixed.
 #define FILE_UNKNOWN    		0
 #define FILE_AIFF       		10
 #define FILE_AMPEG      	  	16    // For encoding only
@@ -68,7 +69,8 @@
 #define FILE_YUV		29	// mjpegtools YUV4MPEG (aka YUV4MPEG2)
 #define FILE_VORBIS             31
 #define FILE_FFMPEG             33
-#define FILE_RAWDV		34
+#define FILE_SCENE              34
+#define FILE_RAWDV		35
 
 // For formats supported by plugins, the format number is the plugin number in the 
 // plugin list ORed with 0x8000.
@@ -144,6 +146,7 @@ N_("OGG Theora/Vorbis")
 #endif
 
 #define AC3_NAME "AC3"
+#define SCENE_NAME "Text To Movie"
 #define AIFF_NAME "Apple/SGI AIFF"
 #define AMPEG_NAME "MPEG Audio"    // For encoding only
 #define AU_NAME "Sun/NeXT AU"
