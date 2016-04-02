@@ -10,7 +10,8 @@
 
 
 
-
+// Different ffmpeg versions
+#define FFMPEG_2010
 
 
 
@@ -367,9 +368,13 @@ static int get_chroma_factor(quicktime_ffmpeg_t *ffmpeg, int current_field)
 		case PIX_FMT_YUVJ420P:
 			return 4;
 			break;
+
+#ifndef FFMPEG_2010
 		case PIX_FMT_YUYV422:
 			return 2;
 			break;
+#endif
+
 		case PIX_FMT_YUV422P:
 			return 2;
 			break;
@@ -578,9 +583,13 @@ int quicktime_ffmpeg_decode(quicktime_ffmpeg_t *ffmpeg,
 		case PIX_FMT_YUVJ420P:
 			input_cmodel = BC_YUV420P;
 			break;
+
+#ifndef FFMPEG_2010
 		case PIX_FMT_YUYV422:
 			input_cmodel = BC_YUV422;
 			break;
+#endif
+
 		case PIX_FMT_YUV422P:
 			input_cmodel = BC_YUV422P;
 			break;

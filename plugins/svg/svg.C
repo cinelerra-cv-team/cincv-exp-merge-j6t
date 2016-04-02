@@ -24,6 +24,7 @@
 #include "picon_png.h"
 #include "svg.h"
 #include "svgwin.h"
+#include "colormodels.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

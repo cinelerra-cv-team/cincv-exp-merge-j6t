@@ -492,6 +492,7 @@ PNGS = \
 	redrawindex_up.png \
 	reel.png \
 	reload.png \
+	rename.png \
 	reset_dn.png \
 	reset_hi.png \
 	reset_up.png \

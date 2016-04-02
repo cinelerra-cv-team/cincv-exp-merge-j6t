@@ -152,6 +152,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    filemov.C \
 		    filempeg.C \
 		    filepng.C \
+		    filescene.C \
 		    fileserver.C \
 		    filesndfile.C \
 		    filetga.C \
@@ -284,6 +285,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    samples.C \
 		    samplescroll.C \
 		    savefile.C \
+		    scenegraph.C \
 		    setformat.C \
 		    sharedlocation.C \
 		    shmemory.C \
@@ -475,6 +477,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 filemov.h \
 		 filempeg.h \
 		 filepng.h \
+		 filescene.h \
 		 fileserver.h \
 		 filesndfile.h \
 		 filetga.h \
@@ -622,6 +625,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 samplescroll.h \
 		 savefile.h \
 		 scale.h \
+		 scenegraph.h \
 		 setformat.h \
 		 sharedlocation.h \
 		 shmemory.h \

@@ -40,6 +40,7 @@ libguicast_la_SOURCES = \
 	bcprogressbox.C	\
 	bcrecentlist.C \
 	bcrelocatablewidget.C \
+	bcrename.C \
 	bcrepeater.C \
 	bcresources.C \
 	bcscrollbar.C \
@@ -140,6 +141,8 @@ noinst_HEADERS = \
 	bcrecentlist.h \
 	bcrelocatablewidget.h \
 	bcrelocatablewidget.inc \
+	bcrename.h \
+	bcrename.inc \
 	bcrepeater.h \
 	bcrepeater.inc \
 	bcresources.h \
