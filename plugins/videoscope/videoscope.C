@@ -27,7 +27,7 @@
 #include "language.h"
 #include "loadbalance.h"
 #include "picon_png.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "pluginvclient.h"
 #include "fonts.h"
 #include "vframe.h"

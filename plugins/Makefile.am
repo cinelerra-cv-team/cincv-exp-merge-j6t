@@ -9,12 +9,10 @@ MAYBE_FINDOBJECT = \
 endif
 
 # burn must come before any other effecttv plugin
-# colors must come before any plugin
 # motion must come before perspective
 
 SUBDIRS= \
 	$(THEMES) \
-	colors \
 	1080to540 \
 	720to480 \
 	C41 \

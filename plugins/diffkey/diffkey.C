@@ -29,7 +29,7 @@
 #include "guicast.h"
 #include "language.h"
 #include "loadbalance.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "pluginvclient.h"
 
 #include <string.h>

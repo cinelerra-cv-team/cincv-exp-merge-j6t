@@ -700,7 +700,6 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	cinelerra/Makefile \
 	cinelerra/data/Makefile \
 	mplexlo/Makefile \
-	plugins/colors/Makefile \
 	plugins/Makefile \
 	plugins/1080to540/Makefile \
 	plugins/histogram/Makefile \

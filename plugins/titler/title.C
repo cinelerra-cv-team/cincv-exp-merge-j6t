@@ -34,7 +34,7 @@
 #include "language.h"
 #include "mwindow.inc"
 #include "picon_png.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "title.h"
 #include "titlewindow.h"
 #include "transportque.inc"

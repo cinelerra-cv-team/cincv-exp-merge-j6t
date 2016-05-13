@@ -31,7 +31,7 @@
 #include "loadbalance.h"
 #include "picon_png.h"
 #include "playback3d.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "pluginvclient.h"
 #include "vframe.h"
 

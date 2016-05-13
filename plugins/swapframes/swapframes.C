@@ -26,7 +26,7 @@
 #include "guicast.h"
 #include "language.h"
 #include "picon_png.h"
-#include "../colors/plugincolors.h"
+#include "cicolors.h"
 #include "pluginvclient.h"
 #include "swapframes.h"
 #include "vframe.h"

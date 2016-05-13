@@ -25,7 +25,7 @@
 #include "bchash.h"
 #include "language.h"
 #include "picon_png.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "../interpolate/aggregated.h"
 #include "playback3d.h"
 #include "workarounds.h"

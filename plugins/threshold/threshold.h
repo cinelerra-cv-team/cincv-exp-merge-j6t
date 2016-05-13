@@ -26,7 +26,7 @@
 #include "histogramengine.inc"
 #include "loadbalance.h"
 #include "thresholdwindow.inc"
-#include "plugincolors.inc"
+#include "cicolors.inc"
 #include "pluginvclient.h"
 
 

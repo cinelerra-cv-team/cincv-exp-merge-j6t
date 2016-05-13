@@ -25,7 +25,7 @@
 #include "language.h"
 #include "mutex.h"
 #include "mwindow.inc"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "vframe.h"
 
 #include <string.h>

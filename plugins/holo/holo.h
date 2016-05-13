@@ -30,7 +30,7 @@ class HoloEngine;
 #include "holowindow.h"
 #include "loadbalance.h"
 #include "mutex.h"
-#include "plugincolors.inc"
+#include "cicolors.inc"
 #include "pluginvclient.h"
 
 #include <stdint.h>

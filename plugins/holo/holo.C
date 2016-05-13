@@ -27,7 +27,7 @@
 #include "holowindow.h"
 #include "language.h"
 #include "picon_png.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 
 #include <stdint.h>
 #include <stdio.h>

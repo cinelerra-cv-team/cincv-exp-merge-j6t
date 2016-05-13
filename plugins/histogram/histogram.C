@@ -36,7 +36,7 @@
 #include "language.h"
 #include "loadbalance.h"
 #include "playback3d.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "vframe.h"
 #include "workarounds.h"
 

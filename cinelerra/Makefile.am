@@ -104,6 +104,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    channelpicker.C \
 		    chantables.C \
 		    clipedit.C \
+		    colorpicker.C \
 		    commonrender.C \
 		    confirmquit.C \
 		    confirmsave.C \
@@ -427,6 +428,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 channelpicker.h \
 		 chantables.h \
 		 clipedit.h \
+		 colorpicker.h \
 		 commonrender.h \
 		 compresspopup.h \
 		 confirmquit.h \

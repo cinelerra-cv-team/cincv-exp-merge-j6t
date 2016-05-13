@@ -25,7 +25,7 @@
 #include "keyframe.h"
 #include "language.h"
 #include "picon_png.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "timeavg.h"
 #include "timeavgwindow.h"
 #include "vframe.h"

@@ -25,7 +25,7 @@
 #include "filexml.h"
 #include "language.h"
 #include "picon_png.h"
-#include "plugincolors.h"
+#include "cicolors.h"
 #include "samples.h"
 #include "spectrogram.h"
 #include "transportque.inc"
