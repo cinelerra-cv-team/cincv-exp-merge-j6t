@@ -31,6 +31,14 @@
 #include <string.h>
 #include "theme.h"
 
+static void update_framerate_text(Preferences* preferences, BC_Title* master_rate)
+{
+	char string[BCTEXTLEN];
+	sprintf(string,
+		_("Master node framerate: %0.3f"),
+		preferences->local_rate);
+	master_rate->update(string);
+}
 
 PerformancePrefs::PerformancePrefs(MWindow *mwindow, PreferencesWindow *pwindow)
  : PreferencesDialog(mwindow, pwindow)
@@ -54,7 +62,6 @@ void PerformancePrefs::create_objects()
 	int xmargin2 = 170;
 	int xmargin3 = 250;
 	int xmargin4 = 380;
-	char string[BCTEXTLEN];
 	BC_Resources *resources = BC_WindowBase::get_resources();
 	BC_WindowBase *win;
 	int maxw, curw, y1;
@@ -174,13 +181,8 @@ void PerformancePrefs::create_objects()
 		this, 
 		x + xmargin4, 
 		y - 5));
-#if 0
-N_("Master node framerate: %0.3f")
-#endif
-#define MASTER_NODE_FRAMERATE_TEXT "Master node framerate: %0.3f"
-	sprintf(string, _(MASTER_NODE_FRAMERATE_TEXT), 
-		pwindow->thread->preferences->local_rate);
-	add_subwindow(master_rate = new BC_Title(x + xmargin4, y + node_list->get_h(), string));
+	add_subwindow(master_rate = new BC_Title(x + xmargin4, y + node_list->get_h(), ""));
+	update_framerate_text(pwindow->thread->preferences, master_rate);
 
 	y += 25;
 	add_subwindow(edit_node = new PrefsRenderFarmEditNode(pwindow, 
@@ -741,11 +743,7 @@ int PrefsRenderFarmReset::handle_event()
 	subwindow->generate_node_list();
 	subwindow->update_node_list();
 
-	char string[BCTEXTLEN];
-	sprintf(string, 
-		MASTER_NODE_FRAMERATE_TEXT, 
-		pwindow->thread->preferences->local_rate);
-	subwindow->master_rate->update(string);
+	update_framerate_text(pwindow->thread->preferences, subwindow->master_rate);
 	subwindow->hot_node = -1;
 	return 1;
 }
