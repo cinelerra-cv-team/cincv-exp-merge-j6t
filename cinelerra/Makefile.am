@@ -168,6 +168,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    formatpopup.C \
 		    formatpresets.C \
 		    formattools.C \
+		    fourier.C \
 		    framecache.C \
 		    garbage.C \
 		    gwindow.C \
@@ -494,6 +495,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 formatpresets.h \
 		 formattools.h \
 		 formatwindow.h \
+		 fourier.h \
 		 framecache.h \
 		 garbage.h \
 		 gwindow.h \
@@ -715,6 +717,7 @@ cinelerra_LDADD = \
 	-lsndfile \
 	-lmp3lame \
 	-lpng -ljpeg -ltiff -lz \
+	-lfftw3 \
 	$(SOUND_LDFLAGS) \
 	$(FIREWIRE_LDFLAGS) \
 	$(LIBDV_LIBS) \

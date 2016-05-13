@@ -712,7 +712,6 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/bluebanana/Makefile \
 	plugins/brightness/Makefile \
 	plugins/burn/Makefile \
-	plugins/parametric/Makefile \
 	plugins/aging/Makefile \
 	plugins/cdripper/Makefile \
 	plugins/chromakey/Makefile \
@@ -762,6 +761,7 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/oilpainting/Makefile \
 	plugins/overlay/Makefile \
 	plugins/overlayaudio/Makefile \
+	plugins/parametric/Makefile \
 	plugins/pitch/Makefile \
 	plugins/polar/Makefile \
 	plugins/reroute/Makefile \

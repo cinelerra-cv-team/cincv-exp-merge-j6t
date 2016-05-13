@@ -26,7 +26,7 @@
 #include "bchash.inc"
 #include "guicast.h"
 #include "mutex.h"
-#include "../parametric/fourier.h"
+#include "fourier.h"
 #include "pluginaclient.h"
 #include "vframe.inc"
 

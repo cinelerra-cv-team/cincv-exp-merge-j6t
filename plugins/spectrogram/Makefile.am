@@ -1,7 +1,6 @@
 plugin_LTLIBRARIES = spectrogram.la
 spectrogram_la_LDFLAGS = -avoid-version -module -shared 
 spectrogram_la_LIBADD = \
-	../parametric/libfourier.la \
 	../colors/libcolors.la
 spectrogram_la_SOURCES = spectrogram.C 
 AM_CXXFLAGS = $(LARGEFILE_CFLAGS)
@@ -10,7 +9,6 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/guicast \
 	-I$(top_srcdir)/cinelerra \
 	-I$(top_srcdir)/quicktime \
-	-I$(top_srcdir)/plugins/parametric \
 	-I$(top_srcdir)/plugins/colors
 LIBTOOL = $(SHELL) $(top_builddir)/libtool $(LTCXX_FLAGS)
 

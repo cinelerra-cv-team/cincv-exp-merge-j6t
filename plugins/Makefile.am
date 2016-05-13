@@ -10,7 +10,6 @@ endif
 
 # burn must come before any other effecttv plugin
 # colors must come before any plugin
-# parametric must come before fourier plugins
 # motion must come before perspective
 
 SUBDIRS= \
@@ -25,7 +24,6 @@ SUBDIRS= \
 	bluebanana \
 	brightness \
 	burn \
-	parametric \
 	aging \
 	cdripper \
 	chromakey \
@@ -82,6 +80,7 @@ SUBDIRS= \
 	oilpainting \
 	overlay \
 	overlayaudio \
+	parametric \
 	perspective \
 	pitch \
 	polar \

@@ -23,7 +23,7 @@
 #define GRAPHIC_H
 
 #include "guicast.h"
-#include "../parametric/fourier.h"
+#include "fourier.h"
 #include "pluginaclient.h"
 
 
