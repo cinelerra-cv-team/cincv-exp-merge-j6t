@@ -86,7 +86,7 @@ private:
 	virtual int init_selection(int cursor_x, int cursor_y) { return 0; };
 	virtual int update_selection(int cursor_x, int cursor_y) { return 0; };
 	int set_images(VFrame **images);
-	int draw_face();
+	int draw_face(int flush);
 	void show_value_tooltip();
 
 	VFrame **images;

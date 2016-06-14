@@ -27,7 +27,6 @@
 #include "language.h"
 #include "picon_png.h"
 #include "playback3d.h"
-#include "bcdisplayinfo.h"
 
 #include "aggregated.h"
 #include "../interpolate/aggregated.h"
@@ -372,7 +371,6 @@ LoadPackage* Color3WayEngine::new_package()
 Color3WayMain::Color3WayMain(PluginServer *server)
  : PluginVClient(server)
 {
-	using_defaults = 0;
 	need_reconfigure = 1;
 	engine = 0;
 	for(int i = 0; i < SECTIONS; i++) copy_to_all[i] = 0;
@@ -539,23 +537,6 @@ void Color3WayMain::save_data(KeyFrame *keyframe)
 
 	output.append_tag();
 	output.terminate_string();
-}
-
-// FIXME Implement these based on the read_data() method used by
-// Cinelerra HV 4.5
-int Color3WayMain::load_defaults()
-{
-	return 0;
-}
-
-int Color3WayMain::save_defaults()
-{
-	return 0;
-}
-
-int Color3WayMain::is_defaults()
-{
-	return using_defaults;
 }
 
 void Color3WayMain::read_data(KeyFrame *keyframe)

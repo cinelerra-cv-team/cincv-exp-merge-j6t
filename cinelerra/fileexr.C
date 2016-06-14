@@ -602,6 +602,7 @@ void EXRConfigVideo::create_objects()
 	add_subwindow(menu = new EXRCompression(this, x, y, 100));
 	menu->create_objects();
 	add_subwindow(new BC_OKButton(this));
+	show_window(1);
 	unlock_window();
 }
 

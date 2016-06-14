@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 1997-2011 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -246,12 +246,33 @@ RenderPackage* PackageDispatcher::get_package(double frames_per_second,
 	int client_number,
 	int use_local_rate)
 {
+	const int debug = 0;
 	package_lock->lock("PackageDispatcher::get_package");
-// printf("PackageDispatcher::get_package 1 %f\n", 
-// frames_per_second);
 
-	preferences->set_rate(frames_per_second, client_number);
-	if(mwindow) mwindow->preferences->copy_rates_from(preferences);
+	if(debug) printf("PackageDispatcher::get_package %d %f %d %d\n", 
+		__LINE__,
+		frames_per_second,
+		client_number,
+		use_local_rate);
+
+// Store new frames per second for the node
+	if(!EQUIV(frames_per_second, 0))
+	{
+		preferences->set_rate(frames_per_second, client_number);
+		if(mwindow) mwindow->preferences->copy_rates_from(preferences);
+	}
+	else
+// Use previous frames per second
+	{
+		frames_per_second = preferences->get_rate(client_number);
+	}
+
+	if(debug) printf("PackageDispatcher::get_package %d %f %d %d\n", 
+		__LINE__,
+		frames_per_second,
+		client_number,
+		use_local_rate);
+
 	float avg_frames_per_second = preferences->get_avg_rate(use_local_rate);
 
 	RenderPackage *result = 0;
@@ -347,7 +368,7 @@ RenderPackage* PackageDispatcher::get_package(double frames_per_second,
 
 	package_lock->unlock();
 
-//printf("PackageDispatcher::get_package %p\n", result);
+	if(debug && result) printf("PackageDispatcher::get_package %d %ld\n", __LINE__, (long)(result->video_end - result->video_start));
 	return result;
 }
 

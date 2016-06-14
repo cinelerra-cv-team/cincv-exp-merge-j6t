@@ -144,8 +144,6 @@ public:
 		int64_t start_position,
 		double frame_rate);
 	int is_realtime();
-	int load_defaults();
-	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
@@ -580,25 +578,7 @@ NEW_PICON_MACRO(HueEffect)
 NEW_WINDOW_MACRO(HueEffect, HueWindow)
 LOAD_CONFIGURATION_MACRO(HueEffect, HueConfig)
 
-int HueEffect::load_defaults()
-{
-	char directory[BCTEXTLEN];
-	sprintf(directory, "%shuesaturation.rc", BCASTDIR);
-	defaults = new BC_Hash(directory);
-	defaults->load();
-	config.hue = defaults->get("HUE", config.hue);
-	config.saturation = defaults->get("SATURATION", config.saturation);
-	config.value = defaults->get("VALUE", config.value);
-	return 0;
-}
-int HueEffect::save_defaults()
-{
-	defaults->update("HUE", config.hue);
-	defaults->update("SATURATION", config.saturation);
-	defaults->update("VALUE", config.value);
-	defaults->save();
-	return 0;
-}
+
 void HueEffect::save_data(KeyFrame *keyframe)
 {
 	FileXML output;

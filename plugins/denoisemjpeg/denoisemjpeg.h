@@ -186,8 +186,6 @@ public:
 	PLUGIN_CLASS_MEMBERS(DenoiseMJPEGConfig);
 	int process_realtime(VFrame *input, VFrame *output);
 	int is_realtime();
-	int load_defaults();
-	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();

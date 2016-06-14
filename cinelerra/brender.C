@@ -147,7 +147,7 @@ void BRender::run()
 	fd = fopen("/proc/self/cmdline", "r");
 	if(fd)
 	{
-		fread(string, 1, BCTEXTLEN, fd);
+		int temp = fread(string, 1, BCTEXTLEN, fd);
 		fclose(fd);
 	}
 	else
@@ -304,8 +304,7 @@ int BRender::set_video_map(int64_t position, int value)
 	if(update_gui)
 	{
 		mwindow->gui->lock_window("BRender::set_video_map");
-		mwindow->gui->timebar->update(1, 0);
-		mwindow->gui->timebar->flush();
+		mwindow->gui->timebar->update(1);
 		mwindow->gui->unlock_window();
 	}
 	return 0;
@@ -594,7 +593,8 @@ end_frame);
 
 //sleep(1);
 //printf("BRenderThread::start 3 %d\n", result);
-		farm_server = new RenderFarmServer(packages,
+		farm_server = new RenderFarmServer(mwindow,
+			packages,
 			preferences,
 			0,
 			&farm_result,

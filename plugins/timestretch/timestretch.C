@@ -35,7 +35,7 @@
 
 #include <string.h>
 
-
+// FFT window size
 #define WINDOW_SIZE 4096
 #define INPUT_SIZE 65536
 #define OVERSAMPLE 8

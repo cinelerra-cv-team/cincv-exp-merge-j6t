@@ -91,15 +91,6 @@ VFrame* HoloMain::new_picon()
 	return new VFrame(picon_png);
 }
 
-int HoloMain::load_defaults()
-{
-	return 0;
-}
-
-int HoloMain::save_defaults()
-{
-	return 0;
-}
 
 int HoloMain::load_configuration()
 {

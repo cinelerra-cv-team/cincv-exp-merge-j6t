@@ -118,16 +118,39 @@ void RecordPrefs::create_objects()
 
 
 	BC_TextBox *textbox;
-	BC_Title *title1, *title2, *title3;
+	BC_Title *title0, *title1, *title2, *title3;
 
 	ybix[0] = y;
+	add_subwindow(title0 = new BC_Title(x, y, _("Samples read from device:")));
+	ybix[1] = y += title0->get_h() + 8;
 	add_subwindow(title1 = new BC_Title(x, y, _("Samples to write to disk at a time:")));
-	ybix[1] = y += title1->get_h() + 8;
+	ybix[2] = y += title1->get_h() + 8;
 	add_subwindow(title2 = new BC_Title(x, y, _("Sample rate for recording:")));
-	ybix[2] = y += title2->get_h() + 8;
+	ybix[3] = y += title2->get_h() + 8;
 	add_subwindow(title3 = new BC_Title(x, y, _("Channels to record:")));
 	x2 = MAX(title1->get_w(), title2->get_w()) + 10;
 	x2 = MAX(x2, title3->get_w() + 10);
+	x2 = MAX(x2, title0->get_w() + 10);
+
+
+	sprintf(string, "%ld", (long)pwindow->thread->edl->session->record_fragment_size);
+	RecordFragment *menu;
+	add_subwindow(menu = new RecordFragment(x2,
+		y,
+		pwindow, 
+		this, 
+		string));
+	y += menu->get_h() + mwindow->theme->widget_border;
+	menu->add_item(new BC_MenuItem("1024"));
+	menu->add_item(new BC_MenuItem("2048"));
+	menu->add_item(new BC_MenuItem("4096"));
+	menu->add_item(new BC_MenuItem("8192"));
+	menu->add_item(new BC_MenuItem("16384"));
+	menu->add_item(new BC_MenuItem("32768"));
+	menu->add_item(new BC_MenuItem("65536"));
+	menu->add_item(new BC_MenuItem("131072"));
+	menu->add_item(new BC_MenuItem("262144"));
+
 
 	sprintf(string, "%jd", pwindow->thread->edl->session->record_write_length);
 	add_subwindow(textbox = new RecordWriteLength(mwindow, 
@@ -135,10 +158,10 @@ void RecordPrefs::create_objects()
 		x2, 
 		ybix[0],
 		string));
-	add_subwindow(textbox = new RecordSampleRate(pwindow, x2, ybix[1]));
+	add_subwindow(textbox = new RecordSampleRate(pwindow, x2, ybix[2]));
 	add_subwindow(new SampleRatePulldown(mwindow, textbox, x2 + textbox->get_w(), ybix[1]));
 
-	RecordChannels *channels = new RecordChannels(pwindow, this, x2, ybix[2]);
+	RecordChannels *channels = new RecordChannels(pwindow, this, x2, ybix[3]);
 	channels->create_objects();
 
 	y += title3->get_h() + 15;
@@ -250,6 +273,38 @@ void RecordPrefs::create_objects()
 	add_subwindow(new BC_Title(x, y, _("Seconds")));
 
 }
+
+
+
+
+
+
+
+RecordFragment::RecordFragment(int x, 
+	int y, 
+	PreferencesWindow *pwindow, 
+	RecordPrefs *record, 
+	char *text)
+ : BC_PopupMenu(x, 
+ 	y, 
+	100, 
+	text,
+	1)
+{ 
+	this->pwindow = pwindow;
+	this->record = record;
+}
+
+int RecordFragment::handle_event() 
+{
+	pwindow->thread->edl->session->record_fragment_size = atol(get_text()); 
+	return 1;
+}
+
+
+
+
+
 
 
 RecordWriteLength::RecordWriteLength(MWindow *mwindow, PreferencesWindow *pwindow, int x, int y, char *text)

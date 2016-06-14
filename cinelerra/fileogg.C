@@ -1324,7 +1324,7 @@ int FileOGG::check_sig(Asset *asset)
 	fseek(fd, 0, SEEK_SET);
 	char data[4];
 
-	fread(data, 4, 1, fd);
+	int temp = fread(data, 4, 1, fd);
 
 	if(data[0] == 'O' &&
 		data[1] == 'g' &&
@@ -1466,7 +1466,7 @@ int FileOGG::read_frame(VFrame *frame)
 	{
 		if (!ogg_seek_to_keyframe(tf->videosync, tf->to.serialno, next_frame_position, &ogg_frame_position))
 		{
-			eprintf("Error while seeking to frame's keyframe (frame: %lli, keyframe: %lli)\n", next_frame_position, ogg_frame_position);
+			eprintf("Error while seeking to frame's keyframe (frame: %lli, keyframe: %lli)\n", (long long)next_frame_position, (long long)ogg_frame_position);
 			return 1;
 		}
 //		printf("For frame: %lli, keyframe is: %lli\n", next_frame_position,ogg_frame_position);
@@ -1475,7 +1475,7 @@ int FileOGG::read_frame(VFrame *frame)
 		ogg_frame_position --; // ogg_frame_position is at last decoded frame, so it will point right 
 		if (decode_frames <= 0) 
 		{
-			eprintf("Error while seeking to keyframe, wrong keyframe number (frame: %lli, keyframe: %lli)\n", next_frame_position, ogg_frame_position);
+			eprintf("Error while seeking to keyframe, wrong keyframe number (frame: %lli, keyframe: %lli)\n", (long long)next_frame_position, (long long)ogg_frame_position);
 			return 1;
 			
 		}
@@ -2082,8 +2082,7 @@ void OGGConfigAudio::create_objects()
 
 
 	add_subwindow(new BC_OKButton(this));
-	show_window();
-	flush();
+	show_window(1);
 	unlock_window();
 }
 
@@ -2231,6 +2230,7 @@ void OGGConfigVideo::create_objects()
 	
 
 	add_subwindow(new BC_OKButton(this));
+	show_window(1);
 	unlock_window();
 }
 

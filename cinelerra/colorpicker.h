@@ -51,6 +51,7 @@ public:
 	void start_window(int output, int alpha);
 	virtual int handle_new_color(int output, int alpha);
 	void update_gui(int output, int alpha);
+	ColorWindow* get_gui();
 
 private:
 	friend class ColorWindow;

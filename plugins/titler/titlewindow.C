@@ -20,6 +20,7 @@
  */
 
 #include "bcdisplayinfo.h"
+#include "bcsignals.h"
 #include "clip.h"
 #include "language.h"
 #include "titlewindow.h"
@@ -49,7 +50,7 @@ TitleWindow::TitleWindow(TitleMain *client)
  : PluginClientWindow(client,
 	770,
 	360)
-{ 
+{
 	this->client = client; 
 }
 
@@ -290,8 +291,7 @@ void TitleWindow::create_objects()
 
 	update_color();
 
-	show_window();
-	flush();
+	show_window(1);
 }
 
 void TitleWindow::previous_font()

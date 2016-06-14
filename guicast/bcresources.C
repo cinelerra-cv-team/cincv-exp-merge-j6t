@@ -315,8 +315,8 @@ BC_Resources::BC_Resources()
 	};
 	listbox_button = default_listbox_button;
 
-#include "images/list_bg_png.h"
-	static VFrame* default_listbox_bg = new VFrame(list_bg_png);
+#include "images/menu_popup_bg_png.h"
+	static VFrame* default_listbox_bg = 0;
 	listbox_bg = default_listbox_bg;
 
 #include "images/listbox_expandchecked_png.h"
@@ -350,6 +350,7 @@ BC_Resources::BC_Resources()
 #include "images/listbox_dn_png.h"
 	listbox_up = new VFrame(listbox_up_png);
 	listbox_dn = new VFrame(listbox_dn_png);
+	listbox_title_overlap = 0;
 	listbox_title_margin = 0;
 	listbox_title_color = BLACK;
 	listbox_title_hotspot = 5;
@@ -442,14 +443,20 @@ BC_Resources::BC_Resources()
 	bg_light1 = WHITE;
 	bg_light2 = bg_color;
 
+
+	border_light1 = bg_color;
+	border_light2 = MEGREY;
+	border_shadow1 = BLACK;
+	border_shadow2 = bg_color;
+
 	default_text_color = BLACK;
 	disabled_text_color = MEGREY;
 
-	button_light = WHITE;           // bright corner
+	button_light = MEGREY;           // bright corner
 	button_highlighted = 0xffe000;  // face when highlighted
 	button_down = MDGREY;         // face when down
 	button_up = 0xffc000;           // face when up
-	button_shadow = DKGREY;       // dark corner
+	button_shadow = BLACK;       // dark corner
 	button_uphighlighted = RED;   // upper side when highlighted
 
 	tumble_data = 0;
@@ -465,12 +472,40 @@ BC_Resources::BC_Resources()
 	menu_down = MDCYAN;
 	menu_up = MECYAN;
 	menu_shadow = DKCYAN;
-	menu_popup_bg = 0;
-	menu_title_bg = 0;
-	menu_item_bg = 0;
-	menu_bar_bg = 0;
-	menu_title_bg = 0;
+
+
+#include "images/menuitem_up_png.h"
+#include "images/menuitem_hi_png.h"
+#include "images/menuitem_dn_png.h"
+#include "images/menubar_up_png.h"
+#include "images/menubar_hi_png.h"
+#include "images/menubar_dn_png.h"
+#include "images/menubar_bg_png.h"
+
+	static VFrame *default_menuitem_data[] = 
+	{
+		new VFrame(menuitem_up_png),
+		new VFrame(menuitem_hi_png),
+		new VFrame(menuitem_dn_png),
+	};
+	menu_item_bg = default_menuitem_data;
+
+
+	static VFrame *default_menubar_data[] = 
+	{
+		new VFrame(menubar_up_png),
+		new VFrame(menubar_hi_png),
+		new VFrame(menubar_dn_png),
+	};
+	menu_title_bg = default_menubar_data;
+
+	menu_popup_bg = new VFrame(menu_popup_bg_png);
+
+	menu_bar_bg = new VFrame(menubar_bg_png);
+
 	popupmenu_images = 0;
+
+
 	popupmenu_margin = 10;
 	popupmenu_triangle_margin = 10;
 

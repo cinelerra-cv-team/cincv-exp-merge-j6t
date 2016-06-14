@@ -337,7 +337,7 @@ int FileXML::read_from_file(const char *filename, int ignore_error)
 		int new_length = ftell(in);
 		fseek(in, 0, SEEK_SET);
 		reallocate_string(new_length + 1);
-		fread(string, new_length, 1, in);
+		int temp = fread(string, new_length, 1, in);
 		string[new_length] = 0;
 		position = 0;
 		length = new_length;
@@ -690,7 +690,9 @@ int64_t XMLTag::get_property(const char *property, int64_t default_)
 		result = default_;
 	else 
 	{
-		sscanf(temp_string, "%lld", &result);
+		long long temp;
+		sscanf(temp_string, "%lld", &temp);
+		result = temp;
 	}
 	return result;
 }
@@ -731,14 +733,14 @@ int XMLTag::set_title(const char *text)       // set the title field
 
 int XMLTag::set_property(const char *text, int32_t value)
 {
-	sprintf(temp_string, "%d", value);
+	sprintf(temp_string, "%ld", (long)value);
 	set_property(text, temp_string);
 	return 0;
 }
 
 int XMLTag::set_property(const char *text, int64_t value)
 {
-	sprintf(temp_string, "%lld", value);
+	sprintf(temp_string, "%lld", (long long)value);
 	set_property(text, temp_string);
 	return 0;
 }
@@ -746,7 +748,7 @@ int XMLTag::set_property(const char *text, int64_t value)
 int XMLTag::set_property(const char *text, float value)
 {
 	if (value - (float)((int64_t)value) == 0)
-		sprintf(temp_string, "%lld", (int64_t)value);
+		sprintf(temp_string, "%lld", (long long)value);
 	else
 		sprintf(temp_string, "%.6e", value);
 	set_property(text, temp_string);
@@ -756,7 +758,7 @@ int XMLTag::set_property(const char *text, float value)
 int XMLTag::set_property(const char *text, double value)
 {
 	if (value - (double)((int64_t)value) == 0)
-		sprintf(temp_string, "%lld", (int64_t)value);
+		sprintf(temp_string, "%lld", (long long)value);
 	else
 		sprintf(temp_string, "%.16e", value);
 	set_property(text, temp_string);

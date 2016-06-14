@@ -26,6 +26,7 @@
 #include "guicast.h"
 #include "language.h"
 #include "pluginvclient.h"
+#include "theme.h"
 #include "transportque.h"
 
 #include <string.h>
@@ -48,6 +49,7 @@ public:
 	double scale;
 	int stretch;
 	int interp;
+	int optic_flow;
 };
 
 
@@ -120,8 +122,6 @@ public:
 
 	PLUGIN_CLASS_MEMBERS(ReframeRTConfig)
 
-	int load_defaults();
-	int save_defaults();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	void update_gui();
@@ -147,6 +147,7 @@ ReframeRTConfig::ReframeRTConfig()
 	scale = 1.0;
 	stretch = 0;
 	interp = 0;
+	optic_flow = 1;
 }
 
 int ReframeRTConfig::equivalent(ReframeRTConfig &src)
@@ -211,9 +212,9 @@ ReframeRTWindow::~ReframeRTWindow()
 void ReframeRTWindow::create_objects()
 {
 	int x = 10, y = 10;
-
-	add_subwindow(new BC_Title(x, y, _("Scale by amount:")));
-	y += 20;
+	BC_Title *title;
+	add_subwindow(title = new BC_Title(x, y, _("Scale by amount:")));
+	y += title->get_h() + plugin->get_theme()->widget_border;
 	scale = new ReframeRTScale(plugin, 
 		this,
 		x, 
@@ -426,31 +427,6 @@ int ReframeRT::process_buffer(VFrame *frame,
 
 
 
-
-int ReframeRT::load_defaults()
-{
-	char directory[BCTEXTLEN];
-// set the default directory
-	sprintf(directory, "%sreframert.rc", BCASTDIR);
-
-// load the defaults
-	defaults = new BC_Hash(directory);
-	defaults->load();
-
-	config.scale = defaults->get("SCALE", config.scale);
-	config.stretch = defaults->get("STRETCH", config.stretch);
-	config.interp = defaults->get("INTERPOLATE", config.interp);
-	return 0;
-}
-
-int ReframeRT::save_defaults()
-{
-	defaults->update("SCALE", config.scale);
-	defaults->update("STRETCH", config.stretch);
-	defaults->update("INTERPOLATE", config.interp);
-	defaults->save();
-	return 0;
-}
 
 void ReframeRT::save_data(KeyFrame *keyframe)
 {

@@ -74,11 +74,11 @@ Asset* VEdit::get_nested_asset(int64_t *source_position,
 	if(nested_edl)
 	{
 // Convert position to nested EDL rate
-		if(direction == PLAY_REVERSE) *source_position--;
+		if(direction == PLAY_REVERSE) (*source_position)--;
 		*source_position = Units::to_int64(*source_position *
 			nested_edl->session->frame_rate /
 			edl->session->frame_rate);
-		if(direction == PLAY_REVERSE) *source_position++;
+		if(direction == PLAY_REVERSE) (*source_position)++;
 		PlayableTracks *playable_tracks = new PlayableTracks(
 			nested_edl, 
 			*source_position, 
@@ -112,17 +112,15 @@ Asset* VEdit::get_nested_asset(int64_t *source_position,
 // *source_position, 
 // asset->frame_rate,
 // edl->session->frame_rate);
-		if(direction == PLAY_REVERSE) *source_position--;
-		*source_position = Units::to_int64((double)*source_position * 
+		if(direction == PLAY_REVERSE) (*source_position)--;
+
+		(*source_position) = Units::to_int64((double)(*source_position) * 
 			asset->frame_rate / 
 			edl->session->frame_rate);
-		if(direction == PLAY_REVERSE) *source_position++;
 
-// printf("VEdit::get_nested_asset %d %lld %f %f\n", 
-// __LINE__, 
-// *source_position, 
-// asset->frame_rate,
-// edl->session->frame_rate);
+
+		if(direction == PLAY_REVERSE) (*source_position)++;
+
 		return asset;
 	}
 }
@@ -142,14 +140,17 @@ int VEdit::read_frame(VFrame *video_out,
 	if(use_nudge) input_position += track->nudge;
 if(debug) printf("VEdit::read_frame %d source_position=%lld input_position=%lld\n", 
 __LINE__, 
-source_position,
-input_position);
+(long long)source_position,
+(long long)input_position);
 
 	Asset *asset = get_nested_asset(&source_position,
 		input_position,
 		direction);
 
-if(debug) printf("VEdit::read_frame %d\n", __LINE__);
+if(debug) printf("VEdit::read_frame %d source_position=%lld input_position=%lld\n", 
+__LINE__, 
+(long long)source_position,
+(long long)input_position);
 
 	File *file = cache->check_out(asset,
 		edl);
@@ -158,7 +159,7 @@ if(debug) printf("VEdit::read_frame %d\n", __LINE__);
 if(debug) printf("VEdit::read_frame %d path=%s source_position=%lld\n", 
 __LINE__, 
 asset->path, 
-source_position);
+(long long)source_position);
 
 	if(file)
 	{
@@ -169,8 +170,8 @@ if(debug) printf("VEdit::read_frame %d\n", __LINE__);
 			(source_position - 1);
 if(debug) printf("VEdit::read_frame %d %lld %lld\n", 
 __LINE__,
-input_position,
-source_position);
+(long long)input_position,
+(long long)source_position);
 
 		if(use_asynchronous)
 			file->start_video_decode_thread();
@@ -179,6 +180,7 @@ source_position);
 if(debug) printf("VEdit::read_frame %d\n", __LINE__);
 
 		file->set_layer(channel);
+//printf("VEdit::read_frame %d %lld\n", __LINE__, source_position);
 		file->set_video_position(source_position, 0);
 
 		if(use_cache) file->set_cache_frames(use_cache);

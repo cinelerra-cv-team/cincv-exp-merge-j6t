@@ -31,7 +31,6 @@
 #include <string.h>
 
 
-#define SQR(x) ((x) * (x))
 
 
 REGISTER_PLUGIN(LensMain)
@@ -723,67 +722,6 @@ void LensMain::update_gui()
 	}
 }
 
-// void LensMain::load_presets()
-// {
-// 	char path[BCTEXTLEN];
-// 	char string[BCTEXTLEN];
-// 	sprintf(path, "%slenspresets.rc", BCASTDIR);
-// 	BC_Hash *defaults = new BC_Hash(path);
-// 	defaults->load();
-// 
-// 	presets.remove_all_objects();
-// 	int total_presets = defaults->get("TOTAL_PRESETS", 0);
-// 	for(int i = 0; i < total_presets; i++)
-// 	{
-// 		LensPreset *preset = new LensPreset;
-// 		presets.append(preset);
-// 		sprintf(string, "TITLE_%d", i);
-// 		defaults->get(string, preset->title);
-// 		for(int j = 0; j < FOV_CHANNELS; j++)
-// 		{
-// 			sprintf(string, "FOCAL_LENGTH_%d_%d", i, j);
-// 			preset->fov[j] = defaults->get(string, config.fov[j]);
-// 		}
-// 		sprintf(string, "ASPECT_%d", i);
-// 		preset->aspect = defaults->get(string, config.aspect);
-// 		sprintf(string, "RADIUS_%d", i);
-// 		preset->radius = defaults->get(string, config.radius);
-// 		sprintf(string, "MODE_%d", i);
-// 		preset->mode = defaults->get(string, config.mode);
-// 	}
-// 	
-// 	delete defaults;
-// }
-
-int LensMain::load_defaults()
-{
-	char path[BCTEXTLEN], string[BCTEXTLEN];
-// set the default path
-	sprintf(path, "%slens.rc", BCASTDIR);
-
-// load the defaults
-	defaults = new BC_Hash(path);
-	defaults->load();
-
-	for(int i = 0; i < FOV_CHANNELS; i++)
-	{
-		sprintf(string, "FOCAL_LENGTH%d", i);
-		config.fov[i] = defaults->get(string, config.fov[i]);
-	}
-	config.aspect = defaults->get("ASPECT", config.aspect);
-	config.radius = defaults->get("RADIUS", config.radius);
-	config.mode = defaults->get("MODE", config.mode);
-	config.center_x = defaults->get("CENTER_X", config.center_x);
-	config.center_y = defaults->get("CENTER_Y", config.center_y);
-	config.draw_guides = defaults->get("DRAW_GUIDES", config.draw_guides);
-	lock = defaults->get("LOCK", lock);
-	current_preset = defaults->get("PRESET", current_preset);
-
-// Load presets
-//	load_presets();
-	return 0;
-}
-
 void LensMain::save_presets()
 {
 	char path[BCTEXTLEN], string[BCTEXTLEN];
@@ -816,27 +754,6 @@ void LensMain::save_presets()
 	delete defaults;
 }
 
-int LensMain::save_defaults()
-{
-	char string[BCTEXTLEN];
-	for(int i = 0; i < FOV_CHANNELS; i++)
-	{
-		sprintf(string, "FOCAL_LENGTH%d", i);
-		defaults->update(string, config.fov[i]);
-	}
-	defaults->update("ASPECT", config.aspect);
-	defaults->update("RADIUS", config.radius);
-	defaults->update("MODE", config.mode);
-	defaults->update("CENTER_X", config.center_x);
-	defaults->update("CENTER_Y", config.center_y);
-	defaults->update("DRAW_GUIDES", config.draw_guides);
-	defaults->update("LOCK", lock);
-	defaults->update("PRESET", current_preset);
-
-	defaults->save();
-//	save_presets();
-	return 0;
-}
 
 void LensMain::save_data(KeyFrame *keyframe)
 {

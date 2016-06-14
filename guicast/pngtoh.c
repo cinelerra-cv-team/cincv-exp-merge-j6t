@@ -120,9 +120,9 @@ int main(int argc, char *argv[])
 
 // Print the size of the file
 		fprintf(out, "\t0x%02x, 0x%02x, 0x%02x, 0x%02x,\n",
-			(int)(total_bytes >> 24) & 0xff,
-			(int)(total_bytes >> 16) & 0xff,
-			(int)(total_bytes >> 8) & 0xff,
+			(int)(total_bytes & 0xff000000) >> 24,
+			(int)(total_bytes & 0xff0000) >> 16,
+			(int)(total_bytes & 0xff00) >> 8,
 			(int)(total_bytes & 0xff));
 
 		while(total_bytes > 0)

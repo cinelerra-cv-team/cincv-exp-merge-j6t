@@ -225,9 +225,11 @@ int BC_Clipboard::handle_request_targets(XSelectionRequestEvent *request)
 int BC_Clipboard::to_clipboard(char *data, long len, int clipboard_num)
 {
 
-#if 0
-	XStoreBuffer(display, data, len, clipboard_num);
-#endif
+	if(clipboard_num == BC_PRIMARY_SELECTION)
+	{
+		XStoreBuffer(out_display, data, len, clipboard_num);
+		return 0;
+	}
 
 #ifdef SINGLE_THREAD
 	BC_Display::lock_display("BC_Clipboard::to_clipboard");
@@ -250,10 +252,22 @@ int BC_Clipboard::to_clipboard(char *data, long len, int clipboard_num)
 		this->data[clipboard_num][len] = 0;
 	}
 
-	XSetSelectionOwner(out_display, 
-		(clipboard_num == PRIMARY_SELECTION) ? primary : secondary, 
-		out_win, 
-		CurrentTime);
+	if(clipboard_num == PRIMARY_SELECTION)
+	{
+		XSetSelectionOwner(out_display, 
+			primary, 
+			out_win, 
+			CurrentTime);
+	}
+	else
+	if(clipboard_num == SECONDARY_SELECTION)
+	{
+		XSetSelectionOwner(out_display, 
+			secondary, 
+			out_win, 
+			CurrentTime);
+	}
+
 
 	XFlush(out_display);
 
@@ -271,18 +285,21 @@ int BC_Clipboard::from_clipboard(char *data, long maxlen, int clipboard_num)
 
 
 
-#if 0
-	char *data2;
-	int len, i;
-	data2 = XFetchBuffer(display, &len, clipboard_num);
-	for(i = 0; i < len && i < maxlen; i++)
-		data[i] = data2[i];
+	if(clipboard_num == BC_PRIMARY_SELECTION)
+	{
+		char *data2;
+		int len, i;
+		data2 = XFetchBuffer(in_display, &len, clipboard_num);
+		for(i = 0; i < len && i < maxlen; i++)
+			data[i] = data2[i];
 
-	data[i] = 0;
+		data[i] = 0;
 
-	XFree(data2);
-
-#endif
+		XFree(data2);
+		
+		
+		return 0;
+	}
 
 
 
@@ -374,14 +391,15 @@ int BC_Clipboard::from_clipboard(char *data, long maxlen, int clipboard_num)
 long BC_Clipboard::clipboard_len(int clipboard_num)
 {
 
-#if 0
-	char *data2;
-	int len;
+	if(clipboard_num == BC_PRIMARY_SELECTION)
+	{
+		char *data2;
+		int len;
 
-	data2 = XFetchBuffer(display, &len, clipboard_num);
-	XFree(data2);
-	return len;
-#endif
+		data2 = XFetchBuffer(in_display, &len, clipboard_num);
+		XFree(data2);
+		return len;
+	}
 
 
 

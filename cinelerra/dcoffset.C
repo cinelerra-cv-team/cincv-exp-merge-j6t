@@ -21,13 +21,9 @@
 
 #include "bcprogressbox.h"
 #include "dcoffset.h"
+#include "language.h"
 #include "mutex.h"
 #include "recordgui.h"
-
-#include <libintl.h>
-#define _(String) gettext(String)
-#define gettext_noop(String) String
-#define N_(String) gettext_noop (String)
 
 
 

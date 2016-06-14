@@ -84,6 +84,7 @@ public:
 	BatchRenderThread(MWindow *mwindow);
 	BatchRenderThread();
 	~BatchRenderThread();
+
 	void handle_close_event(int result);
 	BC_Window* new_gui();
 
@@ -101,6 +102,7 @@ public:
 	char* create_path(char *string);
 	void new_job();
 	void delete_job();
+	void use_current_edl();
 // Conditionally returns the job or the default job based on current_job
 	BatchRenderJob* get_current_job();
 	Asset* get_current_asset();
@@ -151,6 +153,17 @@ public:
 		int y, 
 		int w, 
 		char *text);
+	int handle_event();
+	BatchRenderThread *thread;
+};
+
+
+class BatchRenderCurrentEDL : public BC_GenericButton
+{
+public:
+	BatchRenderCurrentEDL(BatchRenderThread *thread, 
+		int x, 
+		int y);
 	int handle_event();
 	BatchRenderThread *thread;
 };
@@ -313,6 +326,7 @@ public:
 	BatchRenderStart *start_button;
 	BatchRenderStop *stop_button;
 	BatchRenderCancel *cancel_button;
+	BatchRenderCurrentEDL *use_current_edl;
 };
 
 

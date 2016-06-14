@@ -251,30 +251,30 @@ void PerformancePrefs::create_objects()
 void PerformancePrefs::generate_node_list()
 {
 	int selected_row = node_list ? node_list->get_selection_number(0, 0) : -1;
-	nodes[0].remove_all_objects();
-	nodes[1].remove_all_objects();
-	nodes[2].remove_all_objects();
-	nodes[3].remove_all_objects();
+	
+	for(int i = 0; i < TOTAL_COLUMNS; i++)
+		nodes[i].remove_all_objects();
+
 	for(int i = 0; 
-		i < pwindow->thread->preferences->renderfarm_nodes.total; 
+		i < pwindow->thread->preferences->renderfarm_nodes.size(); 
 		i++)
 	{
 		BC_ListBoxItem *item;
-		nodes[0].append(item = new BC_ListBoxItem(
-			(char*)(pwindow->thread->preferences->renderfarm_enabled.values[i] ? "X" : " ")));
+		nodes[ENABLED_COLUMN].append(item = new BC_ListBoxItem(
+			(char*)(pwindow->thread->preferences->renderfarm_enabled.get(i) ? "X" : " ")));
 		if(i == selected_row) item->set_selected(1);
 
-		nodes[1].append(item = new BC_ListBoxItem(
-			pwindow->thread->preferences->renderfarm_nodes.values[i]));
+		nodes[HOSTNAME_COLUMN].append(item = new BC_ListBoxItem(
+			pwindow->thread->preferences->renderfarm_nodes.get(i)));
 		if(i == selected_row) item->set_selected(1);
 
 		char string[BCTEXTLEN];
-		sprintf(string, "%d", pwindow->thread->preferences->renderfarm_ports.values[i]);
-		nodes[2].append(item = new BC_ListBoxItem(string));
+		sprintf(string, "%d", pwindow->thread->preferences->renderfarm_ports.get(i));
+		nodes[PORT_COLUMN].append(item = new BC_ListBoxItem(string));
 		if(i == selected_row) item->set_selected(1);
 
-		sprintf(string, "%0.3f", pwindow->thread->preferences->renderfarm_rate.values[i]);
-		nodes[3].append(item = new BC_ListBoxItem(string));
+		sprintf(string, "%0.3f", pwindow->thread->preferences->renderfarm_rate.get(i));
+		nodes[RATE_COLUMN].append(item = new BC_ListBoxItem(string));
 		if(i == selected_row) item->set_selected(1);
 	}
 }
@@ -301,12 +301,32 @@ void PerformancePrefs::update_node_list()
 	node_list->update(nodes,
 						titles,
 						widths,
-						4,
+						TOTAL_COLUMNS,
 						node_list->get_xposition(),
 						node_list->get_yposition(),
 						node_list->get_selection_number(0, 0));
 }
 
+
+void PerformancePrefs::update_rates()
+{
+//printf("PerformancePrefs::update_rates %d\n", __LINE__);
+	char string[BCTEXTLEN];
+	for(int i = 0; 
+		i < mwindow->preferences->renderfarm_rate.size(); 
+		i++)
+	{
+		if(i < nodes[RATE_COLUMN].size())
+		{
+			sprintf(string, "%0.3f", mwindow->preferences->renderfarm_rate.get(i));
+			nodes[RATE_COLUMN].get(i)->set_text(string);
+		}
+	}
+	
+	update_framerate_text(mwindow->preferences, master_rate);
+	
+	update_node_list();
+}
 
 
 PrefsUseBRender::PrefsUseBRender(PreferencesWindow *pwindow, 
@@ -686,9 +706,12 @@ PrefsRenderFarmDelNode::~PrefsRenderFarmDelNode()
 }
 int PrefsRenderFarmDelNode::handle_event()
 {
-	if(strlen(subwindow->edit_node->get_text()))
+	if(strlen(subwindow->edit_node->get_text()) &&
+		subwindow->hot_node >= 0)
 	{
+
 		pwindow->thread->preferences->delete_node(subwindow->hot_node);
+		
 		subwindow->generate_node_list();
 		subwindow->update_node_list();
 		subwindow->hot_node = -1;

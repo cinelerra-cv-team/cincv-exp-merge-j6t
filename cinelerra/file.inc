@@ -67,10 +67,11 @@
 #define FILE_EXR_LIST           27
 #define FILE_CR2                28
 #define FILE_YUV		29	// mjpegtools YUV4MPEG (aka YUV4MPEG2)
+#define FILE_CR2_LIST           35
 #define FILE_VORBIS             31
 #define FILE_FFMPEG             33
 #define FILE_SCENE              34
-#define FILE_RAWDV		35
+#define FILE_RAWDV		36
 
 // For formats supported by plugins, the format number is the plugin number in the 
 // plugin list ORed with 0x8000.
@@ -159,6 +160,7 @@ N_("OGG Theora/Vorbis")
 #define RAWDV_NAME "Raw DV"
 #define OGG_NAME "OGG Theora/Vorbis"
 #define JPEG_LIST_NAME "JPEG Sequence"
+#define CR2_LIST_NAME "CR2 Sequence"
 #define JPEG_NAME "JPEG"
 #define MOV_NAME "Quicktime for Linux"
 #define MPEG_NAME "MPEG"           // For decoding only

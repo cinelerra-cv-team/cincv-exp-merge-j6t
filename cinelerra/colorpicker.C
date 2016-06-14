@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 1997-2011 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,7 +123,10 @@ int ColorThread::handle_new_color(int output, int alpha)
 	return 0;
 }
 
-
+ColorWindow* ColorThread::get_gui()
+{
+	return window;
+}
 
 
 
@@ -378,27 +381,54 @@ void PaletteWheel::create_objects()
 	default_b = (get_resources()->get_bg_color() & 0xff);
 //printf("PaletteWheel::create_objects 1\n");
 
+	int highlight_r = (get_resources()->button_light & 0xff0000) >> 16;
+	int highlight_g = (get_resources()->button_light & 0xff00) >> 8;
+	int highlight_b = (get_resources()->button_light & 0xff);
+
 	for(y2 = 0; y2 < get_h(); y2++)
 	{
+		unsigned char *row = (unsigned char*)frame.get_rows()[(int)y2];
 		for(x2 = 0; x2 < get_w(); x2++)
 		{
 			distance = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 			if(distance > x1)
 			{
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4] = default_r;
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4 + 1] = default_g;
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4 + 2] = default_b;
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4 + 3] = 0;
+				row[(int)x2 * 4] = default_r;
+				row[(int)x2 * 4 + 1] = default_g;
+				row[(int)x2 * 4 + 2] = default_b;
+				row[(int)x2 * 4 + 3] = 0;
+			}
+			else
+			if(distance > x1 - 1)
+			{
+				int r_i, g_i, b_i;
+				if(get_h() - y2 < x2)
+				{
+					r_i = highlight_r;
+					g_i = highlight_g;
+					b_i = highlight_b;
+				}
+				else
+				{
+					r_i = 0;
+					g_i = 0;
+					b_i = 0;
+				}
+
+				row[(int)x2 * 4] = r_i;
+				row[(int)x2 * 4 + 1] = g_i;
+				row[(int)x2 * 4 + 2] = b_i;
+				row[(int)x2 * 4 + 3] = 255;
 			}
 			else
 			{
 				h = get_angle(x1, y1, x2, y2);
 				s = distance / x1;
 				HSV::hsv_to_rgb(r, g, b, h, s, v);
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4] = (int)(r * 255);
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4 + 1] = (int)(g * 255);
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4 + 2] = (int)(b * 255);
-				((unsigned char*)frame.get_rows()[(int)y2])[(int)x2 * 4 + 3] = 255;
+				row[(int)x2 * 4] = (int)(r * 255);
+				row[(int)x2 * 4 + 1] = (int)(g * 255);
+				row[(int)x2 * 4 + 2] = (int)(b * 255);
+				row[(int)x2 * 4 + 3] = 255;
 			}
 		}
 	}
@@ -439,25 +469,25 @@ int PaletteWheel::draw(float hue, float saturation)
 
 	if(hue > 0 && hue < 90)
 	{
-		x = (int)(w + w * cos(torads(90 - hue)) * saturation);
+		x = (int)(w - w * cos(torads(90 - hue)) * saturation);
 		y = (int)(h - h * sin(torads(90 - hue)) * saturation);
 	}
 	else
 	if(hue > 90 && hue < 180)
 	{
-		x = (int)(w + w * cos(torads(hue - 90)) * saturation);
+		x = (int)(w - w * cos(torads(hue - 90)) * saturation);
 		y = (int)(h + h * sin(torads(hue - 90)) * saturation);
 	}
 	else
 	if(hue > 180 && hue < 270)
 	{
-		x = (int)(w - w * cos(torads(270 - hue)) * saturation);
+		x = (int)(w + w * cos(torads(270 - hue)) * saturation);
 		y = (int)(h + h * sin(torads(270 - hue)) * saturation);
 	}
 	else
 	if(hue > 270 && hue < 360)
 	{
-		x = (int)(w - w * cos(torads(hue - 270)) * saturation);
+		x = (int)(w + w * cos(torads(hue - 270)) * saturation);
 		y = (int)(h - w * sin(torads(hue - 270)) * saturation);
 	}
 	else
@@ -469,7 +499,7 @@ int PaletteWheel::draw(float hue, float saturation)
 	else
 	if(hue == 90)
 	{
-		x = (int)(w + w * saturation);
+		x = (int)(w - w * saturation);
 		y = h;
 	}
 	else
@@ -481,7 +511,7 @@ int PaletteWheel::draw(float hue, float saturation)
 	else
 	if(hue == 270)
 	{
-		x = (int)(w - w * saturation);
+		x = (int)(w + w * saturation);
 		y = h;
 	}
 
@@ -494,7 +524,7 @@ int PaletteWheel::draw(float hue, float saturation)
 
 int PaletteWheel::get_angle(float x1, float y1, float x2, float y2)
 {
-	float result = atan2(x2 - x1, y1 - y2) * (360 / M_PI / 2);
+	float result = -atan2(x2 - x1, y1 - y2) * (360 / M_PI / 2);
 	if (result < 0)
 		result += 360;
 	return (int)result;
@@ -539,7 +569,7 @@ int PaletteWheelValue::cursor_motion_event()
 	if(button_down && is_event_win())
 	{
 //printf("PaletteWheelValue::cursor_motion 1\n");
-		window->v = (float)(get_h() - get_cursor_y()) / get_h();
+		window->v = 1.0 - (float)(get_cursor_y() - 2) / (get_h() - 4);
 		window->update_display();
 		window->handle_event();
 		return 1;
@@ -562,34 +592,49 @@ int PaletteWheelValue::draw(float hue, float saturation, float value)
 {
 	float r_f, g_f, b_f;
 	int i, j, r, g, b;
-	for(i = get_h() - 1; i >= 0; i--)
+
+	for(i = get_h() - 3; i >= 2; i--)
 	{
-		HSV::hsv_to_rgb(r_f, g_f, b_f, hue, saturation, (float)(get_h() - 1 - i) / get_h());
+		unsigned char *row = (unsigned char*)frame->get_rows()[i];
+		HSV::hsv_to_rgb(r_f, 
+			g_f, 
+			b_f, 
+			hue, 
+			saturation, 
+			1.0 - (float)(i - 2) / (get_h() - 4));
 		r = (int)(r_f * 255);
 		g = (int)(g_f * 255);
 		b = (int)(b_f * 255);
 		for(j = 0; j < get_w(); j++)
 		{
- 			((unsigned char*)frame->get_rows()[i])[j * 3] = r;
- 			((unsigned char*)frame->get_rows()[i])[j * 3 + 1] = g;
- 			((unsigned char*)frame->get_rows()[i])[j * 3 + 2] = b;
+ 			row[j * 3] = r;
+ 			row[j * 3 + 1] = g;
+ 			row[j * 3 + 2] = b;
 		}
 	}
+
+	draw_3d_border(0, 
+		0, 
+		get_w(), 
+		get_h(), 
+		1);
 	draw_vframe(frame, 
-		0, 
-		0, 
-		get_w(), 
-		get_h(), 
-		0, 
-		0, 
-		get_w(), 
-		get_h(), 
+		2, 
+		2, 
+		get_w() - 4, 
+		get_h() - 4, 
+		2, 
+		2, 
+		get_w() - 4, 
+		get_h() - 4, 
 		0);
 	set_color(BLACK);
-	draw_line(0, 
-		get_h() - (int)(value * get_h()), 
-		get_w(), 
-		get_h() - (int)(value * get_h()));
+	draw_line(2, 
+		get_h() - 3 - (int)(value * (get_h() - 5)), 
+		get_w() - 3, 
+		get_h() - 3 - (int)(value * (get_h() - 5)));
+//printf("PaletteWheelValue::draw %d %f\n", __LINE__, value);
+
 	return 0;
 }
 
@@ -620,7 +665,14 @@ int PaletteOutput::draw()
 	
 	HSV::hsv_to_rgb(r_f, g_f, b_f, window->h, window->s, window->v);
 	set_color(((int)(r_f * 255) << 16) | ((int)(g_f * 255) << 8) | ((int)(b_f * 255)));
-	draw_box(0, 0, get_w(), get_h());
+	draw_box(2, 2, get_w() - 4, get_h() - 4);
+	draw_3d_border(0, 
+		0, 
+		get_w(), 
+		get_h(), 
+		1);
+
+
 	return 0;
 }
 

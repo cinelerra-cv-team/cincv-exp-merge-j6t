@@ -76,7 +76,7 @@ int BC_Tumbler::initialize()
 	BC_SubWindow::initialize();
 
 // Display the bitmap
-	draw_face();
+	draw_face(0);
 	return 0;
 }
 
@@ -86,7 +86,7 @@ int BC_Tumbler::reposition_window(int x, int y, int w, int h)
 		printf("BC_Tumbler::reposition_window - w & h haven't been implemented yet!! (probably never will be)");
 
 	BC_WindowBase::reposition_window(x, y);
-	draw_face();
+	draw_face(0);
 	return 0;
 }
 
@@ -95,7 +95,7 @@ int BC_Tumbler::update_bitmaps(VFrame **data)
 {
 	set_images(data);
 	draw_top_background(parent_window, 0, 0, w, h);
-	draw_face();
+	draw_face(1);
 	return 0;
 }
 
@@ -110,7 +110,7 @@ int BC_Tumbler::set_images(VFrame **data)
 	return 0;
 }
 
-int BC_Tumbler::draw_face()
+int BC_Tumbler::draw_face(int flush)
 {
 	draw_top_background(parent_window, 0, 0, w, h);
 	pixmap->draw_pixmap(images[status], 
@@ -120,7 +120,7 @@ int BC_Tumbler::draw_face()
 			h,
 			0,
 			0);
-	flash();
+	flash(flush);
 	return 0;
 }
 
@@ -167,7 +167,7 @@ int BC_Tumbler::cursor_enter_event()
 		if(! top_level->button_down && status == TUMBLE_UP) 
 		{
 			status = TUMBLE_UPHI;
-			draw_face();
+			draw_face(1);
 		}
 	}
 	return 0;
@@ -179,7 +179,7 @@ int BC_Tumbler::cursor_leave_event()
 	if(status == TUMBLE_UPHI)
 	{
 		status = TUMBLE_UP;
-		draw_face();
+		draw_face(1);
 	}
 	return 0;
 }
@@ -193,8 +193,7 @@ int BC_Tumbler::button_press_event()
 		if(get_buttonpress() == 4)
 		{
 			status = TUMBLETOP_DN;
-			draw_face();
-			flush();
+			draw_face(1);
 			handle_up_event();
 //			repeat_count = 0;
 //			repeat_event(top_level->get_resources()->tumble_duration);
@@ -203,8 +202,7 @@ int BC_Tumbler::button_press_event()
 		if(get_buttonpress() == 5)
 		{
 			status = TUMBLEBOTTOM_DN;
-			draw_face();
-			flush();
+			draw_face(1);
 			handle_down_event();
 //			repeat_count = 0;
 //			repeat_event(top_level->get_resources()->tumble_duration);
@@ -220,8 +218,7 @@ int BC_Tumbler::button_press_event()
 				status = TUMBLEBOTTOM_DN;
 			}
 
-			draw_face();
-			flush();
+			draw_face(1);
 
 			top_level->set_repeat(top_level->get_resources()->tumble_duration);
 			repeat_count = 0;
@@ -246,7 +243,7 @@ int BC_Tumbler::button_release_event()
 			else
 				status = TUMBLE_UP;
 		}
-		draw_face();
+		draw_face(1);
 	}
 	return 0;
 }
@@ -258,7 +255,7 @@ int BC_Tumbler::cursor_motion_event()
 		!(status == TUMBLETOP_DN || status == TUMBLEBOTTOM_DN))
 	{
 		status = TUMBLE_UP;
-		draw_face();
+		draw_face(1);
 	}
 	return 0;
 }

@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 1997-2011 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ public:
 // Whenever the position of the text changes
 	virtual int motion_event() { return 0; };
 	void set_selection(int char1, int char2, int ibeam);
-	int update(const char *text);
+	int update(const char *text, int flush = 0);
 	void update(const wchar_t *text);
 	void updateutf8(const char *text);
 	int update(int64_t value);
@@ -104,6 +104,7 @@ public:
 	void disable();
 	void enable();
 	int get_enabled();
+	int get_rows();
 
 	int initialize();
 
@@ -153,6 +154,7 @@ public:
 	
 
 // Compute suggestions for a path
+// If entries is null, just search absolute paths
 	int calculate_suggestions(ArrayList<BC_ListBoxItem*> *entries);
 
 
@@ -166,14 +168,14 @@ public:
 private:
 	void convert_number();
 	int reset_parameters(int rows, int has_border, int font);
-	void draw();
+	void draw(int flush);
 	void draw_border();
 	void draw_cursor();
 	void copy_selection(int clipboard_num);
 	void paste_selection(int clipboard_num);
 	void delete_selection(int letter1, int letter2, int text_len);
 	void insert_text(const wchar_t *string, int string_len = -1);
-	void update_wtext();
+	void update_wtext(int flush = 1);
 // Reformat text according to separators.
 // ibeam_left causes the ibeam to move left.
 	void do_separators(int ibeam_left);
@@ -182,9 +184,17 @@ private:
 	void select_word(int &letter1, int &letter2, int ibeam_letter);
 	void select_line(int &letter1, int &letter2, int ibeam_letter);
 	int get_cursor_letter(int cursor_x, int cursor_y);
+	int get_cursor_letter2(int cursor_x, int cursor_y);
 	int get_row_h(int rows);
 	void default_keypress(int &dispatch_event, int &result);
 
+
+
+	int repeat_state;
+	enum
+	{
+		
+	};
 
 // Top left of text relative to window
 	int text_x, text_y;

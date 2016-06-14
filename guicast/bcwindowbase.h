@@ -309,6 +309,7 @@ public:
 	int get_x2();
 	int get_y2();
 	int get_bg_color();
+	void set_bg_color(int color);
 	BC_Pixmap* get_bg_pixmap();
 	int get_text_ascent(int font);
 	int get_text_descent(int font);
@@ -336,11 +337,13 @@ public:
 
 // Set the gc to the color
 	void set_color(int64_t color);
+	void set_line_width(int value);
+	void set_line_dashes(int value);
 	int get_bgcolor();
 	void set_font(int font);
 // Set the cursor to a macro from cursors.h
 // Set override if the caller is enabling hourglass or hiding the cursor
-	void set_cursor(int cursor, int override = 0);
+	void set_cursor(int cursor, int override /* = 0 */, int flush);
 // Set the cursor to a character in the X cursor library.  Used by test.C
 	void set_x_cursor(int cursor);
 	int get_cursor();
@@ -363,6 +366,13 @@ public:
 	void clear_box(int x, int y, int w, int h, BC_Pixmap *pixmap = 0);
 	void draw_box(int x, int y, int w, int h, BC_Pixmap *pixmap = 0);
 	void draw_circle(int x, int y, int w, int h, BC_Pixmap *pixmap = 0);
+	void draw_arc(int x, 
+		int y, 
+		int w, 
+		int h, 
+		int start_angle,
+		int angle_length,
+		BC_Pixmap *pixmap = 0);
 	void draw_disc(int x, int y, int w, int h, BC_Pixmap *pixmap = 0);
 	void draw_text(int x, int y, const char *text, int length = -1, BC_Pixmap *pixmap = 0);
 	void draw_text(int x, int y, const wchar_t *text, int length = -1, BC_Pixmap *pixmap = 0);
@@ -471,8 +481,25 @@ public:
 		int shadow1, 
 		int shadow2, 
 		BC_Pixmap *pixmap = 0);
-	void draw_3d_border(int x, int y, int w, int h, 
-		int light1, int light2, int shadow1, int shadow2);
+	void draw_3d_box(int x, 
+		int y, 
+		int w, 
+		int h, 
+		int is_down, 
+		BC_Pixmap *pixmap = 0);
+	void draw_3d_border(int x, 
+		int y, 
+		int w, 
+		int h, 
+		int light1, 
+		int light2, 
+		int shadow1, 
+		int shadow2);
+	void draw_3d_border(int x, 
+		int y, 
+		int w, 
+		int h, 
+		int is_down);
 	void draw_colored_box(int x, int y, int w, int h, int down, int highlighted);
 	void draw_check(int x, int y);
 	void draw_triangle_down_flat(int x, int y, int w, int h);
@@ -554,7 +581,8 @@ public:
 	int set_tooltips(int tooltips_enabled);
 	int resize_window(int w, int h);
 	int reposition_widget(int x, int y, int w = -1, int h = -1);
-	int reposition_window(int x, int y, int w = -1, int h = -1);
+	int reposition_window(int x, int y);
+	int reposition_window(int x, int y, int w /* = -1 */, int h /* = -1*/ );
 // Cause a repeat event to be dispatched every duration.
 // duration is milliseconds
 	int set_repeat(int64_t duration);
@@ -792,6 +820,8 @@ private:
 	void *largefont_xft, *mediumfont_xft, *smallfont_xft;
 	void *bold_largefont_xft, *bold_mediumfont_xft, *bold_smallfont_xft;
 
+	int line_width;
+	int line_dashes;
 	int64_t current_color;
 // Coordinate of drag start
 	int drag_x, drag_y;
@@ -862,6 +892,7 @@ private:
 // Icon
 	BC_Popup *icon_window;
 	BC_Pixmap *icon_pixmap;
+	BC_Pixmap **_7segment_pixmaps;
 // Temporary
 	BC_Bitmap *temp_bitmap;
 // Clipboard

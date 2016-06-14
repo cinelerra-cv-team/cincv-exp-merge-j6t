@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2012 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "clip.h"
 #include "language.h"
 #include "motion.h"
+#include "motionscan.h"
 #include "motionwindow.h"
 
 
@@ -126,11 +127,11 @@ void MotionWindow::create_objects()
 
 	y += 50;
 	add_subwindow(title = new BC_Title(x, y, _("Translation direction:")));
-	add_subwindow(mode3 = new Mode3(plugin, 
+	add_subwindow(track_direction = new TrackDirection(plugin, 
 		this, 
 		x + title->get_w() + 10, 
 		y));
-	mode3->create_objects();
+	track_direction->create_objects();
 
 	y += 40;
 	add_subwindow(title = new BC_Title(x, y + 10, _("Block X:")));
@@ -147,6 +148,7 @@ void MotionWindow::create_objects()
 	add_subwindow(rotation_center = new RotationCenter(plugin,
 		x2 + title->get_w() + 10,
 		y));
+
 
 
 	int y1 = y;
@@ -177,13 +179,13 @@ void MotionWindow::create_objects()
 		y + 10));
 
 	y += 50;
-	add_subwindow(title = new BC_Title(x, y + 10, _("Maximum position offset:")));
+	add_subwindow(title = new BC_Title(x, y + 10, _("Maximum absolute offset:")));
 	add_subwindow(magnitude = new MotionMagnitude(plugin, 
 		x + title->get_w() + 10, 
 		y));
 
 	y += 40;
-	add_subwindow(title = new BC_Title(x, y + 10, _("Position settling speed:")));
+	add_subwindow(title = new BC_Title(x, y + 10, _("Motion settling speed:")));
 	add_subwindow(return_speed = new MotionReturnSpeed(plugin,
 		x + title->get_w() + 10, 
 		y));
@@ -239,22 +241,22 @@ void MotionWindow::create_objects()
 
 
 	add_subwindow(title = new BC_Title(x, y, _("Action:")));
-	add_subwindow(mode1 = new Mode1(plugin, 
+	add_subwindow(action_type = new ActionType(plugin, 
 		this,
 		x + title->get_w() + 10, 
 		y));
-	mode1->create_objects();
+	action_type->create_objects();
 	y += 30;
 
 
 
 
 	add_subwindow(title = new BC_Title(x, y, _("Calculation:")));
-	add_subwindow(mode2 = new Mode2(plugin, 
+	add_subwindow(tracking_type = new TrackingType(plugin, 
 		this, 
 		x + title->get_w() + 10, 
 		y));
-	mode2->create_objects();
+	tracking_type->create_objects();
 
 
 
@@ -458,7 +460,6 @@ RotationSearchPositions::RotationSearchPositions(MotionMain *plugin,
 }
 void RotationSearchPositions::create_objects()
 {
-	add_item(new BC_MenuItem("2"));
 	add_item(new BC_MenuItem("4"));
 	add_item(new BC_MenuItem("8"));
 	add_item(new BC_MenuItem("16"));
@@ -505,22 +506,22 @@ int MotionMagnitude::handle_event()
 MotionReturnSpeed::MotionReturnSpeed(MotionMain *plugin, 
 	int x, 
 	int y)
- : BC_FPot(x, 
+ : BC_IPot(x, 
 		y, 
-		(float)plugin->config.return_speed,
-		(float)0,
-		(float)100)
+		(int64_t)plugin->config.return_speed,
+		(int64_t)0,
+		(int64_t)100)
 {
 	this->plugin = plugin;
-	set_precision(1);
 }
 
 int MotionReturnSpeed::handle_event()
 {
-	plugin->config.return_speed = (float)get_value();
+	plugin->config.return_speed = (int)get_value();
 	plugin->send_configure_change();
 	return 1;
 }
+
 
 
 MotionRMagnitude::MotionRMagnitude(MotionMain *plugin, 
@@ -543,22 +544,22 @@ int MotionRMagnitude::handle_event()
 }
 
 
+
 MotionRReturnSpeed::MotionRReturnSpeed(MotionMain *plugin, 
 	int x, 
 	int y)
- : BC_FPot(x, 
+ : BC_IPot(x, 
 		y, 
-		(float)plugin->config.rotate_return_speed,
-		(float)0,
-		(float)100)
+		(int64_t)plugin->config.rotate_return_speed,
+		(int64_t)0,
+		(int64_t)100)
 {
 	this->plugin = plugin;
-	set_precision(1);
 }
 
 int MotionRReturnSpeed::handle_event()
 {
-	plugin->config.rotate_return_speed = (float)get_value();
+	plugin->config.rotate_return_speed = (int)get_value();
 	plugin->send_configure_change();
 	return 1;
 }
@@ -774,7 +775,7 @@ TrackSingleFrame::TrackSingleFrame(MotionMain *plugin,
 	int y)
  : BC_Radial(x, 
  	y, 
-	plugin->config.mode3 == MotionConfig::TRACK_SINGLE, 
+	plugin->config.tracking_object == MotionScan::TRACK_SINGLE, 
  	_("Track single frame"))
 {
 	this->plugin = plugin;
@@ -783,7 +784,7 @@ TrackSingleFrame::TrackSingleFrame(MotionMain *plugin,
 
 int TrackSingleFrame::handle_event()
 {
-	plugin->config.mode3 = MotionConfig::TRACK_SINGLE;
+	plugin->config.tracking_object = MotionScan::TRACK_SINGLE;
 	gui->track_previous->update(0);
 	gui->previous_same->update(0);
 	gui->track_frame_number->enable();
@@ -806,7 +807,7 @@ TrackFrameNumber::TrackFrameNumber(MotionMain *plugin,
 {
 	this->plugin = plugin;
 	this->gui = gui;
-	if(plugin->config.mode3 != MotionConfig::TRACK_SINGLE) disable();
+	if(plugin->config.tracking_object != MotionScan::TRACK_SINGLE) disable();
 }
 
 int TrackFrameNumber::handle_event()
@@ -828,7 +829,7 @@ TrackPreviousFrame::TrackPreviousFrame(MotionMain *plugin,
 	int y)
  : BC_Radial(x, 
  	y, 
-	plugin->config.mode3 == MotionConfig::TRACK_PREVIOUS, 
+	plugin->config.tracking_object == MotionScan::TRACK_PREVIOUS, 
 	_("Track previous frame"))
 {
 	this->plugin = plugin;
@@ -836,7 +837,7 @@ TrackPreviousFrame::TrackPreviousFrame(MotionMain *plugin,
 }
 int TrackPreviousFrame::handle_event()
 {
-	plugin->config.mode3 = MotionConfig::TRACK_PREVIOUS;
+	plugin->config.tracking_object = MotionScan::TRACK_PREVIOUS;
 	gui->track_single->update(0);
 	gui->previous_same->update(0);
 	gui->track_frame_number->disable();
@@ -857,7 +858,7 @@ PreviousFrameSameBlock::PreviousFrameSameBlock(MotionMain *plugin,
 	int y)
  : BC_Radial(x, 
  	y, 
-	plugin->config.mode3 == MotionConfig::PREVIOUS_SAME_BLOCK, 
+	plugin->config.tracking_object == MotionScan::PREVIOUS_SAME_BLOCK, 
 	_("Previous frame same block"))
 {
 	this->plugin = plugin;
@@ -865,7 +866,7 @@ PreviousFrameSameBlock::PreviousFrameSameBlock(MotionMain *plugin,
 }
 int PreviousFrameSameBlock::handle_event()
 {
-	plugin->config.mode3 = MotionConfig::PREVIOUS_SAME_BLOCK;
+	plugin->config.tracking_object = MotionScan::PREVIOUS_SAME_BLOCK;
 	gui->track_single->update(0);
 	gui->track_previous->update(0);
 	gui->track_frame_number->disable();
@@ -929,72 +930,72 @@ int MasterLayer::calculate_w(MotionWindow *gui)
 
 
 
-Mode1::Mode1(MotionMain *plugin, MotionWindow *gui, int x, int y)
+ActionType::ActionType(MotionMain *plugin, MotionWindow *gui, int x, int y)
  : BC_PopupMenu(x, 
  	y, 
 	calculate_w(gui),
-	to_text(plugin->config.mode1))
+	to_text(plugin->config.action_type))
 {
 	this->plugin = plugin;
 	this->gui = gui;
 }
 
-int Mode1::handle_event()
+int ActionType::handle_event()
 {
-	plugin->config.mode1 = from_text(get_text());
+	plugin->config.action_type = from_text(get_text());
 	plugin->send_configure_change();
 	return 1;
 }
 
-void Mode1::create_objects()
+void ActionType::create_objects()
 {
-	add_item(new BC_MenuItem(to_text(MotionConfig::TRACK)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::TRACK_PIXEL)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::STABILIZE)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::STABILIZE_PIXEL)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::NOTHING)));
+	add_item(new BC_MenuItem(to_text(MotionScan::TRACK)));
+	add_item(new BC_MenuItem(to_text(MotionScan::TRACK_PIXEL)));
+	add_item(new BC_MenuItem(to_text(MotionScan::STABILIZE)));
+	add_item(new BC_MenuItem(to_text(MotionScan::STABILIZE_PIXEL)));
+	add_item(new BC_MenuItem(to_text(MotionScan::NOTHING)));
 }
 
-int Mode1::from_text(char *text)
+int ActionType::from_text(char *text)
 {
-	if(!strcmp(text, _("Track Subpixel"))) return MotionConfig::TRACK;
-	if(!strcmp(text, _("Track Pixel"))) return MotionConfig::TRACK_PIXEL;
-	if(!strcmp(text, _("Stabilize Subpixel"))) return MotionConfig::STABILIZE;
-	if(!strcmp(text, _("Stabilize Pixel"))) return MotionConfig::STABILIZE_PIXEL;
-	if(!strcmp(text, _("Do Nothing"))) return MotionConfig::NOTHING;
+	if(!strcmp(text, _("Track Subpixel"))) return MotionScan::TRACK;
+	if(!strcmp(text, _("Track Pixel"))) return MotionScan::TRACK_PIXEL;
+	if(!strcmp(text, _("Stabilize Subpixel"))) return MotionScan::STABILIZE;
+	if(!strcmp(text, _("Stabilize Pixel"))) return MotionScan::STABILIZE_PIXEL;
+	if(!strcmp(text, _("Do Nothing"))) return MotionScan::NOTHING;
 }
 
-char* Mode1::to_text(int mode)
+char* ActionType::to_text(int mode)
 {
 	switch(mode)
 	{
-		case MotionConfig::TRACK:
+		case MotionScan::TRACK:
 			return _("Track Subpixel");
 			break;
-		case MotionConfig::TRACK_PIXEL:
+		case MotionScan::TRACK_PIXEL:
 			return _("Track Pixel");
 			break;
-		case MotionConfig::STABILIZE:
+		case MotionScan::STABILIZE:
 			return _("Stabilize Subpixel");
 			break;
-		case MotionConfig::STABILIZE_PIXEL:
+		case MotionScan::STABILIZE_PIXEL:
 			return _("Stabilize Pixel");
 			break;
-		case MotionConfig::NOTHING:
+		case MotionScan::NOTHING:
 			return _("Do Nothing");
 			break;
 	}
 	return _("");
 }
 
-int Mode1::calculate_w(MotionWindow *gui)
+int ActionType::calculate_w(MotionWindow *gui)
 {
 	int result = 0;
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::TRACK)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::TRACK_PIXEL)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::STABILIZE)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::STABILIZE_PIXEL)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::NOTHING)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::TRACK)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::TRACK_PIXEL)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::STABILIZE)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::STABILIZE_PIXEL)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::NOTHING)));
 	return result + 50;
 }
 
@@ -1002,65 +1003,65 @@ int Mode1::calculate_w(MotionWindow *gui)
 
 
 
-Mode2::Mode2(MotionMain *plugin, MotionWindow *gui, int x, int y)
+TrackingType::TrackingType(MotionMain *plugin, MotionWindow *gui, int x, int y)
  : BC_PopupMenu(x, 
  	y, 
 	calculate_w(gui),
-	to_text(plugin->config.mode2))
+	to_text(plugin->config.tracking_type))
 {
 	this->plugin = plugin;
 	this->gui = gui;
 }
 
-int Mode2::handle_event()
+int TrackingType::handle_event()
 {
-	plugin->config.mode2 = from_text(get_text());
+	plugin->config.tracking_type = from_text(get_text());
 	plugin->send_configure_change();
 	return 1;
 }
 
-void Mode2::create_objects()
+void TrackingType::create_objects()
 {
-	add_item(new BC_MenuItem(to_text(MotionConfig::NO_CALCULATE)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::RECALCULATE)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::SAVE)));
-	add_item(new BC_MenuItem(to_text(MotionConfig::LOAD)));
+	add_item(new BC_MenuItem(to_text(MotionScan::NO_CALCULATE)));
+	add_item(new BC_MenuItem(to_text(MotionScan::CALCULATE)));
+	add_item(new BC_MenuItem(to_text(MotionScan::SAVE)));
+	add_item(new BC_MenuItem(to_text(MotionScan::LOAD)));
 }
 
-int Mode2::from_text(char *text)
+int TrackingType::from_text(char *text)
 {
-	if(!strcmp(text, _("Don't Calculate"))) return MotionConfig::NO_CALCULATE;
-	if(!strcmp(text, _("Recalculate"))) return MotionConfig::RECALCULATE;
-	if(!strcmp(text, _("Save coords to /tmp"))) return MotionConfig::SAVE;
-	if(!strcmp(text, _("Load coords from /tmp"))) return MotionConfig::LOAD;
+	if(!strcmp(text, _("Don't Calculate"))) return MotionScan::NO_CALCULATE;
+	if(!strcmp(text, _("Recalculate"))) return MotionScan::CALCULATE;
+	if(!strcmp(text, _("Save coords to /tmp"))) return MotionScan::SAVE;
+	if(!strcmp(text, _("Load coords from /tmp"))) return MotionScan::LOAD;
 }
 
-char* Mode2::to_text(int mode)
+char* TrackingType::to_text(int mode)
 {
 	switch(mode)
 	{
-		case MotionConfig::NO_CALCULATE:
+		case MotionScan::NO_CALCULATE:
 			return _("Don't Calculate");
 			break;
-		case MotionConfig::RECALCULATE:
+		case MotionScan::CALCULATE:
 			return _("Recalculate");
 			break;
-		case MotionConfig::SAVE:
+		case MotionScan::SAVE:
 			return _("Save coords to /tmp");
 			break;
-		case MotionConfig::LOAD:
+		case MotionScan::LOAD:
 			return _("Load coords from /tmp");
 			break;
 	}
 }
 
-int Mode2::calculate_w(MotionWindow *gui)
+int TrackingType::calculate_w(MotionWindow *gui)
 {
 	int result = 0;
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::NO_CALCULATE)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::RECALCULATE)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::SAVE)));
-	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionConfig::LOAD)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::NO_CALCULATE)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::CALCULATE)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::SAVE)));
+	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(MotionScan::LOAD)));
 	return result + 50;
 }
 
@@ -1073,7 +1074,7 @@ int Mode2::calculate_w(MotionWindow *gui)
 
 
 
-Mode3::Mode3(MotionMain *plugin, MotionWindow *gui, int x, int y)
+TrackDirection::TrackDirection(MotionMain *plugin, MotionWindow *gui, int x, int y)
  : BC_PopupMenu(x, 
  	y, 
 	calculate_w(gui),
@@ -1083,21 +1084,21 @@ Mode3::Mode3(MotionMain *plugin, MotionWindow *gui, int x, int y)
 	this->gui = gui;
 }
 
-int Mode3::handle_event()
+int TrackDirection::handle_event()
 {
 	from_text(&plugin->config.horizontal_only, &plugin->config.vertical_only, get_text());
 	plugin->send_configure_change();
 	return 1;
 }
 
-void Mode3::create_objects()
+void TrackDirection::create_objects()
 {
 	add_item(new BC_MenuItem(to_text(1, 0)));
 	add_item(new BC_MenuItem(to_text(0, 1)));
 	add_item(new BC_MenuItem(to_text(0, 0)));
 }
 
-void Mode3::from_text(int *horizontal_only, int *vertical_only, char *text)
+void TrackDirection::from_text(int *horizontal_only, int *vertical_only, char *text)
 {
 	*horizontal_only = 0;
 	*vertical_only = 0;
@@ -1105,14 +1106,14 @@ void Mode3::from_text(int *horizontal_only, int *vertical_only, char *text)
 	if(!strcmp(text, to_text(0, 1))) *vertical_only = 1;
 }
 
-char* Mode3::to_text(int horizontal_only, int vertical_only)
+char* TrackDirection::to_text(int horizontal_only, int vertical_only)
 {
 	if(horizontal_only) return _("Horizontal only");
 	if(vertical_only) return _("Vertical only");
 	return _("Both");
 }
 
-int Mode3::calculate_w(MotionWindow *gui)
+int TrackDirection::calculate_w(MotionWindow *gui)
 {
 	int result = 0;
 	result = MAX(result, gui->get_text_width(MEDIUMFONT, to_text(1, 0)));

@@ -201,6 +201,7 @@ public:
 	int button_press_event();
 	int button_release_event();
 	int cursor_motion_event();
+	int draw_face(int flash, int flush);
 	int number;
 	int note_on;
 	SynthWindow *window;
@@ -566,8 +567,6 @@ public:
 	int equivalent(SynthOscillatorConfig &that);
 	void copy_from(SynthOscillatorConfig& that);
 	void reset();
-	void load_defaults(BC_Hash *defaults);
-	void save_defaults(BC_Hash *defaults);
 	void read_data(FileXML *file);
 	void save_data(FileXML *file);
 	int is_realtime();
@@ -601,6 +600,7 @@ public:
 	double base_freq[MAX_FREQS];
 	int wavefunction;        // SINE, SAWTOOTH, etc
 	ArrayList<SynthOscillatorConfig*> oscillator_config;
+	int momentary_notes;
 };
 
 
@@ -614,10 +614,8 @@ public:
 	PLUGIN_CLASS_MEMBERS(SynthConfig)
 	int is_realtime();
 	int is_synthesis();
-	int load_defaults();
 	void read_data(KeyFrame *keyframe);
 	void save_data(KeyFrame *keyframe);
-	int save_defaults();
 	int process_realtime(int64_t size, Samples *input_ptr, Samples *output_ptr);
 
 
@@ -657,11 +655,11 @@ public:
 
 
 
+	int window_w, window_h;
 	int need_reconfigure;
 	DB db;
 // Samples since last reconfiguration
 	int64_t waveform_sample;
-	int momentary_notes;
 };
 
 

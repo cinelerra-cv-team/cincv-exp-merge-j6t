@@ -89,10 +89,9 @@ void DelayVideoWindow::create_objects()
 	
 	add_subwindow(new BC_Title(x, y, _("Delay seconds:")));
 	y += 20;
-	add_subwindow(slider = new DelayVideoSlider(plugin, x, y));
-
+	slider = new DelayVideoSlider(this, plugin, x, y);
+	slider->create_objects();
 	show_window();
-	flush();
 }
 
 
@@ -114,10 +113,20 @@ void DelayVideoWindow::update_gui()
 
 
 
-DelayVideoSlider::DelayVideoSlider(DelayVideo *plugin, int x, int y)
- : BC_TextBox(x, y, 150, 1, plugin->config.length)
+DelayVideoSlider::DelayVideoSlider(DelayVideoWindow *window,
+	DelayVideo *plugin, 
+	int x, 
+	int y)
+ : BC_TumbleTextBox(window,
+ 	(float)plugin->config.length,
+	(float)0,
+	(float)10,
+	x, 
+	y, 
+	150)
 {
 	this->plugin = plugin;
+	set_increment(0.1);
 }
 
 int DelayVideoSlider::handle_event()
@@ -147,7 +156,6 @@ DelayVideo::DelayVideo(PluginServer *server)
  : PluginVClient(server)
 {
 	reset();
-	load_defaults();
 }
 
 DelayVideo::~DelayVideo()
@@ -167,7 +175,6 @@ DelayVideo::~DelayVideo()
 void DelayVideo::reset()
 {
 	thread = 0;
-	defaults = 0;
 	need_reconfigure = 1;
 	buffer = 0;
 	allocation = 0;
@@ -296,22 +303,6 @@ void DelayVideo::update_gui()
 
 
 
-int DelayVideo::load_defaults()
-{
-	char directory[BCTEXTLEN];
-	sprintf(directory, "%sdelayvideo.rc", BCASTDIR);
-	defaults = new BC_Hash(directory);
-	defaults->load();
-	config.length = defaults->get("LENGTH", (double)1);
-	return 0;
-}
-
-int DelayVideo::save_defaults()
-{
-	defaults->update("LENGTH", config.length);
-	defaults->save();
-	return 0;
-}
 
 
 

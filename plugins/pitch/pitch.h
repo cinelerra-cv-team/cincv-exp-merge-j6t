@@ -33,12 +33,26 @@
 
 
 class PitchEffect;
+class PitchWindow;
 
 class PitchScale : public BC_FPot
 {
 public:
 	PitchScale(PitchEffect *plugin, int x, int y);
 	int handle_event();
+	PitchEffect *plugin;
+};
+
+
+class PitchSize : public BC_PopupMenu
+{
+public:
+	PitchSize(PitchWindow *window, PitchEffect *plugin, int x, int y);
+
+	int handle_event();
+	void create_objects();         // add initial items
+	void update(int size);
+
 	PitchEffect *plugin;
 };
 
@@ -50,6 +64,7 @@ public:
 	void update();
 
 	PitchScale *scale;
+	PitchSize *size;
 	PitchEffect *plugin;
 };
 
@@ -72,6 +87,7 @@ public:
 
 
 	double scale;
+	int size;
 };
 
 class PitchFFT : public CrossfadeFFT
@@ -112,8 +128,6 @@ public:
 
 
 
-	int load_defaults();
-	int save_defaults();
 	void reset();
 	void update_gui();
 

@@ -24,7 +24,6 @@
 
 class Color3WayMain;
 class Color3WayEngine;
-class Color3WayThread;
 
 #define SHADOWS 0
 #define MIDTONES 1
@@ -111,13 +110,6 @@ public:
 		double frame_rate);
 	int is_realtime();
 	void update_gui();
-
-	// These three methods are part of the PluginClient class in
-	// Cinelerra HV 4.5
-	int load_defaults();
-	int save_defaults();
-	int is_defaults();
-
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
 	int handle_opengl();
@@ -152,8 +144,6 @@ public:
     int redo_buffers;
 	int need_reconfigure;
 	int copy_to_all[SECTIONS];
-private:
-	int using_defaults;
 };
 
 

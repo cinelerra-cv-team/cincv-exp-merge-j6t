@@ -53,7 +53,7 @@ int FilePNG::check_sig(Asset *asset)
 
 //printf("FilePNG::check_sig 1\n");
 		char test[16];
-		fread(test, 16, 1, stream);
+		int temp = fread(test, 16, 1, stream);
 		fclose(stream);
 
 		if(png_check_sig((unsigned char*)test, 8))
@@ -459,6 +459,7 @@ void PNGConfigVideo::create_objects()
 	lock_window("PNGConfigVideo::create_objects");
 	add_subwindow(new PNGUseAlpha(this, x, y));
 	add_subwindow(new BC_OKButton(this));
+	show_window(1);
 	unlock_window();
 }
 

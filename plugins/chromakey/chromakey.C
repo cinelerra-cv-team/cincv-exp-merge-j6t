@@ -360,7 +360,6 @@ void ChromaKeyUnit::process_package(LoadPackage *package)
 #define RGB_TO_VALUE(r, g, b) \
 ((r) * R_TO_Y + (g) * G_TO_Y + (b) * B_TO_Y)
 
-#define SQR(x) ((x) * (x))
 
 #define OUTER_VARIABLES(plugin) \
 	YUV yuv; \
@@ -578,40 +577,6 @@ NEW_PICON_MACRO(ChromaKey)
 
 LOAD_CONFIGURATION_MACRO(ChromaKey, ChromaKeyConfig)
 
-int ChromaKey::load_defaults()
-{
-SET_TRACE
-	char directory[BCTEXTLEN];
-// set the default directory
-	sprintf(directory, "%schromakey.rc", BCASTDIR);
-
-// load the defaults
-	defaults = new BC_Hash(directory);
-	defaults->load();
-
-	config.red = defaults->get("RED", config.red);
-	config.green = defaults->get("GREEN", config.green);
-	config.blue = defaults->get("BLUE", config.blue);
-	config.threshold = defaults->get("THRESHOLD", config.threshold);
-	config.slope = defaults->get("SLOPE", config.slope);
-	config.use_value = defaults->get("USE_VALUE", config.use_value);
-SET_TRACE
-	return 0;
-}
-
-int ChromaKey::save_defaults()
-{
-SET_TRACE
-	defaults->update("RED", config.red);
-	defaults->update("GREEN", config.green);
-	defaults->update("BLUE", config.blue);
-    defaults->update("THRESHOLD", config.threshold);
-    defaults->update("SLOPE", config.slope);
-    defaults->update("USE_VALUE", config.use_value);
-	defaults->save();
-SET_TRACE
-	return 0;
-}
 
 void ChromaKey::save_data(KeyFrame *keyframe)
 {

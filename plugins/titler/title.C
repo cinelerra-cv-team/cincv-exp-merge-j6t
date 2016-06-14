@@ -82,6 +82,8 @@ TitleConfig::TitleConfig()
 	wtext_length = 0;
 	wtext[0] = 0;
 	outline_size = 0;
+	window_w = 640;
+	window_h = 480;
 }
 
 
@@ -133,6 +135,10 @@ void TitleConfig::copy_from(TitleConfig &that)
 	strcpy(encoding, that.encoding);
 	memcpy(wtext, that.wtext, that.wtext_length * sizeof(wchar_t));
 	wtext_length = that.wtext_length;
+	window_w = that.window_w;
+	window_h = that.window_h;
+
+	limits();
 }
 
 void TitleConfig::interpolate(TitleConfig &prev, 
@@ -172,6 +178,17 @@ void TitleConfig::interpolate(TitleConfig &prev,
 	strcpy(timecodeformat, prev.timecodeformat);
 //	this->dropshadow = (int)(prev.dropshadow * prev_scale + next.dropshadow * next_scale);
 	this->dropshadow = prev.dropshadow;
+	
+	this->window_w = prev.window_w;
+	this->window_h = prev.window_h;
+
+	limits();
+}
+
+void TitleConfig::limits()
+{
+	if(window_w < 100) window_w = 100;
+	if(window_h < 100) window_h = 100;
 }
 
 void TitleConfig::text_to_ucs4(const char *from_enc)
@@ -973,8 +990,6 @@ LoadPackage* TitleTranslate::new_package()
 TitleMain::TitleMain(PluginServer *server)
  : PluginVClient(server)
 {
-	
-
 	text_mask = 0;
 	outline_mask = 0;
 	glyph_engine = 0;
@@ -1030,7 +1045,7 @@ int TitleMain::load_freetype_face(FT_Library &freetype_library,
 		0,
 		&freetype_face))
 	{
-		fprintf(stderr, _("TitleMain::load_freetype_face %s failed.\n"), path);
+		fprintf(stderr, "TitleMain::load_freetype_face %s failed.\n", path);
 		FT_Done_FreeType(freetype_library);
 		freetype_face = 0;
 		freetype_library = 0;
@@ -1708,112 +1723,6 @@ void TitleMain::update_gui()
 }
 
 
-int TitleMain::load_defaults()
-{
-//printf("TitleMain::load_defaults %d\n", __LINE__);
-	char directory[BCTEXTLEN], text_path[BCTEXTLEN];
-// set the default directory
-	sprintf(directory, "%stitle.rc", BCASTDIR);
-
-// load the defaults
-	defaults = new BC_Hash(directory);
-	defaults->load();
-
-	defaults->get("FONT", config.font);
-	defaults->get("ENCODING", config.encoding);
-	config.style = defaults->get("STYLE", (int64_t)config.style);
-	config.size = defaults->get("SIZE", config.size);
-	config.color = defaults->get("COLOR", config.color);
-	config.outline_color = defaults->get("OUTLINE_COLOR", config.outline_color);
-	config.alpha = defaults->get("ALPHA", config.alpha);
-	config.outline_alpha = defaults->get("OUTLINE_ALPHA", config.outline_alpha);
-	config.motion_strategy = defaults->get("MOTION_STRATEGY", config.motion_strategy);
-	config.loop = defaults->get("LOOP", config.loop);
-	config.pixels_per_second = defaults->get("PIXELS_PER_SECOND", config.pixels_per_second);
-	config.hjustification = defaults->get("HJUSTIFICATION", config.hjustification);
-	config.vjustification = defaults->get("VJUSTIFICATION", config.vjustification);
-	config.fade_in = defaults->get("FADE_IN", config.fade_in);
-	config.fade_out = defaults->get("FADE_OUT", config.fade_out);
-	config.x = defaults->get("TITLE_X", config.x);
-	config.y = defaults->get("TITLE_Y", config.y);
-	config.dropshadow = defaults->get("DROPSHADOW", config.dropshadow);
-	config.outline_size = defaults->get("OUTLINE_SIZE", config.outline_size);
-	config.timecode = defaults->get("TIMECODE", config.timecode);
-	defaults->get("TIMECODEFORMAT", config.timecodeformat);
-
-// Store text in separate path to isolate special characters
-	FileSystem fs;
-	sprintf(text_path, "%stitle_text.rc", BCASTDIR);
-	fs.complete_path(text_path);
-	FILE *fd = fopen(text_path, "rb");
-	if(fd)
-	{
-		fseek(fd, 0, SEEK_END);
-		int64_t len = ftell(fd);
-		fseek(fd, 0, SEEK_SET);
-		if(len && fread(config.text, len, 1, fd) < 0)
-			len = 0;
-		config.text[len] = 0;
-//printf("TitleMain::load_defaults %s\n", config.text);
-		fclose(fd);
-		config.text_to_ucs4(config.encoding);
-		strcpy(config.encoding, DEFAULT_ENCODING);
-	}
-	else
-	{
-		config.text[0] = 0;
-		config.wtext[0] = 0;
-		config.wtext_length = 0;
-	}
-	return 0;
-}
-
-int TitleMain::save_defaults()
-{
-//printf("TitleMain::save_defaults %d\n", __LINE__);
-	char text_path[BCTEXTLEN];
-
-	defaults->update("FONT", config.font);
-	defaults->update("ENCODING", config.encoding);
-	defaults->update("STYLE", (int64_t)config.style);
-	defaults->update("SIZE", config.size);
-	defaults->update("COLOR", config.color);
-	defaults->update("OUTLINE_COLOR", config.outline_color);
-	defaults->update("ALPHA", config.alpha);
-	defaults->update("OUTLINE_ALPHA", config.outline_alpha);
-	defaults->update("MOTION_STRATEGY", config.motion_strategy);
-	defaults->update("LOOP", config.loop);
-	defaults->update("PIXELS_PER_SECOND", config.pixels_per_second);
-	defaults->update("HJUSTIFICATION", config.hjustification);
-	defaults->update("VJUSTIFICATION", config.vjustification);
-	defaults->update("FADE_IN", config.fade_in);
-	defaults->update("FADE_OUT", config.fade_out);
-	defaults->update("TITLE_X", config.x);
-	defaults->update("TITLE_Y", config.y);
-	defaults->update("DROPSHADOW", config.dropshadow);
-	defaults->update("OUTLINE_SIZE", config.outline_size);
-	defaults->update("TIMECODE", config.timecode);
-	defaults->update("TIMECODEFORMAT", config.timecodeformat);
-	defaults->save();
-
-// Store text in separate path to isolate special characters
-	FileSystem fs;
-	int txlen = BC_Resources::encode(BC_Resources::wide_encoding, DEFAULT_ENCODING,
-		(char*)config.wtext, config.text, BCTEXTLEN,
-		config.wtext_length * sizeof(wchar_t));
-	sprintf(text_path, "%stitle_text.rc", BCASTDIR);
-	fs.complete_path(text_path);
-	FILE *fd = fopen(text_path, "wb");
-	if(fd)
-	{
-		fwrite(config.text, txlen, 1, fd);
-		fclose(fd);
-	}
-//	else
-//		perror("TitleMain::save_defaults");
-//printf("TitleMain::save_defaults %d\n", __LINE__);
-	return 0;
-}
 
 
 
@@ -1900,6 +1809,8 @@ void TitleMain::save_data(KeyFrame *keyframe)
 	output.tag.set_property("OUTLINE_SIZE", config.outline_size);
 	output.tag.set_property("TIMECODE", config.timecode);
 	output.tag.set_property("TIMECODEFORMAT", config.timecodeformat);
+	output.tag.set_property("WINDOW_W", config.window_w);
+	output.tag.set_property("WINDOW_H", config.window_h);
 	output.append_tag();
 	output.append_newline();
 	BC_Resources::encode(BC_Resources::wide_encoding, DEFAULT_ENCODING, (char*)config.wtext,
@@ -1953,6 +1864,8 @@ void TitleMain::read_data(KeyFrame *keyframe)
 				config.outline_size = input.tag.get_property("OUTLINE_SIZE", config.outline_size);
 				config.timecode = input.tag.get_property("TIMECODE", config.timecode);
 				input.tag.get_property("TIMECODEFORMAT", config.timecodeformat);
+				config.window_w = input.tag.get_property("WINDOW_W", config.window_w);
+				config.window_h = input.tag.get_property("WINDOW_H", config.window_h);
 				strcpy(config.text, input.read_text());
 				config.text_to_ucs4(config.encoding);
 			}

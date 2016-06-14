@@ -228,6 +228,7 @@ int GWindowGUI::cursor_motion_event()
 			}
 		}
 	}
+	return 0;
 }
 
 

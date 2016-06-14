@@ -114,7 +114,7 @@ int MWindow::zoom_sample(int64_t zoom_sample, int64_t view_start)
 	else
 		edl->local_session->view_start = view_start;
  			
-	gui->get_scrollbars();
+	gui->get_scrollbars(0);
 
 	if(!gui->samplescroll) edl->local_session->view_start = 0;
 	samplemovement(edl->local_session->view_start);
@@ -377,10 +377,10 @@ void MWindow::trackmovement(int track_start)
 	edl->local_session->track_start = track_start;
 	if(edl->local_session->track_start < 0) edl->local_session->track_start = 0;
 	edl->tracks->update_y_pixels(theme);
-	gui->get_scrollbars();
+	gui->get_scrollbars(0);
 	gui->canvas->draw(0, 0);
 	gui->patchbay->update();
-	gui->canvas->flash();
+	gui->canvas->flash(0);
 	gui->flush();
 }
 
@@ -438,6 +438,7 @@ int MWindow::goto_end()
 	gui->cursor->update();
 	gui->canvas->activate();
 	gui->zoombar->update();
+	gui->timebar->update(1);
 	cwindow->update(1, 0, 0, 0, 1);
 	return 0;
 }
@@ -465,6 +466,7 @@ int MWindow::goto_start()
 	gui->cursor->update();
 	gui->canvas->activate();
 	gui->zoombar->update();
+	gui->timebar->update(1);
 	cwindow->update(1, 0, 0, 0, 1);
 	return 0;
 }
@@ -475,11 +477,11 @@ int MWindow::samplemovement(int64_t view_start)
 	if(edl->local_session->view_start < 0) edl->local_session->view_start = 0;
 	gui->canvas->draw();
 	gui->cursor->show();
-	gui->canvas->flash();
-	gui->timebar->update();
+	gui->canvas->flash(0);
+	gui->timebar->update(0);
 	gui->zoombar->update();
 
-	if(gui->samplescroll) gui->samplescroll->set_position();
+	if(gui->samplescroll) gui->samplescroll->set_position(1);
 	return 0;
 }
 
@@ -510,7 +512,8 @@ void MWindow::select_all()
 	edl->local_session->set_selectionend(edl->tracks->total_length());
 	gui->update(0, 1, 1, 1, 0, 1, 0);
 	gui->canvas->activate();
-	cwindow->update(1, 0, 0);
+	cwindow->update(1, 0, 0, 0, 1);
+	update_plugin_guis();
 }
 
 int MWindow::next_label(int shift_down)
@@ -545,11 +548,11 @@ int MWindow::next_label(int shift_down)
 		}
 		else
 		{
-			gui->timebar->update();
+			gui->timebar->update(0);
 			gui->cursor->hide(0);
 			gui->cursor->draw(1);
 			gui->zoombar->update();
-			gui->canvas->flash();
+			gui->canvas->flash(0);
 			gui->flush();
 		}
 		cwindow->update(1, 0, 0, 0, 1);
@@ -593,7 +596,7 @@ int MWindow::prev_label(int shift_down)
 		else
 // Don't scroll the display
 		{
-			gui->timebar->update();
+			gui->timebar->update(0);
 			gui->cursor->hide(0);
 			gui->cursor->draw(1);
 			gui->zoombar->update();
@@ -662,7 +665,7 @@ int MWindow::next_edit_handle(int shift_down)
 		}
 		else
 		{
-			gui->timebar->update();
+			gui->timebar->update(0);
 			gui->cursor->hide(0);
 			gui->cursor->draw(1);
 			gui->zoombar->update();
@@ -727,7 +730,7 @@ int MWindow::prev_edit_handle(int shift_down)
 		else
 // Don't scroll the display
 		{
-			gui->timebar->update();
+			gui->timebar->update(0);
 			gui->cursor->hide(0);
 			gui->cursor->draw(1);
 			gui->zoombar->update();

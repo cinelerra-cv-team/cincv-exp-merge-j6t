@@ -51,7 +51,7 @@ public:
 	virtual void set_log_floatincrement(int value) {};
 
 private:
-	int draw_face();
+	int draw_face(int flush = 1);
 
 	BC_Pixmap *images[4];
 	int status;

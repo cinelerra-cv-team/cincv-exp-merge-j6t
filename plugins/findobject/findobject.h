@@ -53,7 +53,6 @@
 
 class FindObjectMain;
 class FindObjectWindow;
-class FindObjectThread;
 
 using namespace cv;
 

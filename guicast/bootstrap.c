@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 			*(data_buffer + data_size) = size & 0xff;
 			data_size++;
 
-			fread(data_buffer + data_size, 1, size, src);
+			int temp = fread(data_buffer + data_size, 1, size, src);
 			data_size += size;
 			fclose(src);
 

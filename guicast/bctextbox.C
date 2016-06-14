@@ -1,6 +1,6 @@
 /*
  * CINELERRA
- * Copyright (C) 2010 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 1997-2011 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -103,7 +103,7 @@ BC_TextBox::BC_TextBox(int x,
 {
 	skip_cursor = 0;
 	reset_parameters(rows, has_border, font);
-	sprintf(ntext, "%lld", text);
+	sprintf(ntext, "%lld", (long long)text);
 	convert_number();
 }
 
@@ -229,8 +229,9 @@ int BC_TextBox::initialize()
 		back_color = bg_color;
 	}
 
-	draw();
-	set_cursor(IBEAM_CURSOR);
+	draw(0);
+	set_cursor(IBEAM_CURSOR, 0, 0);
+	show_window(0);
 	return 0;
 }
 
@@ -328,6 +329,7 @@ int BC_TextBox::calculate_suggestions(ArrayList<BC_ListBoxItem*> *entries)
 		}
 		else
 // Get entries from current listbox with matching trailing characters
+		if(entries)
 		{
 // printf("BC_TextBox::calculate_suggestions %d %d\n", 
 // __LINE__, 
@@ -395,7 +397,7 @@ void BC_TextBox::set_suggestions(ArrayList<char*> *suggestions, int column)
 				(char*)(wide_text + wtext_len), (TEXTBOXLEN - wtext_len) * sizeof(wchar_t));
 //printf("BC_TextBox::set_suggestions %d %d\n", __LINE__, suggestion_column);
 			highlight_letter2 = wtext_len = wcslen(wide_text);
-			update_wtext();
+			update_wtext(1);
 
 			delete suggestions_popup;
 			suggestions_popup = 0;
@@ -415,10 +417,10 @@ void BC_TextBox::set_selection(int char1, int char2, int ibeam)
 	highlight_letter1 = char1;
 	highlight_letter2 = char2;
 	ibeam_letter = ibeam;
-	draw();
+	draw(1);
 }
 
-int BC_TextBox::update(const char *text)
+int BC_TextBox::update(const char *text, int flush)
 {
 //printf("BC_TextBox::update 1 %d %s %s\n", strcmp(text, this->text), text, this->text);
 // Don't update if contents are the same
@@ -427,16 +429,16 @@ int BC_TextBox::update(const char *text)
 	ntext[TEXTBOXLEN] = 0;
 	wtext_len = BC_Resources::encode(BC_Resources::encoding, BC_Resources::wide_encoding,
 		ntext, (char*)wide_text, TEXTBOXLEN * sizeof(wchar_t)) / sizeof(wchar_t);
-	update_wtext();
+	update_wtext(flush);
 	return 0;
 }
 
-void BC_TextBox::update_wtext()
+void BC_TextBox::update_wtext(int flush)
 {
 	if(highlight_letter1 > wtext_len) highlight_letter1 = wtext_len;
 	if(highlight_letter2 > wtext_len) highlight_letter2 = wtext_len;
 	if(ibeam_letter > wtext_len) ibeam_letter = wtext_len;
-	draw();
+	draw(flush);
 }
 
 void BC_TextBox::updateutf8(const char *text)
@@ -467,7 +469,7 @@ void BC_TextBox::update(const wchar_t *text)
 int BC_TextBox::update(int64_t value)
 {
 	char string[BCTEXTLEN];
-	sprintf(string, "%lld", value);
+	sprintf(string, "%lld", (long long)value);
 
 
 	update(string);
@@ -491,7 +493,7 @@ void BC_TextBox::disable()
 		if(top_level)
 		{
 			if(active) top_level->deactivate();
-			draw();
+			draw(1);
 		}
 	}
 }
@@ -503,7 +505,7 @@ void BC_TextBox::enable()
 		enabled = 1;
 		if(top_level)
 		{
-			draw();
+			draw(1);
 		}
 	}
 }
@@ -587,7 +589,7 @@ int BC_TextBox::reposition_window(int x, int y, int w, int rows)
 // printf("BC_TextBox::reposition_window 1 %d %d %d %d %d %d %d %d\n",
 // x, get_x(), y, get_y(), w, get_w(), new_h, get_h());
 		BC_WindowBase::reposition_window(x, y, w, new_h);
-		draw();
+		draw(0);
 	}
 	return 0;
 }
@@ -631,7 +633,7 @@ void BC_TextBox::draw_cursor()
 }
 
 
-void BC_TextBox::draw()
+void BC_TextBox::draw(int flush)
 {
 	int i, j, k;
 	int row_begin, row_end;
@@ -740,19 +742,18 @@ void BC_TextBox::draw()
 
 // Border
 	draw_border();
-	flash();
-	flush();   
+	flash(flush);
 }
 
 int BC_TextBox::focus_in_event()
 {
-	draw();
+	draw(1);
 	return 1;
 }
 
 int BC_TextBox::focus_out_event()
 {
-	draw();
+	draw(1);
 	return 1;
 }
 
@@ -766,8 +767,7 @@ int BC_TextBox::cursor_enter_event()
 		{
 			highlighted = 1;
 			draw_border();
-			flash();
-			flush();   
+			flash(1);
 		}
 	}
 	return 0;
@@ -780,8 +780,7 @@ int BC_TextBox::cursor_leave_event()
 		highlighted = 0;
 		draw_border();
 		hide_tooltip();
-		flash();
-		flush();   
+		flash(1);
 	}
 	return 0;
 }
@@ -844,10 +843,17 @@ int BC_TextBox::button_press_event()
 				ibeam_letter = highlight_letter1 = 
 				highlight_letter2 = cursor_letter;
 		}
-		
+
+
+// Handle scrolling by highlighting text
+		if(text_selected || word_selected || line_selected)
+		{
+			set_repeat(top_level->get_resources()->scroll_repeat);
+		}
+
 		if(ibeam_letter < 0) ibeam_letter = 0;
 		if(ibeam_letter > wtext_len) ibeam_letter = wtext_len;
-		draw();
+		draw(1);
 		return 1;
 	}
 	else
@@ -885,6 +891,9 @@ int BC_TextBox::button_release_event()
 			text_selected = 0;
 			word_selected = 0;
 			line_selected = 0;
+
+// Stop scrolling by highlighting text
+			unset_repeat(top_level->get_resources()->scroll_repeat);
 		}
 	}
 	return 0;
@@ -893,12 +902,15 @@ int BC_TextBox::button_release_event()
 int BC_TextBox::cursor_motion_event()
 {
 	int cursor_letter, letter1, letter2;
+
 	if(active)
 	{
 		if(text_selected || word_selected || line_selected)
 		{
 			cursor_letter = get_cursor_letter(top_level->cursor_x, 
 				top_level->cursor_y);
+
+//printf("BC_TextBox::cursor_motion_event %d cursor_letter=%d\n", __LINE__, cursor_letter);
 
 			if(line_selected)
 			{
@@ -928,13 +940,18 @@ int BC_TextBox::cursor_motion_event()
 				highlight_letter1 = highlight_letter3;
 				ibeam_letter = letter2;
 			}
-			
+
 			copy_selection(PRIMARY_SELECTION);
-			find_ibeam(1);
-			draw();
+
+			
+
+
+//			find_ibeam(1);
+			draw(1);
 			return 1;
 		}
 	}
+
 	return 0;
 }
 
@@ -942,7 +959,7 @@ int BC_TextBox::activate()
 {
 	top_level->active_subwindow = this;
 	active = 1;
-	draw();
+	draw(1);
 	top_level->set_repeat(top_level->get_resources()->blink_rate);
 	return 0;
 }
@@ -961,13 +978,15 @@ int BC_TextBox::deactivate()
 		suggestions_popup = 0;
 	}
 
-	draw();
+	draw(1);
 	return 0;
 }
 
 int BC_TextBox::repeat_event(int64_t duration)
 {
 	int result = 0;
+	int cursor_y = get_cursor_y();
+	int cursor_x = get_cursor_x();
 
 	if(duration == top_level->get_resources()->tooltip_delay &&
 		tooltip_wtext &&
@@ -982,18 +1001,116 @@ int BC_TextBox::repeat_event(int64_t duration)
 		active &&
 		get_has_focus())
 	{
-		if(skip_cursor->get_difference() < duration)
+// don't flash if keypress
+		if(skip_cursor->get_difference() < 500)
 		{
 // printf("BC_TextBox::repeat_event 1 %lld %lld\n", 
 // skip_cursor->get_difference(), 
 // duration);
-			return 1;
+			result = 1;
 		}
-		draw_cursor();
-		flash();
-		flush();   
-		result = 1;
+		else
+		{
+			if(!(text_selected || word_selected || line_selected))
+			{
+				draw_cursor();
+				flash(1);
+			}
+			result = 1;
+		}
 	}
+
+	if(duration == top_level->get_resources()->scroll_repeat && 
+		(text_selected || word_selected || line_selected))
+	{
+		if(get_cursor_y() < top_margin)
+		{
+			int difference = top_margin - get_cursor_y();
+			
+			text_y += difference;
+			text_y = MIN(text_y, top_margin);
+			draw(1);
+			motion_event();
+			result = 1;
+		}
+		else
+		if(get_cursor_y() > get_h() - bottom_margin)
+		{
+			int difference = get_cursor_y() - 
+				(get_h() - bottom_margin);
+			int min_y = -(get_text_rows() * 
+				text_height - 
+				get_h() + 
+				bottom_margin);
+			
+			text_y -= difference;
+
+// printf("BC_TextBox::repeat_event %d %d %d\n", 
+// __LINE__,
+// text_y,
+// min_y);
+
+			text_y = MAX(min_y, text_y);
+
+			draw(1);
+			motion_event();
+			result = 1;
+		}
+
+		if(get_cursor_x() < left_margin)
+		{
+			int difference = left_margin - get_cursor_x();
+			
+			text_x += difference;
+			text_x = MIN(text_x, left_margin);
+			draw(1);
+			result = 1;
+		}
+		else
+		if(get_cursor_x() > get_w() - right_margin)
+		{
+			int difference = get_cursor_x() - (get_w() - right_margin);
+			int new_text_x = text_x - difference;
+
+// Get width of current row
+			int min_x = 0;
+			int row_width = 0;
+			int row_begin = 0;
+			int row_end = 0;
+			for(int i = 0, k = text_y; i < wtext_len; k += text_height)
+			{
+				row_begin = i;
+				while(wide_text[i] != '\n' && i < wtext_len)
+				{
+					i++;
+				}
+				row_end = i;
+				if(wide_text[i] == '\n') i++;
+				
+				if(cursor_y >= k && cursor_y < k + text_height)
+				{
+					row_width = get_text_width(font,
+						wide_text + row_begin,
+						row_end - row_begin);
+
+// printf("BC_TextBox::repeat_event %d %s %d\n", 
+// __LINE__,
+// wide_text + row_begin,
+// row_width);
+					break;
+				}
+			}
+			
+			min_x = -row_width + get_w() - left_margin - BCCURSORW;
+			new_text_x = MAX(new_text_x, min_x);
+			new_text_x = MIN(new_text_x, left_margin);
+			
+			if(new_text_x < text_x) text_x = new_text_x;
+			draw(1);
+			result = 1;
+		}
+	}
+
 	return result;
 }
 
@@ -1012,7 +1129,7 @@ void BC_TextBox::default_keypress(int &dispatch_event, int &result)
 		}
 		insert_text(temp_string, len);
 		find_ibeam(1);
-		draw();
+		draw(1);
 		dispatch_event = 1;
 		result = 1;
 	}
@@ -1027,7 +1144,7 @@ int BC_TextBox::select_whole_text(int select)
 		text_selected = word_selected = 0;	
 		ibeam_letter = highlight_letter1;
 		find_ibeam(1);
-		if(keypress_draw) draw();
+		if(keypress_draw) draw(1);
 	} else
 	if (select == -1)
 	{
@@ -1036,7 +1153,7 @@ int BC_TextBox::select_whole_text(int select)
 		highlight_letter2 = ibeam_letter;
 		text_selected = word_selected = 0;
 		find_ibeam(1);
-		if(keypress_draw) draw();
+		if(keypress_draw) draw(1);
 	}
 	return highlight_letter2 - highlight_letter1;
 }
@@ -1155,7 +1272,7 @@ int BC_TextBox::keypress_event()
 
 
 				find_ibeam(1);
-				if(keypress_draw) draw();
+				if(keypress_draw) draw(1);
 			}
 			result = 1;
 			break;
@@ -1206,7 +1323,7 @@ int BC_TextBox::keypress_event()
 				}
 
 				find_ibeam(1);
-				if(keypress_draw) draw();
+				if(keypress_draw) draw(1);
 			}
 			result = 1;
 			break;
@@ -1223,7 +1340,7 @@ int BC_TextBox::keypress_event()
 			else
 			if(ibeam_letter > 0)
 			{
-				int new_letter = get_cursor_letter(ibeam_x + text_x, 
+				int new_letter = get_cursor_letter2(ibeam_x + text_x, 
 					ibeam_y + text_y - text_height);
 
 // Extend selection
@@ -1260,7 +1377,7 @@ int BC_TextBox::keypress_event()
 				ibeam_letter = new_letter;
 
 				find_ibeam(1);
-				if(keypress_draw) draw();
+				if(keypress_draw) draw(1);
 			}
 			result = 1;
 			break;
@@ -1268,7 +1385,7 @@ int BC_TextBox::keypress_event()
 		case PGUP:
 			if(ibeam_letter > 0)
 			{
-				int new_letter = get_cursor_letter(ibeam_x + text_x, 
+				int new_letter = get_cursor_letter2(ibeam_x + text_x, 
 					ibeam_y + text_y - get_h());
 
 // Extend selection
@@ -1305,7 +1422,7 @@ int BC_TextBox::keypress_event()
 				ibeam_letter = new_letter;
 
 				find_ibeam(1);
-				if(keypress_draw) draw();
+				if(keypress_draw) draw(1);
 			}
 			result = 1;
 			break;
@@ -1325,7 +1442,7 @@ int BC_TextBox::keypress_event()
 			else
 			{
 // Extend selection
-				int new_letter = get_cursor_letter(ibeam_x + text_x, 
+				int new_letter = get_cursor_letter2(ibeam_x + text_x, 
 					ibeam_y + text_y + text_height);
 //printf("BC_TextBox::keypress_event 10 %d\n", new_letter);
 
@@ -1362,7 +1479,7 @@ int BC_TextBox::keypress_event()
 				ibeam_letter = new_letter;
 
 				find_ibeam(1);
-				if(keypress_draw) draw();
+				if(keypress_draw) draw(1);
 
 //printf("BC_TextBox::keypress_event 20 %d\n", ibeam_letter);
 			}
@@ -1372,7 +1489,7 @@ int BC_TextBox::keypress_event()
 		case PGDN:
 			{
 // Extend selection
-				int new_letter = get_cursor_letter(ibeam_x + text_x, 
+				int new_letter = get_cursor_letter2(ibeam_x + text_x, 
 					ibeam_y + text_y + get_h());
 //printf("BC_TextBox::keypress_event 10 %d\n", new_letter);
 
@@ -1409,7 +1526,7 @@ int BC_TextBox::keypress_event()
 				ibeam_letter = new_letter;
 
 				find_ibeam(1);
-				if(keypress_draw) draw();
+				if(keypress_draw) draw(1);
 
 //printf("BC_TextBox::keypress_event 20 %d\n", ibeam_letter);
 			}
@@ -1452,7 +1569,7 @@ int BC_TextBox::keypress_event()
 				highlight_letter1 = highlight_letter2 = ibeam_letter;
 
 			find_ibeam(1);
-			if(keypress_draw) draw();
+			if(keypress_draw) draw(1);
 			result = 1;
 			break;
 		}
@@ -1493,7 +1610,7 @@ int BC_TextBox::keypress_event()
 				highlight_letter1 = highlight_letter2 = ibeam_letter;
 
 			find_ibeam(1);
-			if(keypress_draw) draw();
+			if(keypress_draw) draw(1);
 			result = 1;
 			break;
 		}
@@ -1520,7 +1637,7 @@ int BC_TextBox::keypress_event()
 			}
 
 			find_ibeam(1);
-			if(keypress_draw) draw();
+			if(keypress_draw) draw(1);
 			dispatch_event = 1;
 			result = 1;
     		break;
@@ -1540,7 +1657,7 @@ int BC_TextBox::keypress_event()
 			}
 			
 			find_ibeam(1);
-			if(keypress_draw) draw();
+			if(keypress_draw) draw(1);
 			dispatch_event = 1;
 			result = 1;
 			break;
@@ -1563,7 +1680,7 @@ int BC_TextBox::keypress_event()
 				{
 					paste_selection(SECONDARY_SELECTION);
 					find_ibeam(1);
-					if(keypress_draw) draw();
+					if(keypress_draw) draw(1);
 					dispatch_event = 1;
 					result = 1;
 				}
@@ -1578,7 +1695,7 @@ int BC_TextBox::keypress_event()
 					}
 
 					find_ibeam(1);
-					if(keypress_draw) draw();
+					if(keypress_draw) draw(1);
 					dispatch_event = 1;
 					result = 1;
 				}
@@ -1590,7 +1707,7 @@ int BC_TextBox::keypress_event()
 			break;
 	}
 
-	if(dispatch_event) skip_cursor->update();
+	if(result) skip_cursor->update();
 	if(dispatch_event) handle_event();
 //printf("BC_TextBox::keypress_event 100 %d\n", ibeam_letter);
 	return result;
@@ -1739,7 +1856,7 @@ void BC_TextBox::get_ibeam_position(int &x, int &y)
 void BC_TextBox::set_text_row(int row)
 {
 	text_y = -(row * text_height) + top_margin;
-	draw();
+	draw(1);
 }
 
 int BC_TextBox::get_text_row()
@@ -1786,7 +1903,112 @@ void BC_TextBox::find_ibeam(int dispatch_event)
 	if(dispatch_event && (old_x != text_x || old_y != text_y)) motion_event();
 }
 
+// New algorithm
 int BC_TextBox::get_cursor_letter(int cursor_x, int cursor_y)
+{
+	int i, j, k, current_y, row_begin, row_end, result = 0, done = 0;
+	int column1, column2;
+	int got_visible_row = 0;
+
+// Select complete row if cursor above the window
+//printf("BC_TextBox::get_cursor_letter %d %d\n", __LINE__, text_y);
+	if(cursor_y < text_y - text_height)
+	{
+		result = 0;
+		done = 1;
+	}
+
+	for(i = 0, current_y = text_y; i < wtext_len && current_y < get_h() && !done; current_y += text_height)
+	{
+// Simulate drawing of 1 row
+		if(wide_text[i] == '\n') i++;
+		row_begin = i;
+		for(; wide_text[i] != '\n' && i < wtext_len; i++);
+		row_end = i;
+
+		int first_visible_row = 0;
+		int last_visible_row = 0;
+		if(current_y + text_height > top_margin && !got_visible_row) 
+		{
+			first_visible_row = 1;
+			got_visible_row = 1;
+		}
+		
+		if((current_y + text_height >= get_h() - bottom_margin || 
+			(row_end >= wtext_len && 
+				current_y < get_h() - bottom_margin && 
+				current_y + text_height > 0)))
+			last_visible_row = 1;
+
+// Cursor is inside vertical range of row
+		if((cursor_y >= top_margin && 
+				cursor_y < get_h() - bottom_margin && 
+				cursor_y >= current_y && 
+				cursor_y < current_y + text_height) ||
+// Cursor is above 1st row
+			(cursor_y < current_y + text_height && first_visible_row) ||
+// Cursor is below last row
+			(cursor_y >= current_y && last_visible_row))
+		{
+			column1 = 0;
+			column2 = 0;
+			for(j = 0; j <= row_end - row_begin && !done; j++)
+			{
+				column2 = get_text_width(font, &wide_text[row_begin], j) + text_x;
+				if((column2 + column1) / 2 >= cursor_x)
+				{
+					result = row_begin + j - 1;
+					done = 1;
+// printf("BC_TextBox::get_cursor_letter %d %d %d %d\n", 
+// __LINE__, 
+// result,
+// first_visible_row,
+// last_visible_row);
+				}
+				column1 = column2;
+			}
+
+			if(!done)
+			{
+				result = row_end;
+				done = 1;
+			}
+		}
+
+		if(wide_text[i] == '\n') i++;
+
+
+// Select complete row if last visible & cursor is below window
+ 		if(last_visible_row && cursor_y > current_y + text_height * 2)
+ 			result = row_end;
+
+		if(i >= wtext_len && !done)
+		{
+			result = wtext_len;
+		}
+	}
+
+
+// printf("BC_TextBox::get_cursor_letter %d cursor_y=%d current_y=%d h=%d %d %d\n", 
+// __LINE__,
+// cursor_y,
+// current_y,
+// get_h(),
+// first_visible_row,
+// last_visible_row);
+	if(result < 0) result = 0;
+	if(result > wtext_len) 
+	{
+//printf("BC_TextBox::get_cursor_letter %d\n", __LINE__);
+		result = wtext_len;
+	}
+
+
+	return result;
+}
+
+// Old algorithm
+int BC_TextBox::get_cursor_letter2(int cursor_x, int cursor_y)
 {
 	int i, j, k, row_begin, row_end, result = 0, done = 0;
 	int column1, column2;
@@ -1938,7 +2160,7 @@ void BC_TextBox::set_ibeam_letter(int number, int redraw)
 	this->ibeam_letter = number;
 	if(redraw)
 	{
-		draw();
+		draw(1);
 	}
 }
 
@@ -1946,6 +2168,12 @@ void BC_TextBox::set_separators(const char *separators)
 {
 	this->separators = separators;
 }
+
+int BC_TextBox::get_rows()
+{
+	return rows;
+}
+
 
 
 
@@ -1996,7 +2224,7 @@ return 0;
 //printf("BC_TextBoxSuggestions::selection_changed %d\n", __LINE__);
 		text[TEXTBOXLEN] = 0;
 //printf("BC_TextBoxSuggestions::selection_changed %d\n", __LINE__);
-		text_box->update(text);
+		text_box->update(text, 1);
 		text_box->handle_event();
 	}
 
@@ -2024,7 +2252,7 @@ int BC_TextBoxSuggestions::handle_event()
 	text_box->highlight_letter1 = 
 		text_box->highlight_letter2 = 
 		text_box->ibeam_letter = TEXTBOXLEN;
-	text_box->update_wtext();
+	text_box->update_wtext(1);
 	text_box->handle_event();
 //printf("BC_TextBoxSuggestions::handle_event %d\n", __LINE__);
 	return 1;
@@ -2125,7 +2353,8 @@ void BC_ScrollTextBox::update(const char *text)
 	this->text->update(text);
 	yscroll->update_length(this->text->get_text_rows(),
 		this->text->get_text_row(),
-		yscroll->get_handlelength());
+		yscroll->get_handlelength(),
+		1);
 }
 
 void BC_ScrollTextBox::update(const wchar_t *text)
@@ -2133,7 +2362,8 @@ void BC_ScrollTextBox::update(const wchar_t *text)
 	this->text->update(text);
 	yscroll->update_length(this->text->get_text_rows(),
 		this->text->get_text_row(),
-		yscroll->get_handlelength());
+		yscroll->get_handlelength(),
+		1);
 }
 
 void BC_ScrollTextBox::reposition_window(int x, int y, int w, int rows)
@@ -2142,6 +2372,7 @@ void BC_ScrollTextBox::reposition_window(int x, int y, int w, int rows)
 	this->y = y;
 	this->w = w;
 	this->rows = rows;
+
 	text->reposition_window(x, 
 		y, 
 		w - yscroll->get_span(), 
@@ -2152,7 +2383,8 @@ void BC_ScrollTextBox::reposition_window(int x, int y, int w, int rows)
 			parent_window));
 	yscroll->update_length(text->get_text_rows(),
 		text->get_text_row(),
-		rows);
+		rows,
+		0);
 }
 
 
@@ -2187,7 +2419,8 @@ int BC_ScrollTextBoxText::handle_event()
 {
 	gui->yscroll->update_length(get_text_rows(),
 		get_text_row(),
-		gui->yscroll->get_handlelength());
+		gui->yscroll->get_handlelength(),
+		1);
 	return gui->handle_event();
 }
 
@@ -2195,7 +2428,8 @@ int BC_ScrollTextBoxText::motion_event()
 {
 	gui->yscroll->update_length(get_text_rows(),
 		get_text_row(),
-		gui->yscroll->get_handlelength());
+		gui->yscroll->get_handlelength(),
+		1);
 	return 1;
 }
 
@@ -2380,9 +2614,17 @@ void BC_PopupTextBox::reposition_window(int x, int y)
 	this->x = x;
 	this->y = y;
 	int x1 = x, y1 = y;
-	textbox->reposition_window(x1, y1);
+	textbox->reposition_window(x1, 
+		y1, 
+		textbox->get_w(), 
+		textbox->get_rows());
 	x1 += textbox->get_w();
-	listbox->reposition_window(x1, y1);
+	listbox->reposition_window(x1, 
+		y1, 
+		listbox->get_w(), 
+		listbox->get_h(), 
+		0);
+//	if(flush) parent_window->flush();
 }
 
 
@@ -2681,6 +2923,7 @@ void BC_TumbleTextBox::reposition_window(int x, int y)
 		1);
 	tumbler->reposition_window(x + textbox->get_w(),
 		y);
+//	if(flush) parent_window->flush();
 }
 
 

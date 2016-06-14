@@ -34,8 +34,6 @@
 #include "overlayframe.h"
 #include "surfscan.h"
 #include "transportque.h"
-#include "bchash.h"
-#include "bcdisplayinfo.h"
 
 // Needed with OpenCV version 2.4.8
 #include "opencv2/legacy/legacy.hpp"

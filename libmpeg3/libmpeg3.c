@@ -192,13 +192,20 @@ int mpeg3_check_sig(char *path)
 	bits = mpeg3io_read_int32(fs);
 	bits2 = mpeg3io_read_int32(fs);
 	ext = strrchr(path, '.');
+
+// Approve this before ffmpeg gets it
+	if(ext && !strncasecmp(ext, ".mp3", 4))
+	{
+		result = 1;
+	}
+	else
 /* Test header */
 	if(bits == MPEG3_TOC_PREFIX)
 	{
 		result = 1;
 	}
 	else
-/* Blu-Ray or AVC-HD*/
+/* Blu-Ray or AVC-HD */
 	if(is_bd(bits, bits2, ext))
 	{
 		result = 1;
@@ -283,6 +290,11 @@ int mpeg3_get_file_type(mpeg3_t *file,
 	uint32_t bits2 = mpeg3io_read_int32(file->fs);
 	int result = 0;
 
+	char *ext;
+	ext = strrchr(file->fs->path, '.');
+
+
+
 	if(old_file)
 	{
 		file->is_bd = old_file->is_bd;
@@ -346,7 +358,7 @@ int mpeg3_get_file_type(mpeg3_t *file,
 		file->is_program_stream = 1;
 	}
 	else
-	if(is_mpeg_audio(bits))
+	if(is_mpeg_audio(bits) || (ext && !strncasecmp(ext, ".mp3", 4)))
 	{
 /* MPEG Audio only */
 		file->is_audio_stream = 1;
@@ -499,11 +511,13 @@ if(debug) printf("mpeg3_open_copy %d\n", __LINE__);
 		{
 			if(file->demuxer->vstream_table[i])
 			{
+if(debug) printf("mpeg3_open_copy %d\n", __LINE__);
 				file->vtrack[file->total_vstreams] = 
 					mpeg3_new_vtrack(file, 
 						i, 
 						file->demuxer, 
 						file->total_vstreams);
+if(debug) printf("mpeg3_open_copy %d\n", __LINE__);
 				if(file->vtrack[file->total_vstreams]) 
 					file->total_vstreams++;
 
@@ -515,11 +529,13 @@ if(debug) printf("mpeg3_open_copy %d\n", __LINE__);
 		{
 			if(file->demuxer->astream_table[i])
 			{
+if(debug) printf("mpeg3_open_copy %d\n", __LINE__);
 				file->atrack[file->total_astreams] = mpeg3_new_atrack(file, 
 					i, 
 					file->demuxer->astream_table[i], 
 					file->demuxer,
 					file->total_astreams);
+if(debug) printf("mpeg3_open_copy %d\n", __LINE__);
 				if(file->atrack[file->total_astreams]) file->total_astreams++;
 			}
 		}
@@ -1046,6 +1062,11 @@ int mpeg3_read_video_chunk(mpeg3_t *file,
 		file->last_type_read = 2;
 		file->last_stream_read = stream;
 	}
+/*
+ * static FILE *test = 0;
+ * if(!test) test = fopen("test.m4v", "w");
+ * fwrite(output, *size, 1, test);
+ */
 	return result;
 }
 

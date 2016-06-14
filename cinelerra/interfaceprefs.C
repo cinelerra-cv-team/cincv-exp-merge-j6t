@@ -50,6 +50,7 @@ void InterfacePrefs::create_objects()
 {
 	int y, x, value;
 	BC_Resources *resources = BC_WindowBase::get_resources();
+	int margin = mwindow->theme->widget_border;
 	char string[BCTEXTLEN];
 	BC_WindowBase *win;
 	x = mwindow->theme->preferencesoptions_x;
@@ -94,18 +95,21 @@ void InterfacePrefs::create_objects()
 		x, 
 		y));
 	y += 20;
+	int x1 = x;
 	add_subwindow(feet = new TimeFormatFeet(pwindow, 
 		this, 
 		pwindow->thread->edl->session->time_format == TIME_FEET_FRAMES, 
-		x, 
+		x1, 
 		y));
+	x1 += feet->get_w() + margin;
+	BC_Title *title;
+	add_subwindow(title = new BC_Title(x1, y, _("Frames per foot:")));
+	x1 += title->get_w() + margin;
 	sprintf(string, "%0.2f", pwindow->thread->edl->session->frames_per_foot);
-	win = add_subwindow(new TimeFormatFeetSetting(pwindow,
-		x + feet->get_w() + 5,
-		y - 5,
+	add_subwindow(new TimeFormatFeetSetting(pwindow, 
+		x1, 
+		y - 5, 
 		string));
-	add_subwindow(new BC_Title(x + feet->get_w() + win->get_w() + 10,
-		y, _("frames per foot")));
 	y += 20;
 	add_subwindow(seconds = new TimeFormatSeconds(pwindow, 
 		this, 
@@ -217,8 +221,7 @@ void InterfacePrefs::create_objects()
 	text->create_objects();
 
 	y += 30;
-	int x1 = x;
-	BC_Title *title;
+	x1 = x;
 	add_subwindow(title = new BC_Title(x, y + 5, _("Min DB for meter:")));
 	x += title->get_w() + 10;
 	sprintf(string, "%d", pwindow->thread->edl->session->min_meter_db);

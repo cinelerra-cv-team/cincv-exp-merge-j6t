@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2011 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #ifdef HAVE_FIREWIRE
 #include "avc1394transport.h"
 #endif
+#include "bcdialog.h"
 #include "canvas.h"
 #include "channelpicker.inc"
 #include "condition.inc"
@@ -35,12 +36,12 @@
 #include "preferences.inc"
 #include "record.inc"
 #include "recordgui.inc"
+#include "recordscopes.inc"
 #include "recordtransport.inc"
 #include "recordmonitor.inc"
 #include "videodevice.inc"
 
 class RecordMonitorThread;
-
 
 class RecordMonitor : public Thread
 {
@@ -61,7 +62,8 @@ public:
 	VideoDevice *device;
 // Fake config for monitoring
 	VideoOutConfig *config;
-	
+
+	RecordScopeThread *scope_thread;
 	
 	
 	
@@ -108,6 +110,7 @@ public:
 	AVC1394TransportThread *avc1394transport_thread;
 #endif
 	RecordChannelPicker *channel_picker;
+	ScopeEnable *scope_toggle;
 	ReverseInterlace *reverse_interlace;
 	int cursor_x_origin, cursor_y_origin;
 	int translate_x_origin, translate_y_origin;
@@ -157,7 +160,9 @@ class RecVideoDVThread;
 class RecordMonitorThread : public Thread
 {
 public:
-	RecordMonitorThread(MWindow *mwindow, Record *record, RecordMonitor *record_monitor);
+	RecordMonitorThread(MWindow *mwindow, 
+		Record *record, 
+		RecordMonitor *record_monitor);
 	~RecordMonitorThread();
 
 	void reset_parameters();
@@ -192,6 +197,8 @@ private:
 	void render_uncompressed();
 	int render_jpeg();
 	int render_dv();
+	void process_scope();
+	void process_hist();
 
 	int ready;   // Ready to recieve the next frame
 	int done;
@@ -254,7 +261,9 @@ public:
 class RecVideoMJPGThread
 {
 public:
-	RecVideoMJPGThread(Record *record, RecordMonitorThread *thread);
+	RecVideoMJPGThread(Record *record, 
+		RecordMonitorThread *thread,
+		int fields);
 	~RecVideoMJPGThread();
 
 	int render_frame(VFrame *frame, long size);
@@ -266,6 +275,7 @@ public:
 
 private:
 	mjpeg_t *mjpeg;
+	int fields;
 };
 
 class RecVideoDVThread
@@ -286,4 +296,10 @@ private:
 	void *dv;
 };
 
+
+
+
 #endif
+
+
+

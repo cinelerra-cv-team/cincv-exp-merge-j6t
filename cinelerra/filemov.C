@@ -564,6 +564,7 @@ int FileMOV::get_best_colormodel(Asset *asset, int driver)
 			else
 			if(!strncasecmp(asset->vcodec, QUICKTIME_DIV3, 4)) return BC_YUV420P;
 			break;
+
 		case CAPTURE_BUZ:
 		case CAPTURE_LML:
 		case VIDEO4LINUX2JPEG:
@@ -572,6 +573,15 @@ int FileMOV::get_best_colormodel(Asset *asset, int driver)
 			else
 				return BC_YUV422;
 			break;
+
+		case CAPTURE_JPEG_WEBCAM:
+			return BC_COMPRESSED;
+			break;
+
+		case CAPTURE_YUYV_WEBCAM:
+			return BC_YUV422;
+			break;
+		
 		case CAPTURE_FIREWIRE:
 		case CAPTURE_IEC61883:
 			if(!strncasecmp(asset->vcodec, QUICKTIME_DV, 4) ||
@@ -743,8 +753,8 @@ if(debug) printf("FileMOV::write_frames %d layers=%d\n", __LINE__, asset->layers
 
 if(debug) printf("FileMOV::write_frames %d colormodel=%d size=%d\n", 
 __LINE__,
-frames[i][0]->get_color_model(),
-frames[i][0]->get_compressed_size());
+(int)frames[i][0]->get_color_model(),
+(int)frames[i][0]->get_compressed_size());
 
 
 
@@ -758,6 +768,19 @@ if(debug) printf("FileMOV::write_frames %d len=%d\n", __LINE__, len);
 				VFrame *frame = frames[i][j];
 
 
+if(debug) printf("FileMOV::write_frames %d %d colormodel=%d size=%d %02x %02x %02x %02x %02x %02x %02x %02x\n", 
+__LINE__,
+frame->get_shmid(),
+(int)frame->get_color_model(),
+(int)frame->get_compressed_size(),
+frames[i][j]->get_data()[0],
+frames[i][j]->get_data()[1],
+frames[i][j]->get_data()[2],
+frames[i][j]->get_data()[3],
+frames[i][j]->get_data()[4],
+frames[i][j]->get_data()[5],
+frames[i][j]->get_data()[6],
+frames[i][j]->get_data()[7]);
 
 // Special handling for DIVX
 // Determine keyframe status.
@@ -819,9 +842,9 @@ if(debug) printf("FileMOV::write_frames %d len=%d\n", __LINE__, len);
 // Write frame
 if(debug) printf("FileMOV::write_frames %d keyframe=%d data=%p size=%d\n", 
 __LINE__, 
-frame->get_keyframe(),
+(int)frame->get_keyframe(),
 frame->get_data(),
-frame->get_compressed_size());
+(int)frame->get_compressed_size());
 						result = quicktime_write_frame(fd,
 							frame->get_data(),
 							frame->get_compressed_size(),
@@ -1027,7 +1050,7 @@ int FileMOV::read_frame(VFrame *frame)
 
 if(debug) printf("FileMOV::read_frame %d frame=%lld color_model=%d\n", 
 __LINE__, 
-file->current_frame,
+(long long)file->current_frame,
 frame->get_color_model());
 	switch(frame->get_color_model())
 	{
@@ -1489,6 +1512,7 @@ void MOVConfigAudio::create_objects()
 	update_parameters();
 
 	add_subwindow(new BC_OKButton(this));
+	show_window(1);
 	unlock_window();
 }
 
@@ -1602,6 +1626,7 @@ void MOVConfigAudio::update_parameters()
 		mp4a_quantqual->set_increment(1);
 		mp4a_quantqual->create_objects();
 	}
+	show_window(1);
 }
 
 int MOVConfigAudio::close_event()
@@ -1799,6 +1824,7 @@ void MOVConfigVideo::create_objects()
 	update_parameters();
 
 	add_subwindow(new BC_OKButton(this));
+	show_window(1);
 	unlock_window();
 }
 
@@ -2068,6 +2094,7 @@ void MOVConfigVideo::update_parameters()
 			0,
 			&asset->jpeg_quality));
 	}
+	show_window(1);
 }
 
 

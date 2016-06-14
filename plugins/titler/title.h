@@ -100,7 +100,7 @@ public:
 		int64_t next_frame, 
 		int64_t current_frame);
 	void text_to_ucs4(const char *from_enc);
-
+	void limits();
 
 // Font information
 	char font[BCTEXTLEN];
@@ -139,6 +139,9 @@ public:
 	char timecodeformat[BCTEXTLEN];
 	int wtext_length;
 	wchar_t wtext[BCTEXTLEN];
+
+// Size of window
+	int window_w, window_h;
 };
 
 class TitleGlyph
@@ -152,6 +155,8 @@ public:
 	int width, height, pitch, advance_w, left, top, freetype_index;
 	VFrame *data;
 };
+
+
 
 
 
@@ -362,8 +367,6 @@ public:
 	void update_gui();
 	void save_data(KeyFrame *keyframe);
 	void read_data(KeyFrame *keyframe);
-	int load_defaults();
-	int save_defaults();
 	void draw_glyphs();
 	int draw_mask();
 	void overlay_mask();

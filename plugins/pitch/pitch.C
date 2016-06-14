@@ -27,6 +27,7 @@
 #include "pitch.h"
 #include "picon_png.h"
 #include "samples.h"
+#include "theme.h"
 #include "units.h"
 #include "vframe.h"
 
@@ -81,6 +82,7 @@ void PitchEffect::read_data(KeyFrame *keyframe)
 			if(input.tag.title_is("PITCH"))
 			{
 				config.scale = input.tag.get_property("SCALE", config.scale);
+				config.size = input.tag.get_property("SIZE", config.size);
 			}
 		}
 	}
@@ -93,6 +95,7 @@ void PitchEffect::save_data(KeyFrame *keyframe)
 
 	output.tag.set_title("PITCH");
 	output.tag.set_property("SCALE", config.scale);
+	output.tag.set_property("SIZE", config.size);
 	output.append_tag();
 	output.tag.set_title("/PITCH");
 	output.append_tag();
@@ -101,26 +104,6 @@ void PitchEffect::save_data(KeyFrame *keyframe)
 	output.terminate_string();
 }
 
-int PitchEffect::load_defaults()
-{
-	char directory[BCTEXTLEN], string[BCTEXTLEN];
-	sprintf(directory, "%spitch.rc", BCASTDIR);
-	defaults = new BC_Hash(directory);
-	defaults->load();
-	
-	config.scale = defaults->get("SCALE", config.scale);
-	return 0;
-}
-
-int PitchEffect::save_defaults()
-{
-	char string[BCTEXTLEN];
-
-	defaults->update("SCALE", config.scale);
-	defaults->save();
-
-	return 0;
-}
 
 
 LOAD_CONFIGURATION_MACRO(PitchEffect, PitchConfig)
@@ -158,6 +141,11 @@ int PitchEffect::process_buffer(int64_t size,
 //printf("PitchEffect::process_buffer %d\n", __LINE__);
 	load_configuration();
 
+	if(fft && config.size != fft->window_size)
+	{
+		delete fft;
+		fft = 0;
+	}
 
 	if(!fft)
 	{
@@ -339,16 +327,18 @@ int PitchFFT::read_samples(int64_t output_sample,
 PitchConfig::PitchConfig()
 {
 	scale = 1.0;
+	size = 2048;
 }
 
 int PitchConfig::equivalent(PitchConfig &that)
 {
-	return EQUIV(scale, that.scale);
+	return EQUIV(scale, that.scale) && size == that.size;
 }
 
 void PitchConfig::copy_from(PitchConfig &that)
 {
 	scale = that.scale;
+	size = that.size;
 }
 
 void PitchConfig::interpolate(PitchConfig &prev, 
@@ -360,6 +350,7 @@ void PitchConfig::interpolate(PitchConfig &prev,
 	double next_scale = (double)(current_frame - prev_frame) / (next_frame - prev_frame);
 	double prev_scale = (double)(next_frame - current_frame) / (next_frame - prev_frame);
 	scale = prev.scale * prev_scale + next.scale * next_scale;
+	size = prev.size;
 }
 
 
@@ -388,11 +379,19 @@ PitchWindow::PitchWindow(PitchEffect *plugin)
 
 void PitchWindow::create_objects()
 {
-	int x = 10, y = 10;
+	int x1 = 10, x = 10, y = 10;
 	
-	add_subwindow(new BC_Title(x, y, _("Scale:")));
-	x += 70;
+	BC_Title *title;
+	add_subwindow(title = new BC_Title(x, y, _("Scale:")));
+	x += title->get_w() + plugin->get_theme()->widget_border;
 	add_subwindow(scale = new PitchScale(plugin, x, y));
+	x = x1;
+	y += scale->get_h() + plugin->get_theme()->widget_border;
+	add_subwindow(title = new BC_Title(x, y, _("Window Size:")));
+	y += title->get_h() + plugin->get_theme()->widget_border;
+	add_subwindow(size = new PitchSize(this, plugin, x, y));
+	size->create_objects();
+	size->update(plugin->config.size);
 	show_window();
 	flush();
 }
@@ -402,6 +401,7 @@ void PitchWindow::create_objects()
 void PitchWindow::update()
 {
 	scale->update(plugin->config.scale);
+	size->update(plugin->config.size);
 }
 
 
@@ -430,6 +430,38 @@ int PitchScale::handle_event()
 }
 
 
+
+PitchSize::PitchSize(PitchWindow *window, PitchEffect *plugin, int x, int y)
+ : BC_PopupMenu(x, y, 100, "4096", 1)
+{
+	this->plugin = plugin;
+}
+
+int PitchSize::handle_event()
+{
+	plugin->config.size = atoi(get_text());
+	plugin->send_configure_change();
+	return 1;
+}
+
+void PitchSize::create_objects()
+{
+	add_item(new BC_MenuItem("2048"));
+	add_item(new BC_MenuItem("4096"));
+	add_item(new BC_MenuItem("8192"));
+	add_item(new BC_MenuItem("16384"));
+	add_item(new BC_MenuItem("32768"));
+	add_item(new BC_MenuItem("65536"));
+	add_item(new BC_MenuItem("131072"));
+	add_item(new BC_MenuItem("262144"));
+}
+
+void PitchSize::update(int size)
+{
+	char string[BCTEXTLEN];
+	sprintf(string, "%d", size);
+	set_text(string);
+}
 
 
 

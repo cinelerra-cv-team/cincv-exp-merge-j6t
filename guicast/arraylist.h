@@ -70,6 +70,7 @@ public:
 	void set_free();
 	int size();
 	TYPE get(int number);
+	TYPE set(int number, TYPE value);
 
 	void sort();
 
@@ -355,7 +356,7 @@ int ArrayList<TYPE>::number_of(TYPE object)
 	{
 		if(values[i] == object) return i;
 	}
-	return 0;
+	return -1;
 }
 
 template<class TYPE>
@@ -369,6 +370,21 @@ TYPE ArrayList<TYPE>::get(int number)
 {
 	if(number < total) return values[number];
 	printf("ArrayList<TYPE>::get number=%d total=%d\n",
+		number,
+		total);
+	return 0;
+}
+
+template<class TYPE>
+TYPE ArrayList<TYPE>::set(int number, TYPE value)
+{
+	if(number < total) 
+	{
+		values[number] = value;
+		return values[number];
+	}
+
+	printf("ArrayList<TYPE>::set number=%d total=%d\n",
 		number,
 		total);
 	return 0;

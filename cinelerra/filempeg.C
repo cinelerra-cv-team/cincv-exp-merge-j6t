@@ -657,8 +657,8 @@ int FileMPEG::create_index()
 				sprintf(string, 
 					"%sETA: %lldm%llds",
 					progress_title,
-					eta / 60,
-					eta % 60);
+					(long long)eta / 60,
+					(long long)eta % 60);
 				progress->update_title(string, 1);
 // 				fprintf(stderr, "ETA: %dm%ds        \r", 
 // 					bytes_processed * 100 / total_bytes,
@@ -1606,8 +1606,7 @@ void MPEGConfigAudio::create_objects()
 	
 	
 	add_subwindow(new BC_OKButton(this));
-	show_window();
-	flush();
+	show_window(1);
 	unlock_window();
 }
 
@@ -1799,8 +1798,7 @@ void MPEGConfigVideo::create_objects()
 	update_cmodel_objs();
 
 	add_subwindow(new BC_OKButton(this));
-	show_window();
-	flush();
+	show_window(1);
 	unlock_window();
 }
 
@@ -2171,6 +2169,7 @@ int MPEGColorModel::handle_event()
 {
 	gui->asset->vmpeg_cmodel = string_to_cmodel(get_text());
 	gui->update_cmodel_objs();
+	gui->show_window(1);
 	return 1;
 };
 
