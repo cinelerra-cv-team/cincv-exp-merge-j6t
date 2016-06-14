@@ -69,8 +69,8 @@ void ManualGoto::open_window()
 						 mwindow->edl->session->frame_rate;;
 	}
 	else
-		if (mwindow->vwindow->get_edl())
-			position = mwindow->vwindow->get_edl()->local_session->get_selectionstart(1);
+		if (mwindow->vwindows.get(DEFAULT_VWINDOW)->get_edl())
+			position = mwindow->vwindows.get(DEFAULT_VWINDOW)->get_edl()->local_session->get_selectionstart(1);
 		else
 			return;
 	if (!gotowindow)
@@ -130,11 +130,11 @@ void ManualGoto::run()
 					mwindow->cwindow->update(1, 0, 0, 0, 0);			
 				}
 			} else
-			if ((masterwindow == (BC_WindowBase *)mwindow->vwindow->gui) &&
-			    mwindow->vwindow->get_edl())
+			if ((masterwindow == (BC_WindowBase *)mwindow->vwindows.get(DEFAULT_VWINDOW)->gui) &&
+			    mwindow->vwindows.get(DEFAULT_VWINDOW)->get_edl())
 			{
 				// vwindow update
-				VWindow *vwindow = mwindow->vwindow;
+				VWindow *vwindow = mwindow->vwindows.get(DEFAULT_VWINDOW);
 				double current_position = vwindow->get_edl()->local_session->get_selectionstart(1);
 				switch (modifier)
 				{

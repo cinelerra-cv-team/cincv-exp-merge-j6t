@@ -458,7 +458,7 @@ void BlueDotTheme::initialize()
 	new_image("setformat_bg", "setformat_bg2.png");
 
 
-	timebar_view_data = new_image("timebar_view.png");
+//	timebar_view_data = new_image("timebar_view.png");
 
 // x, y of Format dialog box
 	setformat_w = 600;
@@ -771,259 +771,12 @@ void BlueDotTheme::initialize()
 	resources->tooltip_bg_color = 0xfff7e3;
 }
 
-//CWINDOW is probalby ComposerWindow, V=ViewerWindow
-#define CWINDOW_METER_MARGIN 5
 #define VWINDOW_METER_MARGIN 5
-
-//Specific to BD
-void BlueDotTheme::get_mwindow_sizes(MWindowGUI *gui, int w, int h)
-{
-// Position of menu buttons (start, stop, ff, etc.)
-	mbuttons_x = 0;
-	mbuttons_y = gui->mainmenu->get_h();
-	mbuttons_w = w;
-	mbuttons_h = get_image("mbutton_left")->get_h();
-	mclock_x = 20;		//x position of digits in clock window
-	mclock_y = mbuttons_y + 1 + mbuttons_h + CWINDOW_METER_MARGIN;
-	mclock_w = get_image("clock_bg")->get_w() - 72;
-	mclock_h = get_image("clock_bg")->get_h();
-
-//Time bar - coordinates and dimensions
-	mtimebar_x = get_image("patchbay_bg")->get_w();
-	mtimebar_y = mbuttons_y + mbuttons_h;
-	mtimebar_w = w - mtimebar_x;
-	mtimebar_h = get_image("timebar_bg")->get_h();
-
-// Zooming tracks - just above the status bar
-	mzoom_h =  get_image("zoombar_left")->get_h();
-	mzoom_x = 0;
-	mzoom_y = h - get_image("statusbar_left")->get_h() - mzoom_h;
-	mzoom_w = w;
-
-// Status bar at the very bottom of the screen.
-	mstatus_x = 0;
-//	mstatus_y = mzoom_y + mzoom_h;
-	mstatus_y = mzoom_y + mzoom_h;
-	mstatus_w = w;
-	mstatus_h = h - mstatus_y;
-	mstatus_message_x = 10;
-	mstatus_message_y = 8;
-	mstatus_progress_w = 230;
-	mstatus_progress_x = mstatus_w - statusbar_cancel_data[0]->get_w() - 240;
-	mstatus_progress_y = mstatus_h - BC_WindowBase::get_resources()->progress_images[0]->get_h();
-
-//Specific to BD
-	mstatus_cancel_x = mstatus_w - statusbar_cancel_data[0]->get_w();
-	mstatus_cancel_y = mstatus_h - statusbar_cancel_data[0]->get_h();
-
-//This is Patch Bay - on the left side of the tracks.
-	patchbay_x = 0;
-	patchbay_y = mtimebar_y + mtimebar_h;
-	patchbay_w = get_image("patchbay_bg")->get_w();
-	patchbay_h = mzoom_y - patchbay_y - BC_ScrollBar::get_span(SCROLL_HORIZ);
-
-//Canvas where audio and video tracks are
-	mcanvas_x = patchbay_x + patchbay_w;
-	mcanvas_y = mtimebar_y + mtimebar_h;
-	mcanvas_w = w - patchbay_w - BC_ScrollBar::get_span(SCROLL_VERT);
-	mcanvas_h = patchbay_h;
-//COPIED START
-	mhscroll_x = 0;
-	mhscroll_y = mzoom_y - BC_ScrollBar::get_span(SCROLL_HORIZ);
-	mhscroll_w = w - BC_ScrollBar::get_span(SCROLL_VERT);
-	mvscroll_x = mcanvas_x + mcanvas_w;
-	mvscroll_y = mcanvas_y;
-	mvscroll_h = mcanvas_h;
-//COPIED END
-}
-
-void BlueDotTheme::get_cwindow_sizes(CWindowGUI *gui, int cwindow_controls)
-{
-	if(cwindow_controls)
-	{
-SET_TRACE
-		ccomposite_x = 0;
-		ccomposite_y = 5;
-		ccomposite_w = get_image("cpanel_bg")->get_w();
-		ccomposite_h = mwindow->session->cwindow_h - 
-			get_image("cbuttons_left")->get_h();
-		cslider_x = 5;
-		cslider_y = ccomposite_h + 23;
-		cedit_x = 10;
-		cedit_y = cslider_y + 17;
-		ctransport_x = 10;
-		ctransport_y = mwindow->session->cwindow_h - 
-			get_image_set("autokeyframe")[0]->get_h();
-		ccanvas_x = ccomposite_x + ccomposite_w;
-		ccanvas_y = 0;
-		ccanvas_h = ccomposite_h;
-//COPIED START
-		cstatus_x = 453;
-		cstatus_y = mwindow->session->cwindow_h - 66;
-//COPIED END
-		if(mwindow->edl->session->cwindow_meter)
-		{
-			cmeter_x = mwindow->session->cwindow_w - MeterPanel::get_meters_width(mwindow->edl->session->audio_channels, 
-				mwindow->edl->session->cwindow_meter);
-			ccanvas_w = cmeter_x - ccanvas_x - 5;
-		}
-		else
-		{
-			cmeter_x = mwindow->session->cwindow_w;
-			ccanvas_w = cmeter_x - ccanvas_x;
-		}
-SET_TRACE
-	}
-	else
-	{
-SET_TRACE
-		ccomposite_x = -get_image("cpanel_bg")->get_w();
-		ccomposite_y = 0;
-		ccomposite_w = get_image("cpanel_bg")->get_w();
-		ccomposite_h = mwindow->session->cwindow_h - get_image("cbuttons_left")->get_h();
-
-		cslider_x = 5;
-		cslider_y = mwindow->session->cwindow_h;
-		cedit_x = 10;
-		cedit_y = cslider_y + 17;
-		ctransport_x = 10;
-		ctransport_y = cedit_y + 40;
-		ccanvas_x = 0;
-		ccanvas_y = 0;
-		ccanvas_w = mwindow->session->cwindow_w;
-		ccanvas_h = mwindow->session->cwindow_h;
-		cmeter_x = mwindow->session->cwindow_w;
-//COPIED START
-		cstatus_x = mwindow->session->cwindow_w;
-		cstatus_y = mwindow->session->cwindow_h;
-//COPIED END
-SET_TRACE
-	}
-
-SET_TRACE
-
-	czoom_x = ctransport_x + PlayTransport::get_transport_width(mwindow) + 20;
-	czoom_y = ctransport_y + 5;
-
-
-	cmeter_y = 5;
-	cmeter_h = mwindow->session->cwindow_h - cmeter_y;
-
-//Specific to BD
-	cslider_w = ccanvas_x + ccanvas_w - cslider_x;
-	ctimebar_x = ccanvas_x;
-	ctimebar_y = ccanvas_y + ccanvas_h;
-	ctimebar_w = ccanvas_w;
-	ctimebar_h = 16;
-
-
-// Not used
-	ctime_x = ctransport_x + PlayTransport::get_transport_width(mwindow);
-	ctime_y = ctransport_y;
-	cdest_x = czoom_x;
-	cdest_y = czoom_y + 30;
-SET_TRACE
-}
-
-
-
-void BlueDotTheme::get_recordgui_sizes(RecordGUI *gui, int w, int h)
-{
-	
-}
-
-// COPIED START--------
-void BlueDotTheme::get_rmonitor_sizes(int do_audio, 
-	int do_video,
-	int do_channel,
-	int do_interlace,
-	int do_avc,
-	int audio_channels)
-{
-	Theme::get_rmonitor_sizes(do_audio, 
-		do_video,
-		do_channel,
-		do_interlace,
-		do_avc,
-		audio_channels);
-	if(!do_video && do_audio)
-	{
-		rmonitor_meter_y -= 30;
-		rmonitor_meter_h += 30;
-	}
-}
-// COPIED END--------
-
-
-void BlueDotTheme::get_vwindow_sizes(VWindowGUI *gui)
-{
-	vmeter_y = 5;
-	vmeter_h = mwindow->session->vwindow_h - cmeter_y;
-	vcanvas_x = 0;
-	vcanvas_y = 0;
-	vcanvas_h = mwindow->session->vwindow_h - get_image("vbuttons_left")->get_h();
-
-	if(mwindow->edl->session->vwindow_meter)
-	{
-		vmeter_x = mwindow->session->vwindow_w - 
-			VWINDOW_METER_MARGIN - 
-			MeterPanel::get_meters_width(mwindow->edl->session->audio_channels, 
-			mwindow->edl->session->vwindow_meter);
-		vcanvas_w = vmeter_x - vcanvas_x - VWINDOW_METER_MARGIN;
-	}
-	else
-	{
-		vmeter_x = mwindow->session->vwindow_w;
-		vcanvas_w = mwindow->session->vwindow_w;
-	}
-
-	vtimebar_x = vcanvas_x;
-	vtimebar_y = vcanvas_y + vcanvas_h;
-	vtimebar_w = vcanvas_w;
-	vtimebar_h = 16;
-
-//Specific to BD
-	vslider_x = 10;
-	vslider_y = vtimebar_y + 25;
-	vslider_w = vtimebar_w - vslider_x;
-	vedit_x = 10;
-	vedit_y = vslider_y + 17;
-	vtransport_x = 10;
-	vtransport_y = mwindow->session->vwindow_h - 
-		get_image_set("autokeyframe")[0]->get_h();
-	vtime_x = 373;
-	vtime_y = vedit_y + 7;
-	vtime_w = 100;
-
-
-
-
-	vzoom_x = vtime_x + 150;
-	vzoom_y = vtime_y;
-	vsource_x = vtime_x + 50;
-	vsource_y = vtransport_y + 5;
-}
-
-
-
-
-
-void BlueDotTheme::build_icons()
-{
-	new_image("mwindow_icon", "heroine_icon.png");
-	new_image("vwindow_icon", "heroine_icon.png");
-	new_image("cwindow_icon", "heroine_icon.png");
-	new_image("awindow_icon", "heroine_icon.png");
-	new_image("record_icon", "heroine_icon.png");
-	new_image("clip_icon", "clip_icon.png");
-}
-
 
 
 void BlueDotTheme::build_bg_data()
 {
 // Audio settings
-	channel_bg_data = new VFrame(get_image_data("channel_bg.png"));
 	channel_position_data = new VFrame(get_image_data("channel_position.png"));
 
 // Track bitmaps
@@ -1199,24 +952,26 @@ void BlueDotTheme::draw_cwindow_bg(CWindowGUI *gui)
 //Specific to BD
 	const int button_division = 530;
 	gui->draw_3segmentv(0, 0, ccomposite_h, get_image("cpanel_bg"));
-	gui->draw_3segmenth(0, ccomposite_h, button_division, get_image("cbuttons_left"));
+
+	gui->draw_3segmenth(0, ccomposite_h, cstatus_x, get_image("cbuttons_left"));
+
 	if(mwindow->edl->session->cwindow_meter)
 	{
-		gui->draw_3segmenth(button_division, 
+		gui->draw_3segmenth(cstatus_x, 
 			ccomposite_h, 
-			cmeter_x - CWINDOW_METER_MARGIN - button_division, 
+			cmeter_x - widget_border - cstatus_x, 
 			get_image("cbuttons_right"));
-		gui->draw_9segment(cmeter_x - CWINDOW_METER_MARGIN, 
+		gui->draw_9segment(cmeter_x - widget_border, 
 			0, 
-			mwindow->session->cwindow_w - cmeter_x + CWINDOW_METER_MARGIN, 
+			mwindow->session->cwindow_w - cmeter_x + widget_border, 
 			mwindow->session->cwindow_h, 
 			get_image("cmeter_bg"));
 	}
 	else
 	{
-		gui->draw_3segmenth(button_division, 
+		gui->draw_3segmenth(cstatus_x, 
 			ccomposite_h, 
-			cmeter_x - CWINDOW_METER_MARGIN - button_division + 100, 
+			cmeter_x - widget_border - cstatus_x + 100, 
 			get_image("cbuttons_right"));
 	}
 }

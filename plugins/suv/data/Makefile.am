@@ -3,121 +3,48 @@ libimagedata_a_SOURCES =
 nodist_libimagedata_a_SOURCES = suv.data
 
 PNGS = \
+	0.png \
+	1.png \
+	2.png \
+	3.png \
+	4.png \
+	5.png \
+	6.png \
+	7.png \
+	8.png \
+	9.png \
+	a.png \
 	about.png \
 	about_bg.png \
-	add_dn.png \
-	add_hi.png \
-	add_up.png \
+	aeffect_icon.png \
 	antenna.png \
-	antierase_checked.png \
-	antierase_checkedhi.png \
-	antierase_dn.png \
-	antierase_hi.png \
-	antierase_up.png \
-	append_dn.png \
-	append_hi.png \
-	append_up.png \
-	appendasset_dn.png \
-	appendasset_hi.png \
-	appendasset_up.png \
-	apply_dn.png \
-	apply_hi.png \
-	apply_up.png \
 	arrow.png \
-	arrow_checked.png \
-	arrow_checkedhi.png \
-	arrow_dn.png \
-	arrow_hi.png \
-	arrow_up.png \
-	asset_append_dn.png \
-	asset_append_hi.png \
-	asset_append_up.png \
-	asset_disk_dn.png \
-	asset_disk_hi.png \
-	asset_disk_up.png \
-	asset_index_dn.png \
-	asset_index_hi.png \
-	asset_index_up.png \
-	asset_info_dn.png \
-	asset_info_hi.png \
-	asset_info_up.png \
-	asset_project_dn.png \
-	asset_project_hi.png \
-	asset_project_up.png \
-	attach_dn.png \
-	attach_hi.png \
-	attach_up.png \
-	auto_dn.png \
-	auto_dnhi.png \
-	auto_up.png \
-	auto_uphi.png \
+	atransition_icon.png \
 	autokeyframe.png \
-	autokeyframe_checked.png \
-	autokeyframe_checkedhi.png \
-	autokeyframe_dn.png \
-	autokeyframe_up.png \
-	autokeyframe_uphi.png \
-	automationpatch_checked.png \
-	automationpatch_checkedhi.png \
-	automationpatch_dn.png \
-	automationpatch_hi.png \
-	automationpatch_up.png \
+	b.png \
 	bar.png \
-	batchcancel_dn.png \
-	batchcancel_hi.png \
-	batchcancel_up.png \
-	batchstart_dn.png \
-	batchstart_hi.png \
-	batchstart_up.png \
-	batchstop_dn.png \
-	batchstop_hi.png \
-	batchstop_up.png \
 	blank30x30.png \
 	bottom_justify.png \
-	calibrate_dn.png \
-	calibrate_hi.png \
-	calibrate_up.png \
+	c.png \
 	camera.png \
-	camera_checked.png \
-	camera_checkedhi.png \
-	camera_dn.png \
-	camera_hi.png \
-	camera_up.png \
 	camerakeyframe.png \
 	cancel.png \
-	cancel_dn.png \
-	cancel_hi.png \
-	cancel_small_dn.png \
-	cancel_small_hi.png \
-	cancel_small_up.png \
-	cancel_up.png \
 	cbuttons_left.png \
 	cbuttons_right.png \
 	center_justify.png \
-	chain_dn.png \
-	chain_hi.png \
-	chain_up.png \
 	channel.png \
-	channel_bg.png \
-	channel_dn.png \
-	channel_hi.png \
 	channel_position.png \
-	channel_up.png \
 	checkbox_checked.png \
 	checkbox_checkedhi.png \
 	checkbox_dn.png \
 	checkbox_hi.png \
 	checkbox_up.png \
-	cirselection_checked.png \
-	cirselection_checkedhi.png \
-	cirselection_dn.png \
-	cirselection_hi.png \
-	cirselection_up.png \
 	clearinpoint.png \
 	clearoutpoint.png \
 	clip_icon.png \
 	closetip.png \
 	cmeter_bg.png \
+	colon.png \
 	color3way_dn.png \
 	color3way_hi.png \
 	color3way_point.png \
@@ -134,56 +61,21 @@ PNGS = \
 	cpanel_hi.png \
 	cpanel_up.png \
 	crop.png \
-	crop_checked.png \
-	crop_checkedhi.png \
-	crop_dn.png \
-	crop_hi.png \
-	crop_up.png \
 	cut.png \
 	cwindow_active.png \
 	cwindow_inactive.png \
-	default_bg.png \
+	d.png \
+	dash.png \
 	delete.png \
-	deletedisk_dn.png \
-	deletedisk_hi.png \
-	deletedisk_up.png \
-	deleteproject_dn.png \
-	deleteproject_hi.png \
-	deleteproject_up.png \
-	detach_dn.png \
-	detach_hi.png \
-	detach_up.png \
-	draw_dn.png \
-	draw_dnhi.png \
-	draw_up.png \
-	draw_uphi.png \
 	drawpatch.png \
-	drawpatch_checked.png \
-	drawpatch_checkedhi.png \
-	drawpatch_dn.png \
-	drawpatch_hi.png \
-	drawpatch_up.png \
 	duplex.png \
-	edit_dn.png \
-	edit_hi.png \
-	edit_up.png \
-	edithandlein_dn.png \
-	edithandlein_hi.png \
-	edithandlein_up.png \
-	edithandleout_dn.png \
-	edithandleout_hi.png \
-	edithandleout_up.png \
+	e.png \
 	editpanel_checked.png \
 	editpanel_checkedhi.png \
 	editpanel_dn.png \
 	editpanel_hi.png \
 	editpanel_up.png \
 	end.png \
-	erase_checked.png \
-	erase_checkedhi.png \
-	erase_dn.png \
-	erase_hi.png \
-	erase_up.png \
 	expandpatch.png \
 	expandpatch_checked.png \
 	expandpatch_checkedhi.png \
@@ -191,6 +83,7 @@ PNGS = \
 	expandpatch_hi.png \
 	expandpatch_up.png \
 	eyedrop.png \
+	f.png \
 	fastfwd.png \
 	fastrev.png \
 	filebox_bigbutton_dn.png \
@@ -200,35 +93,24 @@ PNGS = \
 	fileboxbutton_hi.png \
 	fileboxbutton_up.png \
 	fit.png \
-	fit_dn.png \
-	fit_hi.png \
-	fit_up.png \
 	fitautos.png \
 	folder.png \
 	framefwd.png \
 	framerev.png \
-	fwd_dn.png \
-	fwd_hi.png \
-	fwd_up.png \
 	gangpatch.png \
-	gangpatch_checked.png \
-	gangpatch_checkedhi.png \
-	gangpatch_dn.png \
-	gangpatch_hi.png \
-	gangpatch_up.png \
 	generic_dn.png \
 	generic_hi.png \
 	generic_up.png \
 	generickeyframe.png \
 	goto.png \
-	heroine_bg.png \
 	heroine_icon.png \
-	hscroll_back_dn.png \
-	hscroll_back_hi.png \
-	hscroll_back_up.png \
-	hscroll_fwd_dn.png \
-	hscroll_fwd_hi.png \
-	hscroll_fwd_up.png \
+	histogram.png \
+	histogram_carrot_checked.png \
+	histogram_carrot_checkedhi.png \
+	histogram_carrot_dn.png \
+	histogram_carrot_hi.png \
+	histogram_carrot_up.png \
+	histogram_rgb.png \
 	hscroll_handle_bg.png \
 	hscroll_handle_dn.png \
 	hscroll_handle_hi.png \
@@ -246,36 +128,19 @@ PNGS = \
 	hslider_fg_hi.png \
 	hslider_fg_up.png \
 	ibeam.png \
-	ibeam_checked.png \
-	ibeam_checkedhi.png \
-	ibeam_dn.png \
-	ibeam_hi.png \
-	ibeam_up.png \
 	icons.png \
 	in_checked.png \
 	in_checkedhi.png \
 	in_dn.png \
 	in_hi.png \
 	in_up.png \
-	infoasset_dn.png \
-	infoasset_hi.png \
-	infoasset_up.png \
 	inpoint.png \
-	insert_dn.png \
-	insert_hi.png \
-	insert_up.png \
 	keyframe.png \
 	keyframe2.png \
 	keyframe3.png \
-	keyframe_dn.png \
-	keyframe_hi.png \
-	keyframe_up.png \
 	label.png \
 	label_checked.png \
 	label_checkedhi.png \
-	label_dn.png \
-	label_hi.png \
-	label_up.png \
 	labeltoggle_dn.png \
 	labeltoggle_up.png \
 	labeltoggle_uphi.png \
@@ -302,11 +167,6 @@ PNGS = \
 	locklabels_unlocked.png \
 	locklabels_unlockedhi.png \
 	magnify.png \
-	magnify_checked.png \
-	magnify_checkedhi.png \
-	magnify_dn.png \
-	magnify_hi.png \
-	magnify_up.png \
 	mask.png \
 	maskkeyframe.png \
 	mbutton_bg.png \
@@ -341,17 +201,6 @@ PNGS = \
 	mode_subtract.png \
 	mode_up.png \
 	modekeyframe.png \
-	move_checked.png \
-	move_checkedhi.png \
-	move_dn.png \
-	move_hi.png \
-	move_up.png \
-	movedn_dn.png \
-	movedn_hi.png \
-	movedn_up.png \
-	moveup_dn.png \
-	moveup_hi.png \
-	moveup_up.png \
 	mscroll_filler.png \
 	mtimebar.png \
 	mutepatch.png \
@@ -366,18 +215,9 @@ PNGS = \
 	new_bigbutton_up.png \
 	nextedit.png \
 	nextlabel.png \
-	nextlabel_dn.png \
-	nextlabel_hi.png \
-	nextlabel_up.png \
 	nexttip.png \
-	no_dn.png \
-	no_hi.png \
-	no_up.png \
 	ok.png \
 	openfolder.png \
-	options_dn.png \
-	options_hi.png \
-	options_up.png \
 	out_checked.png \
 	out_checkedhi.png \
 	out_dn.png \
@@ -385,9 +225,6 @@ PNGS = \
 	out_up.png \
 	outpoint.png \
 	over.png \
-	over_dn.png \
-	over_up.png \
-	over_uphi.png \
 	overwrite.png \
 	pan_channel.png \
 	pan_channel_small.png \
@@ -399,9 +236,6 @@ PNGS = \
 	panel_divider.png \
 	pankeyframe.png \
 	paste.png \
-	pasteasset_dn.png \
-	pasteasset_hi.png \
-	pasteasset_up.png \
 	patch_checked.png \
 	patch_checkedhi.png \
 	patch_dn.png \
@@ -409,16 +243,10 @@ PNGS = \
 	patch_up.png \
 	patchbay_bg.png \
 	pause.png \
-	picture_dn.png \
-	picture_hi.png \
-	picture_up.png \
+	period.png \
+	picture.png \
 	play.png \
 	playpatch.png \
-	playpatch_checked.png \
-	playpatch_checkedhi.png \
-	playpatch_dn.png \
-	playpatch_hi.png \
-	playpatch_up.png \
 	plugin_bg.png \
 	plugin_on.png \
 	plugin_ondn.png \
@@ -439,23 +267,12 @@ PNGS = \
 	preferencesbutton_dnlo.png \
 	preferencesbutton_up.png \
 	preferencesbutton_uphi.png \
-	presentation_dn.png \
-	presentation_hi.png \
-	presentation_up.png \
 	prevedit.png \
 	prevlabel.png \
-	prevlabel_dn.png \
-	prevlabel_hi.png \
-	prevlabel_up.png \
 	prevtip.png \
 	progress_bg.png \
 	progress_hi.png \
 	projector.png \
-	projector_checked.png \
-	projector_checkedhi.png \
-	projector_dn.png \
-	projector_hi.png \
-	projector_up.png \
 	projectorkeyframe.png \
 	protect.png \
 	radial_checked.png \
@@ -463,39 +280,11 @@ PNGS = \
 	radial_dn.png \
 	radial_hi.png \
 	radial_up.png \
-	recframe.png \
 	record.png \
-	recordgui_batch.png \
-	recordgui_controls.png \
-	recordgui_list.png \
-	recordmonitor_meters.png \
-	recordmonitor_panel.png \
 	recordpatch.png \
-	recordpatch_checked.png \
-	recordpatch_checkedhi.png \
-	recordpatch_dn.png \
-	recordpatch_dnhi.png \
-	recordpatch_hi.png \
-	recordpatch_up.png \
-	recordpatch_uphi.png \
-	rectselection_checked.png \
-	rectselection_checkedhi.png \
-	rectselection_dn.png \
-	rectselection_hi.png \
-	rectselection_up.png \
 	redo.png \
-	redo_dn.png \
-	redo_hi.png \
-	redo_up.png \
-	redrawindex_dn.png \
-	redrawindex_hi.png \
-	redrawindex_up.png \
-	reel.png \
 	reload.png \
 	rename.png \
-	reset_dn.png \
-	reset_hi.png \
-	reset_up.png \
 	resource1024.png \
 	resource128.png \
 	resource256.png \
@@ -506,18 +295,12 @@ PNGS = \
 	rewind.png \
 	right_justify.png \
 	ruler.png \
-	select_dn.png \
-	select_hi.png \
-	select_up.png \
+	scope.png \
 	setformat_bg.png \
-	setformat_bg2.png \
 	show_meters.png \
 	singleframe.png \
-	slider_bg.png \
+	space.png \
 	splice.png \
-	startover_dn.png \
-	startover_hi.png \
-	startover_up.png \
 	statusbar.png \
 	statusbar_cancel.png \
 	statusbar_cancel_dn.png \
@@ -525,8 +308,8 @@ PNGS = \
 	statusbar_cancel_up.png \
 	stop.png \
 	swap_extents.png \
-	tan_smooth.png \
 	tan_linear.png \
+	tan_smooth.png \
 	text.png \
 	text_highlight.png \
 	timebar_bg.png \
@@ -541,13 +324,6 @@ PNGS = \
 	toclip.png \
 	toolwindow.png \
 	top_justify.png \
-	tracks_bg.png \
-	transition_dn.png \
-	transition_hi.png \
-	transition_up.png \
-	transitionhandle_dn.png \
-	transitionhandle_hi.png \
-	transitionhandle_up.png \
 	transportdn.png \
 	transportend.png \
 	transporthi.png \
@@ -557,22 +333,10 @@ PNGS = \
 	tumble_top.png \
 	tumble_up.png \
 	undo.png \
-	undo_dn.png \
-	undo_hi.png \
-	undo_up.png \
 	updir.png \
 	vbuttons_left.png \
 	vclock.png \
-	viewasset_dn.png \
-	viewasset_hi.png \
-	viewasset_up.png \
-	vmeter_bg.png \
-	vscroll_back_dn.png \
-	vscroll_back_hi.png \
-	vscroll_back_up.png \
-	vscroll_fwd_dn.png \
-	vscroll_fwd_hi.png \
-	vscroll_fwd_up.png \
+	veffect_icon.png \
 	vscroll_handle_bg.png \
 	vscroll_handle_dn.png \
 	vscroll_handle_hi.png \
@@ -583,20 +347,17 @@ PNGS = \
 	vscroll_right_dn.png \
 	vscroll_right_hi.png \
 	vscroll_right_up.png \
+	vtransition_icon.png \
 	vwindow_timebar.png \
+	waveform.png \
+	waveform_rgb.png \
 	wrench.png \
-	wrench_dn.png \
-	wrench_hi.png \
-	wrench_up.png \
 	xmeter_green.png \
 	xmeter_normal.png \
 	xmeter_over.png \
 	xmeter_red.png \
 	xmeter_white.png \
 	xmeter_yellow.png \
-	yes_dn.png \
-	yes_hi.png \
-	yes_up.png \
 	ymeter_green.png \
 	ymeter_normal.png \
 	ymeter_over.png \

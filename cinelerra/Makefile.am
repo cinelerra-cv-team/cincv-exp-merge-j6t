@@ -32,7 +32,7 @@ if BUILDINFO_CUST
 
 endif
 endif
-	echo '#define COPYRIGHTTEXT1 "(C) 2009 Adam Williams\n\nheroinewarrior.com"' >> versioninfo.h
+	echo '#define COPYRIGHTTEXT1 "(C) 2012 Adam Williams\n\nheroinewarrior.com"' >> versioninfo.h
 	echo '#define COPYRIGHTTEXT2 "(C) 2006-2016 The CinelerraCV Community"' >> versioninfo.h
 	echo '#define COMPILEDATE "Compiled on $(BUILDDATE)"' >> versioninfo.h
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h
@@ -270,6 +270,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    recordlabel.C \
 		    recordmonitor.C \
 		    recordprefs.C \
+		    recordscopes.C \
 		    recordthread.C \
 		    recordtransport.C \
 		    recordvideo.C \
@@ -288,6 +289,7 @@ cinelerra_SOURCES = aattachmentpoint.C \
 		    samplescroll.C \
 		    savefile.C \
 		    scenegraph.C \
+		    scopewindow.C \
 		    setformat.C \
 		    sharedlocation.C \
 		    shmemory.C \
@@ -610,6 +612,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 recordlabel.h \
 		 recordmonitor.h \
 		 recordprefs.h \
+		 recordscopes.h \
 		 recordthread.h \
 		 recordtransport.h \
 		 recordvideo.h \
@@ -630,6 +633,7 @@ noinst_HEADERS = aattachmentpoint.h \
 		 savefile.h \
 		 scale.h \
 		 scenegraph.h \
+		 scopewindow.h \
 		 setformat.h \
 		 sharedlocation.h \
 		 shmemory.h \

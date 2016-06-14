@@ -427,10 +427,7 @@ ScopeGUI::ScopeGUI(Theme *theme,
  	x, 
 	y, 
 	w, 
-	h, 
-	MIN_SCOPE_W, 
-	MIN_SCOPE_H,
-	1)
+	h)
 {
 	this->x = x;
 	this->y = y;
@@ -446,10 +443,7 @@ ScopeGUI::ScopeGUI(PluginClient *plugin,
 	int h)
  : PluginClientWindow(plugin,
  	w, 
-	h, 
-	MIN_SCOPE_W, 
-	MIN_SCOPE_H,
-	1)
+	h)
 {
 	this->x = get_x();
 	this->y = get_y();

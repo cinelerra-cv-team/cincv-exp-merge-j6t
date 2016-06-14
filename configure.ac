@@ -1,4 +1,4 @@
-AC_INIT(cinelerra-cv, 4.3)
+AC_INIT(cinelerra-cv, 4.4)
 
 AC_CANONICAL_SYSTEM
 

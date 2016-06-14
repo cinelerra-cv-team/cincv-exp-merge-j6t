@@ -246,7 +246,6 @@ reverse.png \
 rewind.png \
 right_justify.png \
 ruler.png \
-setformat_bg2.png \
 show_meters.png \
 singleframe.png \
 splice.png \
