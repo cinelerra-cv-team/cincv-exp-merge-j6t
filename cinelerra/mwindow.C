@@ -492,7 +492,8 @@ void MWindow::init_plugin_path(Preferences *preferences,
 		index_fd = fopen(index_path, "w");
 
 // Version of the index file
-		fprintf(index_fd, "%d\n", PLUGIN_FILE_VERSION);
+		if (index_fd)
+			fprintf(index_fd, "%d\n", PLUGIN_FILE_VERSION);
 
 
 // Get directories
@@ -527,7 +528,8 @@ void MWindow::init_plugin_path(Preferences *preferences,
 
 					if(!result)
 					{
-						new_plugin->write_table(index_fd);
+						if (index_fd)
+							new_plugin->write_table(index_fd);
 						plugindb->append(new_plugin);
 						new_plugin->close_plugin();
 					}
@@ -548,7 +550,8 @@ void MWindow::init_plugin_path(Preferences *preferences,
 							id++;
 							if(!result)
 							{
-								new_plugin->write_table(index_fd);
+								if (index_fd)
+									new_plugin->write_table(index_fd);
 								plugindb->append(new_plugin);
 								new_plugin->close_plugin();
 							}
@@ -563,8 +566,9 @@ void MWindow::init_plugin_path(Preferences *preferences,
 			}
 		}
 	}
-	
-	fclose(index_fd);
+
+	if (index_fd)
+		fclose(index_fd);
 	if(debug) printf("MWindow::init_plugin_path %d total_time=%d\n", __LINE__, (int)total_time.get_difference());
 
 }
