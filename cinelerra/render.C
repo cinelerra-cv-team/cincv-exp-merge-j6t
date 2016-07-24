@@ -959,6 +959,7 @@ if(debug) printf("Render::render %d\n", __LINE__);
 			0,
 			mwindow->edl->session->labels_follow_edits,
 			mwindow->edl->session->plugins_follow_edits,
+			mwindow->edl->session->autos_follow_edits,
 			0); // overwrite
 if(debug) printf("Render::render %d\n", __LINE__);
 		for(int i = 0; i < assets->size(); i++)

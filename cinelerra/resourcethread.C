@@ -45,6 +45,8 @@
 #include "wavecache.h"
 
 
+#include <unistd.h>
+
 ResourceThreadItem::ResourceThreadItem(ResourcePixmap *pixmap, 
 	Indexable *indexable,
 	int data_type,
@@ -521,7 +523,8 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 	WaveCacheItem *wave_item;
 	double high;
 	double low;
-	
+	const int debug = 0;
+	if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 	if((wave_item = mwindow->wave_cache->get_wave(item->indexable->id,
 		item->channel,
 		item->start,
@@ -538,6 +541,7 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 		int64_t end = item->end;
 		if(start == end) end = start + 1;
 		
+		if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 		for(int64_t sample = start; sample < end; sample++)
 		{
 			double value;
@@ -563,10 +567,14 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 
 				if(!item->indexable->is_asset)
 				{
+					if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 					open_render_engine((EDL*)item->indexable, 1, 0);
+					if(debug) printf("ResourceThread::do_audio %d %p\n", __LINE__, render_engine);
 					if(render_engine->arender)
 					{
+						if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 						int source_channels = item->indexable->get_audio_channels();
+						if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 						for(int i = 0; i < MAXCHANNELS; i++)
 						{
 							if(i < source_channels &&
@@ -584,17 +592,22 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 						}
 
 						
+						if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 						render_engine->arender->process_buffer(
 							temp_buffer, 
 							fragment,
 							sample);
+						if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 						memcpy(audio_buffer->get_data(), 
 							temp_buffer[item->channel]->get_data(),
 							fragment * sizeof(double));
 					}
 					else
 					{
-						bzero(audio_buffer->get_data(), sizeof(double) * fragment);
+						if(debug) printf("ResourceThread::do_audio %d %d\n", __LINE__, fragment);
+						if(fragment > 0) bzero(audio_buffer->get_data(), sizeof(double) * fragment);
+						if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
+
 					}
 				}
 				else
@@ -633,6 +646,7 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 					low = value;
 			}
 		}
+		if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 
 // If it's a nested EDL, store all the channels
 		mwindow->wave_cache->put_wave(item->indexable,
@@ -641,12 +655,15 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 			item->end,
 			high,
 			low);
+		if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 	}
+	if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 
 // Allow escape here
 	if(interrupted)
 		return;
 
+	if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 // Draw the column
 	mwindow->gui->lock_window("ResourceThread::do_audio");
 	if(interrupted)
@@ -655,6 +672,7 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 		return;
 	}
 
+	if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 	if(item->operation_count == operation_count)
 	{
 
@@ -684,6 +702,7 @@ void ResourceThread::do_audio(AResourceThreadItem *item)
 			}
 		}
 	}
+	if(debug) printf("ResourceThread::do_audio %d\n", __LINE__);
 
 	mwindow->gui->unlock_window();
 

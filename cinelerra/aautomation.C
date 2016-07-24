@@ -48,8 +48,6 @@ void AAutomation::create_objects()
 	autos[AUTOMATION_FADE]->autoidx = AUTOMATION_FADE;
 	autos[AUTOMATION_FADE]->autogrouptype = AUTOGROUPTYPE_AUDIO_FADE;
 
-
-
 	autos[AUTOMATION_PAN] = new PanAutos(edl, track);
 	autos[AUTOMATION_PAN]->create_objects();
 	autos[AUTOMATION_PAN]->autoidx = AUTOMATION_PAN;

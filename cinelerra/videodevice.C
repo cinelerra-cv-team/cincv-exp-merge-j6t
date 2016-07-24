@@ -1,7 +1,7 @@
 
 /*
  * CINELERRA
- * Copyright (C) 2008 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 2008-2013 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -206,16 +206,16 @@ int VideoDevice::open_input(VideoInConfig *config,
 
 
 #ifdef HAVE_VIDEO4LINUX2
+
 		case VIDEO4LINUX2:
 		case CAPTURE_JPEG_WEBCAM:
 		case CAPTURE_YUYV_WEBCAM:
-			new_device_base();
-			result = input_base->open_input();
-			break;
+		case CAPTURE_MPEG:
 		case VIDEO4LINUX2JPEG:
 			new_device_base();
 			result = input_base->open_input();
 			break;
+
 #endif
 
 		case SCREENCAPTURE:
@@ -262,6 +262,7 @@ VDeviceBase* VideoDevice::new_device_base()
 		case VIDEO4LINUX2:
 		case CAPTURE_JPEG_WEBCAM:
 		case CAPTURE_YUYV_WEBCAM:
+		case CAPTURE_MPEG:
 			return input_base = new VDeviceV4L2(this);
 
 		case VIDEO4LINUX2JPEG:
@@ -301,6 +302,9 @@ static const char* get_channeldb_path(VideoInConfig *vconfig_in)
 		case CAPTURE_YUYV_WEBCAM:
 			path = "channels_v4l2";
 			break;
+		case CAPTURE_MPEG:
+			path = "channels_mpeg";
+			break;
 		case VIDEO4LINUX2JPEG:
 			path = "channels_v4l2jpeg";
 			break;
@@ -336,6 +340,7 @@ int VideoDevice::is_compressed(int driver, int use_file, int use_fixed)
 	return ((driver == CAPTURE_BUZ && use_fixed) ||
 		(driver == VIDEO4LINUX2JPEG && use_fixed) || 
 		(driver == CAPTURE_JPEG_WEBCAM && use_fixed) || 
+		(driver == CAPTURE_MPEG && use_fixed) || 
 		driver == CAPTURE_LML || 
 		driver == CAPTURE_FIREWIRE ||
 		driver == CAPTURE_IEC61883);
@@ -413,6 +418,9 @@ const char* VideoDevice::drivertostr(int driver)
 			break;
 		case CAPTURE_JPEG_WEBCAM:
 			return CAPTURE_JPEG_WEBCAM_TITLE;
+			break;
+		case CAPTURE_MPEG:
+			return CAPTURE_MPEG_TITLE;
 			break;
 		case CAPTURE_YUYV_WEBCAM:
 			return CAPTURE_YUYV_WEBCAM_TITLE;

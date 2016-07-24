@@ -154,6 +154,7 @@ public:
 		RecordLabels *labels /* = 0 */,
 		int edit_labels,
 		int edit_plugins,
+		int edit_autos,
 		int overwrite);
 	int paste_edls(ArrayList<EDL*> *new_edls, 
 		int load_mode, 
@@ -161,6 +162,7 @@ public:
 		double current_position /* = -1 */,
 		int edit_labels,
 		int edit_plugins,
+		int edit_autos,
 		int overwrite);
 // Reset everything for a load
 	void update_project(int load_mode);
@@ -319,7 +321,8 @@ public:
 		FileXML *file,
 		int edit_labels,
 		int edit_plugins,
-		EDL *parent_edl = 0);
+		int edit_autos,
+		EDL *parent_edl /* = 0 */);
 
 // TrackCanvas calls this to insert multiple effects from the drag_pluginservers
 // into pluginset_highlighted.
@@ -376,7 +379,8 @@ public:
 		double end, 
 		FileXML *file,
 		int edit_labels,
-		int edit_plugins);
+		int edit_plugins,
+		int edit_autos);
 	int paste_output(int64_t startproject, 
 				int64_t endproject, 
 				int64_t startsource_sample, 

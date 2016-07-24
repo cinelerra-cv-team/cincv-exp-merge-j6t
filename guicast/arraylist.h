@@ -317,6 +317,7 @@ void ArrayList<TYPE>::remove_all_objects()
 				break;
 		}
 	}
+	
 	total = 0;
 }
 

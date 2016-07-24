@@ -1,6 +1,6 @@
 /*
  * CINELERRA
- * Copyright (C) 1997-2011 Adam Williams <broadcast at earthling dot net>
+ * Copyright (C) 1997-2013 Adam Williams <broadcast at earthling dot net>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1196,7 +1196,6 @@ int BC_TextBox::keypress_event()
 
 
 		case RETURN:
-//printf("BC_TextBox::keypress_event %d\n", __LINE__);
 			if(rows == 1)
 			{
 				top_level->deactivate();
@@ -1709,7 +1708,6 @@ int BC_TextBox::keypress_event()
 
 	if(result) skip_cursor->update();
 	if(dispatch_event) handle_event();
-//printf("BC_TextBox::keypress_event 100 %d\n", ibeam_letter);
 	return result;
 }
 

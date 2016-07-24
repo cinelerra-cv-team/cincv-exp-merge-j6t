@@ -25,7 +25,9 @@
 class AEffectMenu;
 class LabelsFollowEdits;
 class PluginsFollowEdits;
+class KeyframesFollowEdits;
 class CursorOnFrames;
+class TypelessKeyframes;
 class LoopPlayback;
 
 class Redo;
@@ -110,7 +112,9 @@ public:
 	KeyframeType *keyframe_type;
 	LabelsFollowEdits *labels_follow_edits;
 	PluginsFollowEdits *plugins_follow_edits;
+	KeyframesFollowEdits *keyframes_follow_edits;
 	CursorOnFrames *cursor_on_frames;
+	TypelessKeyframes *typeless_keyframes;
 	LoopPlayback *loop_playback;
 	ShowAssets *show_assets;
 	ShowTitles *show_titles;
@@ -127,6 +131,7 @@ public:
 	PluginAutomation *plugin_automation;
 	ShowAutomation *mask_automation;
 	ShowAutomation *mode_automation;
+	ShowAutomation *speed_automation;
 	ShowVWindow *show_vwindow;
 	ShowAWindow *show_awindow;
 	ShowCWindow *show_cwindow;
@@ -243,6 +248,7 @@ public:
 	int handle_event();
 	MWindow *mwindow;
 };
+
 
 class ClearKeyframes : public BC_MenuItem
 {
@@ -511,6 +517,14 @@ public:
 	MWindow *mwindow;
 };
 
+class KeyframesFollowEdits : public BC_MenuItem
+{
+public:
+	KeyframesFollowEdits(MWindow *mwindow);
+	int handle_event();
+	MWindow *mwindow;
+};
+
 class CursorOnFrames : public BC_MenuItem
 {
 public:
@@ -519,10 +533,10 @@ public:
 	MWindow *mwindow;
 };
 
-class AutosFollowEdits : public BC_MenuItem
+class TypelessKeyframes : public BC_MenuItem
 {
 public:
-	AutosFollowEdits(MWindow *mwindow);
+	TypelessKeyframes(MWindow *mwindow);
 	int handle_event();
 	MWindow *mwindow;
 };

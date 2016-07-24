@@ -1480,7 +1480,8 @@ if(debug) printf("MWindow::load_filenames %d\n", __LINE__);
 				edl->clear(start, 
 					end,
 					edl->session->labels_follow_edits,
-					edl->session->plugins_follow_edits);
+					edl->session->plugins_follow_edits,
+					edl->session->autos_follow_edits);
 		}
 
 		paste_edls(&new_edls, 
@@ -1489,6 +1490,7 @@ if(debug) printf("MWindow::load_filenames %d\n", __LINE__);
 			-1,
 			edl->session->labels_follow_edits, 
 			edl->session->plugins_follow_edits,
+			edl->session->autos_follow_edits,
 			0); // overwrite
 	}
 
@@ -2620,7 +2622,7 @@ if(debug) printf("MWindow::asset_to_edl %d\n", __LINE__);
 	if(edl->session->cursor_on_frames)
 	{
 		double edl_length = new_edl->tracks->total_length_framealigned(edl->session->frame_rate);
-		new_edl->tracks->clear(edl_length, new_edl->tracks->total_length() + 100, 1);
+		new_edl->tracks->clear(edl_length, new_edl->tracks->total_length() + 100, 1, 1);
 		new_edl->tracks->loaded_lengths_to_tracklengths(1);
 	}
 

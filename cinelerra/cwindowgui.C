@@ -620,6 +620,7 @@ int CWindowGUI::drag_stop()
 				0,
 				mwindow->edl->session->labels_follow_edits, 
 				mwindow->edl->session->plugins_follow_edits,
+				mwindow->edl->session->autos_follow_edits,
 				0); // overwrite
 		}
 
@@ -633,6 +634,7 @@ int CWindowGUI::drag_stop()
 				mwindow->edl->local_session->get_selectionstart(),
 				mwindow->edl->session->labels_follow_edits, 
 				mwindow->edl->session->plugins_follow_edits,
+				mwindow->edl->session->autos_follow_edits,
 				0); // overwrite
 		}
 

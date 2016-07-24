@@ -52,6 +52,7 @@ public:
 		double position,
 		int edit_labels,
 		int edit_plugins,
+		int edit_autos,
 		int behaviour);
 	void move_effect(Plugin *plugin,
 		PluginSet *plugin_set,
@@ -148,7 +149,7 @@ public:
 // If do_swap is true values of new are replaced with old.
 	void change_modules(int old_location, int new_location, int do_swap);
 // Append all the tracks to the end of the recordable tracks
-	int concatenate_tracks(int edit_plugins);
+	int concatenate_tracks(int edit_plugins, int edit_autos);
 // Change references to shared plugins in all tracks
 	void change_plugins(SharedLocation &old_location, SharedLocation &new_location, int do_swap);
 
@@ -170,7 +171,7 @@ public:
 		double start, 
 		double end, 
 		int all);
-	int clear(double start, double end, int clear_plugins);
+	int clear(double start, double end, int clear_plugins, int edit_autos);
 	void clear_automation(double selectionstart, 
 		double selectionend);
 	void set_automation_mode(double selectionstart, 
@@ -181,7 +182,8 @@ public:
 		double end,
 		double &longest_distance,
 		int clear_labels,
-		int clear_plugins);
+		int clear_plugins,
+		int edit_autos);
 	int copy_automation(double selectionstart, 
 		double selectionend, 
 		FileXML *file,
@@ -192,7 +194,8 @@ public:
 	void paste_automation(double selectionstart, 
 		FileXML *xml,
 		int default_only,
-		int active_only);
+		int active_only,
+		int typeless);
 //	int paste_default_keyframe(FileXML *file);
 	int paste(int64_t start, int64_t end);
 // all units are samples by default
@@ -205,7 +208,8 @@ public:
 				Asset *asset);
 	int paste_silence(double start, 
 		double end, 
-		int edit_plugins);
+		int edit_plugins,
+		int edit_autos);
 	int purge_asset(Asset *asset);
 	int asset_used(Asset *asset);
 // Transition popup
@@ -217,12 +221,14 @@ public:
 		int currentend, 
 		int handle_mode,
 		int edit_labels,
-		int edit_plugins);
+		int edit_plugins,
+		int edit_autos);
 	int modify_pluginhandles(double &oldposition, 
 		double &newposition, 
 		int currentend, 
 		int handle_mode,
 		int edit_labels,
+		int edit_autos,
 		Edits *trim_edits);
 	int select_handles();
 	int select_region();

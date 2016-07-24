@@ -530,6 +530,7 @@ void MenuEffectThread::run()
 			0,
 			mwindow->edl->session->labels_follow_edits, 
 			mwindow->edl->session->plugins_follow_edits,
+			mwindow->edl->session->autos_follow_edits,
 			0); // overwrite
 
 

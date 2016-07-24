@@ -76,7 +76,7 @@ static const char *auto_text[] =
 	N_("Pan"),
 	N_("Mode"),
 	N_("Mask"),
-	N_("Nudge")
+	N_("Speed")
 };
 
 static toggleinfo toggle_order[] = 
