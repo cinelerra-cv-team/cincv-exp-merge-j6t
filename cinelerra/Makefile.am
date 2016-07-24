@@ -32,7 +32,7 @@ if BUILDINFO_CUST
 
 endif
 endif
-	echo '#define COPYRIGHTTEXT1 "(C) 2012 Adam Williams\n\nheroinewarrior.com"' >> versioninfo.h
+	echo '#define COPYRIGHTTEXT1 "(C) 2013 Adam Williams\n\nheroinewarrior.com"' >> versioninfo.h
 	echo '#define COPYRIGHTTEXT2 "(C) 2006-2016 The CinelerraCV Community"' >> versioninfo.h
 	echo '#define COMPILEDATE "Compiled on $(BUILDDATE)"' >> versioninfo.h
 	echo '#define FFMPEG_EXTERNALTEXT "@FFMPEG_EXTERNALTEXT@"' >> versioninfo.h
