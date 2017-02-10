@@ -13,6 +13,6 @@ EXTRA_DIST = picon.png
 
 quark.o: picon_png.h
 picon_png.h: picon.png
-	$(top_builddir)/guicast/pngtoh $^ || { rm -f $@; exit 1; }
+	$(top_builddir)/guicast/pngtoh $^ > $@ || { rm -f $@; exit 1; }
 clean-local:
 	$(RM) picon_png.h

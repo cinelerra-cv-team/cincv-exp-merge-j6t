@@ -25,17 +25,16 @@
 
 int main(int argc, char *argv[])
 {
-	if(argc < 2)
+	if(argc != 2)
 	{
 		fprintf(stderr, "Usage: %s <file.png>\n", argv[0]);
-		fprintf(stderr, "  Convert 'file.png' file to C table 'file_png.h'.\n");
+		fprintf(stderr, "  Convert 'file.png' file to C table on stdout.\n");
 		return 1;
 	}
 
-	for(argc--; argc > 0; argc--)
+	argc--;
 	{
 		FILE *in;
-		FILE *out;
 		char variable[1024], header_fn[1024], output_fn[1024], *suffix, *prefix;
 		int i;
 		int bytes_per_row = 16;
@@ -44,7 +43,12 @@ int main(int argc, char *argv[])
 		long total_bytes;
 
 		in = fopen(argv[argc], "rb");
-		if(!in) continue;
+		if(!in)
+		{
+			fprintf(stderr, "error: unable to read %s: %s\n",
+				argv[argc], strerror(errno));
+			return 1;
+		}
 
 		stat(argv[argc], &st);
 		total_bytes = (long)st.st_size;
@@ -61,16 +65,6 @@ int main(int argc, char *argv[])
 			prefix = output_fn;
 		else
 			prefix++;
-
-		out = fopen(prefix, "w");
-		if(!out)
-		{
-			fclose(in);
-			fprintf(stderr, "error: unable to write to %s: %s\n",
-				prefix, strerror(errno));
-			continue;
-		}
-
 
 		strcpy(header_fn, prefix);
 		for(i = 0; i < strlen(header_fn); i++)
@@ -110,7 +104,7 @@ int main(int argc, char *argv[])
 		}
 
 // Print the header
-		fprintf(out, "#ifndef %s\n"
+		printf("#ifndef %s\n"
 					 "#define %s\n"
 					 "\n"
 					 "static unsigned char %s[] =\n{\n",
@@ -119,7 +113,7 @@ int main(int argc, char *argv[])
 					 variable);
 
 // Print the size of the file
-		fprintf(out, "\t0x%02x, 0x%02x, 0x%02x, 0x%02x,\n",
+		printf("\t0x%02x, 0x%02x, 0x%02x, 0x%02x,\n",
 			(int)(total_bytes >> 24) & 0xff,
 			(int)(total_bytes >> 16) & 0xff,
 			(int)(total_bytes >> 8) & 0xff,
@@ -142,10 +136,10 @@ int main(int argc, char *argv[])
 			else
 				sprintf(byte, "\n");
 
-			fprintf(out, "%s%s", row, byte);
+			printf("%s%s", row, byte);
 		}
 
-		fprintf(out, "};\n\n#endif\n");
-		fclose(out);
+		printf("};\n\n#endif\n");
 	}
+	return 0;
 }
