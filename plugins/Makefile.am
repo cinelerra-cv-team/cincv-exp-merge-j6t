@@ -7,8 +7,7 @@ SUBDIRS= \
 	$(THEMES) \
 	libfourier \
 	colors \
-	libeffecttv \
-	titler
+	libeffecttv
 
 AM_LDFLAGS = -avoid-version -module -shared
 AM_CXXFLAGS = $(LARGEFILE_CFLAGS)
@@ -111,6 +110,7 @@ plugin_LTLIBRARIES = \
 	timeavg.la \
 	timefront.la \
 	timestretch.la \
+	titler.la \
 	translate.la \
 	unsharp.la \
 	videoscope.la \
@@ -443,6 +443,10 @@ timestretch_la_SOURCES = timestretch/timestretch.C timestretch/timestretchengine
 timestretch_la_CXXFLAGS = $(AM_CXXFLAGS) -Itimestretch -I$(top_srcdir)/plugins/libfourier
 timestretch_la_LIBADD = libfourier/libfourier.la
 
+titler_la_SOURCES = titler/title.C titler/titlewindow.C
+titler_la_CXXFLAGS = $(AM_CXXFLAGS) -Ititler ${FREETYPE_CFLAGS} -I$(top_srcdir)/plugins/colors
+titler_la_LIBADD = colors/libcolors.la
+
 translate_la_SOURCES = translate/translate.C translate/translatewin.C
 translate_la_CXXFLAGS = $(AM_CXXFLAGS) -Itranslate
 
@@ -546,6 +550,7 @@ noinst_HEADERS = \
 	timefront/timefront.h \
 	timestretch/timestretch.h timestretch/timestretchengine.h \
 	timestretch/timestretchengine.inc \
+	titler/title.h titler/titlewindow.h \
 	translate/translate.h translate/translatewin.h \
 	unsharp/unsharp.h unsharp/unsharp.inc \
 	unsharp/unsharpwindow.h unsharp/unsharpwindow.inc \
@@ -643,6 +648,7 @@ BUILT_SOURCES = \
 	timeavg/picon_png.h \
 	timefront/picon_png.h \
 	timestretch/picon_png.h \
+	titler/picon_png.h \
 	translate/picon_png.h \
 	unsharp/picon_png.h \
 	videoscope/picon_png.h \
@@ -744,6 +750,7 @@ clean-local:
 	$(RM) timeavg/picon_png.h
 	$(RM) timefront/picon_png.h
 	$(RM) timestretch/picon_png.h
+	$(RM) titler/picon_png.h
 	$(RM) translate/picon_png.h
 	$(RM) unsharp/picon_png.h
 	$(RM) videoscope/picon_png.h
@@ -846,6 +853,7 @@ EXTRA_DIST = \
 	timeavg/picon.png \
 	timefront/picon.png \
 	timestretch/picon.png \
+	titler/picon.png \
 	translate/picon.png \
 	unsharp/picon.png \
 	videoscope/picon.png \

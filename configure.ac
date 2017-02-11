@@ -672,7 +672,6 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/bluedottheme/data/Makefile \
 	plugins/defaulttheme/Makefile \
 	plugins/defaulttheme/data/Makefile \
-	plugins/titler/Makefile \
 	image/Makefile)
 
 succeeded=yes
