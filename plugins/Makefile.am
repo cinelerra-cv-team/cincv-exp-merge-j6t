@@ -8,7 +8,6 @@ SUBDIRS= \
 	libfourier \
 	colors \
 	libeffecttv \
-	shapewipe \
 	titler
 
 AM_LDFLAGS = -avoid-version -module -shared
@@ -101,6 +100,7 @@ plugin_LTLIBRARIES = \
 	rotate.la \
 	scale.la \
 	sharpen.la \
+	shapewipe.la \
 	shiftinterlace.la \
 	slide.la \
 	spectrogram.la \
@@ -393,6 +393,16 @@ rotate_la_CXXFLAGS = $(AM_CXXFLAGS) -Irotate
 scale_la_SOURCES = scale/scale.C scale/scalewin.C
 scale_la_CXXFLAGS = $(AM_CXXFLAGS) -Iscale
 
+shapewipe_la_SOURCES = shapewipe/shapewipe.C
+shapewipe_la_CXXFLAGS = $(AM_CXXFLAGS) -DDEFAULT_SHAPE=\"$(shapewipedir)/heart.png\" -Ishapewipe
+shapewipedir = $(plugindir)/shapewipe
+shapewipe_DATA = \
+	shapewipe/circle.png \
+	shapewipe/clock.png \
+	shapewipe/heart.png \
+	shapewipe/tile2x2h.png \
+	shapewipe/tile2x2v.png
+
 sharpen_la_SOURCES = sharpen/sharpen.C sharpen/sharpenwindow.C
 sharpen_la_CXXFLAGS = $(AM_CXXFLAGS) -Isharpen
 
@@ -520,6 +530,7 @@ noinst_HEADERS = \
 	reverb/reverbwindow.h reverb/reverbwindow.inc \
 	rgb601/rgb601.h rgb601/rgb601window.h \
 	scale/scale.h scale/scalewin.h \
+	shapewipe/shapewipe.h \
 	sharpen/sharpen.h sharpen/sharpenwindow.h \
 	slide/slide.h \
 	spectrogram/spectrogram.h \
@@ -620,6 +631,7 @@ BUILT_SOURCES = \
 	rgb601/picon_png.h \
 	rotate/picon_png.h \
 	scale/picon_png.h \
+	shapewipe/picon_png.h \
 	sharpen/picon_png.h \
 	shiftinterlace/picon_png.h \
 	slide/picon_png.h \
@@ -720,6 +732,7 @@ clean-local:
 	$(RM) rgb601/picon_png.h
 	$(RM) rotate/picon_png.h
 	$(RM) scale/picon_png.h
+	$(RM) shapewipe/picon_png.h
 	$(RM) sharpen/picon_png.h
 	$(RM) shiftinterlace/picon_png.h
 	$(RM) slide/picon_png.h
@@ -820,6 +833,8 @@ EXTRA_DIST = \
 	rgb601/picon.png \
 	rotate/picon.png \
 	scale/picon.png \
+	shapewipe/picon.png \
+	$(shapewipe_DATA) \
 	sharpen/picon.png \
 	shiftinterlace/picon.png \
 	slide/picon.png \
