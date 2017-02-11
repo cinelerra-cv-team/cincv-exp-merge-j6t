@@ -8,7 +8,6 @@ SUBDIRS= \
 	libfourier \
 	colors \
 	libeffecttv \
-	chromakeyhsv \
 	freeverb \
 	histogram \
 	shapewipe \
@@ -38,6 +37,7 @@ plugin_LTLIBRARIES = \
 	burn.la \
 	cdripper.la \
 	chromakey.la \
+	chromakeyhsv.la \
 	color3way.la \
 	colorbalance.la \
 	compressor.la \
@@ -167,6 +167,15 @@ cdripper_la_CXXFLAGS = $(AM_CXXFLAGS) -Icdripper
 chromakey_la_SOURCES = chromakey/chromakey.C
 chromakey_la_CXXFLAGS = $(AM_CXXFLAGS) -Ichromakey -I$(top_srcdir)/plugins/colors
 chromakey_la_LIBADD = colors/libcolors.la
+
+chromakeyhsv_la_SOURCES = chromakeyhsv/chromakey.C chromakeyhsv/chromakey_sl.c
+chromakeyhsv_la_CXXFLAGS = $(AM_CXXFLAGS) -Ichromakeyhsv -I$(top_srcdir)/plugins/colors
+chromakeyhsv_la_LIBADD = colors/libcolors.la
+chromakeyhsv/chromakey_sl.c: chromakeyhsv/chromakey.sl
+	(echo "const char _binary_chromakey_sl_start[] ="; \
+	sed -e 's/\\/\\\\/' -e 's/"/\\"/' \
+	-e 's/^/"/' -e 's/$$/\\n"/' < $(srcdir)/chromakeyhsv/chromakey.sl; \
+	echo ";") > chromakeyhsv/chromakey_sl.c
 
 color3way_la_SOURCES = \
 	color3way/aggregated.h \
@@ -451,6 +460,7 @@ noinst_HEADERS = \
 	burn/burn.h burn/burnwindow.h \
 	cdripper/cdripper.h cdripper/cdripwindow.h \
 	chromakey/chromakey.h \
+	chromakeyhsv/chromakey.h \
 	colorbalance/aggregated.h colorbalance/colorbalance.h \
 	colorbalance/colorbalancewindow.h \
 	compressor/compressor.h \
@@ -520,6 +530,8 @@ BUILT_SOURCES = \
 	brightness/picon_png.h \
 	burn/picon_png.h \
 	chromakey/picon_png.h \
+	chromakeyhsv/chromakey_sl.c \
+	chromakeyhsv/picon_png.h \
 	color3way/picon_png.h \
 	colorbalance/picon_png.h \
 	compressor/picon_png.h \
@@ -613,6 +625,8 @@ clean-local:
 	$(RM) brightness/picon_png.h
 	$(RM) burn/picon_png.h
 	$(RM) chromakey/picon_png.h
+	$(RM) chromakeyhsv/chromakey_sl.c
+	$(RM) chromakeyhsv/picon_png.h
 	$(RM) color3way/picon_png.h
 	$(RM) colorbalance/picon_png.h
 	$(RM) compressor/picon_png.h
@@ -706,6 +720,8 @@ EXTRA_DIST = \
 	brightness/picon.png \
 	burn/picon.png \
 	chromakey/picon.png \
+	chromakeyhsv/chromakey.sl \
+	chromakeyhsv/picon.png \
 	color3way/picon.png \
 	colorbalance/picon.png \
 	compressor/picon.png \
