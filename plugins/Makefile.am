@@ -8,7 +8,6 @@ SUBDIRS= \
 	libfourier \
 	colors \
 	libeffecttv \
-	freeverb \
 	histogram \
 	shapewipe \
 	titler
@@ -59,6 +58,7 @@ plugin_LTLIBRARIES = \
 	flash.la \
 	flip.la \
 	framefield.la \
+	freeverb.la \
 	freezeframe.la \
 	gain.la \
 	gamma.la \
@@ -248,6 +248,13 @@ flip_la_CXXFLAGS = $(AM_CXXFLAGS) -Iflip
 
 framefield_la_SOURCES = framefield/framefield.C
 framefield_la_CXXFLAGS = $(AM_CXXFLAGS) -Iframefield
+
+freeverb_la_SOURCES = \
+	freeverb/Components/allpass.cpp \
+	freeverb/Components/comb.cpp \
+	freeverb/Components/revmodel.cpp \
+	freeverb/freeverb.C
+freeverb_la_CXXFLAGS = $(AM_CXXFLAGS) -Ifreeverb -I$(srcdir)/freeverb/Components
 
 freezeframe_la_SOURCES = freezeframe/freezeframe.C
 freezeframe_la_CXXFLAGS = $(AM_CXXFLAGS) -Ifreezeframe
@@ -476,6 +483,9 @@ noinst_HEADERS = \
 	dot/dot.h dot/dotwindow.h \
 	flash/flash.h \
 	flip/flip.h flip/flipwindow.h \
+	freeverb/Components/allpass.hpp freeverb/Components/comb.hpp \
+	freeverb/Components/denormals.h freeverb/Components/revmodel.hpp \
+	freeverb/Components/tuning.h \
 	freezeframe/freezeframe.h \
 	gain/gain.h gain/gainwindow.h \
 	gamma/aggregated.h gamma/gamma.h \
@@ -553,6 +563,7 @@ BUILT_SOURCES = \
 	flash/picon_png.h \
 	flip/picon_png.h \
 	framefield/picon_png.h \
+	freeverb/picon_png.h \
 	freezeframe/picon_png.h \
 	gain/picon_png.h \
 	gamma/picon_png.h \
@@ -648,6 +659,7 @@ clean-local:
 	$(RM) flash/picon_png.h
 	$(RM) flip/picon_png.h
 	$(RM) framefield/picon_png.h
+	$(RM) freeverb/picon_png.h
 	$(RM) freezeframe/picon_png.h
 	$(RM) gain/picon_png.h
 	$(RM) gamma/picon_png.h
@@ -743,6 +755,7 @@ EXTRA_DIST = \
 	flash/picon.png \
 	flip/picon.png \
 	framefield/picon.png \
+	freeverb/picon.png \
 	freezeframe/picon.png \
 	gain/picon.png \
 	gamma/picon.png \
