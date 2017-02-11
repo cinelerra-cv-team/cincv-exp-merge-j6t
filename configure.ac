@@ -666,7 +666,6 @@ AC_OUTPUT(Makefile cinelerra-cvs-current.spec po/Makefile.in \
 	plugins/libfourier/Makefile \
 	plugins/libeffecttv/Makefile \
 	plugins/Makefile \
-	plugins/histogram/Makefile \
 	plugins/shapewipe/Makefile \
 	plugins/suv/Makefile \
 	plugins/suv/data/Makefile \

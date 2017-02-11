@@ -8,7 +8,6 @@ SUBDIRS= \
 	libfourier \
 	colors \
 	libeffecttv \
-	histogram \
 	shapewipe \
 	titler
 
@@ -64,6 +63,7 @@ plugin_LTLIBRARIES = \
 	gamma.la \
 	gradient.la \
 	greycstoration.la \
+	histogram.la \
 	holo.la \
 	huesaturation.la \
 	interpolateaudio.la \
@@ -272,6 +272,13 @@ gradient_la_LIBADD = colors/libcolors.la
 
 greycstoration_la_SOURCES = greycstoration/greycstorationwindow.C greycstoration/greycstorationplugin.C
 greycstoration_la_CXXFLAGS = $(AM_CXXFLAGS) -Igreycstoration
+
+histogram_la_SOURCES = \
+	histogram/histogram.C \
+	histogram/histogramconfig.C \
+	histogram/histogramwindow.C
+histogram_la_CXXFLAGS = $(AM_CXXFLAGS) -Ihistogram -I$(top_srcdir)/plugins/colors
+histogram_la_LIBADD = colors/libcolors.la
 
 holo_la_SOURCES = holo/holo.C holo/holowindow.C
 holo_la_CXXFLAGS = $(AM_CXXFLAGS) -Iholo -I$(top_srcdir)/plugins/libeffecttv -I$(top_srcdir)/plugins/colors
@@ -493,6 +500,10 @@ noinst_HEADERS = \
 	gradient/gradient.h \
 	greycstoration/greycstorationplugin.h greycstoration/greycstorationwindow.h \
 	greycstoration/greycstoration.h \
+	histogram/aggregated.h histogram/histogram.h \
+	histogram/histogramconfig.h histogram/histogramwindow.h \
+	histogram/histogram.inc histogram/histogramconfig.inc \
+	histogram/histogramwindow.inc \
 	holo/holo.h holo/holowindow.h \
 	irissquare/irissquare.h \
 	ivtc/ivtc.h ivtc/ivtcwindow.h \
@@ -569,6 +580,10 @@ BUILT_SOURCES = \
 	gamma/picon_png.h \
 	gradient/picon_png.h \
 	greycstoration/picon_png.h \
+	histogram/picon_png.h \
+	histogram/max_picon_png.h \
+	histogram/mid_picon_png.h \
+	histogram/min_picon_png.h \
 	holo/picon_png.h \
 	huesaturation/picon_png.h \
 	interpolateaudio/picon_png.h \
@@ -665,6 +680,10 @@ clean-local:
 	$(RM) gamma/picon_png.h
 	$(RM) gradient/picon_png.h
 	$(RM) greycstoration/picon_png.h
+	$(RM) histogram/picon_png.h
+	$(RM) histogram/max_picon_png.h
+	$(RM) histogram/mid_picon_png.h
+	$(RM) histogram/min_picon_png.h
 	$(RM) holo/picon_png.h
 	$(RM) huesaturation/picon_png.h
 	$(RM) interpolateaudio/picon_png.h
@@ -761,6 +780,10 @@ EXTRA_DIST = \
 	gamma/picon.png \
 	gradient/picon.png \
 	greycstoration/picon.png \
+	histogram/picon.png \
+	histogram/max_picon.png \
+	histogram/mid_picon.png \
+	histogram/min_picon.png \
 	holo/picon.png \
 	huesaturation/picon.png \
 	interpolateaudio/picon.png \
