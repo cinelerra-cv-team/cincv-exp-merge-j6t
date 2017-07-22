@@ -97,7 +97,6 @@ SUBDIRS= \
 	timeavg \
 	timefront \
 	timestretch \
-	titler \
 	translate \
 	unsharp \
 	videoscope \
@@ -105,7 +104,8 @@ SUBDIRS= \
 	whirl \
 	wipe \
 	yuv \
-	zoomblur
+	zoomblur \
+	titler
 
 AUTOMAKE_OPTIONS=foreign
 
